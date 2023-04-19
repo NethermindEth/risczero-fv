@@ -277,5 +277,7 @@ TSWLatexianTemp*
 
 ## Lean 4 stuff
 /build
+/lake-packages/*
+!/lake-packages/manifest.json
 /lean_packages/*
 !/lean_packages/manifest.json
