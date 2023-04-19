@@ -274,3 +274,8 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+
+## Lean 4 stuff
+/build
+/lean_packages/*
+!/lean_packages/manifest.json
