@@ -1,0 +1,107 @@
+\documentclass[10pt, reqno]{amsart}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[skins,minted]{tcolorbox}
+\definecolor{mintedbackground}{rgb}{0.95,0.95,0.95}
+
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  citecolor=cyan,
+}
+\usepackage{hyperref}
+
+\setminted[console]{
+    bgcolor=mintedbackground,
+    fontfamily=tt,
+    linenos=true,
+    numberblanklines=true,
+    numbersep=12pt,
+    numbersep=5pt,
+    gobble=0,
+    frame=leftline,
+    framesep=2mm,
+    funcnamehighlighting=true,
+    tabsize=4,
+    obeytabs=false,
+    mathescape=false
+    samepage=false,
+    showspaces=false,
+    showtabs =false,
+    texcl=false,
+    baselinestretch=1.2,
+    breaklines=true,
+}
+\newtcblisting{code}[2][]{listing engine=minted, listing only, #1, title=\texttt{#2}, fonttitle=\tiny, minted language=console, colback=mintedbackground, minted options={fontsize=\scriptsize}}
+
+\begin{document}
+\title{Nonzero Example MLIR}
+\author{}
+
+\maketitle
+
+The guiding design principles behind MLIR seem to be extensibility and modularity. Very, very few things are built-in to the language by default. Instead, everything lives in pseudo-eDSLs/namespaces called \href{https://mlir.llvm.org/docs/LangRef/#dialects}{dialects}. Even the \texttt{module} keyword is part of the \href{https://mlir.llvm.org/docs/Dialects/Builtin/}{builtin} dialect. Here's some tips for reading the basic syntax:
+\begin{itemize}
+  \item Identifiers are prefixed with sigils (e.g. \texttt{\%}, \texttt{!}, \texttt{@}). In particular, values/variables are of the form e.g. \texttt{\%0}, and function names/symbolic references are of the form \texttt{@computeIsZero}.
+  \item The \texttt{cirgen.} prefix indicates an operation/attribute/type that is specific to the \texttt{cirgen} (circuit generatioin) dialect. This is a custom MLIR namespace/extension of MLIR defined by the Risc0 folks.
+  \item The colon (\texttt{:}) indicates the type of a value, just as it does in Lean.
+  \item Tokens prefixed with an exclamation mark (\texttt{!}) below are \href{https://mlir.llvm.org/docs/LangRef/#dialect-types}{dialect types}. These are basically types defined in the eDSL/namespace. Exclamation marks are also used for type aliases sometimes, but I believe all the ones below are dialect types.
+  \item Operations are things like \texttt{cirgen.const} and \texttt{cirgen.get} below. They can be thought of as instructions, and they are allowed to be target-architecture-specific in MLIR. All the \texttt{cirgen} operations below are documented in the repository.
+  \item The stuff in angle brackets (\texttt{<1, constant>})
+\end{itemize}
+
+\vspace{1em}
+\begin{code}{risczero-wip/nonzero.mlir}
+  ---- ORIGINAL ----
+  module {
+    func.func @computeIsZero(
+      %arg0: !cirgen.buffer<1, constant> {cirgen.argName = "in"},
+      %arg1: !cirgen.buffer<2, mutable> {cirgen.argName = "data"},
+  ) {
+      %0 = cirgen.const 1
+      %1 = cirgen.get %arg0[0] back 0 : <1, constant>
+      cirgen.nondet {
+        %4 = cirgen.isz %1 : <default>
+        cirgen.set %arg1 : <2, mutable>[0] = %4 : <default>
+        %5 = cirgen.inv %1 : <default>
+        cirgen.set %arg1 : <2, mutable>[1] = %5 : <default>
+      }
+      %2 = cirgen.get %arg1[0] back 0 : <2, mutable>
+      cirgen.if %2 : <default> {
+        cirgen.eqz %1 : <default>
+      }
+      %3 = cirgen.sub %0 : <default>, %2 : <default>
+      cirgen.if %3 : <default> {
+        %4 = cirgen.get %arg1[1] back 0 : <2, mutable>
+        %5 = cirgen.mul %1 : <default>, %4 : <default>
+        %6 = cirgen.sub %5 : <default>, %0 : <default>
+        cirgen.eqz %6 : <default>
+      }
+      return
+    }
+  }
+  ---- CONSTAINTS ----
+  module {
+    func.func @computeIsZero(
+      %arg0: !cirgen.buffer<1, constant> {cirgen.argName = "in"},
+      %arg1: !cirgen.buffer<2, mutable> {cirgen.argName = "data"},
+    ) -> !cirgen.constraint {
+      %0 = cirgen.const 1
+      %1 = cirgen.true
+      %2 = cirgen.get %arg0[0] back 0 : <1, constant>
+      %3 = cirgen.get %arg1[0] back 0 : <2, mutable>
+      %4 = cirgen.and_eqz %1, %2 : <default>
+      %5 = cirgen.and_cond %1, %3 : <default>, %4
+      %6 = cirgen.sub %0 : <default>, %3 : <default>
+      %7 = cirgen.get %arg1[1] back 0 : <2, mutable>
+      %8 = cirgen.mul %2 : <default>, %7 : <default>
+      %9 = cirgen.sub %8 : <default>, %0 : <default>
+      %10 = cirgen.and_eqz %1, %9 : <default>
+      %11 = cirgen.and_cond %5, %6 : <default>, %10
+      return %11 : !cirgen.constraint
+    }
+  }
+\end{code}
+
+\end{document}
