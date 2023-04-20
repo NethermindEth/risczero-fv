@@ -60,7 +60,7 @@ inductive Cirgen where
   | Assign : String → Op → Cirgen
   | Return : String → Cirgen
 
-def Cirgen.step (state : State) (program : Cirgen) : State × Option Lit :=
+def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
   match program with
   -- We may want to encode the index of the instruction in `State`, and then
   -- always assign to the index instead of using a name.
@@ -69,9 +69,9 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option Lit :=
                     match x with
                     | some x => (state', some x)
                     | none => Cirgen.step state' b
-  | Return name => (state, some (.Constraint $ state.constraints.findD name _root_.True))
+  | Return name => (state, some $ state.constraints.findD name _root_.True)
 
-def subAndEqzResult (x : Felt) : State × Option Lit :=
+def subAndEqzResult (x : Felt) : State × Option Prop :=
   Cirgen.step { felts := Std.HashMap.empty, constraints := Std.HashMap.empty }
     (.Sequence
       (.Assign "x-1" (Op.Sub x 1))
@@ -80,5 +80,5 @@ def subAndEqzResult (x : Felt) : State × Option Lit :=
 
 theorem Sub_AndEqz_iff_eq_one :
   ∀ x : Felt, (subAndEqzResult x).1 = subAndEqzState
-    ∧ ((subAndEqzResult x).2 = some (.Constraint c))
+    ∧ ((subAndEqzResult x).2 = some c)
     ∧ (c ↔ x = 1) := by sorry
