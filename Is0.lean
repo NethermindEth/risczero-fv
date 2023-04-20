@@ -8,19 +8,21 @@ def P: ℕ := 15 * 2^27 + 1
 axiom P_prime: Nat.Prime P 
 instance : Fact (Nat.Prime P) := ⟨P_prime⟩
 abbrev Felt := ZMod P
-def Constraint := Prop
 
 inductive Lit where
   | Val : Felt → Lit
-  | Constraint : Constraint → Lit
+  | Constraint : Prop → Lit
 
-def State := Std.HashMap String Lit
+-- So now we can have duplicate keys if one maps to a felt and the other to a constraint...
+structure State where
+  felts : Std.HashMap String Felt
+  constraints : Std.HashMap String Prop
 
 -- We'll definitely need a context, mapping variable names to values.
 
-inductive Expression : Type → Type where
-  | Literal {a} : a → Expression a
-  | Variable {a} : String → Expression a
+inductive Expression (α : Type) where
+  | Literal : α → Expression α
+  | Variable : String → Expression α
 
 inductive Op where
   | Const : Felt → Op
@@ -31,42 +33,52 @@ inductive Op where
   | Mul : Felt → Felt → Op
   | Isz : Felt → Op
   | Inv : Felt → Op
-  | AndEqz : Expression Constraint → Expression Felt → Op
-  | AndCond : Constraint → Felt → Constraint → Op
+  | AndEqz : Expression Prop → Expression Felt → Op
+  | AndCond : Prop → Felt → Prop → Op
   | Variable : String → Op
 
-def Op.eval (state : State) (e : Op) : Lit :=
-  match e with
+def Op.eval (state : State) (op : Op) : Lit :=
+  match op with
   | Const x => .Val x
   | True => .Constraint (_root_.True)
   | Get buffer i _ => .Val (buffer.get i)
   | Sub x y => .Val (x - y)
-  | Variable name => state.findD name (Lit.Val 0)
-  | AndEqz c x => 
+  | Variable name => .Val (state.felts.findD name 0)
+  | AndEqz c x =>
     match c with
-    | (Literal c) => .Constraint (c ∧ x = 0)
+    | .Literal c => .Constraint (c ∧ x = .Literal 0)
+    | .Variable name =>  .Constraint ((state.constraints.findD name _root_.True) ∧ x = .Literal 0)
   | _ => .Constraint False
 
-def Op.assign (state : State) (e : Op) (name : String) : State :=
-  state.insert name (Op.eval state e)
+def Op.assign (state : State) (op : Op) (name : String) : State :=
+  match (Op.eval state op) with
+  | .Val x => { state with felts := state.felts.insert name x }
+  | .Constraint c => { state with constraints := state.constraints.insert name c }
 
 inductive Cirgen where
   | Sequence : Cirgen → Cirgen → Cirgen
   | Assign : String → Op → Cirgen
-  -- Should this take a String?
-  | Return : Op → Cirgen
+  | Return : String → Cirgen
 
-def Cirgen.step (state : State) (op : Cirgen) : State × Option Lit :=
-  match op with
+def Cirgen.step (state : State) (program : Cirgen) : State × Option Lit :=
+  match program with
   -- We may want to encode the index of the instruction in `State`, and then
   -- always assign to the index instead of using a name.
-  | Assign e name => (Op.assign state e name, none)
+  | Assign name op => (Op.assign state op name, none)
   | Sequence a b => let (state', x) := Cirgen.step state a
                     match x with
                     | some x => (state', some x)
                     | none => Cirgen.step state' b
-  | Return e => (state, Op.eval state e)
+  | Return name => (state, some (.Constraint $ state.constraints.findD name _root_.True))
 
-open Op Cirgen in
-theorem Sub_AndEqz_is_if_is_zero (state : State) :
-  ∀ x : Felt, Sequence (Assign "x-1" (Op.Sub x 1)) (Assign "(x-1)=0" (AndEqz True (Variable "x-1"))) := by sorry
+def subAndEqzResult (x : Felt) : State × Option Lit :=
+  Cirgen.step { felts := Std.HashMap.empty, constraints := Std.HashMap.empty }
+    (.Sequence
+      (.Assign "x-1" (Op.Sub x 1))
+      (.Assign "(x-1)=0"
+        (.AndEqz (.Literal _root_.True) (.Variable "x-1"))))
+
+theorem Sub_AndEqz_iff_eq_one :
+  ∀ x : Felt, (subAndEqzResult x).1 = subAndEqzState
+    ∧ ((subAndEqzResult x).2 = some (.Constraint c))
+    ∧ (c ↔ x = 1) := by sorry
