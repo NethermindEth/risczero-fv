@@ -7,31 +7,43 @@ def P: ℕ := 15 * 2^27 + 1
 
 axiom P_prime: Nat.Prime P 
 instance : Fact (Nat.Prime P) := ⟨P_prime⟩
-abbrev Val := ZMod P
-abbrev State := Std.HashMap String Val
-abbrev Constraint := Prop
+abbrev Felt := ZMod P
+def Constraint := Prop
 
 inductive Literal where
-  | Val : Val → Literal
+  | Val : Felt → Literal
   | Constraint : Constraint → Literal
 
-inductive Cirgen where
-  | Const : Val → Cirgen
-  | True : Cirgen
-  | Get : Vector Val n → Fin n → Val → Cirgen
-  | Set : Vector Val n → Fin n → Val → Cirgen
-  | Sub : Val → Val → Cirgen
-  | Mul : Val → Val → Cirgen
-  | Isz : Val → Cirgen
-  | Inv : Val → Cirgen
-  | AndEqz : Constraint → Val → Cirgen
-  | AndCond : Constraint → Val → Constraint → Cirgen
-  | Variable : String → Cirgen
+def State := Std.HashMap String Literal
 
-def Cirgen.step (state : State) (constraints : List Constraint) (op : Cirgen) : Literal :=
+-- We'll definitely need a context, mapping variable names to values.
+
+inductive Cirgen where
+  | Const : Felt → Cirgen
+  | True : Cirgen
+  | Get : Vector Felt n → Fin n → Felt → Cirgen
+  | Set : Vector Felt n → Fin n → Felt → Cirgen
+  | Sub : Felt → Felt → Cirgen
+  | Mul : Felt → Felt → Cirgen
+  | Isz : Felt → Cirgen
+  | Inv : Felt → Cirgen
+  | AndEqz : Constraint → Felt → Cirgen
+  | AndCond : Constraint → Felt → Constraint → Cirgen
+  | Variable : String → Cirgen
+  | Sequence : Cirgen → Cirgen → Cirgen
+  | Assign : String → Literal → Cirgen
+
+def Cirgen.step (state : State) (op : Cirgen) : Literal :=
   match op with
-  | Const x => Literal.Val x
-  | True => Literal.Constraint (¬ False)
-  | Get buffer i _ => Literal.Val (buffer.get i)
-  | Sub x y => Literal.Val (x - y)
-  | Variable name => Literal.Val (state.findD name 0)
+  | Const x => .Val x
+  | True => .Constraint (_root_.True)
+  | Get buffer i _ => .Val (buffer.get i)
+  | Sub x y => .Val (x - y)
+  | Variable name => (state.findD name (Literal.Val 0))
+  | AndEqz c x => .Constraint (c ∧ x = 0)
+  | Sequence a b => .Constraint False
+  | Assign name x => state.
+  | _ => .Constraint False
+
+open Cirgen in
+theorem Sub_AndEqz_is_if_is_zero : ∀ x : Felt, Sequence (Sub x 1) (AndEqz True state.get "%0") := by sorry
