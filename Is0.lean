@@ -2,6 +2,7 @@ import Mathlib.Data.Nat.Prime
 import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
+import Mathlib.Tactic.LibrarySearch
 
 @[inline]
 def P: ℕ := 15 * 2^27 + 1
@@ -92,11 +93,6 @@ def subAndEqzActual (x : Felt) : State × Option Prop :=
         (.Assign (.AndEqz (.Literal _root_.True) (.Variable 0))))
       (.Return 0))
 
-#eval (subAndEqzActual 1).1.1
-#eval (subAndEqzActual 0).1.1
-#eval (subAndEqzActual 2).1.1
-#eval (subAndEqzActual 1).1.2
-
 -- The expected post-execution state after computing `subAndEqzActual`.
 def subAndEqzExpectedState (x : Felt) : State :=
   { felts := [x - 1]
@@ -135,7 +131,9 @@ theorem Sub_AndEqz_iff_eq_one :
   simp only [List.getD_cons_zero, IsEmpty.forall_iff]
   intros h
   simp only [true_and] at h
-  sorry
+  have h₁ : ∀ y : Felt, y - 1 = 0 ↔ y = 1 := by exact fun y => sub_eq_zero
+  rw [h₁] at h
+  exact h
   intros h
   rw [h]
   unfold Op.assign
