@@ -71,14 +71,19 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
                     | none => Cirgen.step state' b
   | Return name => (state, some $ state.constraints.findD name _root_.True)
 
-def subAndEqzResult (x : Felt) : State × Option Prop :=
+def subAndEqzActual (x : Felt) : State × Option Prop :=
   Cirgen.step { felts := Std.HashMap.empty, constraints := Std.HashMap.empty }
     (.Sequence
       (.Assign "x-1" (Op.Sub x 1))
       (.Assign "(x-1)=0"
         (.AndEqz (.Literal _root_.True) (.Variable "x-1"))))
 
+def subAndEqzExpectedState (x : Felt) : State :=
+  { felts := Std.HashMap.ofList [("x-1", x - 1)]
+  , constraints := Std.HashMap.ofList [("(x-1)=0", x - 1 = (0 : Felt))]
+  }
+
 theorem Sub_AndEqz_iff_eq_one :
-  ∀ x : Felt, (subAndEqzResult x).1 = subAndEqzState
-    ∧ ((subAndEqzResult x).2 = some c)
+  ∀ x : Felt, (subAndEqzActual x).1 = subAndEqzExpectedState x
+    ∧ ((subAndEqzActual x).2 = some c)
     ∧ (c ↔ x = 1) := by sorry
