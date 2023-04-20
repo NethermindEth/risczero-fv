@@ -44,6 +44,7 @@ inductive Op where
   | Variable : ℕ → Op
 
 -- Evaluate a circuit operation to get some kind of literal.
+@[simp]
 def Op.eval (state : State) (op : Op) : Lit :=
   match op with
   | Const x => .Val x
@@ -60,6 +61,7 @@ def Op.eval (state : State) (op : Op) : Lit :=
   | _ => .Constraint False
 
 -- Evaluate `op` and push its literal value to the stack.
+@[simp]
 def Op.assign (state : State) (op : Op) : State :=
   match (Op.eval state op) with
   | .Val x => { state with felts := x :: state.felts }
@@ -74,6 +76,7 @@ inductive Cirgen where
 -- Step through the entirety of a `Cirgen` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
 -- (`Prop`).
+@[simp]
 def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
   match program with
   | Assign op => (Op.assign state op, none)
@@ -107,35 +110,17 @@ theorem Sub_AndEqz_iff_eq_one :
   apply And.intro
   unfold subAndEqzActual
   unfold subAndEqzExpectedState
-  unfold Cirgen.step
-  unfold Cirgen.step
-  unfold Cirgen.step
-  unfold Op.assign
-  unfold Op.eval
-  simp only [List.getD_cons_zero, true_and]
+  simp only [Cirgen.step, Op.assign, Op.eval, List.getD_cons_zero, true_and]
   intros h
   unfold subAndEqzActual at h
-  rw [Prod.snd] at h
-  unfold Cirgen.step at h
-  unfold Cirgen.step at h
-  unfold Cirgen.step at h
-  unfold Cirgen.step at h
-  simp only at h
-  rw [Option.some_inj] at h
+  simp only [Cirgen.step, Op.assign, Op.eval, List.getD_cons_zero, true_and, Option.some.injEq, eq_iff_iff] at h
   rw [← h]
   clear h
   apply Iff.intro
-  unfold Op.assign
-  unfold Op.eval
-  simp only [and_false]
-  simp only [List.getD_cons_zero, IsEmpty.forall_iff]
+  simp only [and_false, List.getD_cons_zero, IsEmpty.forall_iff]
   intros h
-  simp only [true_and] at h
-  have h₁ : ∀ y : Felt, y - 1 = 0 ↔ y = 1 := by exact fun y => sub_eq_zero
-  rw [h₁] at h
+  rw [sub_eq_zero] at h
   exact h
   intros h
   rw [h]
-  unfold Op.assign
-  unfold Op.eval
   simp only [List.getD_cons_zero]
