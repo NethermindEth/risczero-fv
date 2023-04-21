@@ -35,12 +35,13 @@ def Map.fromList {α : Type} [BEq α] {β : Type} (l : List (α × β)) : Map α
   | [] => Map.empty
   | (k, v) :: xs => Map.update (Map.fromList xs) k v
 
--- A pair of append-only stacks of assignments. Basically, this is where we
--- store the evaluated value of the expression on each line.
+-- The first three fields map variable names to values. The last is an
+-- append-only stack of the constraints that we `Eqz`-ed.
 structure State where
   felts : Map String Felt
+  props : Map String Prop
   buffers : Map String (List Felt)
-  constraints : Map String Prop
+  constraints : List Prop
 
 -- A parametrized Variable. In practice, α will be either `Felt` or `Prop` or `List Felt`.
 inductive Variable (α : Type) :=
@@ -82,14 +83,14 @@ def Op.eval (state : State) (op : Op) : Lit :=
                  | _      , _       => 42
   | AndEqz c x => let ⟨i⟩ := c
                   let ⟨j⟩ := x
-                  match state.constraints i, state.felts j with
+                  match state.props i, state.felts j with
                     | .some c, .some x => .Constraint (c ∧ x = 0)
                     | _      , _       => .Constraint (42 = 42)
   | AndCond old cond inner =>
       let ⟨i⟩ := old
       let ⟨j⟩ := cond
       let ⟨k⟩ := inner
-      match state.constraints i, state.felts j, state.constraints k with
+      match state.props i, state.felts j, state.props k with
         | .some old, .some cond, .some inner => .Constraint (if cond == 0 then old else old ∧ inner)
         | _        , _         , _           => .Constraint (42 = 42)
   | _ => .Constraint (42 = 42)
@@ -99,7 +100,7 @@ def Op.eval (state : State) (op : Op) : Lit :=
 def Op.assign (state : State) (op : Op) (name : String) : State :=
   match (Op.eval state op) with
   | .Val x => { state with felts := state.felts.update name x }
-  | .Constraint c => { state with constraints := state.constraints.update name c }
+  | .Constraint c => { state with props := state.props.update name c }
 
 -- An MLIR program in the `cirgen` (circuit generation) dialect.
 inductive Cirgen where
@@ -144,7 +145,7 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
                       | some x => (state', some x)
                       | none => Cirgen.step state' b
   | Return name => let retval:=
-                    match state.constraints name with
+                    match state.props name with
                     | some retval => retval
                     | none => 42 = 42
                    (state, some retval)
@@ -152,7 +153,7 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
 -- The result of stepping through a program that generates `(1 - x) = 0`, which
 -- should be equivalent to checking `x = 1`.
 def subAndEqzActual (x : Felt) : State × Option Prop :=
-  Cirgen.step { felts := Map.empty, buffers := Map.empty, constraints := Map.empty }
+  Cirgen.step { felts := Map.empty, buffers := Map.empty, props := Map.empty, constraints := [] }
     (.Sequence
       (.Sequence
         (.Sequence
@@ -168,8 +169,9 @@ def subAndEqzActual (x : Felt) : State × Option Prop :=
 -- The expected post-execution state after computing `subAndEqzActual`.
 def subAndEqzExpectedState (x : Felt) : State :=
   { felts := Map.fromList [("x - 1", x - 1), ("x", x), ("1", 1)]
+  , props := Map.fromList [("x - 1 = 0", x - 1 = 0), ("true", True)]
   , buffers := Map.empty
-  , constraints := Map.fromList [("x - 1 = 0", x - 1 = 0), ("true", True)]
+  , constraints := []
   }
 
 -- Check that our `(1 - x) = 0` program is equivalent to `x = 1`.
@@ -195,8 +197,9 @@ theorem Sub_AndEqz_iff_eq_one :
 
 def is0OriginalProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
   Cirgen.step { felts := Map.empty
+              , props := Map.empty
               , buffers := Map.fromList [("in", [x]), ("out", [y, z])]
-              , constraints := Map.empty
+              , constraints := []
               }
     (.Sequence
       (.Sequence
@@ -226,10 +229,22 @@ def is0OriginalProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :
                               (.Assign "x * out[1] - 1" (Op.Sub ⟨"x * out[1]"⟩ ⟨"1"⟩)))
                               (.Eqz ⟨"x * out[1] - 1"⟩))))
 
+theorem is0OriginalProgram_constraints_are_what_we_expect :
+  ∀ x y z : Felt, (is0OriginalProgram x y z).1.constraints.foldr And _root_.True ↔ (x = 0 ∧ x * x⁻¹ - 1 = 0) := by
+  intros x y z
+  apply Iff.intro
+  intros h
+  unfold is0OriginalProgram at h
+  unfold Cirgen.step at h
+  simp only [Map.empty, Map.fromList, Map.update, beq_iff_eq] at h
+  sorry
+  sorry
+
 def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
   Cirgen.step { felts := Map.empty
+              , props := Map.empty
               , buffers := Map.fromList [("in", [x]), ("out", [y, z])]
-              , constraints := Map.empty
+              , constraints := []
               }
   (.Sequence
     (.Sequence
