@@ -51,7 +51,6 @@ inductive Op where
   | Const : Felt → Op
   | True : Op
   | Get : Variable (List Felt) → ℕ → Felt → Op
-  | Set : List Felt → ℕ → Felt → Op
   | Sub : Variable Felt → Variable Felt → Op
   | Mul : Variable Felt → Variable Felt → Op
   | Isz : Variable Felt → Op
@@ -104,8 +103,11 @@ def Op.assign (state : State) (op : Op) (name : String) : State :=
 
 -- An MLIR program in the `cirgen` (circuit generation) dialect.
 inductive Cirgen where
-  | Assign : String → Op → Cirgen
+  | If : Variable Felt → Cirgen → Cirgen
+  | Eqz : Variable Felt → Cirgen
+  | Set : Variable (List Felt) → ℕ → Variable Felt → Cirgen
   | Return : String → Cirgen
+  | Assign : String → Op → Cirgen
   | Sequence : Cirgen → Cirgen → Cirgen
 
 -- Step through the entirety of a `Cirgen` MLIR program from initial state
@@ -114,11 +116,33 @@ inductive Cirgen where
 @[simp]
 def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
   match program with
+  | If x program =>
+    let ⟨name⟩ := x
+    match state.felts name with
+      | .some x => if x == 0
+                   then (state, none)
+                   else Cirgen.step state program
+      | none    => (state, 42 = 42)
+  | Eqz x =>
+    let ⟨name⟩ := x
+    match state.felts name with
+      | .some x => if x == 0
+                   then (state, none)
+                   else (state, some False)
+      | .none   => (state, 42 = 42)
+  | Set buffer i x =>
+    let ⟨name⟩ := buffer
+    let ⟨nameₓ⟩ := x
+      match state.buffers name, state.felts nameₓ with
+        | .some buffer, .some x =>
+          let buffers' := state.buffers.update name (buffer.set i x)
+          ({state with buffers := buffers' }, none)
+        | _, _ => (state, none)
   | Assign name op => (Op.assign state op name, none)
   | Sequence a b => let (state', x) := Cirgen.step state a
                     match x with
-                    | some x => (state', some x)
-                    | none => Cirgen.step state' b
+                      | some x => (state', some x)
+                      | none => Cirgen.step state' b
   | Return name => let retval:=
                     match state.constraints name with
                     | some retval => retval
@@ -169,9 +193,42 @@ theorem Sub_AndEqz_iff_eq_one :
   rw [h₂]
   decide
 
+def is0OriginalProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
+  Cirgen.step { felts := Map.empty
+              , buffers := Map.fromList [("in", [x]), ("out", [y, z])]
+              , constraints := Map.empty
+              }
+    (.Sequence
+      (.Sequence
+        (.Sequence
+          (.Sequence
+            (.Sequence
+              (.Sequence
+                (.Sequence
+                  (.Sequence
+                    (.Sequence
+                      (.Assign "1" (Op.Const 1))
+                      (.Assign "x" (Op.Get ⟨"in"⟩ 0 0)))
+                      (.Assign "isZeroBit" (Op.Isz ⟨"x"⟩)))
+                      (.Set ⟨"out"⟩ 0 ⟨"isZeroBit"⟩))
+                      (.Assign "invVal" (Op.Inv ⟨"x"⟩)))
+                      (.Set ⟨"out"⟩ 1 ⟨"invVal"⟩))
+                      (.Assign "out[0]" (Op.Get ⟨"out"⟩ 0 0)))
+                      (.If ⟨"out[0]"⟩
+                        (.Eqz ⟨"x"⟩)))
+                      (.Assign "1 - out[0]" (Op.Sub ⟨"1"⟩ ⟨"out[0]"⟩)))
+                      (.If ⟨"1 - out[0]"⟩
+                        (.Sequence
+                          (.Sequence
+                            (.Sequence
+                              (.Assign "out[1]" (Op.Get ⟨"out"⟩ 1 0))
+                              (.Assign "x * out[1]" (Op.Mul ⟨"x"⟩ ⟨"out[1]"⟩)))
+                              (.Assign "x * out[1] - 1" (Op.Sub ⟨"x * out[1]"⟩ ⟨"1"⟩)))
+                              (.Eqz ⟨"x * out[1] - 1"⟩))))
+
 def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
   Cirgen.step { felts := Map.empty
-              , buffers := Map.update (Map.update Map.empty "in" [x]) "out" [y, z]
+              , buffers := Map.fromList [("in", [x]), ("out", [y, z])]
               , constraints := Map.empty
               }
   (.Sequence
