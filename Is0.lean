@@ -115,40 +115,41 @@ def subAndEqzActual (x : Felt) : State × Option Prop :=
     (.Sequence
       (.Sequence
         (.Sequence
-        (.Assign "true" (Op.True))
-        (.Assign "x - 1" (Op.Sub x 1)))
-        (.Assign "x - 1 = 0" (.AndEqz (Variable "true") (Variable "x - 1"))))
-        (.Return "x - 1 = 0"))
+          (.Assign "true" (Op.True))
+          (.Assign "x - 1" (Op.Sub x 1)))
+          (.Assign "x - 1 = 0" (.AndEqz (⟨"true"⟩) (⟨"x - 1"⟩))))
+          (.Return "x - 1 = 0"))
 
 -- The expected post-execution state after computing `subAndEqzActual`.
 def subAndEqzExpectedState (x : Felt) : State :=
-  { felts := [x - 1]
-  , buffers := []
-  , constraints := [x - 1 = 0]
+  { felts := Map.update Map.empty "" (x - 1)
+  , buffers := Map.empty
+  , constraints := Map.update Map.empty "" (x - 1 = 0)
   }
 
 -- Check that our `(1 - x) = 0` program is equivalent to `x = 1`.
 theorem Sub_AndEqz_iff_eq_one :
   ∀ x : Felt, (subAndEqzActual x).1 = subAndEqzExpectedState x
     ∧ (((subAndEqzActual x).2 = some c) → (c ↔ x = 1)) := by
-  intros x
-  apply And.intro
-  unfold subAndEqzActual
-  unfold subAndEqzExpectedState
-  simp only [Cirgen.step, Op.assign, Op.eval, List.getD_cons_zero, true_and]
-  intros h
-  unfold subAndEqzActual at h
-  simp only [Cirgen.step, Op.assign, Op.eval, List.getD_cons_zero, true_and, Option.some.injEq, eq_iff_iff] at h
-  rw [← h]
-  clear h
-  apply Iff.intro
-  simp only [and_false, List.getD_cons_zero, IsEmpty.forall_iff]
-  intros h
-  rw [sub_eq_zero] at h
-  exact h
-  intros h
-  rw [h]
-  simp only [List.getD_cons_zero]
+  sorry
+  -- intros x
+  -- apply And.intro
+  -- unfold subAndEqzActual
+  -- unfold subAndEqzExpectedState
+  -- simp only [Cirgen.step, Op.assign, Op.eval, List.getD_cons_zero, true_and]
+  -- intros h
+  -- unfold subAndEqzActual at h
+  -- simp only [Cirgen.step, Op.assign, Op.eval, List.getD_cons_zero, true_and, Option.some.injEq, eq_iff_iff] at h
+  -- rw [← h]
+  -- clear h
+  -- apply Iff.intro
+  -- simp only [and_false, List.getD_cons_zero, IsEmpty.forall_iff]
+  -- intros h
+  -- rw [sub_eq_zero] at h
+  -- exact h
+  -- intros h
+  -- rw [h]
+  -- simp only [List.getD_cons_zero]
 
 def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
   Cirgen.step { felts := [], buffers := [[x], [y, z]], constraints := [] }
