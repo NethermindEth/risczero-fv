@@ -22,10 +22,18 @@ inductive Lit where
 
 def Map (α : Type) (β : Type) := α → Option β
 
+@[simp]
 def Map.empty {α : Type} {β : Type} : Map α β := λ _ => none
 
+@[simp]
 def Map.update {α : Type} [BEq α] {β : Type} (m : Map α β) (k : α) (v : β) : Map α β :=
   λ x => if x == k then v else m x
+
+@[simp]
+def Map.fromList {α : Type} [BEq α] {β : Type} (l : List (α × β)) : Map α β :=
+  match l with
+  | [] => Map.empty
+  | (k, v) :: xs => Map.update (Map.fromList xs) k v
 
 -- A pair of append-only stacks of assignments. Basically, this is where we
 -- store the evaluated value of the expression on each line.
@@ -135,16 +143,31 @@ def subAndEqzActual (x : Felt) : State × Option Prop :=
 
 -- The expected post-execution state after computing `subAndEqzActual`.
 def subAndEqzExpectedState (x : Felt) : State :=
-  { felts := Map.update Map.empty "" (x - 1)
+  { felts := Map.fromList [("x - 1", x - 1), ("x", x), ("1", 1)]
   , buffers := Map.empty
-  , constraints := Map.update Map.empty "" (x - 1 = 0)
+  , constraints := Map.fromList [("x - 1 = 0", x - 1 = 0), ("true", True)]
   }
 
 -- Check that our `(1 - x) = 0` program is equivalent to `x = 1`.
 theorem Sub_AndEqz_iff_eq_one :
   ∀ x : Felt, (subAndEqzActual x).1 = subAndEqzExpectedState x
     ∧ (((subAndEqzActual x).2 = some c) → (c ↔ x = 1)) := by
-  sorry
+  intros x
+  unfold subAndEqzActual
+  apply And.intro
+  unfold subAndEqzExpectedState
+  simp only [Cirgen.step, Op.assign, Op.eval, Map.update, beq_iff_eq, Map.empty, ite_false, ite_true, true_and, Map.fromList, State.mk.injEq]
+  simp only [Cirgen.step, Op.assign, Op.eval, Map.update, beq_iff_eq, Map.empty, ite_false, ite_true, true_and, Option.some.injEq, eq_iff_iff]
+  intros h
+  rw [←h]
+  clear h
+  apply Iff.intro
+  intros h₁
+  rw [sub_eq_zero] at h₁
+  exact h₁
+  intros h₂
+  rw [h₂]
+  decide
 
 def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
   Cirgen.step { felts := Map.empty
