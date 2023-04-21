@@ -69,7 +69,6 @@ inductive Op where
 instance : Inhabited Lit := ⟨(Lit.Val (-42))⟩
 
 -- Evaluate a pure functional circuit operation to get some kind of literal.
-@[simp]
 def Op.eval (state : State) (op : Op) : Lit :=
   match op with
   | Const x => .Val x
@@ -103,7 +102,6 @@ def Op.eval (state : State) (op : Op) : Lit :=
   | _ => .Constraint (42 = 42)
 
 -- Evaluate `op` and map `name ↦ result` in `state : State`.
-@[simp]
 def Op.assign (state : State) (op : Op) (name : String) : State :=
   match (Op.eval state op) with
   | .Val x => { state with felts := state.felts.update name x }
@@ -201,112 +199,5 @@ theorem Sub_AndEqz_iff_eq_one :
   intros h₂
   rw [h₂]
   decide
-
--- The MLIR program labeled `ORIGINAL` in the `nonzero-example` output.
-def is0OriginalProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
-  Cirgen.step { felts := Map.empty
-              , props := Map.empty
-              , buffers := Map.fromList [("in", [x]), ("out", [y, z])]
-              , constraints := []
-              }
-    (.Sequence
-      (.Sequence
-        (.Sequence
-          (.Sequence
-            (.Sequence
-              (.Sequence
-                (.Sequence
-                  (.Sequence
-                    (.Sequence
-                      (.Assign "1" (Op.Const 1))
-                      (.Assign "x" (Op.Get ⟨"in"⟩ 0 0)))
-                      (.Assign "isZeroBit" (Op.Isz ⟨"x"⟩)))
-                      (.Set ⟨"out"⟩ 0 ⟨"isZeroBit"⟩))
-                      (.Assign "invVal" (Op.Inv ⟨"x"⟩)))
-                      (.Set ⟨"out"⟩ 1 ⟨"invVal"⟩))
-                      (.Assign "out[0]" (Op.Get ⟨"out"⟩ 0 0)))
-                      (.If ⟨"out[0]"⟩
-                        (.Eqz ⟨"x"⟩)))
-                      (.Assign "1 - out[0]" (Op.Sub ⟨"1"⟩ ⟨"out[0]"⟩)))
-                      (.If ⟨"1 - out[0]"⟩
-                        (.Sequence
-                          (.Sequence
-                            (.Sequence
-                              (.Assign "out[1]" (Op.Get ⟨"out"⟩ 1 0))
-                              (.Assign "x * out[1]" (Op.Mul ⟨"x"⟩ ⟨"out[1]"⟩)))
-                              (.Assign "x * out[1] - 1" (Op.Sub ⟨"x * out[1]"⟩ ⟨"1"⟩)))
-                              (.Eqz ⟨"x * out[1] - 1"⟩))))
-
-theorem is0OriginalProgram_constraints_are_what_we_expect :
-  ∀ x y z : Felt, (is0OriginalProgram x y z).1.constraints.foldr And _root_.True ↔ (x = 0 ∧ x * x⁻¹ - 1 = 0) := by
-  intros x y z
-  apply Iff.intro
-  intros h
-  unfold is0OriginalProgram at h
-  sorry
-  sorry
-
--- The MLIR program labeled `CONSTAINTS` in the `nonzero-example` output.
-def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
-  Cirgen.step { felts := Map.empty
-              , props := Map.empty
-              , buffers := Map.fromList [("in", [x]), ("out", [y, z])]
-              , constraints := []
-              }
-  (.Sequence
-    (.Sequence
-      (.Sequence
-        (.Sequence
-          (.Sequence
-            (.Sequence
-              (.Sequence
-                (.Sequence
-                  (.Sequence
-                    (.Sequence
-                      (.Sequence
-                        (.Sequence
-                          (.Assign "1" (Op.Const 1))
-                          (.Assign "true" Op.True))
-                          (.Assign "x" (Op.Get ⟨"in"⟩ 0 0)))
-                          (.Assign "isZeroBit" (Op.Get ⟨"out"⟩ 0 0)))
-                          (.Assign "x = 0" (Op.AndEqz ⟨"true"⟩ ⟨"x"⟩)))
-                          (.Assign "IF isZeroBit THEN (x = 0) ELSE true" (Op.AndCond ⟨"true"⟩ ⟨"isZeroBit"⟩ ⟨"x = 0"⟩)))
-                          (.Assign "1 - isZeroBit" (Op.Sub ⟨"1"⟩ ⟨"isZeroBit"⟩)))
-                          (.Assign "invVal" (Op.Get ⟨"out"⟩ 1 0)))
-                          (.Assign "x * invVal" (Op.Mul ⟨"x"⟩ ⟨"invVal"⟩)))
-                          (.Assign "x * invVal - 1" (Op.Sub ⟨"x * invVal"⟩ ⟨"1"⟩)))
-                          (.Assign "x * invVal - 1 = 0" (Op.AndEqz ⟨"true"⟩ ⟨"x * invVal - 1"⟩)))
-                          (.Assign "result"
-                            (Op.AndCond
-                              ⟨"IF isZeroBit THEN (x = 0) ELSE true"⟩
-                              ⟨"1 - isZeroBit"⟩
-                              ⟨"x * invVal - 1 = 0"⟩)))
-                          (.Return "result"))
-
-lemma step_of_sequence_of_assign_eq_state_change :
-  ∀ (state : State) (name : String) (op : Op) (program : Cirgen),
-  Cirgen.step state (.Sequence (.Assign name op) program) = Cirgen.step (state.update k (Op.eval state op)) program := by
-  intros state name op program
-  induction op with
-  | Const x =>
-    unfold Op.eval
-    simp only [State.update, Map.update, beq_iff_eq]
-    unfold Cirgen.step
-    unfold Cirgen.step
-    unfold Op.assign
-    unfold Op.eval
-    simp only [Map.update, beq_iff_eq]
-
-  -- inductive Op where
-  -- | Const : Felt → Op
-  -- | True : Op
-  -- | Get : Variable (List Felt) → ℕ → Felt → Op
-  -- | Sub : Variable Felt → Variable Felt → Op
-  -- | Mul : Variable Felt → Variable Felt → Op
-  -- | Isz : Variable Felt → Op
-  -- | Inv : Variable Felt → Op
-  -- | AndEqz : Variable Prop → Variable Felt → Op
-  -- | AndCond : Variable Prop → Variable Felt → Variable Prop → Op
-
 
 end Risc0
