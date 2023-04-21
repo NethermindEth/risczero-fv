@@ -22,6 +22,11 @@ inductive Lit where
 
 def Map (α : Type) (β : Type) := α → Option β
 
+def Map.empty {α : Type} {β : Type} : Map α β := λ _ => none
+
+def Map.update {α : Type} [BEq α] {β : Type} (m : Map α β) (k : α) (v : β) : Map α β :=
+  λ x => if x == k then v else m x
+
 -- A pair of append-only stacks of assignments. Basically, this is where we
 -- store the evaluated value of the expression on each line.
 structure State where
@@ -75,15 +80,15 @@ def Op.eval (state : State) (op : Op) : Lit :=
 
 -- Evaluate `op` and push its literal value to the stack.
 @[simp]
-def Op.assign (state : State) (op : Op) : State :=
+def Op.assign (state : State) (op : Op) (name : String) : State :=
   match (Op.eval state op) with
-  | .Val x => { state with felts := x :: state.felts }
-  | .Constraint c => { state with constraints := c :: state.constraints }
+  | .Val x => { state with felts := state.felts.update name x }
+  | .Constraint c => { state with constraints := state.constraints.update name c }
 
 -- An MLIR program in the `cirgen` (circuit generation) dialect.
 inductive Cirgen where
-  | Assign : Op → Cirgen
-  | Return : ℕ → Cirgen
+  | Assign : String → Op → Cirgen
+  | Return : String → Cirgen
   | Sequence : Cirgen → Cirgen → Cirgen
 
 -- Step through the entirety of a `Cirgen` MLIR program from initial state
@@ -92,22 +97,28 @@ inductive Cirgen where
 @[simp]
 def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
   match program with
-  | Assign op => (Op.assign state op, none)
+  | Assign name op => (Op.assign state op name, none)
   | Sequence a b => let (state', x) := Cirgen.step state a
                     match x with
                     | some x => (state', some x)
                     | none => Cirgen.step state' b
-  | Return i => (state, some $ state.constraints.getD i False)
+  | Return name => let retval:=
+                    match state.constraints name with
+                    | some retval => retval
+                    | none => 42 = 42
+                   (state, some retval)
 
 -- The result of stepping through a program that generates `(1 - x) = 0`, which
 -- should be equivalent to checking `x = 1`.
 def subAndEqzActual (x : Felt) : State × Option Prop :=
-  Cirgen.step { felts := [], buffers := [], constraints := [] }
+  Cirgen.step { felts := Map.empty, buffers := Map.empty, constraints := Map.empty }
     (.Sequence
       (.Sequence
-        (.Assign (Op.Sub x 1))
-        (.Assign (.AndEqz (.Literal _root_.True) (.Variable 0))))
-      (.Return 0))
+        (.Sequence
+        (.Assign "true" (Op.True))
+        (.Assign "x - 1" (Op.Sub x 1)))
+        (.Assign "x - 1 = 0" (.AndEqz (Variable "true") (Variable "x - 1"))))
+        (.Return "x - 1 = 0"))
 
 -- The expected post-execution state after computing `subAndEqzActual`.
 def subAndEqzExpectedState (x : Felt) : State :=
