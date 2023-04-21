@@ -27,25 +27,26 @@ def Map (α : Type) (β : Type) := α → Option β
 structure State where
   felts : Map String Felt
   buffers : Map String (List Felt)
-  constraints : List Prop
+  constraints : Map String Prop
 
--- A parametrized expression. In practice, α will be either `Felt` or `Prop`.
-inductive Expression (α : Type) where
-  | Literal : α → Expression α
-  | Variable : ℕ → Expression α
+-- A parametrized Variable. In practice, α will be either `Felt` or `Prop` or `List Felt`.
+inductive Variable (α : Type) :=
+  | mk : String → Variable α
 
 -- An operation from the cirgen (circuit generation) MLIR dialect.
 inductive Op where
   | Const : Felt → Op
   | True : Op
-  | Get : Expression (List Felt) → ℕ → Felt → Op
+  | Get : Variable (List Felt) → ℕ → Felt → Op
   | Set : List Felt → ℕ → Felt → Op
   | Sub : Felt → Felt → Op
   | Mul : Felt → Felt → Op
   | Isz : Felt → Op
   | Inv : Felt → Op
-  | AndEqz : Expression Prop → Expression Felt → Op
-  | AndCond : Expression Prop → Expression Felt → Expression Prop → Op
+  | AndEqz : Variable Prop → Variable Felt → Op
+  | AndCond : Variable Prop → Variable Felt → Variable Prop → Op
+
+instance : Inhabited Lit := ⟨(Lit.Val (-42))⟩
 
 -- Evaluate a circuit operation to get some kind of literal.
 @[simp]
@@ -53,25 +54,24 @@ def Op.eval (state : State) (op : Op) : Lit :=
   match op with
   | Const x => .Val x
   | True => .Constraint (_root_.True)
-  | Get buffer i _ =>
-    match buffer with
-    | .Literal buffer => .Val (buffer.getD i (-1))
-    | .Variable j => .Val ((state.buffers.getD j []).getD i (-1))
+  | Get buffer i _ => let ⟨j⟩ := buffer
+                      match state.buffers j with
+                        | .none => default
+                        | .some v => .Val <| v.getD i (-42)
   | Sub x y => .Val (x - y)
-  | AndEqz c x =>
-    match c, x with
-    | .Literal c, .Literal x => .Constraint (c ∧ x = 0)
-    | .Literal c, .Variable j => .Constraint (c ∧ (state.felts.getD j (-1)) = 0)
-    | .Variable i, .Literal x =>  .Constraint ((state.constraints.getD i False) ∧ x = 0)
-    | .Variable i, .Variable j =>  .Constraint ((state.constraints.getD i False) ∧ (state.felts.getD j (-1)) = 0)
+  | AndEqz c x => let ⟨i⟩ := c
+                  let ⟨j⟩ := x
+                  match state.constraints i, state.felts j with
+                    | .some c, .some x => .Constraint (c ∧ x = 0)
+                    | _      , _       => .Constraint (42 = 42)
   | AndCond old cond inner =>
-    match old, cond, inner with
-    | .Variable i, .Variable j, .Variable k =>  .Constraint $
-      if (state.felts.getD j (-1)) == 0
-      then (state.constraints.getD i False) ∧ (state.constraints.getD k False)
-      else state.constraints.getD i False
-    | _, _, _ => .Constraint False
-  | _ => .Constraint False
+      let ⟨i⟩ := old
+      let ⟨j⟩ := cond
+      let ⟨k⟩ := inner
+      match state.constraints i, state.felts j, state.constraints k with
+        | .some old, .some cond, .some inner => .Constraint (if cond == 0 then old else old ∧ inner)
+        | _        , _         , _           => .Constraint (42 = 42)
+  | _ => .Constraint (42 = 42)
 
 -- Evaluate `op` and push its literal value to the stack.
 @[simp]
