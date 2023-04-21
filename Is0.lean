@@ -20,6 +20,7 @@ inductive Lit where
   | Val : Felt → Lit
   | Constraint : Prop → Lit
 
+-- A functional map, used to send variable names to literal values.
 def Map (α : Type) (β : Type) := α → Option β
 
 @[simp]
@@ -43,11 +44,11 @@ structure State where
   buffers : Map String (List Felt)
   constraints : List Prop
 
--- A parametrized Variable. In practice, α will be either `Felt` or `Prop` or `List Felt`.
+-- A parametrized Variable. In practice, α will be one of `Felt`, `Prop`, or `List Felt`.
 inductive Variable (α : Type) :=
   | mk : String → Variable α
 
--- An operation from the cirgen (circuit generation) MLIR dialect.
+-- Pure functional operations from the cirgen (circuit generation) MLIR dialect.
 inductive Op where
   | Const : Felt → Op
   | True : Op
@@ -61,7 +62,7 @@ inductive Op where
 
 instance : Inhabited Lit := ⟨(Lit.Val (-42))⟩
 
--- Evaluate a circuit operation to get some kind of literal.
+-- Evaluate a pure functional circuit operation to get some kind of literal.
 @[simp]
 def Op.eval (state : State) (op : Op) : Lit :=
   match op with
@@ -95,14 +96,15 @@ def Op.eval (state : State) (op : Op) : Lit :=
         | _        , _         , _           => .Constraint (42 = 42)
   | _ => .Constraint (42 = 42)
 
--- Evaluate `op` and push its literal value to the stack.
+-- Evaluate `op` and map `name ↦ result` in `state : State`.
 @[simp]
 def Op.assign (state : State) (op : Op) (name : String) : State :=
   match (Op.eval state op) with
   | .Val x => { state with felts := state.felts.update name x }
   | .Constraint c => { state with props := state.props.update name c }
 
--- An MLIR program in the `cirgen` (circuit generation) dialect.
+-- An MLIR program in the `cirgen` (circuit generation) dialect. MLIR ops that
+-- are not pure functions are implemented here, so they can mess with state. 
 inductive Cirgen where
   | If : Variable Felt → Cirgen → Cirgen
   | Eqz : Variable Felt → Cirgen
@@ -113,7 +115,7 @@ inductive Cirgen where
 
 -- Step through the entirety of a `Cirgen` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
--- (`Prop`).
+-- (`Prop`), the return value of the program.
 @[simp]
 def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
   match program with
@@ -195,6 +197,7 @@ theorem Sub_AndEqz_iff_eq_one :
   rw [h₂]
   decide
 
+-- The MLIR program labeled `ORIGINAL` in the `nonzero-example` output.
 def is0OriginalProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
   Cirgen.step { felts := Map.empty
               , props := Map.empty
@@ -240,6 +243,7 @@ theorem is0OriginalProgram_constraints_are_what_we_expect :
   sorry
   sorry
 
+-- The MLIR program labeled `CONSTAINTS` in the `nonzero-example` output.
 def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
   Cirgen.step { felts := Map.empty
               , props := Map.empty
