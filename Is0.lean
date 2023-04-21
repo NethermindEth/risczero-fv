@@ -4,6 +4,8 @@ import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.LibrarySearch
 
+namespace Risc0
+
 @[inline]
 def P: ℕ := 15 * 2^27 + 1
 
@@ -18,11 +20,13 @@ inductive Lit where
   | Val : Felt → Lit
   | Constraint : Prop → Lit
 
+def Map (α : Type) (β : Type) := α → Option β
+
 -- A pair of append-only stacks of assignments. Basically, this is where we
 -- store the evaluated value of the expression on each line.
 structure State where
-  felts : List Felt
-  buffers : List (List Felt)
+  felts : Map String Felt
+  buffers : Map String (List Felt)
   constraints : List Prop
 
 -- A parametrized expression. In practice, α will be either `Felt` or `Prop`.
@@ -150,3 +154,5 @@ def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Pro
               (.Assign (Op.AndEqz (.Variable 0) (.Variable 1))))
               (.Assign (Op.AndCond (.Variable 0) (.Variable 1) (.Variable 1))))
               (.Return 3))
+
+end Risc0
