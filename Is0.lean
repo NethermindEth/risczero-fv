@@ -22,6 +22,7 @@ inductive Lit where
 -- store the evaluated value of the expression on each line.
 structure State where
   felts : List Felt
+  buffers : List (List Felt)
   constraints : List Prop
 
 -- A parametrized expression. In practice, α will be either `Felt` or `Prop`.
@@ -33,15 +34,14 @@ inductive Expression (α : Type) where
 inductive Op where
   | Const : Felt → Op
   | True : Op
-  | Get : Vector Felt n → Fin n → Felt → Op
-  | Set : Vector Felt n → Fin n → Felt → Op
+  | Get : Expression (List Felt) → ℕ → Felt → Op
+  | Set : List Felt → ℕ → Felt → Op
   | Sub : Felt → Felt → Op
   | Mul : Felt → Felt → Op
   | Isz : Felt → Op
   | Inv : Felt → Op
   | AndEqz : Expression Prop → Expression Felt → Op
-  | AndCond : Prop → Felt → Prop → Op
-  | Variable : ℕ → Op
+  | AndCond : Expression Prop → Expression Felt → Expression Prop → Op
 
 -- Evaluate a circuit operation to get some kind of literal.
 @[simp]
@@ -49,15 +49,24 @@ def Op.eval (state : State) (op : Op) : Lit :=
   match op with
   | Const x => .Val x
   | True => .Constraint (_root_.True)
-  | Get buffer i _ => .Val (buffer.get i)
+  | Get buffer i _ =>
+    match buffer with
+    | .Literal buffer => .Val (buffer.getD i (-1))
+    | .Variable j => .Val ((state.buffers.getD j []).getD i (-1))
   | Sub x y => .Val (x - y)
-  | Variable i => .Val (state.felts.getD i 0)
   | AndEqz c x =>
     match c, x with
     | .Literal c, .Literal x => .Constraint (c ∧ x = 0)
-    | .Literal c, .Variable j => .Constraint (c ∧ (state.felts.getD j 17) = 0)
-    | .Variable i, .Literal x =>  .Constraint ((state.constraints.getD i _root_.True) ∧ x = 0)
-    | .Variable i, .Variable j =>  .Constraint ((state.constraints.getD i _root_.True) ∧ (state.felts.getD j 17) = 0)
+    | .Literal c, .Variable j => .Constraint (c ∧ (state.felts.getD j (-1)) = 0)
+    | .Variable i, .Literal x =>  .Constraint ((state.constraints.getD i False) ∧ x = 0)
+    | .Variable i, .Variable j =>  .Constraint ((state.constraints.getD i False) ∧ (state.felts.getD j (-1)) = 0)
+  | AndCond old cond inner =>
+    match old, cond, inner with
+    | .Variable i, .Variable j, .Variable k =>  .Constraint $
+      if (state.felts.getD j (-1)) == 0
+      then (state.constraints.getD i False) ∧ (state.constraints.getD k False)
+      else state.constraints.getD i False
+    | _, _, _ => .Constraint False
   | _ => .Constraint False
 
 -- Evaluate `op` and push its literal value to the stack.
@@ -84,12 +93,12 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
                     match x with
                     | some x => (state', some x)
                     | none => Cirgen.step state' b
-  | Return i => (state, some $ state.constraints.getD i _root_.True)
+  | Return i => (state, some $ state.constraints.getD i False)
 
 -- The result of stepping through a program that generates `(1 - x) = 0`, which
 -- should be equivalent to checking `x = 1`.
 def subAndEqzActual (x : Felt) : State × Option Prop :=
-  Cirgen.step { felts := [], constraints := [] }
+  Cirgen.step { felts := [], buffers := [], constraints := [] }
     (.Sequence
       (.Sequence
         (.Assign (Op.Sub x 1))
@@ -99,6 +108,7 @@ def subAndEqzActual (x : Felt) : State × Option Prop :=
 -- The expected post-execution state after computing `subAndEqzActual`.
 def subAndEqzExpectedState (x : Felt) : State :=
   { felts := [x - 1]
+  , buffers := []
   , constraints := [x - 1 = 0]
   }
 
@@ -124,3 +134,19 @@ theorem Sub_AndEqz_iff_eq_one :
   intros h
   rw [h]
   simp only [List.getD_cons_zero]
+
+def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=
+  Cirgen.step { felts := [], buffers := [[x], [y, z]], constraints := [] }
+  (.Sequence
+    (.Sequence
+      (.Sequence
+        (.Sequence
+          (.Sequence
+            (.Sequence
+              (.Assign (Op.Const 0))
+              (.Assign Op.True))
+              (.Assign (Op.Get (.Variable 0) 0 0)))
+              (.Assign (Op.Get (.Variable 1) 0 0)))
+              (.Assign (Op.AndEqz (.Variable 0) (.Variable 1))))
+              (.Assign (Op.AndCond (.Variable 0) (.Variable 1) (.Variable 1))))
+              (.Return 3))
