@@ -44,6 +44,12 @@ structure State where
   buffers : Map String (List Felt)
   constraints : List Prop
 
+@[simp]
+def State.update (state : State) (name : String) (x : Lit) : State :=
+  match x with
+  | .Val x => { state with felts := state.felts.update name x }
+  | .Constraint c => { state with props := state.props.update name c }
+
 -- A parametrized Variable. In practice, α will be one of `Felt`, `Prop`, or `List Felt`.
 inductive Variable (α : Type) :=
   | mk : String → Variable α
@@ -116,7 +122,6 @@ inductive Cirgen where
 -- Step through the entirety of a `Cirgen` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
 -- (`Prop`), the return value of the program.
-@[simp]
 def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
   match program with
   | If x program =>
@@ -238,8 +243,6 @@ theorem is0OriginalProgram_constraints_are_what_we_expect :
   apply Iff.intro
   intros h
   unfold is0OriginalProgram at h
-  unfold Cirgen.step at h
-  simp only [Map.empty, Map.fromList, Map.update, beq_iff_eq] at h
   sorry
   sorry
 
@@ -279,5 +282,31 @@ def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Pro
                               ⟨"1 - isZeroBit"⟩
                               ⟨"x * invVal - 1 = 0"⟩)))
                           (.Return "result"))
+
+lemma step_of_sequence_of_assign_eq_state_change :
+  ∀ (state : State) (name : String) (op : Op) (program : Cirgen),
+  Cirgen.step state (.Sequence (.Assign name op) program) = Cirgen.step (state.update k (Op.eval state op)) program := by
+  intros state name op program
+  induction op with
+  | Const x =>
+    unfold Op.eval
+    simp only [State.update, Map.update, beq_iff_eq]
+    unfold Cirgen.step
+    unfold Cirgen.step
+    unfold Op.assign
+    unfold Op.eval
+    simp only [Map.update, beq_iff_eq]
+
+  -- inductive Op where
+  -- | Const : Felt → Op
+  -- | True : Op
+  -- | Get : Variable (List Felt) → ℕ → Felt → Op
+  -- | Sub : Variable Felt → Variable Felt → Op
+  -- | Mul : Variable Felt → Variable Felt → Op
+  -- | Isz : Variable Felt → Op
+  -- | Inv : Variable Felt → Op
+  -- | AndEqz : Variable Prop → Variable Felt → Op
+  -- | AndCond : Variable Prop → Variable Felt → Variable Prop → Op
+
 
 end Risc0
