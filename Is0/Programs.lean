@@ -16,32 +16,32 @@ def is0OriginalProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :
               , constraints := []
               }
     (.Sequence
+    (.Assign "1" (Op.Const 1))
+    (.Sequence
+    (.Assign "x" (Op.Get ⟨"in"⟩ 0 0))
+    (.Sequence
+    (.Assign "isZeroBit" (Op.Isz ⟨"x"⟩))
+    (.Sequence
+    (.Set ⟨"out"⟩ 0 ⟨"isZeroBit"⟩)
+    (.Sequence
+    (.Assign "invVal" (Op.Inv ⟨"x"⟩))
+    (.Sequence
+    (.Set ⟨"out"⟩ 1 ⟨"invVal"⟩)
+    (.Sequence
+    (.Assign "out[0]" (Op.Get ⟨"out"⟩ 0 0))
+    (.Sequence
+    (.If ⟨"out[0]"⟩
+      (.Eqz ⟨"x"⟩))
+    (.Sequence
+    (.Assign "1 - out[0]" (Op.Sub ⟨"1"⟩ ⟨"out[0]"⟩))
+    (.If ⟨"1 - out[0]"⟩
       (.Sequence
-        (.Sequence
-          (.Sequence
-            (.Sequence
-              (.Sequence
-                (.Sequence
-                  (.Sequence
-                    (.Sequence
-                      (.Assign "1" (Op.Const 1))
-                      (.Assign "x" (Op.Get ⟨"in"⟩ 0 0)))
-                      (.Assign "isZeroBit" (Op.Isz ⟨"x"⟩)))
-                      (.Set ⟨"out"⟩ 0 ⟨"isZeroBit"⟩))
-                      (.Assign "invVal" (Op.Inv ⟨"x"⟩)))
-                      (.Set ⟨"out"⟩ 1 ⟨"invVal"⟩))
-                      (.Assign "out[0]" (Op.Get ⟨"out"⟩ 0 0)))
-                      (.If ⟨"out[0]"⟩
-                        (.Eqz ⟨"x"⟩)))
-                      (.Assign "1 - out[0]" (Op.Sub ⟨"1"⟩ ⟨"out[0]"⟩)))
-                      (.If ⟨"1 - out[0]"⟩
-                        (.Sequence
-                          (.Sequence
-                            (.Sequence
-                              (.Assign "out[1]" (Op.Get ⟨"out"⟩ 1 0))
-                              (.Assign "x * out[1]" (Op.Mul ⟨"x"⟩ ⟨"out[1]"⟩)))
-                              (.Assign "x * out[1] - 1" (Op.Sub ⟨"x * out[1]"⟩ ⟨"1"⟩)))
-                              (.Eqz ⟨"x * out[1] - 1"⟩))))
+      (.Assign "out[1]" (Op.Get ⟨"out"⟩ 1 0))
+      (.Sequence
+      (.Assign "x * out[1]" (Op.Mul ⟨"x"⟩ ⟨"out[1]"⟩))
+      (.Sequence
+        (.Assign "x * out[1] - 1" (Op.Sub ⟨"x * out[1]"⟩ ⟨"1"⟩))
+        (.Eqz ⟨"x * out[1] - 1"⟩))))))))))))))
 
 -- The MLIR program labeled `CONSTAINTS` in the `nonzero-example` output.
 def is0ConstraintsProgram (x : Felt) (y : Felt) (z : Felt) : State × Option Prop :=

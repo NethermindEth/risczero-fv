@@ -75,22 +75,22 @@ def Op.eval (state : State) (op : Op) : Lit :=
   | True => .Constraint (_root_.True)
   | Get buffer i _ => let ⟨j⟩ := buffer
                       match state.buffers j with
-                        | .none => default
-                        | .some v => .Val <| v.getD i (-42)
+                        | some v => .Val <| v.getD i (-42)
+                        | _      => default
   | Sub x y => let ⟨i⟩ := x
                let ⟨j⟩ := y
                .Val $ match state.felts i, state.felts j with
-                 | .some x, .some y => x - y
+                 | some x, some y => x - y
                  | _      , _       => 42
   | Mul x y => let ⟨i⟩ := x
                let ⟨j⟩ := y
                .Val $ match state.felts i, state.felts j with
-                 | .some x, .some y => x * y
+                 | some x, some y => x * y
                  | _      , _       => 42
   | AndEqz c x => let ⟨i⟩ := c
                   let ⟨j⟩ := x
                   match state.props i, state.felts j with
-                    | .some c, .some x => .Constraint (c ∧ x = 0)
+                    | some c, some x => .Constraint (c ∧ x = 0)
                     | _      , _       => .Constraint (42 = 42)
   | AndCond old cond inner =>
       let ⟨i⟩ := old
@@ -99,7 +99,14 @@ def Op.eval (state : State) (op : Op) : Lit :=
       match state.props i, state.felts j, state.props k with
         | .some old, .some cond, .some inner => .Constraint (if cond == 0 then old else old ∧ inner)
         | _        , _         , _           => .Constraint (42 = 42)
-  | _ => .Constraint (42 = 42)
+  | Isz x => let ⟨i⟩ := x
+             match state.felts i with
+             | some x => .Val $ if x == 0 then 1 else 0
+             | _      => .Val 42
+  | Inv x => let ⟨i⟩ := x
+             match state.felts i with
+             | some x => .Val $ if x == 0 then 0 else x⁻¹
+             | _      => .Val 42
 
 -- Evaluate `op` and map `name ↦ result` in `state : State`.
 def Op.assign (state : State) (op : Op) (name : String) : State :=
