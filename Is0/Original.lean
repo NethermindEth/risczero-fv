@@ -69,15 +69,11 @@ theorem is0OriginalProgram_constraints_are_what_we_expect :
   nth_rewrite 1 [Op.assign]
   nth_rewrite 1 [Op.eval]
   simp only [ne_eq, ite_true, ite_false, List.getD_cons_succ, List.getD_cons_zero, Map.update, beq_iff_eq, ite_self]
+  simp
   simp only [ite_false, ite_true]
   simp only [ite_false, ite_true]
-  apply @hab x y z
-  rw [Cirgen.step_Eqz_collapsible x]
-  simp only [ne_eq, Prod.mk.injEq, State.mk.injEq, and_false, and_true, not_false_iff]
-  simp only [ite_false, ite_true]
-  simp only [ite_false, ite_true]
-  simp only [ite_false, ite_true]
-  simp only [ite_false, ite_true]
-  simp only [ite_false, ite_true]
-
+  simp
+  simp
+  simp
+  simp
 end Risc0
