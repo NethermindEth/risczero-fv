@@ -10,42 +10,46 @@ import Is0.Basic
 namespace Risc0
 
 open MLIRNotation in
-def is0OriginalNondet (x : Felt) (y : Felt) (z : Felt) : State × Option (Felt × Felt) :=
-  MLIR.run { felts := Map.empty
-              , props := Map.empty
-              , buffers := Map.fromList [("in", [x]), ("out", [y, z])]
-              , constraints := []
-              } <|
-  "x"         ←ₐ input[0];
-  "isZeroBit" ←ₐ ??₀⟨"x"⟩;
-  [0]         ←ₐ ⟨"isZeroBit"⟩;
-  "invVal"    ←ₐ Inv ⟨"x"⟩;
-  [1]         ←ₐ ⟨"invVal"⟩;
-  "out[0]"    ←ₐ output[0];
-  ret ["out[0]", "out[1]"]
+def is0_witness (input : List Felt) : List Felt :=
+  let state' :=
+    MLIR.run { felts := Map.empty
+             , props := Map.empty
+             , input := input
+             , output := [42, 42]
+             , constraints := []
+             } <|
+    "x"         ←ₐ input[0];
+    "isZeroBit" ←ₐ ??₀⟨"x"⟩;
+    output[0]   ←ₐ ⟨"isZeroBit"⟩;
+    "invVal"    ←ₐ Inv ⟨"x"⟩;
+    output[1]   ←ₐ ⟨"invVal"⟩
+  state'.output
 
 open MLIRNotation in
-def is0OriginalConstraints (x : Felt) (isZeroBit : Felt) (invVal : Felt) : State × Option (Felt × Felt) :=
-  MLIR.run { felts := Map.empty
-              , props := Map.empty
-              , buffers := Map.fromList [("in", [x]), ("out", [isZeroBit, invVal])]
-              , constraints := []
-              } <|
-  "1"         ←ₐ 1;
-  "x"         ←ₐ input[0];
-  "isZeroBit" ←ₐ isZeroBit;
-  [0]         ←ₐ ⟨"isZeroBit"⟩;
-  "invVal"    ←ₐ invVal;
-  [1]         ←ₐ ⟨"invVal"⟩;
-  "out[0]"    ←ₐ output[0];
-  guard ⟨"out[0]"⟩ then
-    ?₀⟨"x"⟩;
-  "1 - out[0]" ←ₐ ⟨"1"⟩ - ⟨"out[0]"⟩;
-  guard ⟨"1 - out[0]"⟩ then (
-    "out[1]"         ←ₐ output[1];
-    "x * out[1]"     ←ₐ ⟨"x"⟩ * ⟨"out[1]"⟩;
-    "x * out[1] - 1" ←ₐ ⟨"x * out[1]"⟩ - ⟨"1"⟩;
-    ?₀ ⟨"x * out[1] - 1"⟩
-  )
+def is0_constraints (input : List Felt) (output : List Felt) : Prop :=
+  let state' :=
+    MLIR.run { felts := Map.empty
+             , props := Map.empty
+             , input := input
+             , output := output
+             , constraints := []
+             } <|
+    "1"         ←ₐ 1;
+    "x"         ←ₐ input[0];
+    "out[0]"    ←ₐ output[0];
+    guard ⟨"out[0]"⟩ then
+      ?₀⟨"x"⟩;
+    "1 - out[0]" ←ₐ ⟨"1"⟩ - ⟨"out[0]"⟩;
+    guard ⟨"1 - out[0]"⟩ then (
+      "out[1]"         ←ₐ output[1];
+      "x * out[1]"     ←ₐ ⟨"x"⟩ * ⟨"out[1]"⟩;
+      "x * out[1] - 1" ←ₐ ⟨"x * out[1]"⟩ - ⟨"1"⟩;
+      ?₀ ⟨"x * out[1] - 1"⟩
+    )
+  (List.foldr And True) $ List.map (λ e ↦ e = 0) state'.constraints
+
+theorem is0_original_nondet_iff_constraints : ∀ input output : List Felt,
+    input.length = 1 ∧ output.length = 2
+  → is0_witness input = output ↔ is0_constraints input output := by sorry
 
 end Risc0

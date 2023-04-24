@@ -43,7 +43,8 @@ def Map.fromList {α : Type} [BEq α] {β : Type} (l : List (α × β)) : Map α
 structure State where
   felts : Map String Felt
   props : Map String Prop
-  buffers : Map String (List Felt)
+  input : List Felt
+  output : List Felt
   constraints : List Felt
 
 @[simp]
@@ -62,7 +63,8 @@ structure Variable (α : Type) :=
 inductive Op where
   | Const : Felt → Op
   | True : Op
-  | Get : Variable (List Felt) → ℕ → Felt → Op
+  | GetInput : ℕ → Felt → Op
+  | GetOutput : ℕ → Felt → Op
   | Sub : Variable Felt → Variable Felt → Op
   | Mul : Variable Felt → Variable Felt → Op
   | Isz : Variable Felt → Op
@@ -87,8 +89,8 @@ scoped infixl:55 (priority := high) " * " => Op.Mul
 scoped infix:55 " &₀ " => Op.AndEqz
 scoped notation:55 c " guard " x " & " y:55 => Op.AndCond c x y
 scoped notation:max "⊤" => Op.True
-scoped notation:max "input[" n "]" => Op.Get ⟨"in"⟩ n 0
-scoped notation:max "output[" n "]" => Op.Get ⟨"out"⟩ n 0
+scoped notation:max "input[" n "]" => Op.GetInput n 0
+scoped notation:max "output[" n "]" => Op.GetOutput n 0
 scoped prefix:57 "??₀" => Op.Isz
 scoped prefix:max "Inv" => Op.Inv
 
@@ -107,9 +109,8 @@ def Op.eval (state : State) (op : Op) : Lit :=
   match op with
   | Const x => .Val x
   | True => .Constraint (_root_.True)
-  | Get buffer i _ => match state.buffers buffer.name with
-                        | some v => .Val <| v.getD i (-42)
-                        | _      => default
+  | GetInput i _ => .Val <| state.input.getD i (-42)
+  | GetOutput i _ => .Val <| state.output.getD i (-42)
   | Sub x y => let ⟨i⟩ := x
                let ⟨j⟩ := y
                .Val $ match state.felts i, state.felts j with
@@ -154,19 +155,18 @@ def Op.assign (state : State) (op : Op) (name : String) : State :=
 inductive MLIR where
   | If : Variable Felt → MLIR → MLIR
   | Eqz : Variable Felt → MLIR
-  | Set : Variable (List Felt) → ℕ → Variable Felt → MLIR
-  | ReturnPair : String → String → MLIR
   | Assign : String → Op → MLIR
   | Sequence : MLIR → MLIR → MLIR
+  | SetInput : ℕ → Variable Felt → MLIR
+  | SetOutput : ℕ → Variable Felt → MLIR
 
 namespace MLIRNotation
 
 -- Notation for MLIR programs.
 scoped infixr:50 "; " => MLIR.Sequence
 scoped infix:51 "←ₐ " => MLIR.Assign
-scoped notation:max "ret [" x "," y "]" => MLIR.ReturnPair x y
-scoped notation:51 (priority := high) "[" v "]" " ←ₐ " x:51 => MLIR.Set ⟨"out"⟩ v x
-scoped notation:51 (priority := high) str "[" v "]" " ←ₐ " x:51 => MLIR.Set str v x
+scoped notation:51 (priority := high) "input[" v "]" " ←ₐ " x:51 => MLIR.SetInput v x
+scoped notation:51 (priority := high) "output[" v "]" " ←ₐ " x:51 => MLIR.SetOutput v x
 scoped notation:51 "guard " c " then " x:51 => MLIR.If c x
 scoped prefix:52 "?₀" => MLIR.Eqz
 
@@ -174,38 +174,33 @@ end MLIRNotation
 -- Step through the entirety of a `MLIR` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
 -- (`Prop`), the return value of the program.
-def MLIR.run (state : State) (program : MLIR) : State × Option (Felt × Felt) :=
+def MLIR.run (state : State) (program : MLIR) : State :=
   match program with
   | If x program =>
     let ⟨name⟩ := x
     match state.felts name with
       | .some x => if x == 0
-                   then (state, none)
+                   then state
                    else MLIR.run state program
-      | none    => (state, some (42, 42))
+      | none    => state
   | Eqz x =>
     let ⟨name⟩ := x
     match state.felts name with
-      | .some x => ({ state with constraints := x :: state.constraints }, none)
-      | .none   => (state, some (42, 42))
-  | Set buffer i x =>
-    let ⟨name⟩ := buffer
+      | .some x => { state with constraints := x :: state.constraints }
+      | .none   => state
+  | SetInput i x =>
     let ⟨nameₓ⟩ := x
-      match state.buffers name, state.felts nameₓ with
-        | .some buffer, .some x =>
-          let buffers' := state.buffers.update name (buffer.set i x)
-          ({state with buffers := buffers' }, none)
-        | _, _ => (state, none)
-  | Assign name op => (Op.assign state op name, none)
-  | Sequence a b => let (state', x) := MLIR.run state a
-                    match x with
-                      | some x => (state', some x)
-                      | none => MLIR.run state' b
-  | ReturnPair name₁ name₂ => let retval:=
-                    match state.felts name₁, state.felts name₂ with
-                    | some x, some y => (x, y)
-                    | _     , _      => (42, 42)
-                   (state, some retval)
+      match state.felts nameₓ with
+        | .some x => {state with input := state.input.set i x }
+        | _       => state
+  | SetOutput i x =>
+    let ⟨nameₓ⟩ := x
+      match state.felts nameₓ with
+        | .some x => {state with output := state.output.set i x }
+        | _       => state
+  | Assign name op => Op.assign state op name
+  | Sequence a b => let state' := MLIR.run state a
+                    MLIR.run state' b
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run st p
 
