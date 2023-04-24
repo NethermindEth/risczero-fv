@@ -174,14 +174,14 @@ end CirgenNotation
 -- Step through the entirety of a `Cirgen` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
 -- (`Prop`), the return value of the program.
-def Cirgen.step (state : State) (program : Cirgen) : State × Option (Felt × Felt) :=
+def Cirgen.run (state : State) (program : Cirgen) : State × Option (Felt × Felt) :=
   match program with
   | If x program =>
     let ⟨name⟩ := x
     match state.felts name with
       | .some x => if x == 0
                    then (state, none)
-                   else Cirgen.step state program
+                   else Cirgen.run state program
       | none    => (state, some (42, 42))
   | Eqz x =>
     let ⟨name⟩ := x
@@ -197,16 +197,16 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option (Felt × Fe
           ({state with buffers := buffers' }, none)
         | _, _ => (state, none)
   | Assign name op => (Op.assign state op name, none)
-  | Sequence a b => let (state', x) := Cirgen.step state a
+  | Sequence a b => let (state', x) := Cirgen.run state a
                     match x with
                       | some x => (state', some x)
-                      | none => Cirgen.step state' b
+                      | none => Cirgen.run state' b
   | ReturnPair name₁ name₂ => let retval:=
                     match state.felts name₁, state.felts name₂ with
                     | some x, some y => (x, y)
                     | _     , _      => (42, 42)
                    (state, some retval)
 
-notation:61 "Γ " st:max " ⟦" p:49 "⟧" => Cirgen.step st p
+notation:61 "Γ " st:max " ⟦" p:49 "⟧" => Cirgen.run st p
 
 end Risc0

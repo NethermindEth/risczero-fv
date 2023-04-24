@@ -11,7 +11,7 @@ namespace Risc0
 
 open CirgenNotation in
 def is0OriginalNondet (x : Felt) (y : Felt) (z : Felt) : State × Option (Felt × Felt) :=
-  Cirgen.step { felts := Map.empty
+  Cirgen.run { felts := Map.empty
               , props := Map.empty
               , buffers := Map.fromList [("in", [x]), ("out", [y, z])]
               , constraints := []
@@ -26,7 +26,7 @@ def is0OriginalNondet (x : Felt) (y : Felt) (z : Felt) : State × Option (Felt �
 
 open CirgenNotation in
 def is0OriginalConstraints (x : Felt) (isZeroBit : Felt) (invVal : Felt) : State × Option (Felt × Felt) :=
-  Cirgen.step { felts := Map.empty
+  Cirgen.run { felts := Map.empty
               , props := Map.empty
               , buffers := Map.fromList [("in", [x]), ("out", [isZeroBit, invVal])]
               , constraints := []
