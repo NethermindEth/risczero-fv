@@ -90,7 +90,7 @@ lemma Cirgen.step_Eqz_collapsible
     (x : Felt)
     (h₁ : state.felts name = some x) :
     Γ state ⟦?₀ ⟨name⟩⟧ 
-  = ({ state with constraints := (x = 0) :: state.constraints }, none) := by simp [step, *]
+  = ({ state with constraints := x :: state.constraints }, none) := by simp [step, *]
 
 lemma Cirgen.step_Sequence_Eqz_collapsible
     {state : State}
@@ -99,97 +99,10 @@ lemma Cirgen.step_Sequence_Eqz_collapsible
     (x : Felt)
     (h₁ : state.felts name = some x) :
     Cirgen.step state (.Sequence (.Eqz (Variable.mk name)) program)
-  = let state₁ := { state with constraints := (x = 0) :: state.constraints }
+  = let state₁ := { state with constraints := x :: state.constraints }
     let (state₂, y) := Cirgen.step state₁ program
     (state₂, y) := by rw [step_seq, step_Eqz_collapsible _ h₁]
 
 end WithCirgen 
-
-lemma hab {x y z : Felt} : Cirgen.step
-    {
-      felts := fun x_1 =>
-        if x_1 = "out[0]" then some 0
-        else
-          if x_1 = "invVal" then some x⁻¹
-          else if x_1 = "isZeroBit" then some 0 else if x_1 = "x" then some x else if x_1 = "1" then some 1 else none,
-      props := fun _ => none,
-      buffers := fun x_1 =>
-        if x_1 = "out" then some (0 :: List.set [z] 0 x⁻¹)
-        else
-          if x_1 = "out" then some [0, z]
-          else if x_1 = "in" then some [x] else if x_1 = "out" then some [y, z] else none,
-      constraints := [] }
-    (Cirgen.Sequence (Cirgen.Assign "1 - out[0]" (Op.Sub (Variable.mk "1") (Variable.mk "out[0]")))
-      (Cirgen.If (Variable.mk "1 - out[0]")
-        (Cirgen.Sequence (Cirgen.Assign "out[1]" (Op.Get (Variable.mk "out") 1 0))
-          (Cirgen.Sequence (Cirgen.Assign "x * out[1]" (Op.Mul (Variable.mk "x") (Variable.mk "out[1]")))
-            (Cirgen.Sequence (Cirgen.Assign "x * out[1] - 1" (Op.Sub (Variable.mk "x * out[1]") (Variable.mk "1")))
-              (Cirgen.Eqz (Variable.mk "x * out[1] - 1"))))))) ≠
-  Cirgen.step
-    {
-      felts := fun x_1 =>
-        if x_1 = "out[0]" then some 0
-        else
-          if x_1 = "invVal" then some x⁻¹
-          else if x_1 = "isZeroBit" then some 0 else if x_1 = "x" then some x else if x_1 = "1" then some 1 else none,
-      props := fun _ => none,
-      buffers := fun x_1 =>
-        if x_1 = "out" then some (0 :: List.set [z] 0 x⁻¹)
-        else
-          if x_1 = "out" then some [0, z]
-          else if x_1 = "in" then some [x] else if x_1 = "out" then some [y, z] else none,
-      constraints := [] }
-    (Cirgen.Sequence (Cirgen.Eqz (Variable.mk "x"))
-      (Cirgen.Sequence (Cirgen.Assign "1 - out[0]" (Op.Sub (Variable.mk "1") (Variable.mk "out[0]")))
-        (Cirgen.If (Variable.mk "1 - out[0]")
-          (Cirgen.Sequence (Cirgen.Assign "out[1]" (Op.Get (Variable.mk "out") 1 0))
-            (Cirgen.Sequence (Cirgen.Assign "x * out[1]" (Op.Mul (Variable.mk "x") (Variable.mk "out[1]")))
-              (Cirgen.Sequence (Cirgen.Assign "x * out[1] - 1" (Op.Sub (Variable.mk "x * out[1]") (Variable.mk "1")))
-                (Cirgen.Eqz (Variable.mk "x * out[1] - 1")))))))) := by
-  unfold List.set
-  rw [Cirgen.step_Sequence_Assign_collapsible]
-  simp only [State.update, Map.update, beq_iff_eq, ne_eq]
-  unfold Op.eval ; simp only [sub_zero]
-  rw [Cirgen.step_If_collapsible 1]
-  simp only [ite_false]
-  rw [Cirgen.step_Sequence_Assign_collapsible]
-  simp only [State.update, Map.update, beq_iff_eq]
-  unfold Op.eval
-  simp only [ite_true, ite_false, List.getD_cons_succ, List.getD_cons_zero]
-  rw [Cirgen.step_Sequence_Assign_collapsible]
-  simp only [State.update, Map.update, beq_iff_eq]
-  unfold Op.eval
-  simp only [ite_false, ite_true, ne_eq]
-  rw [Cirgen.step_Sequence_Assign_collapsible]
-  simp only [State.update, Map.update, beq_iff_eq]
-  unfold Op.eval
-  simp only [ite_false, ite_true, ne_eq]
-  rw [Cirgen.step_Eqz_collapsible (x * x⁻¹ - 1)]
-  simp only
-  rw [Cirgen.step_Sequence_Eqz_collapsible x]
-  simp only [ne_eq, Prod.mk.eta]
-  rw [Cirgen.step_Sequence_Assign_collapsible]
-  simp only [State.update, Map.update, beq_iff_eq]
-  unfold Op.eval
-  simp only [ne_eq, ite_true, ite_false, sub_zero]
-  rw [Cirgen.step_If_collapsible 1]
-  simp only [ite_false]
-  rw [Cirgen.step_Sequence_Assign_collapsible]
-  simp only [State.update, Map.update, beq_iff_eq]
-  unfold Op.eval
-  simp only [ne_eq, ite_true, ite_false, List.getD_cons_succ, List.getD_cons_zero]
-  rw [Cirgen.step_Sequence_Assign_collapsible]
-  simp only [ne_eq, State.update, Map.update, beq_iff_eq]
-  unfold Op.eval ; simp only
-  rw [Cirgen.step_Sequence_Assign_collapsible]
-  simp only [ne_eq, State.update, Map.update, beq_iff_eq]
-  unfold Op.eval ; simp only
-  rw [Cirgen.step_Eqz_collapsible (x * x⁻¹ - 1)]
-  simp only [ne_eq, Prod.mk.injEq, State.mk.injEq, List.cons.injEq, and_false, and_true, not_false_iff]
-  simp only [ite_false, ite_true]
-  simp only [ite_false, ite_true]
-  simp only [ite_false, ite_true]
-  simp only [ite_false, ite_true]
-  simp only [ite_false, ite_true]
 
 end Risc0

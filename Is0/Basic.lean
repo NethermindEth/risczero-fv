@@ -39,12 +39,12 @@ def Map.fromList {α : Type} [BEq α] {β : Type} (l : List (α × β)) : Map α
   | (k, v) :: xs => Map.update (Map.fromList xs) k v
 
 -- The first three fields map variable names to values. The last is an
--- append-only stack of the constraints that we `Eqz`-ed.
+-- append-only stack of the expressions we assert are equal to zero via `Eqz`.
 structure State where
   felts : Map String Felt
   props : Map String Prop
   buffers : Map String (List Felt)
-  constraints : List Prop
+  constraints : List Felt
 
 @[simp]
 def State.update (state : State) (name : String) (x : Lit) : State :=
@@ -155,7 +155,7 @@ inductive Cirgen where
   | If : Variable Felt → Cirgen → Cirgen
   | Eqz : Variable Felt → Cirgen
   | Set : Variable (List Felt) → ℕ → Variable Felt → Cirgen
-  | Return : String → Cirgen
+  | ReturnPair : String → String → Cirgen
   | Assign : String → Op → Cirgen
   | Sequence : Cirgen → Cirgen → Cirgen
 
@@ -164,7 +164,7 @@ namespace CirgenNotation
 -- Notation for Cirgen programs.
 scoped infixr:50 "; " => Cirgen.Sequence
 scoped infix:51 "←ₐ " => Cirgen.Assign
-scoped notation:max "ret [" x "]" => Cirgen.Return x
+scoped notation:max "ret [" x "," y "]" => Cirgen.ReturnPair x y
 scoped notation:51 (priority := high) "[" v "]" " ←ₐ " x:51 => Cirgen.Set ⟨"out"⟩ v x
 scoped notation:51 (priority := high) str "[" v "]" " ←ₐ " x:51 => Cirgen.Set str v x
 scoped notation:51 "guard " c " then " x:51 => Cirgen.If c x
@@ -174,7 +174,7 @@ end CirgenNotation
 -- Step through the entirety of a `Cirgen` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
 -- (`Prop`), the return value of the program.
-def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
+def Cirgen.step (state : State) (program : Cirgen) : State × Option (Felt × Felt) :=
   match program with
   | If x program =>
     let ⟨name⟩ := x
@@ -182,12 +182,12 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
       | .some x => if x == 0
                    then (state, none)
                    else Cirgen.step state program
-      | none    => (state, 42 = 42)
+      | none    => (state, some (42, 42))
   | Eqz x =>
     let ⟨name⟩ := x
     match state.felts name with
-      | .some x => ({ state with constraints := (x = 0) :: state.constraints }, none)
-      | .none   => (state, 42 = 42)
+      | .some x => ({ state with constraints := x :: state.constraints }, none)
+      | .none   => (state, some (42, 42))
   | Set buffer i x =>
     let ⟨name⟩ := buffer
     let ⟨nameₓ⟩ := x
@@ -201,42 +201,12 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
                     match x with
                       | some x => (state', some x)
                       | none => Cirgen.step state' b
-  | Return name => let retval:=
-                    match state.props name with
-                    | some retval => retval
-                    | none => 42 = 42
+  | ReturnPair name₁ name₂ => let retval:=
+                    match state.felts name₁, state.felts name₂ with
+                    | some x, some y => (x, y)
+                    | _     , _      => (42, 42)
                    (state, some retval)
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧" => Cirgen.step st p
-
--- example : Γ state ⟦name⟧ = Γ (state.update name (Op.eval state op)) ⟦program⟧ := by sorry
-
--- The result of stepping through a program that generates `(1 - x) = 0`, which
--- should be equivalent to checking `x = 1`.
-open CirgenNotation in
-def subAndEqzActual (x : Felt) : State × Option Prop :=
-  Cirgen.step { felts := Map.empty, buffers := Map.empty, props := Map.empty, constraints := [] } <|
-    "1"         ←ₐ 1;
-    "x"         ←ₐ x;
-    "true"      ←ₐ ⊤;
-    "x - 1"     ←ₐ ⟨"x"⟩ - ⟨"1"⟩;
-    "x - 1 = 0" ←ₐ ⟨"true"⟩ &₀ ⟨"x - 1"⟩;
-    ret ["x - 1 = 0"]
-
--- The expected post-execution state after computing `subAndEqzActual`.
-def subAndEqzExpectedState (x : Felt) : State :=
-  { felts := Map.fromList [("x - 1", x - 1), ("x", x), ("1", 1)]
-  , props := Map.fromList [("x - 1 = 0", x - 1 = 0), ("true", True)]
-  , buffers := Map.empty
-  , constraints := []
-  }
-
--- Check that our `(1 - x) = 0` program is equivalent to `x = 1`.
-open CirgenNotation in
-theorem Sub_AndEqz_iff_eq_one {x : Felt} :
-  (subAndEqzActual x).1 = subAndEqzExpectedState x
-    ∧ (((subAndEqzActual x).2 = some c) → (c ↔ x = 1)) := by
-  simp [subAndEqzActual, subAndEqzExpectedState, Cirgen.step, Op.assign, Op.eval, Map.update]
-  exact λ h => by rw [←h, sub_eq_zero]
 
 end Risc0
