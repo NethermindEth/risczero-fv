@@ -70,14 +70,14 @@ inductive Op where
   | AndEqz : Variable Prop → Variable Felt → Op
   | AndCond : Variable Prop → Variable Felt → Variable Prop → Op
 
-namespace CirgenNotation
+namespace MLIRNotation
 
 -- scoped notation:56 (priority := high) "[" x "]" => ⟨x⟩
 
-end CirgenNotation
+end MLIRNotation
 
 -- Notation for Ops.
-namespace CirgenNotation
+namespace MLIRNotation
 
 instance {n} : OfNat Op n := ⟨.Const n⟩
 instance : Coe Felt Op := ⟨(.Const ·)⟩
@@ -95,7 +95,7 @@ scoped prefix:max "Inv" => Op.Inv
 -- scoped prefix:max "C" => Op.Const
 
 
-end CirgenNotation
+end MLIRNotation
 
 @[simp]
 lemma Op.coe_eq_const {n : ℕ} : (↑n : Felt) = Op.Const n := rfl
@@ -151,37 +151,37 @@ def Op.assign (state : State) (op : Op) (name : String) : State :=
 
 -- An MLIR program in the `cirgen` (circuit generation) dialect. MLIR ops that
 -- are not pure functions are implemented here, so they can mess with state. 
-inductive Cirgen where
-  | If : Variable Felt → Cirgen → Cirgen
-  | Eqz : Variable Felt → Cirgen
-  | Set : Variable (List Felt) → ℕ → Variable Felt → Cirgen
-  | ReturnPair : String → String → Cirgen
-  | Assign : String → Op → Cirgen
-  | Sequence : Cirgen → Cirgen → Cirgen
+inductive MLIR where
+  | If : Variable Felt → MLIR → MLIR
+  | Eqz : Variable Felt → MLIR
+  | Set : Variable (List Felt) → ℕ → Variable Felt → MLIR
+  | ReturnPair : String → String → MLIR
+  | Assign : String → Op → MLIR
+  | Sequence : MLIR → MLIR → MLIR
 
-namespace CirgenNotation
+namespace MLIRNotation
 
--- Notation for Cirgen programs.
-scoped infixr:50 "; " => Cirgen.Sequence
-scoped infix:51 "←ₐ " => Cirgen.Assign
-scoped notation:max "ret [" x "," y "]" => Cirgen.ReturnPair x y
-scoped notation:51 (priority := high) "[" v "]" " ←ₐ " x:51 => Cirgen.Set ⟨"out"⟩ v x
-scoped notation:51 (priority := high) str "[" v "]" " ←ₐ " x:51 => Cirgen.Set str v x
-scoped notation:51 "guard " c " then " x:51 => Cirgen.If c x
-scoped prefix:52 "?₀" => Cirgen.Eqz
+-- Notation for MLIR programs.
+scoped infixr:50 "; " => MLIR.Sequence
+scoped infix:51 "←ₐ " => MLIR.Assign
+scoped notation:max "ret [" x "," y "]" => MLIR.ReturnPair x y
+scoped notation:51 (priority := high) "[" v "]" " ←ₐ " x:51 => MLIR.Set ⟨"out"⟩ v x
+scoped notation:51 (priority := high) str "[" v "]" " ←ₐ " x:51 => MLIR.Set str v x
+scoped notation:51 "guard " c " then " x:51 => MLIR.If c x
+scoped prefix:52 "?₀" => MLIR.Eqz
 
-end CirgenNotation
--- Step through the entirety of a `Cirgen` MLIR program from initial state
+end MLIRNotation
+-- Step through the entirety of a `MLIR` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
 -- (`Prop`), the return value of the program.
-def Cirgen.run (state : State) (program : Cirgen) : State × Option (Felt × Felt) :=
+def MLIR.run (state : State) (program : MLIR) : State × Option (Felt × Felt) :=
   match program with
   | If x program =>
     let ⟨name⟩ := x
     match state.felts name with
       | .some x => if x == 0
                    then (state, none)
-                   else Cirgen.run state program
+                   else MLIR.run state program
       | none    => (state, some (42, 42))
   | Eqz x =>
     let ⟨name⟩ := x
@@ -197,16 +197,16 @@ def Cirgen.run (state : State) (program : Cirgen) : State × Option (Felt × Fel
           ({state with buffers := buffers' }, none)
         | _, _ => (state, none)
   | Assign name op => (Op.assign state op name, none)
-  | Sequence a b => let (state', x) := Cirgen.run state a
+  | Sequence a b => let (state', x) := MLIR.run state a
                     match x with
                       | some x => (state', some x)
-                      | none => Cirgen.run state' b
+                      | none => MLIR.run state' b
   | ReturnPair name₁ name₂ => let retval:=
                     match state.felts name₁, state.felts name₂ with
                     | some x, some y => (x, y)
                     | _     , _      => (42, 42)
                    (state, some retval)
 
-notation:61 "Γ " st:max " ⟦" p:49 "⟧" => Cirgen.run st p
+notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run st p
 
 end Risc0

@@ -9,9 +9,9 @@ import Is0.Basic
 
 namespace Risc0
 
-open CirgenNotation in
+open MLIRNotation in
 def is0OriginalNondet (x : Felt) (y : Felt) (z : Felt) : State × Option (Felt × Felt) :=
-  Cirgen.run { felts := Map.empty
+  MLIR.run { felts := Map.empty
               , props := Map.empty
               , buffers := Map.fromList [("in", [x]), ("out", [y, z])]
               , constraints := []
@@ -24,9 +24,9 @@ def is0OriginalNondet (x : Felt) (y : Felt) (z : Felt) : State × Option (Felt �
   "out[0]"    ←ₐ output[0];
   ret ["out[0]", "out[1]"]
 
-open CirgenNotation in
+open MLIRNotation in
 def is0OriginalConstraints (x : Felt) (isZeroBit : Felt) (invVal : Felt) : State × Option (Felt × Felt) :=
-  Cirgen.run { felts := Map.empty
+  MLIR.run { felts := Map.empty
               , props := Map.empty
               , buffers := Map.fromList [("in", [x]), ("out", [isZeroBit, invVal])]
               , constraints := []
