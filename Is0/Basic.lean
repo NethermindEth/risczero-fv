@@ -142,8 +142,6 @@ def Op.eval (state : State) (op : Op) : Lit :=
              | some x => .Val $ if x == 0 then 0 else x⁻¹
              | _      => .Val 42
 
-notation:61 "Γ " st:max " ⟦" p:49 "⟧" => Op.eval st p
-
 -- Evaluate `op` and map `name ↦ result` in `state : State`.
 def Op.assign (state : State) (op : Op) (name : String) : State :=
   match (Op.eval state op) with

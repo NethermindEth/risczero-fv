@@ -5,7 +5,6 @@ import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.LibrarySearch
 
 import Is0.Basic
-import Is0.Programs
 
 namespace Risc0
 
@@ -14,14 +13,13 @@ section WithMLIR
 open MLIRNotation
 
 lemma MLIR.run_Sequence_Assign_collapsible {state : State} {name : String} {op : Op} {program : MLIR} :
-    Γ state ⟦name ←ₐ op; program⟧ = Γ (state[name] := Γ state ⟦op⟧) ⟦program⟧ := by
+    Γ state ⟦name ←ₐ op; program⟧ = Γ (state[name] := Op.eval state op) ⟦program⟧ := by
   cases op <;> conv => lhs; simp [MLIR.run, State.update, Map.update, beq_iff_eq]
 
 lemma MLIR.run_Sequence_Set_collapsible
     {state : State}
     {nameₓ : String}
     {program : MLIR}
-    (buffer : List Felt)
     (x : Felt)
     (h₁ : state.felts nameₓ = some x) :
     Γ state ⟦output[i] ←ₐ ⟨nameₓ⟩; program⟧ = 
