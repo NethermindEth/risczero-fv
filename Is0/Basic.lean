@@ -30,6 +30,8 @@ def Map.empty {α : Type} {β : Type} : Map α β := λ _ => none
 def Map.update {α : Type} [BEq α] {β : Type} (m : Map α β) (k : α) (v : β) : Map α β :=
   λ x => if x == k then v else m x
 
+notation:61 st "[" n:61 "]" " := " x:49 => Map.update st n x
+
 @[simp]
 def Map.fromList {α : Type} [BEq α] {β : Type} (l : List (α × β)) : Map α β :=
   match l with
@@ -50,29 +52,11 @@ def State.update (state : State) (name : String) (x : Lit) : State :=
   | .Val x => { state with felts := state.felts.update name x }
   | .Constraint c => { state with props := state.props.update name c }
 
-@[simp]
-lemma State.felts_collapsible
-  {felts : Map String Felt}
-  {props : Map String Prop}
-  {buffers : Map String (List Felt)}
-  {constraints : List Prop}
-  (name : String) :
-  State.felts { felts := felts, props := props, buffers := buffers, constraints := constraints } name = felts name := by
-    exact rfl
-
-@[simp]
-lemma State.buffers_collapsible
-  {felts : Map String Felt}
-  {props : Map String Prop}
-  {buffers : Map String (List Felt)}
-  {constraints : List Prop}
-  (name : String) :
-  State.buffers { felts := felts, props := props, buffers := buffers, constraints := constraints } name = buffers name := by
-    exact rfl
+notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
 
 -- A parametrized Variable. In practice, α will be one of `Felt`, `Prop`, or `List Felt`.
-inductive Variable (α : Type) :=
-  | mk : String → Variable α
+structure Variable (α : Type) :=
+  name : String
 
 -- Pure functional operations from the cirgen (circuit generation) MLIR dialect.
 inductive Op where
@@ -86,6 +70,36 @@ inductive Op where
   | AndEqz : Variable Prop → Variable Felt → Op
   | AndCond : Variable Prop → Variable Felt → Variable Prop → Op
 
+namespace CirgenNotation
+
+-- scoped notation:56 (priority := high) "[" x "]" => ⟨x⟩
+
+end CirgenNotation
+
+-- Notation for Ops.
+namespace CirgenNotation
+
+instance {n} : OfNat Op n := ⟨.Const n⟩
+instance : Coe Felt Op := ⟨(.Const ·)⟩
+
+scoped infixl:55 (priority := high) " - " => Op.Sub
+scoped infixl:55 (priority := high) " * " => Op.Mul
+scoped infix:55 " &₀ " => Op.AndEqz
+scoped notation:55 c " guard " x " & " y:55 => Op.AndCond c x y
+scoped notation:max "⊤" => Op.True
+scoped notation:max "input[" n "]" => Op.Get ⟨"in"⟩ n 0
+scoped notation:max "output[" n "]" => Op.Get ⟨"out"⟩ n 0
+scoped prefix:57 "??₀" => Op.Isz
+scoped prefix:max "Inv" => Op.Inv
+
+-- scoped prefix:max "C" => Op.Const
+
+
+end CirgenNotation
+
+@[simp]
+lemma Op.coe_eq_const {n : ℕ} : (↑n : Felt) = Op.Const n := rfl
+
 instance : Inhabited Lit := ⟨(Lit.Val (-42))⟩
 
 -- Evaluate a pure functional circuit operation to get some kind of literal.
@@ -93,8 +107,7 @@ def Op.eval (state : State) (op : Op) : Lit :=
   match op with
   | Const x => .Val x
   | True => .Constraint (_root_.True)
-  | Get buffer i _ => let ⟨j⟩ := buffer
-                      match state.buffers j with
+  | Get buffer i _ => match state.buffers buffer.name with
                         | some v => .Val <| v.getD i (-42)
                         | _      => default
   | Sub x y => let ⟨i⟩ := x
@@ -128,6 +141,8 @@ def Op.eval (state : State) (op : Op) : Lit :=
              | some x => .Val $ if x == 0 then 0 else x⁻¹
              | _      => .Val 42
 
+notation:61 "Γ " st:max " ⟦" p:49 "⟧" => Op.eval st p
+
 -- Evaluate `op` and map `name ↦ result` in `state : State`.
 def Op.assign (state : State) (op : Op) (name : String) : State :=
   match (Op.eval state op) with
@@ -144,6 +159,18 @@ inductive Cirgen where
   | Assign : String → Op → Cirgen
   | Sequence : Cirgen → Cirgen → Cirgen
 
+namespace CirgenNotation
+
+-- Notation for Cirgen programs.
+scoped infixr:50 "; " => Cirgen.Sequence
+scoped infix:51 "←ₐ " => Cirgen.Assign
+scoped notation:max "ret [" x "]" => Cirgen.Return x
+scoped notation:51 (priority := high) "[" v "]" " ←ₐ " x:51 => Cirgen.Set ⟨"out"⟩ v x
+scoped notation:51 (priority := high) str "[" v "]" " ←ₐ " x:51 => Cirgen.Set str v x
+scoped notation:51 "guard " c " then " x:51 => Cirgen.If c x
+scoped prefix:52 "?₀" => Cirgen.Eqz
+
+end CirgenNotation
 -- Step through the entirety of a `Cirgen` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
 -- (`Prop`), the return value of the program.
@@ -180,21 +207,21 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
                     | none => 42 = 42
                    (state, some retval)
 
+notation:61 "Γ " st:max " ⟦" p:49 "⟧" => Cirgen.step st p
+
+-- example : Γ state ⟦name⟧ = Γ (state.update name (Op.eval state op)) ⟦program⟧ := by sorry
+
 -- The result of stepping through a program that generates `(1 - x) = 0`, which
 -- should be equivalent to checking `x = 1`.
+open CirgenNotation in
 def subAndEqzActual (x : Felt) : State × Option Prop :=
-  Cirgen.step { felts := Map.empty, buffers := Map.empty, props := Map.empty, constraints := [] }
-    (.Sequence
-      (.Sequence
-        (.Sequence
-          (.Sequence
-            (.Sequence
-              (.Assign "1" (Op.Const 1))
-              (.Assign "x" (Op.Const x)))
-              (.Assign "true" (Op.True)))
-              (.Assign "x - 1" (Op.Sub ⟨"x"⟩ ⟨"1"⟩)))
-              (.Assign "x - 1 = 0" (.AndEqz (⟨"true"⟩) (⟨"x - 1"⟩))))
-              (.Return "x - 1 = 0"))
+  Cirgen.step { felts := Map.empty, buffers := Map.empty, props := Map.empty, constraints := [] } <|
+    "1"         ←ₐ 1;
+    "x"         ←ₐ x;
+    "true"      ←ₐ ⊤;
+    "x - 1"     ←ₐ ⟨"x"⟩ - ⟨"1"⟩;
+    "x - 1 = 0" ←ₐ ⟨"true"⟩ &₀ ⟨"x - 1"⟩;
+    ret ["x - 1 = 0"]
 
 -- The expected post-execution state after computing `subAndEqzActual`.
 def subAndEqzExpectedState (x : Felt) : State :=
@@ -205,24 +232,11 @@ def subAndEqzExpectedState (x : Felt) : State :=
   }
 
 -- Check that our `(1 - x) = 0` program is equivalent to `x = 1`.
-theorem Sub_AndEqz_iff_eq_one :
-  ∀ x : Felt, (subAndEqzActual x).1 = subAndEqzExpectedState x
+open CirgenNotation in
+theorem Sub_AndEqz_iff_eq_one {x : Felt} :
+  (subAndEqzActual x).1 = subAndEqzExpectedState x
     ∧ (((subAndEqzActual x).2 = some c) → (c ↔ x = 1)) := by
-  intros x
-  unfold subAndEqzActual
-  apply And.intro
-  unfold subAndEqzExpectedState
-  simp only [Cirgen.step, Op.assign, Op.eval, Map.update, beq_iff_eq, Map.empty, ite_false, ite_true, true_and, Map.fromList, State.mk.injEq]
-  simp only [Cirgen.step, Op.assign, Op.eval, Map.update, beq_iff_eq, Map.empty, ite_false, ite_true, true_and, Option.some.injEq, eq_iff_iff]
-  intros h
-  rw [←h]
-  clear h
-  apply Iff.intro
-  intros h₁
-  rw [sub_eq_zero] at h₁
-  exact h₁
-  intros h₂
-  rw [h₂]
-  decide
+  simp [subAndEqzActual, subAndEqzExpectedState, Cirgen.step, Op.assign, Op.eval, Map.update]
+  exact λ h => by rw [←h, sub_eq_zero]
 
 end Risc0
