@@ -50,6 +50,26 @@ def State.update (state : State) (name : String) (x : Lit) : State :=
   | .Val x => { state with felts := state.felts.update name x }
   | .Constraint c => { state with props := state.props.update name c }
 
+@[simp]
+lemma State.felts_collapsible
+  {felts : Map String Felt}
+  {props : Map String Prop}
+  {buffers : Map String (List Felt)}
+  {constraints : List Prop}
+  (name : String) :
+  State.felts { felts := felts, props := props, buffers := buffers, constraints := constraints } name = felts name := by
+    exact rfl
+
+@[simp]
+lemma State.buffers_collapsible
+  {felts : Map String Felt}
+  {props : Map String Prop}
+  {buffers : Map String (List Felt)}
+  {constraints : List Prop}
+  (name : String) :
+  State.buffers { felts := felts, props := props, buffers := buffers, constraints := constraints } name = buffers name := by
+    exact rfl
+
 -- A parametrized Variable. In practice, α will be one of `Felt`, `Prop`, or `List Felt`.
 inductive Variable (α : Type) :=
   | mk : String → Variable α
@@ -139,9 +159,7 @@ def Cirgen.step (state : State) (program : Cirgen) : State × Option Prop :=
   | Eqz x =>
     let ⟨name⟩ := x
     match state.felts name with
-      | .some x => if x == 0
-                   then (state, none)
-                   else (state, some False)
+      | .some x => ({ state with constraints := (x = 0) :: state.constraints }, none)
       | .none   => (state, 42 = 42)
   | Set buffer i x =>
     let ⟨name⟩ := buffer
