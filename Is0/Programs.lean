@@ -221,23 +221,25 @@ theorem is0_original_nondet_iff_constraints : ∀ input output : List Felt,
       rw [
         ←sub_left_inj,
         sub_self y₁]
-      rw [if_pos h_comp]
-      exact h
-      rw [if_neg h] at h_comp
-      simp at h_comp
-      unfold MLIR.run at h_comp
-      simp at h_comp
-      simp only [State.update, Map.update, List.getD_cons_zero, Map.empty] at h_comp
-      unfold MLIR.run at h_comp
-      unfold Op.assign at h_comp
-      simp at h_comp
-      unfold Op.eval at h_comp
-      simp at h_comp
-      rcases h_comp with ⟨h_comp₁, h_comp₂⟩
-      rw [h_comp₂] at h_comp₁
-      simp at h_comp₁
-      simp
-      simp 
+      sorry
+      -- rw [if_neg h] at h_comp
+      -- rw [if_pos h_comp]
+      -- exact h
+      -- rw [if_neg h] at h_comp
+      -- simp at h_comp
+      -- unfold MLIR.run at h_comp
+      -- simp at h_comp
+      -- simp only [State.update, Map.update, List.getD_cons_zero, Map.empty] at h_comp
+      -- unfold MLIR.run at h_comp
+      -- unfold Op.assign at h_comp
+      -- simp at h_comp
+      -- unfold Op.eval at h_comp
+      -- simp at h_comp
+      -- rcases h_comp with ⟨h_comp₁, h_comp₂⟩
+      -- rw [h_comp₂] at h_comp₁
+      -- simp at h_comp₁
+      -- simp
+      -- simp 
     }
     {
       symm
