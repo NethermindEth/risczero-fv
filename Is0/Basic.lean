@@ -52,7 +52,15 @@ lemma fromList_cons {k : α} {v : β} {l : List (α × β)} :
 lemma update_get {m : Map α β} {k : α} {v : β} :
   (m[k] := v) k = v := by simp [update]
 
--- instance : Membership α (Map α β) where
+lemma update_update_get {m : Map α β} {k k' : α} {v v' : β} (h : k ≠ k') :
+  ((m[k] := v)[k'] := v') k = some v := by
+  unfold update
+  simp [*]
+
+lemma update_get' {m : Map α β} {k k' : α} {v v' : β} (h : k ≠ k') (h₁ : m k = some v) :
+  (m[k'] := v') k = some v := by
+  unfold update
+  simp [*]
 
 end Map
 
@@ -79,6 +87,11 @@ lemma State.update_val {state : State} {name : String} {x : Felt} :
 @[simp]
 lemma State.update_constraint {state : State} {name : String} {c : Prop} :
   update state name (.Constraint c) = { state with props := state.props.update name c } := rfl
+
+@[simp]
+lemma State.if_constraints {state₁ state₂ : State} {x : Felt} :
+  (if (x = 0) then state₁ else state₂).constraints = if (x = 0) then state₁.constraints else state₂.constraints := by
+  exact apply_ite constraints (x = 0) state₁ state₂
 
 notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
 
@@ -166,6 +179,9 @@ variable (state : State) (op : Op)
 
 @[simp]
 lemma eval_const {x : Felt} : Op.eval state (Const x) = .Val x := by rfl
+
+@[simp]
+lemma eval_const_one : Op.eval state (1 : Op) = .Val 1 := by rfl
 
 @[simp]
 lemma eval_true : Op.eval state True = .Constraint (_root_.True) := by rfl
@@ -261,10 +277,17 @@ notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run st p
 
 lemma run_setOutput_of_some
   {state : State}
-  {program : MLIR}
   {i : ℕ}
+  {x₁ : Felt}
   {x : Variable Felt}
   (h : state.felts x.name = some x₁) :
   Γ state ⟦MLIR.SetOutput i x⟧ = {state with output := state.output.set i x₁ } := by simp [MLIR.run, h]
+
+lemma run_Eqz_of_some
+  {state : State}
+  {x₁ : Felt}
+  {x : Variable Felt}
+  (h : state.felts x.name = some x₁) :
+  Γ state ⟦MLIR.Eqz x⟧ = {state with constraints := x₁ :: state.constraints } := by simp [MLIR.run, h]
 
 end Risc0
