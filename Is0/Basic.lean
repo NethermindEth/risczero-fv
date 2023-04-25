@@ -69,8 +69,11 @@ inductive Op where
   | Mul : Variable Felt → Variable Felt → Op
   | Isz : Variable Felt → Op
   | Inv : Variable Felt → Op
-  | AndEqz : Variable Prop → Variable Felt → Op
-  | AndCond : Variable Prop → Variable Felt → Variable Prop → Op
+
+inductive Impure where
+  | AndEqz : Variable Prop → Variable Felt → Impure
+  | AndCond : Variable Prop → Variable Felt → Variable Prop → Impure
+  | Pure : Op → Impure
 
 namespace MLIRNotation
 
@@ -86,8 +89,6 @@ instance : Coe Felt Op := ⟨(.Const ·)⟩
 
 scoped infixl:55 (priority := high) " - " => Op.Sub
 scoped infixl:55 (priority := high) " * " => Op.Mul
-scoped infix:55 " &₀ " => Op.AndEqz
-scoped notation:55 c " guard " x " & " y:55 => Op.AndCond c x y
 scoped notation:max "⊤" => Op.True
 scoped notation:max "input[" n "]" => Op.GetInput n 0
 scoped notation:max "output[" n "]" => Op.GetOutput n 0
@@ -114,25 +115,13 @@ def Op.eval (state : State) (op : Op) : Lit :=
   | Sub x y => let ⟨i⟩ := x
                let ⟨j⟩ := y
                .Val $ match state.felts i, state.felts j with
-                 | some x, some y => x - y
-                 | _      , _       => 42
+                      | some x, some y => x - y
+                      | _      , _     => 42
   | Mul x y => let ⟨i⟩ := x
                let ⟨j⟩ := y
                .Val $ match state.felts i, state.felts j with
-                 | some x, some y => x * y
-                 | _      , _       => 42
-  | AndEqz c x => let ⟨i⟩ := c
-                  let ⟨j⟩ := x
-                  match state.props i, state.felts j with
-                    | some c, some x => .Constraint (c ∧ x = 0)
-                    | _      , _       => .Constraint (42 = 42)
-  | AndCond old cond inner =>
-      let ⟨i⟩ := old
-      let ⟨j⟩ := cond
-      let ⟨k⟩ := inner
-      match state.props i, state.felts j, state.props k with
-        | .some old, .some cond, .some inner => .Constraint (if cond == 0 then old else old ∧ inner)
-        | _        , _         , _           => .Constraint (42 = 42)
+                      | some x, some y => x * y
+                      | _      , _     => 42
   | Isz x => let ⟨i⟩ := x
              match state.felts i with
              | some x => .Val $ if x == 0 then 1 else 0
@@ -141,6 +130,29 @@ def Op.eval (state : State) (op : Op) : Lit :=
              match state.felts i with
              | some x => .Val $ if x == 0 then 0 else x⁻¹
              | _      => .Val 42
+
+def Impure.eval (state : State) (op : Impure) : Lit :=
+  match op with
+    | AndEqz c x => let ⟨i⟩ := c
+                    let ⟨j⟩ := x
+                    match state.props i, state.felts j with
+                      | some c, some x => .Constraint (c ∧ x = 0)
+                      | _      , _     => .Constraint (42 = 42)
+    | AndCond old cond inner =>
+      let ⟨i⟩ := old
+      let ⟨j⟩ := cond
+      let ⟨k⟩ := inner
+      match state.props i, state.felts j, state.props k with
+        | .some old, .some cond, .some inner => .Constraint (if cond == 0 then old else old ∧ inner)
+        | _        , _         , _           => .Constraint (42 = 42)
+    | Pure op => op.eval state
+
+namespace MLIRNotation
+
+scoped infix:55 " &₀ " => Impure.AndEqz
+scoped notation:55 c " guard " x " & " y:55 => Impure.AndCond c x y
+
+end MLIRNotation
 
 -- Evaluate `op` and map `name ↦ result` in `state : State`.
 def Op.assign (state : State) (op : Op) (name : String) : State :=
