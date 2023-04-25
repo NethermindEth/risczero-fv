@@ -150,8 +150,62 @@ theorem is0_original_nondet_iff_constraints : ∀ input output : List Felt,
   simp only [inv_eq_zero, mul_zero, zero_sub, Fin.succ_inj, iff_false]
   exact h'
   -- rw [Fin.succ_pred (x * y₂)]
-  sorry
-  sorry
+  { 
+    simp 
+    apply Iff.intro
+    intro h_inv
+    rw [←h_inv]
+    rw [mul_inv_cancel]
+    ring_nf
+    exact h'
+    intro h_minus_1
+    rw [←mul_inv_cancel h', ←mul_sub] at h_minus_1
+    rw [
+      ←sub_left_inj, 
+      sub_self x⁻¹, 
+      ←one_mul (y₂ - x⁻¹), 
+      ←mul_inv_cancel h',
+      mul_comm x,
+      mul_assoc,
+      h_minus_1]
+    simp
+  }
+  {
+    rw [List.foldr_map]
+    apply Iff.intro
+    rintro ⟨h_if₁, h_if₂, h_if₃⟩ 
+    rw [←h_if₃]
+    have h' := h
+    by_cases (x = 0)
+    rw [h] at h_if₁
+    simp at h_if₁
+    rw [←h_if₁]
+    simp
+    exact h
+    have hf := iff_false (x = 0)
+    rw [←hf] at h
+    simp at h_if₁
+    exfalso
+    apply h'
+    rw [←h_if₁]
+    simp
+    exact h.1
+    intro h_comp
+    apply And.intro
+    have h' := h
+    by_cases (x = 0)
+    rw [h]
+    rw [←ite_not] at h_comp
+    unfold List.foldr at h_comp
+    simp only [State.update, Map.update, beq_iff_eq, List.getD_cons_zero, Map.empty] at h_comp
+    rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
+    simp at h_comp
+    unfold Op.eval at h_comp
+    simp at h_comp
+    unfold MLIR.run at h_comp
+    simp at h_comp
+    
+  }
   sorry
   sorry
 
