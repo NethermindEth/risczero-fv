@@ -191,12 +191,69 @@ theorem is0_original_nondet_iff_constraints : ∀ input output : List Felt,
     simp
     exact h.1
     intro h_comp
+    rw [←and_assoc]
     apply And.intro
-    have h' := h
-    by_cases (x = 0)
-    rw [h]
-    unfold List.foldr at h_comp
+    {
+      unfold List.foldr at h_comp
+      rw [if_neg h] at h_comp
+      unfold MLIR.run at h_comp
+      rw [MLIR.run_Eqz_collapsible x] at h_comp
+      simp
+      simp at h_comp
+      rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
+      simp only [State.update, Map.update, beq_iff_eq, List.getD_cons_zero, Map.empty] at h_comp
+      unfold Op.eval at h_comp
+      simp at h_comp
+      rw [MLIR.run_If_collapsible (1 - y₁)] at h_comp
+      rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
+      simp at h_comp
+      unfold Op.eval at h_comp
+      simp at h_comp
+      unfold MLIR.run at h_comp
+      simp at h_comp
+      rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
+      unfold Op.eval at h_comp
+      simp at h_comp
+      have h'' := h
+      by_cases (1 - y₁ = 0)
+      rw [if_pos h] at h_comp
+      simp at h_comp
+      rw [
+        ←sub_left_inj,
+        sub_self y₁]
+      rw [if_pos h_comp]
+      exact h
+      rw [if_neg h] at h_comp
+      simp at h_comp
+      unfold MLIR.run at h_comp
+      simp at h_comp
+      simp only [State.update, Map.update, List.getD_cons_zero, Map.empty] at h_comp
+      unfold MLIR.run at h_comp
+      unfold Op.assign at h_comp
+      simp at h_comp
+      unfold Op.eval at h_comp
+      simp at h_comp
+      rcases h_comp with ⟨h_comp₁, h_comp₂⟩
+      rw [h_comp₂] at h_comp₁
+      simp at h_comp₁
+      simp
+      simp 
+    }
+    {
+      symm
+      exact hys
+    }
+    -- unfold List.foldr at h_comp
+    -- rw [if_neg h'] at h_comp
+    -- unfold MLIR.run at h_comp
+    -- rw [MLIR.run_Eqz_collapsible x] at h_comp
+    -- simp
+    -- simp at h_comp
+    -- rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
     -- simp only [State.update, Map.update, beq_iff_eq, List.getD_cons_zero, Map.empty] at h_comp
+    -- unfold Op.eval at h_comp
+    -- simp at h_comp
+    -- rw [MLIR.run_If_collapsible (1 - y₁)] at h_comp
     -- rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
     -- simp at h_comp
     -- unfold Op.eval at h_comp
@@ -206,6 +263,25 @@ theorem is0_original_nondet_iff_constraints : ∀ input output : List Felt,
     -- rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
     -- unfold Op.eval at h_comp
     -- simp at h_comp
+    -- have h'' := h
+    -- by_cases (1 - y₁ = 0)
+    -- rw [if_pos h] at h_comp
+    -- simp at h_comp
+    -- rw [
+    --   ←sub_left_inj,
+    --   sub_self y₁,
+    --   if_pos h_comp]
+    -- exact h
+    -- simp at h_comp
+    -- unfold MLIR.run at h_comp
+    -- simp at h_comp
+    -- simp only [State.update, Map.update, List.getD_cons_zero, Map.empty] at h_comp
+    -- unfold MLIR.run at h_comp
+    -- unfold Op.assign at h_comp
+    -- simp at h_comp
+    -- unfold Op.eval at h_comp
+    -- simp at h_comp
+    -- rcases h_comp with ⟨h_comp₁, h_comp₂⟩
     -- rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
     -- unfold Op.eval at h_comp
     -- simp at h_comp
