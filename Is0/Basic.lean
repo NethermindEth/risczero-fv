@@ -23,20 +23,40 @@ inductive Lit where
 -- A functional map, used to send variable names to literal values.
 def Map (α : Type) (β : Type) := α → Option β
 
-@[simp]
-def Map.empty {α : Type} {β : Type} : Map α β := λ _ => none
+namespace Map
 
-@[simp]
-def Map.update {α : Type} [BEq α] {β : Type} (m : Map α β) (k : α) (v : β) : Map α β :=
-  λ x => if x == k then v else m x
+section Map
+
+variable {α : Type} [BEq α] [DecidableEq α] {β : Type}
+
+def empty : Map α β := λ _ => none
+
+def update (m : Map α β) (k : α) (v : β) : Map α β :=
+  λ x => if x = k then v else m x
+
+def fromList (l : List (α × β)) : Map α β :=
+  match l with
+  | [] => Map.empty
+  | (k, v) :: xs => Map.update (Map.fromList xs) k v
 
 notation:61 st "[" n:61 "]" " := " x:49 => Map.update st n x
 
 @[simp]
-def Map.fromList {α : Type} [BEq α] {β : Type} (l : List (α × β)) : Map α β :=
-  match l with
-  | [] => Map.empty
-  | (k, v) :: xs => Map.update (Map.fromList xs) k v
+lemma fromList_nil : fromList ([] : List (α × β)) = Map.empty := rfl
+
+@[simp]
+lemma fromList_cons {k : α} {v : β} {l : List (α × β)} :
+  fromList ((k, v) :: l) = Map.update (Map.fromList l) k v := rfl
+
+@[simp]
+lemma update_get {m : Map α β} {k : α} {v : β} :
+  (m[k] := v) k = v := by simp [update]
+
+-- instance : Membership α (Map α β) where
+
+end Map
+
+end Map
 
 -- The first three fields map variable names to values. The last is an
 -- append-only stack of the expressions we assert are equal to zero via `Eqz`.
@@ -47,11 +67,18 @@ structure State where
   output : List Felt
   constraints : List Felt
 
-@[simp]
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
   | .Val x => { state with felts := state.felts.update name x }
   | .Constraint c => { state with props := state.props.update name c }
+
+@[simp]
+lemma State.update_val {state : State} {name : String} {x : Felt} :
+  update state name (.Val x) = { state with felts := state.felts.update name x } := rfl
+
+@[simp]
+lemma State.update_constraint {state : State} {name : String} {c : Prop} :
+  update state name (.Constraint c) = { state with props := state.props.update name c } := rfl
 
 notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
 
@@ -111,36 +138,70 @@ def Op.eval (state : State) (op : Op) : Lit :=
   | True => .Constraint (_root_.True)
   | GetInput i _ => .Val <| state.input.getD i (-42)
   | GetOutput i _ => .Val <| state.output.getD i (-42)
-  | Sub x y => let ⟨i⟩ := x
-               let ⟨j⟩ := y
-               .Val $ match state.felts i, state.felts j with
-                 | some x, some y => x - y
-                 | _      , _       => 42
-  | Mul x y => let ⟨i⟩ := x
-               let ⟨j⟩ := y
-               .Val $ match state.felts i, state.felts j with
-                 | some x, some y => x * y
-                 | _      , _       => 42
-  | AndEqz c x => let ⟨i⟩ := c
-                  let ⟨j⟩ := x
-                  match state.props i, state.felts j with
+  | Sub x y => .Val $ match state.felts x.name, state.felts y.name with
+                        | some x, some y => x - y
+                        | _      , _       => 42
+  | Mul x y => .Val $ match state.felts x.name, state.felts y.name with
+                        | some x, some y => x * y
+                        | _      , _       => 42
+  | AndEqz c x => match state.props c.name, state.felts x.name with
                     | some c, some x => .Constraint (c ∧ x = 0)
                     | _      , _       => .Constraint (42 = 42)
   | AndCond old cond inner =>
-      let ⟨i⟩ := old
-      let ⟨j⟩ := cond
-      let ⟨k⟩ := inner
-      match state.props i, state.felts j, state.props k with
+      match state.props old.name, state.felts cond.name, state.props inner.name with
         | .some old, .some cond, .some inner => .Constraint (if cond == 0 then old else old ∧ inner)
         | _        , _         , _           => .Constraint (42 = 42)
-  | Isz x => let ⟨i⟩ := x
-             match state.felts i with
-             | some x => .Val $ if x == 0 then 1 else 0
-             | _      => .Val 42
-  | Inv x => let ⟨i⟩ := x
-             match state.felts i with
-             | some x => .Val $ if x == 0 then 0 else x⁻¹
-             | _      => .Val 42
+  | Isz x => .Val $ match state.felts x.name with
+               | some x => if x == 0 then 1 else 0
+               | _      => 42
+  | Inv x => .Val $ match state.felts x.name with
+               | some x => if x == 0 then 0 else x⁻¹
+               | _      => 42
+
+namespace Op
+
+section Op
+
+variable (state : State) (op : Op)
+
+@[simp]
+lemma eval_const {x : Felt} : Op.eval state (Const x) = .Val x := by rfl
+
+@[simp]
+lemma eval_true : Op.eval state True = .Constraint (_root_.True) := by rfl
+
+@[simp]
+lemma eval_getInput {i : ℕ} {x : Felt} : Op.eval state (GetInput i x) = .Val (state.input.getD i (-42)) := by rfl
+
+@[simp]
+lemma eval_getOutput {i : ℕ} {x : Felt} : Op.eval state (GetOutput i x) = .Val (state.output.getD i (-42)) := by rfl
+
+@[simp]
+lemma eval_sub {x : Variable Felt} {y : Variable Felt} :
+  Op.eval state (Sub x y) = .Val (match state.felts x.name, state.felts y.name with
+                                      | some x, some y => x - y
+                                      | _      , _       => 42) := by rfl
+ 
+@[simp]
+lemma eval_mul {x : Variable Felt} {y : Variable Felt} :
+  Op.eval state (Mul x y) = .Val (match state.felts x.name, state.felts y.name with
+                                      | some x, some y => x * y
+                                      | _      , _       => 42) := by rfl
+
+@[simp]
+lemma eval_isz {x : Variable Felt} :
+  Op.eval state (Isz x) = .Val (match state.felts x.name with
+                                  | some x => if x == 0 then 1 else 0
+                                  | _      => 42) := by rfl
+@[simp]
+lemma eval_inv {x : Variable Felt} :
+  Op.eval state (Inv x) = .Val (match state.felts x.name with
+                                  | some x => if x == 0 then 0 else x⁻¹
+                                  | _      => 42) := by rfl
+
+end Op
+
+end Op
 
 -- Evaluate `op` and map `name ↦ result` in `state : State`.
 def Op.assign (state : State) (op : Op) (name : String) : State :=
@@ -175,25 +236,21 @@ end MLIRNotation
 def MLIR.run (state : State) (program : MLIR) : State :=
   match program with
   | If x program =>
-    let ⟨name⟩ := x
-    match state.felts name with
+    match state.felts x.name with
       | .some x => if x == 0
                    then state
                    else MLIR.run state program
       | none    => state
   | Eqz x =>
-    let ⟨name⟩ := x
-    match state.felts name with
+    match state.felts x.name with
       | .some x => { state with constraints := x :: state.constraints }
       | .none   => state
   | SetInput i x =>
-    let ⟨nameₓ⟩ := x
-      match state.felts nameₓ with
+      match state.felts x.name with
         | .some x => {state with input := state.input.set i x }
         | _       => state
   | SetOutput i x =>
-    let ⟨nameₓ⟩ := x
-      match state.felts nameₓ with
+      match state.felts x.name with
         | .some x => {state with output := state.output.set i x }
         | _       => state
   | Assign name op => Op.assign state op name
@@ -201,5 +258,13 @@ def MLIR.run (state : State) (program : MLIR) : State :=
                     MLIR.run state' b
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run st p
+
+lemma run_setOutput_of_some
+  {state : State}
+  {program : MLIR}
+  {i : ℕ}
+  {x : Variable Felt}
+  (h : state.felts x.name = some x₁) :
+  Γ state ⟦MLIR.SetOutput i x⟧ = {state with output := state.output.set i x₁ } := by simp [MLIR.run, h]
 
 end Risc0
