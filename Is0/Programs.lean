@@ -195,16 +195,30 @@ theorem is0_original_nondet_iff_constraints : ∀ input output : List Felt,
     have h' := h
     by_cases (x = 0)
     rw [h]
-    rw [←ite_not] at h_comp
     unfold List.foldr at h_comp
-    simp only [State.update, Map.update, beq_iff_eq, List.getD_cons_zero, Map.empty] at h_comp
-    rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
-    simp at h_comp
-    unfold Op.eval at h_comp
-    simp at h_comp
-    unfold MLIR.run at h_comp
-    simp at h_comp
-    
+    -- simp only [State.update, Map.update, beq_iff_eq, List.getD_cons_zero, Map.empty] at h_comp
+    -- rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
+    -- simp at h_comp
+    -- unfold Op.eval at h_comp
+    -- simp at h_comp
+    -- unfold MLIR.run at h_comp
+    -- simp at h_comp
+    -- rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
+    -- unfold Op.eval at h_comp
+    -- simp at h_comp
+    -- rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
+    -- unfold Op.eval at h_comp
+    -- simp at h_comp
+    -- rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
+    -- unfold Op.eval at h_comp
+    -- simp at h_comp
+    -- rw [MLIR.run_Sequence_Assign_collapsible] at h_comp
+    -- unfold Op.eval at h_comp
+    -- simp at h_comp
+    -- rw [MLIR.run_Eqz_collapsible] at h_comp
+    -- simp at h_comp
+    -- unfold Op.assign at h_comp
+
   }
   sorry
   sorry
