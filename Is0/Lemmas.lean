@@ -12,9 +12,17 @@ section WithMLIR
 
 open MLIRNotation
 
+lemma MLIR.run_assign :
+  Γ st ⟦name ←ₐ op⟧ = st[name] := op.eval st := rfl
+
 lemma MLIR.run_Sequence_Assign_collapsible {state : State} {name : String} {op : Op} {program : MLIR} :
     Γ state ⟦name ←ₐ op; program⟧ = Γ (state[name] := Op.eval state op) ⟦program⟧ := by
   cases op <;> conv => lhs; simp [MLIR.run, State.update, Map.update, beq_iff_eq]
+
+lemma MLIR.run_set : Γ st ⟦MLIR.SetOutput i x⟧ = 
+  match st.felts x.name with
+    | .some x => {st with output := st.output.set i x}
+    | _       => st := rfl
 
 lemma MLIR.run_Sequence_Set_collapsible
     {state : State}
@@ -22,7 +30,7 @@ lemma MLIR.run_Sequence_Set_collapsible
     {program : MLIR}
     (x : Felt)
     (h₁ : state.felts nameₓ = some x) :
-    Γ state ⟦output[i] ←ₐ ⟨nameₓ⟩; program⟧ = 
+    Γ state ⟦output[i] ←ᵢ ⟨nameₓ⟩; program⟧ = 
     Γ { state with output := state.output.set i x } ⟦program⟧ := by simp [run, *]
 
 lemma MLIR.run_if_true {c : Variable Felt}
@@ -85,7 +93,7 @@ lemma MLIR.run_Eqz_collapsible
     (x : Felt)
     (h₁ : state.felts name = some x) :
     Γ state ⟦?₀ ⟨name⟩⟧ 
-  = { state with constraints := x :: state.constraints } := by simp [run, *]
+  = { state with constraints := (x = 0) :: state.constraints } := by simp [run, *]
 
 lemma MLIR.run_Sequence_Eqz_collapsible
     {state : State}
@@ -94,7 +102,7 @@ lemma MLIR.run_Sequence_Eqz_collapsible
     (x : Felt)
     (h₁ : state.felts name = some x) :
     MLIR.run state (.Sequence (.Eqz (Variable.mk name)) program)
-  = let state₁ := { state with constraints := x :: state.constraints }
+  = let state₁ := { state with constraints := (x = 0) :: state.constraints }
     let state₂ := MLIR.run state₁ program
     state₂ := by rw [run_seq, run_Eqz_collapsible _ h₁]
 

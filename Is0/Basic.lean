@@ -57,10 +57,9 @@ lemma update_update_get {m : Map α β} {k k' : α} {v v' : β} (h : k ≠ k') :
   unfold update
   simp [*]
 
-lemma update_get' {m : Map α β} {k k' : α} {v v' : β} (h : k ≠ k') (h₁ : m k = some v) :
-  (m[k'] := v') k = some v := by
-  unfold update
-  simp [*]
+lemma update_get' {m : Map α β} {k k' : α} {v' : β}
+  (v : β) (h : k ≠ k') (h₁ : m k = some v) :
+  (m[k'] := v') k = some v := by simp [update, *]
 
 end Map
 
@@ -73,7 +72,7 @@ structure State where
   props : Map String Prop
   input : List Felt
   output : List Felt
-  constraints : List Felt
+  constraints : List Prop
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
@@ -121,13 +120,14 @@ end MLIRNotation
 -- Notation for Ops.
 namespace MLIRNotation
 
-instance {n} : OfNat Op n := ⟨.Const n⟩
+-- instance {n} : OfNat Op n := ⟨.Const n⟩
 instance : Coe Felt Op := ⟨(.Const ·)⟩
 
 scoped infixl:55 (priority := high) " - " => Op.Sub
 scoped infixl:55 (priority := high) " * " => Op.Mul
 scoped infix:55 " &₀ " => Op.AndEqz
-scoped notation:55 c " guard " x " & " y:55 => Op.AndCond c x y
+scoped notation:55 " guard " c " & " x " with " y:55 => Op.AndCond x c y
+scoped prefix:max "C" => Op.Const
 scoped notation:max "⊤" => Op.True
 scoped notation:max "input[" n "]" => Op.GetInput n 0
 scoped notation:max "output[" n "]" => Op.GetOutput n 0
@@ -157,13 +157,13 @@ def Op.eval (state : State) (op : Op) : Lit :=
   | Mul x y => .Val $ match state.felts x.name, state.felts y.name with
                         | some x, some y => x * y
                         | _      , _       => 42
-  | AndEqz c x => match state.props c.name, state.felts x.name with
-                    | some c, some x => .Constraint (c ∧ x = 0)
-                    | _      , _       => .Constraint (42 = 42)
+  | AndEqz c x => .Constraint $ match state.props c.name, state.felts x.name with
+                    | some c, some x => c ∧ x = 0
+                    | _      , _     => 42 = 42
   | AndCond old cond inner =>
-      match state.props old.name, state.felts cond.name, state.props inner.name with
-        | .some old, .some cond, .some inner => .Constraint (if cond == 0 then old else old ∧ inner)
-        | _        , _         , _           => .Constraint (42 = 42)
+      .Constraint $ match state.props old.name, state.felts cond.name, state.props inner.name with
+        | .some old, .some cond, .some inner => if cond == 0 then old else old ∧ inner
+        | _        , _         , _           => 42 = 42
   | Isz x => .Val $ match state.felts x.name with
                | some x => if x == 0 then 1 else 0
                | _      => 42
@@ -181,7 +181,7 @@ variable (state : State) (op : Op)
 lemma eval_const {x : Felt} : Op.eval state (Const x) = .Val x := by rfl
 
 @[simp]
-lemma eval_const_one : Op.eval state (1 : Op) = .Val 1 := by rfl
+lemma eval_const_one : Op.eval state (Const 1 : Op) = .Val 1 := by rfl
 
 @[simp]
 lemma eval_true : Op.eval state True = .Constraint (_root_.True) := by rfl
@@ -215,6 +215,26 @@ lemma eval_inv {x : Variable Felt} :
                                   | some x => if x == 0 then 0 else x⁻¹
                                   | _      => 42) := by rfl
 
+-- lemma eval_eqz {c : Variable Prop}
+--                {x : Variable Felt}
+--     (h₁ : state.props c.name = some c₁)
+--     (h₂ : state.felts x.name = some x₁) :
+--   (AndEqz c x).eval state = .Constraint (c₁ ∧ x₁ = 0) := by simp [eval, *]
+
+@[simp]
+lemma eval_andEqz :
+  (AndEqz c x).eval state =
+    .Constraint (match state.props c.name, state.felts x.name with
+                 | some c, some x => (c ∧ x = 0)
+                 | _      , _     => (42 = 42)) := rfl
+
+@[simp]
+lemma eval_andCond :
+  (AndCond old cnd inner).eval state =
+    .Constraint (match state.props old.name, state.felts cnd.name, state.props inner.name with
+        | .some old, .some cnd, .some inner => if cnd == 0 then old else old ∧ inner
+        | _        , _         , _           => 42 = 42) := rfl
+
 end Op
 
 end Op
@@ -240,10 +260,11 @@ namespace MLIRNotation
 -- Notation for MLIR programs.
 scoped infixr:50 "; " => MLIR.Sequence
 scoped infix:51 "←ₐ " => MLIR.Assign
-scoped notation:51 (priority := high) "input[" v "]" " ←ₐ " x:51 => MLIR.SetInput v x
-scoped notation:51 (priority := high) "output[" v "]" " ←ₐ " x:51 => MLIR.SetOutput v x
+scoped notation:51 (priority := high) "input[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetInput v x
+scoped notation:51 (priority := high) "output[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetOutput v x
 scoped notation:51 "guard " c " then " x:51 => MLIR.If c x
 scoped prefix:52 "?₀" => MLIR.Eqz
+-- scoped prefix:max "ret" => MLIR.Return
 
 end MLIRNotation
 -- Step through the entirety of a `MLIR` MLIR program from initial state
@@ -259,20 +280,20 @@ def MLIR.run (state : State) (program : MLIR) : State :=
       | none    => state
   | Eqz x =>
     match state.felts x.name with
-      | .some x => { state with constraints := x :: state.constraints }
+      | .some x => {state with constraints := (x = 0) :: state.constraints}
       | .none   => state
   | SetInput i x =>
       match state.felts x.name with
-        | .some x => {state with input := state.input.set i x }
+        | .some x => {state with input := state.input.set i x}
         | _       => state
   | SetOutput i x =>
       match state.felts x.name with
-        | .some x => {state with output := state.output.set i x }
+        | .some x => {state with output := state.output.set i x}
         | _       => state
   | Assign name op => Op.assign state op name
   | Sequence a b => let state' := MLIR.run state a
                     MLIR.run state' b
-
+  
 notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run st p
 
 lemma run_setOutput_of_some
@@ -281,13 +302,13 @@ lemma run_setOutput_of_some
   {x₁ : Felt}
   {x : Variable Felt}
   (h : state.felts x.name = some x₁) :
-  Γ state ⟦MLIR.SetOutput i x⟧ = {state with output := state.output.set i x₁ } := by simp [MLIR.run, h]
+  Γ state ⟦MLIR.SetOutput i x⟧ = {state with output := state.output.set i x₁} := by simp [MLIR.run, h]
 
 lemma run_Eqz_of_some
   {state : State}
   {x₁ : Felt}
   {x : Variable Felt}
   (h : state.felts x.name = some x₁) :
-  Γ state ⟦MLIR.Eqz x⟧ = {state with constraints := x₁ :: state.constraints } := by simp [MLIR.run, h]
+  Γ state ⟦MLIR.Eqz x⟧ = {state with constraints := (x₁ = 0) :: state.constraints } := by simp [MLIR.run, h]
 
 end Risc0

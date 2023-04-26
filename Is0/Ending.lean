@@ -25,6 +25,10 @@ lemma ending {x y₁ y₂ : Felt} :
     List.foldr And True
       (List.map (fun e => e = 0)
         (if y₁ = 0 then if 1 - y₁ = 0 then [] else [x * y₂ - 1] else if 1 - y₁ = 0 then [x] else [x * y₂ - 1, x])) := by
+  -- c1(isZeroBit, val) =
+  --   isZeroBit * val
+  -- c2(isZeroBit, val) =
+  --   (1 - isZeroBit) * (val*invVal - 1)
   by_cases hx : x = 0
   · rw [hx]
     by_cases hy₁ : y₁ = 0
@@ -49,6 +53,8 @@ lemma ending {x y₁ y₂ : Felt} :
             simp only [List.foldr, and_self, and_true, IsEmpty.forall_iff]
       · simp only [ite_true, inv_zero, ite_self, zero_mul, zero_sub]
         simp [one_sub_z]
+        
+
         sorry
   · rw [if_neg hx]
     by_cases hy₁ : y₁ = 0
