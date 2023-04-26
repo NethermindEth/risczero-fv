@@ -120,11 +120,6 @@ end MLIRNotation
 -- Notation for Ops.
 namespace MLIRNotation
 
--- instance {n} : OfNat Op n := ⟨.Const n⟩
-instance : Coe Felt Op := ⟨(.Const ·)⟩
-
-scoped infixl:55 (priority := high) " - " => Op.Sub
-scoped infixl:55 (priority := high) " * " => Op.Mul
 scoped infix:55 " &₀ " => Op.AndEqz
 scoped notation:55 " guard " c " & " x " with " y:55 => Op.AndCond x c y
 scoped prefix:max "C" => Op.Const
@@ -138,9 +133,6 @@ scoped prefix:max "Inv" => Op.Inv
 
 
 end MLIRNotation
-
-@[simp]
-lemma Op.coe_eq_const {n : ℕ} : (↑n : Felt) = Op.Const n := rfl
 
 instance : Inhabited Lit := ⟨(Lit.Val (-42))⟩
 
