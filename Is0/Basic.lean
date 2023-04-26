@@ -92,6 +92,11 @@ lemma State.if_constraints {state₁ state₂ : State} {x : Felt} :
   (if (x = 0) then state₁ else state₂).constraints = if (x = 0) then state₁.constraints else state₂.constraints := by
   exact apply_ite constraints (x = 0) state₁ state₂
 
+@[simp]
+lemma State.if_output {state₁ state₂ : State} {x : Felt} :
+  (if (x = 0) then state₁ else state₂).output = if (x = 0) then state₁.output else state₂.output := by
+  exact apply_ite output (x = 0) state₁ state₂
+
 notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
 
 -- A parametrized Variable. In practice, α will be one of `Felt`, `Prop`, or `List Felt`.
