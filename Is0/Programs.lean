@@ -105,35 +105,17 @@ lemma Map.mm {x y₁ y₂ : Felt} :
 
 section tactics
 
--- private def Map.findWith_ {β : Type} [BEq β] (keys : List String) (m : Map String β) (v : β) : α := Id.run do
---   for key in keys do
---     if m key = v do return 
-
 open Lean Elab Tactic
 
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat (
-      rw [MLIR.run_Sequence_Assign_collapsible]
+      first| rw [MLIR.run_Sequence_Assign_collapsible] | rw [MLIR.run_Sequence_Set_collapsible]
       simp
     )
   )
   evalTactic <| ← `(tactic| rw [MLIR.run_assign])
   evalTactic <| ← `(tactic| simp)
-
--- elab "MLIR_state" : tactic => do
---   evalTactic <| ← `(
---     tactic| repeat' split
---   )
---   evalTactic <| ← `(
---     tactic| all_goals simp
---   )
---   evalTactic <| ← `(
---     tactic| all_goals try contradiction
---   )
---   evalTactic <| ← `(
---     tactic| all_goals try rfl
---   )
 
 elab "MLIR_state" : tactic => do
   evalTactic <| ← `(tactic| repeat rw [Map.update_get'])
@@ -147,109 +129,111 @@ elab "MLIR_states" : tactic => do
 
 end tactics
 
-lemma is0_constraints_closed_form' {x y₁ y₂ : Felt} :
-    is0_constraints [x] [y₁, y₂]
-  ↔ (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by
-  unfold is0_constraints
-  MLIR
-  MLIR_states
+-- lemma is0_constraints_closed_form' {x y₁ y₂ : Felt} :
+--     is0_constraints [x] [y₁, y₂]
+--   ↔ (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by
+--   unfold is0_constraints
+--   MLIR
+--   MLIR_states
 
--- lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
---   is0_witness [x] = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
---   unfold is0_witness
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_const, State.update_val]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_getInput, List.getD_cons_zero, State.update_val]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_isz, Map.update_get, beq_iff_eq, State.update_val]
---   rw [MLIR.run_Sequence_Set_collapsible (if x = 0 then 1 else 0)] <;> simp only [Map.update_get]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_inv, beq_iff_eq, State.update_val]
---   rw [Map.update_get' x (by simp only) (by simp only [Map.update_get])] ; try decide
---   simp only
---   rw [MLIR.run_Sequence_Set_collapsible (if x = 0 then 0 else x⁻¹)] <;> simp only [Map.update_get]
---   unfold List.set List.set ; simp only
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_getOutput, List.getD_cons_zero, State.update_val]
---   rw [MLIR.run_Sequence_If_collapsible (if x = 0 then 1 else 0) (by simp only [Map.update_get])]
---   simp only [beq_iff_eq]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_sub, Map.update_get, Option.some.injEq, forall_apply_eq_imp_iff', State.update_val]
---   rw [Map.update_get' 1 (by simp only)] <;> try decide
---   swap
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   simp only
---   rw [MLIR.run_If_collapsible (1 - if x = 0 then 1 else 0) (by simp only [Map.update_get])]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [beq_iff_eq, Op.eval_getOutput, List.getD_cons_succ, List.getD_cons_zero, State.update_val]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_mul, Map.update_get, Option.some.injEq, forall_apply_eq_imp_iff', State.update_val]
---   rw [Map.update_get' x (by simp only)] <;> try decide
---   swap
---   rw [Map.update_get' x (by simp only)] ; try decide
---   rw [Map.update_get' x (by simp only)] ; try decide
---   rw [Map.update_get' x (by simp only)] ; try decide
---   rw [Map.update_get' x (by simp only)] ; try decide
---   simp only [Map.update_get]
---   simp only [mul_ite, mul_zero, ne_eq]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_sub, Map.update_get, Option.some.injEq, State.update_val]
---   rw [Map.update_get' 1 (by simp only)] <;> try decide
---   swap
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   simp only
---   rw [MLIR.run_Eqz_collapsible ((if x = 0 then 0 else x * x⁻¹) - 1) (by simp only [Map.update_get])]
---   simp only
---   rw [MLIR.run_Sequence_Eqz_collapsible x] <;> try simp only
---   swap
---   rw [Map.update_get' x (by simp only)] ; try decide
---   rw [Map.update_get' x (by simp only)] ; try decide
---   rw [Map.update_get' x (by simp only)] ; try decide
---   simp only [Map.update_get]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_sub, Map.update_get, Option.some.injEq, forall_apply_eq_imp_iff', State.update_val]
---   rw [Map.update_get' 1 (by simp only)] <;> try decide
---   swap
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   simp only
---   rw [MLIR.run_If_collapsible (1 - if x = 0 then 1 else 0) (by simp only [Map.update_get])]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [beq_iff_eq, Op.eval_getOutput, List.getD_cons_succ, List.getD_cons_zero, State.update_val]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_mul, Map.update_get, Option.some.injEq, forall_apply_eq_imp_iff', State.update_val]
---   rw [Map.update_get' x (by simp only)] <;> try decide
---   swap
---   rw [Map.update_get' x (by simp only)] ; try decide
---   rw [Map.update_get' x (by simp only)] ; try decide
---   rw [Map.update_get' x (by simp only)] ; try decide
---   rw [Map.update_get' x (by simp only)] ; try decide
---   simp only [Map.update_get]
---   simp only [mul_ite, mul_zero]
---   rw [MLIR.run_Sequence_Assign_collapsible]
---   simp only [Op.eval_sub, Map.update_get, Option.some.injEq, State.update_val]
---   rw [Map.update_get' 1 (by simp only)] <;> try decide
---   swap
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   rw [Map.update_get' 1 (by simp only)] ; try decide
---   simp only
---   rw [MLIR.run_Eqz_collapsible ((if x = 0 then 0 else x * x⁻¹) - 1) (by simp only [Map.update_get])]
---   rw [State.if_output]
---   rw [State.if_output]
---   rw [State.if_output]
-  -- simp only [ite_eq_right_iff, ite_self, List.cons.injEq, and_true]
+lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
+  is0_witness [x] = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
+  unfold is0_witness
+  MLIR
+  -- MLIR_states
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_const, State.update_val]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_getInput, List.getD_cons_zero, State.update_val]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_isz, Map.update_get, beq_iff_eq, State.update_val]
+  rw [MLIR.run_Sequence_Set_collapsible (if x = 0 then 1 else 0)] <;> simp only [Map.update_get]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_inv, beq_iff_eq, State.update_val]
+  rw [Map.update_get' x (by simp only) (by simp only [Map.update_get])] ; try decide
+  simp only
+  rw [MLIR.run_Sequence_Set_collapsible (if x = 0 then 0 else x⁻¹)] <;> simp only [Map.update_get]
+  unfold List.set List.set ; simp only
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_getOutput, List.getD_cons_zero, State.update_val]
+  rw [MLIR.run_Sequence_If_collapsible (if x = 0 then 1 else 0) (by simp only [Map.update_get])]
+  simp only [beq_iff_eq]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_sub, Map.update_get, Option.some.injEq, forall_apply_eq_imp_iff', State.update_val]
+  rw [Map.update_get' 1 (by simp only)] <;> try decide
+  swap
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  simp only
+  rw [MLIR.run_If_collapsible (1 - if x = 0 then 1 else 0) (by simp only [Map.update_get])]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [beq_iff_eq, Op.eval_getOutput, List.getD_cons_succ, List.getD_cons_zero, State.update_val]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_mul, Map.update_get, Option.some.injEq, forall_apply_eq_imp_iff', State.update_val]
+  rw [Map.update_get' x (by simp only)] <;> try decide
+  swap
+  rw [Map.update_get' x (by simp only)] ; try decide
+  rw [Map.update_get' x (by simp only)] ; try decide
+  rw [Map.update_get' x (by simp only)] ; try decide
+  rw [Map.update_get' x (by simp only)] ; try decide
+  simp only [Map.update_get]
+  simp only [mul_ite, mul_zero, ne_eq]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_sub, Map.update_get, Option.some.injEq, State.update_val]
+  rw [Map.update_get' 1 (by simp only)] <;> try decide
+  swap
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  simp only
+  rw [MLIR.run_Eqz_collapsible ((if x = 0 then 0 else x * x⁻¹) - 1) (by simp only [Map.update_get])]
+  simp only
+  rw [MLIR.run_Sequence_Eqz_collapsible x] <;> try simp only
+  swap
+  rw [Map.update_get' x (by simp only)] ; try decide
+  rw [Map.update_get' x (by simp only)] ; try decide
+  rw [Map.update_get' x (by simp only)] ; try decide
+  simp only [Map.update_get]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_sub, Map.update_get, Option.some.injEq, forall_apply_eq_imp_iff', State.update_val]
+  rw [Map.update_get' 1 (by simp only)] <;> try decide
+  swap
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  simp only
+  rw [MLIR.run_If_collapsible (1 - if x = 0 then 1 else 0) (by simp only [Map.update_get])]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [beq_iff_eq, Op.eval_getOutput, List.getD_cons_succ, List.getD_cons_zero, State.update_val]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_mul, Map.update_get, Option.some.injEq, forall_apply_eq_imp_iff', State.update_val]
+  rw [Map.update_get' x (by simp only)] <;> try decide
+  swap
+  rw [Map.update_get' x (by simp only)] ; try decide
+  rw [Map.update_get' x (by simp only)] ; try decide
+  rw [Map.update_get' x (by simp only)] ; try decide
+  rw [Map.update_get' x (by simp only)] ; try decide
+  simp only [Map.update_get]
+  simp only [mul_ite, mul_zero]
+  rw [MLIR.run_Sequence_Assign_collapsible]
+  simp only [Op.eval_sub, Map.update_get, Option.some.injEq, State.update_val]
+  rw [Map.update_get' 1 (by simp only)] <;> try decide
+  swap
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  rw [Map.update_get' 1 (by simp only)] ; try decide
+  simp only
+  rw [MLIR.run_Eqz_collapsible ((if x = 0 then 0 else x * x⁻¹) - 1) (by simp only [Map.update_get])]
+  rw [State.if_output]
+  rw [State.if_output]
+  rw [State.if_output]
+  simp only [ite_eq_right_iff, ite_self, List.cons.injEq, and_true]
 
 end Risc0
