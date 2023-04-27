@@ -45,6 +45,28 @@ theorem is0_constraints_if_is0_witness
       tauto
 
 theorem pseudocompleteness {x y₁ y₂ : Felt} {state : State} :
-  is0_constraints [x] [y₁, y₂] → .Val y₂ = Op.eval {state with felts := Map.empty["x"] := x} (.Isz ⟨"x"⟩) := by sorry
+  is0_constraints [x] [y₁, y₂] → .Val y₁ = Op.eval {state with felts := Map.empty["x"] := x} (.Isz ⟨"x"⟩) := by
+  simp only [Op.eval_isz, Map.update_get, beq_iff_eq, Lit.Val.injEq]
+  rw [is0_constraints_closed_form]
+  by_cases eq : x = 0 <;> simp only [eq]
+  · simp only [ite_self, zero_mul, zero_sub, neg_eq_zero, and_false, ite_true]
+    by_cases eq₁ : y₁ = 1 <;> simp only [eq₁]
+    · intros h
+      simp [←@add_left_inj _ _ _ y₁ (1 - y₁) 0] at h
+      simp [eq_comm] at h
+      rw [if_neg eq₁] at h
+      exact h
+  · simp only [ite_false]
+    by_cases eq₁ : y₁ = 1 <;> simp only [eq₁]
+    · intros h
+      simp [←@add_left_inj _ _ _ y₁ (1 - y₁) 0] at h
+    · intros h
+      simp [←@add_left_inj _ _ _ y₁ (1 - y₁) 0] at h
+      simp [eq_comm] at h
+      rw [if_neg eq₁] at h
+      rcases h with ⟨h₁, h₂⟩
+      by_cases eq₂ : y₁ = 0 <;> simp only [eq₂]
+      · rw [if_neg eq₂] at h₁
+        exact h₁
 
 end Risc0
