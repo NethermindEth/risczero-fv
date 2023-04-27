@@ -110,11 +110,14 @@ open Lean Elab Tactic
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat (
-      first| rw [MLIR.run_Sequence_Assign_collapsible] | rw [MLIR.run_Sequence_Set_collapsible]
+      first| rw [MLIR.run_Sequence_Assign_collapsible] |
+             rw [MLIR.run_Sequence_Set_collapsible] |
+             rw [MLIR.run_Sequence_If_collapsible] | skip
+      all_goals try rfl
       simp
     )
   )
-  evalTactic <| ← `(tactic| rw [MLIR.run_assign])
+  evalTactic <| ← `(tactic| try rw [MLIR.run_assign])
   evalTactic <| ← `(tactic| simp)
 
 elab "MLIR_state" : tactic => do
@@ -140,6 +143,9 @@ lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   is0_witness [x] = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
   unfold is0_witness
   MLIR
+  
+  rw [MLIR.run_Sequence_Set_collapsible]
+  
   -- MLIR_states
   rw [MLIR.run_Sequence_Assign_collapsible]
   simp only [Op.eval_const, State.update_val]
