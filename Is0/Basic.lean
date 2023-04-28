@@ -141,7 +141,7 @@ inductive MLIR : IsNondet → Type where
   | If : Variable Felt → MLIR x → MLIR x
   | Eqz : Variable Felt → MLIR x
   | Assign : String → Op x → MLIR x
-  | Sequence : MLIR x → MLIR y → MLIR (lub x y)
+  | Sequence : MLIR x → MLIR x → MLIR x
   | Nondet : MLIR InNondet → MLIR NotInNondet
 
 abbrev MLIRProgram := MLIR NotInNondet
@@ -150,7 +150,7 @@ open MLIR in
 lemma x : MLIRProgram := Sequence (Nondet (Assign "x" (Op.Isz ⟨"y"⟩))) (Assign "z" (Op.Const 4))
 
 open MLIR in
-lemma y : MLIR InNondet := @Sequence _ _ ((Assign "x" (Op.Isz ⟨"y"⟩))) (Assign "z" (Op.Const 4))
+lemma y : MLIR InNondet := Sequence ((Assign "x" (Op.Isz ⟨"y"⟩))) ((Assign "z" (Op.Const 4)))
 
 #check x
 #check y
