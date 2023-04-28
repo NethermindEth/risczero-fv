@@ -103,18 +103,70 @@ notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
 structure Variable (α : Type) :=
   name : String
 
+inductive IsNondet :=
+  | InNondet
+  | NotInNondet
+
+open IsNondet
+
+@[reducible]
+def lub (x₁ x₂ : IsNondet) :=
+  match x₁ with
+    | InNondet => InNondet
+    | _ => x₂
+
 -- Pure functional operations from the cirgen (circuit generation) MLIR dialect.
-inductive Op where
-  | Const : Felt → Op
-  | True : Op
-  | GetInput : ℕ → Felt → Op
-  | GetOutput : ℕ → Felt → Op
-  | Sub : Variable Felt → Variable Felt → Op
-  | Mul : Variable Felt → Variable Felt → Op
-  | Isz : Variable Felt → Op
-  | Inv : Variable Felt → Op
-  | AndEqz : Variable Prop → Variable Felt → Op
-  | AndCond : Variable Prop → Variable Felt → Variable Prop → Op
+inductive Op : IsNondet → Type where
+  | Const : Felt → Op x
+  | True : Op x
+  | GetInput : ℕ → Felt → Op x
+  | GetOutput : ℕ → Felt → Op x
+  | Sub : Variable Felt → Variable Felt → Op x
+  | Mul : Variable Felt → Variable Felt → Op x
+  | AndEqz : Variable Prop → Variable Felt → Op x
+  | AndCond : Variable Prop → Variable Felt → Variable Prop → Op x
+  | Isz : Variable Felt → Op InNondet
+  | Inv : Variable Felt → Op InNondet
+
+-- inductive Det :=
+--   | If : Variable Felt → Det → Det
+--   | Sequence : Det → Det → Det
+--   | SetInput : ℕ → Variable Felt → Variable Felt → Det -- idx -> buffer -> varName -> Det; buffer[idx] := varName
+--   | SetOuput : ℕ → Variable Felt → Variable Felt → Det -- idx -> buffer -> varName -> Det; buffer[idx] := varName
+--   | Assign : String → DetOp → Det
+
+-- An MLIR program in the `cirgen` (circuit generation) dialect. MLIR ops that
+-- are not pure functions are implemented here, so they can mess with state. 
+inductive MLIR : IsNondet → Type where
+  | If : Variable Felt → MLIR x → MLIR x
+  | Eqz : Variable Felt → MLIR x
+  | Assign : String → Op x → MLIR x
+  | Sequence : MLIR x → MLIR y → MLIR (lub x y)
+  | Nondet : MLIR InNondet → MLIR NotInNondet
+
+abbrev MLIRProgram := MLIR NotInNondet
+
+open MLIR in
+lemma x : MLIRProgram := Sequence (Nondet (Assign "x" (Op.Isz ⟨"y"⟩))) (Assign "z" (Op.Const 4))
+
+open MLIR in
+lemma y : MLIR InNondet := @Sequence _ _ ((Assign "x" (Op.Isz ⟨"y"⟩))) (Assign "z" (Op.Const 4))
+
+#check x
+#check y
+
+-- -- Pure functional operations from the cirgen (circuit generation) MLIR dialect.
+-- inductive Op where
+--   | Const : Felt → Op
+--   | True : Op
+--   | GetInput : ℕ → Felt → Op
+--   | GetOutput : ℕ → Felt → Op
+--   | Sub : Variable Felt → Variable Felt → Op
+--   | Mul : Variable Felt → Variable Felt → Op
+--   | Isz : Variable Felt → Op
+--   | Inv : Variable Felt → Op
+--   | AndEqz : Variable Prop → Variable Felt → Op
+--   | AndCond : Variable Prop → Variable Felt → Variable Prop → Op
 
 namespace MLIRNotation
 
@@ -139,173 +191,173 @@ scoped prefix:max "Inv" => Op.Inv
 
 end MLIRNotation
 
-instance : Inhabited Lit := ⟨(Lit.Val (-42))⟩
+-- instance : Inhabited Lit := ⟨(Lit.Val (-42))⟩
 
--- Evaluate a pure functional circuit operation to get some kind of literal.
-def Op.eval (state : State) (op : Op) : Lit :=
-  match op with
-  | Const x => .Val x
-  | True => .Constraint (_root_.True)
-  | GetInput i _ => .Val <| state.input.getD i (-42)
-  | GetOutput i _ => .Val <| state.output.getD i (-42)
-  | Sub x y => .Val $ match state.felts x.name, state.felts y.name with
-                        | some x, some y => x - y
-                        | _      , _       => 42
-  | Mul x y => .Val $ match state.felts x.name, state.felts y.name with
-                        | some x, some y => x * y
-                        | _      , _       => 42
-  | AndEqz c x => .Constraint $ match state.props c.name, state.felts x.name with
-                    | some c, some x => c ∧ x = 0
-                    | _      , _     => 42 = 42
-  | AndCond old cond inner =>
-      .Constraint $ match state.props old.name, state.felts cond.name, state.props inner.name with
-        | .some old, .some cond, .some inner => if cond == 0 then old else old ∧ inner
-        | _        , _         , _           => 42 = 42
-  | Isz x => .Val $ match state.felts x.name with
-               | some x => if x == 0 then 1 else 0
-               | _      => 42
-  | Inv x => .Val $ match state.felts x.name with
-               | some x => if x == 0 then 0 else x⁻¹
-               | _      => 42
+-- -- Evaluate a pure functional circuit operation to get some kind of literal.
+-- def Op.eval (state : State) (op : Op) : Lit :=
+--   match op with
+--   | Const x => .Val x
+--   | True => .Constraint (_root_.True)
+--   | GetInput i _ => .Val <| state.input.getD i (-42)
+--   | GetOutput i _ => .Val <| state.output.getD i (-42)
+--   | Sub x y => .Val $ match state.felts x.name, state.felts y.name with
+--                         | some x, some y => x - y
+--                         | _      , _       => 42
+--   | Mul x y => .Val $ match state.felts x.name, state.felts y.name with
+--                         | some x, some y => x * y
+--                         | _      , _       => 42
+--   | AndEqz c x => .Constraint $ match state.props c.name, state.felts x.name with
+--                     | some c, some x => c ∧ x = 0
+--                     | _      , _     => 42 = 42
+--   | AndCond old cond inner =>
+--       .Constraint $ match state.props old.name, state.felts cond.name, state.props inner.name with
+--         | .some old, .some cond, .some inner => if cond == 0 then old else old ∧ inner
+--         | _        , _         , _           => 42 = 42
+--   | Isz x => .Val $ match state.felts x.name with
+--                | some x => if x == 0 then 1 else 0
+--                | _      => 42
+--   | Inv x => .Val $ match state.felts x.name with
+--                | some x => if x == 0 then 0 else x⁻¹
+--                | _      => 42
 
-namespace Op
+-- namespace Op
 
-section Op
+-- section Op
 
-variable (state : State) (op : Op)
+-- variable (state : State) (op : Op)
 
-@[simp]
-lemma eval_const {x : Felt} : Op.eval state (Const x) = .Val x := by rfl
+-- @[simp]
+-- lemma eval_const {x : Felt} : Op.eval state (Const x) = .Val x := by rfl
 
-@[simp]
-lemma eval_const_one : Op.eval state (Const 1 : Op) = .Val 1 := by rfl
+-- @[simp]
+-- lemma eval_const_one : Op.eval state (Const 1 : Op) = .Val 1 := by rfl
 
-@[simp]
-lemma eval_true : Op.eval state True = .Constraint (_root_.True) := by rfl
+-- @[simp]
+-- lemma eval_true : Op.eval state True = .Constraint (_root_.True) := by rfl
 
-@[simp]
-lemma eval_getInput {i : ℕ} {x : Felt} : Op.eval state (GetInput i x) = .Val (state.input.getD i (-42)) := by rfl
+-- @[simp]
+-- lemma eval_getInput {i : ℕ} {x : Felt} : Op.eval state (GetInput i x) = .Val (state.input.getD i (-42)) := by rfl
 
-@[simp]
-lemma eval_getOutput {i : ℕ} {x : Felt} : Op.eval state (GetOutput i x) = .Val (state.output.getD i (-42)) := by rfl
+-- @[simp]
+-- lemma eval_getOutput {i : ℕ} {x : Felt} : Op.eval state (GetOutput i x) = .Val (state.output.getD i (-42)) := by rfl
 
-@[simp]
-lemma eval_sub {x : Variable Felt} {y : Variable Felt} :
-  Op.eval state (Sub x y) = .Val (match state.felts x.name, state.felts y.name with
-                                      | some x, some y => x - y
-                                      | _      , _       => 42) := by rfl
+-- @[simp]
+-- lemma eval_sub {x : Variable Felt} {y : Variable Felt} :
+--   Op.eval state (Sub x y) = .Val (match state.felts x.name, state.felts y.name with
+--                                       | some x, some y => x - y
+--                                       | _      , _       => 42) := by rfl
  
-@[simp]
-lemma eval_mul {x : Variable Felt} {y : Variable Felt} :
-  Op.eval state (Mul x y) = .Val (match state.felts x.name, state.felts y.name with
-                                      | some x, some y => x * y
-                                      | _      , _       => 42) := by rfl
+-- @[simp]
+-- lemma eval_mul {x : Variable Felt} {y : Variable Felt} :
+--   Op.eval state (Mul x y) = .Val (match state.felts x.name, state.felts y.name with
+--                                       | some x, some y => x * y
+--                                       | _      , _       => 42) := by rfl
 
-@[simp]
-lemma eval_isz {x : Variable Felt} :
-  Op.eval state (Isz x) = .Val (match state.felts x.name with
-                                  | some x => if x == 0 then 1 else 0
-                                  | _      => 42) := by rfl
-@[simp]
-lemma eval_inv {x : Variable Felt} :
-  Op.eval state (Inv x) = .Val (match state.felts x.name with
-                                  | some x => if x == 0 then 0 else x⁻¹
-                                  | _      => 42) := by rfl
+-- @[simp]
+-- lemma eval_isz {x : Variable Felt} :
+--   Op.eval state (Isz x) = .Val (match state.felts x.name with
+--                                   | some x => if x == 0 then 1 else 0
+--                                   | _      => 42) := by rfl
+-- @[simp]
+-- lemma eval_inv {x : Variable Felt} :
+--   Op.eval state (Inv x) = .Val (match state.felts x.name with
+--                                   | some x => if x == 0 then 0 else x⁻¹
+--                                   | _      => 42) := by rfl
 
--- lemma eval_eqz {c : Variable Prop}
---                {x : Variable Felt}
---     (h₁ : state.props c.name = some c₁)
---     (h₂ : state.felts x.name = some x₁) :
---   (AndEqz c x).eval state = .Constraint (c₁ ∧ x₁ = 0) := by simp [eval, *]
+-- -- lemma eval_eqz {c : Variable Prop}
+-- --                {x : Variable Felt}
+-- --     (h₁ : state.props c.name = some c₁)
+-- --     (h₂ : state.felts x.name = some x₁) :
+-- --   (AndEqz c x).eval state = .Constraint (c₁ ∧ x₁ = 0) := by simp [eval, *]
 
-@[simp]
-lemma eval_andEqz :
-  (AndEqz c x).eval state =
-    .Constraint (match state.props c.name, state.felts x.name with
-                 | some c, some x => (c ∧ x = 0)
-                 | _      , _     => (42 = 42)) := rfl
+-- @[simp]
+-- lemma eval_andEqz :
+--   (AndEqz c x).eval state =
+--     .Constraint (match state.props c.name, state.felts x.name with
+--                  | some c, some x => (c ∧ x = 0)
+--                  | _      , _     => (42 = 42)) := rfl
 
-@[simp]
-lemma eval_andCond :
-  (AndCond old cnd inner).eval state =
-    .Constraint (match state.props old.name, state.felts cnd.name, state.props inner.name with
-        | .some old, .some cnd, .some inner => if cnd == 0 then old else old ∧ inner
-        | _        , _         , _           => 42 = 42) := rfl
+-- @[simp]
+-- lemma eval_andCond :
+--   (AndCond old cnd inner).eval state =
+--     .Constraint (match state.props old.name, state.felts cnd.name, state.props inner.name with
+--         | .some old, .some cnd, .some inner => if cnd == 0 then old else old ∧ inner
+--         | _        , _         , _           => 42 = 42) := rfl
 
-end Op
+-- end Op
 
-end Op
+-- end Op
 
--- Evaluate `op` and map `name ↦ result` in `state : State`.
-def Op.assign (state : State) (op : Op) (name : String) : State :=
-  match (Op.eval state op) with
-  | .Val x => { state with felts := state.felts.update name x }
-  | .Constraint c => { state with props := state.props.update name c }
+-- -- Evaluate `op` and map `name ↦ result` in `state : State`.
+-- def Op.assign (state : State) (op : Op) (name : String) : State :=
+--   match (Op.eval state op) with
+--   | .Val x => { state with felts := state.felts.update name x }
+--   | .Constraint c => { state with props := state.props.update name c }
 
--- An MLIR program in the `cirgen` (circuit generation) dialect. MLIR ops that
--- are not pure functions are implemented here, so they can mess with state. 
-inductive MLIR where
-  | If : Variable Felt → MLIR → MLIR
-  | Eqz : Variable Felt → MLIR
-  | Assign : String → Op → MLIR
-  | Sequence : MLIR → MLIR → MLIR
-  | SetInput : ℕ → Variable Felt → MLIR
-  | SetOutput : ℕ → Variable Felt → MLIR
+-- -- An MLIR program in the `cirgen` (circuit generation) dialect. MLIR ops that
+-- -- are not pure functions are implemented here, so they can mess with state. 
+-- inductive MLIR where
+--   | If : Variable Felt → MLIR → MLIR
+--   | Eqz : Variable Felt → MLIR
+--   | Assign : String → Op → MLIR
+--   | Sequence : MLIR → MLIR → MLIR
+--   | SetInput : ℕ → Variable Felt → MLIR
+--   | SetOutput : ℕ → Variable Felt → MLIR
 
-namespace MLIRNotation
+-- namespace MLIRNotation
 
--- Notation for MLIR programs.
-scoped infixr:50 "; " => MLIR.Sequence
-scoped infix:51 "←ₐ " => MLIR.Assign
-scoped notation:51 (priority := high) "input[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetInput v x
-scoped notation:51 (priority := high) "output[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetOutput v x
-scoped notation:51 "guard " c " then " x:51 => MLIR.If c x
-scoped prefix:52 "?₀" => MLIR.Eqz
--- scoped prefix:max "ret" => MLIR.Return
+-- -- Notation for MLIR programs.
+-- scoped infixr:50 "; " => MLIR.Sequence
+-- scoped infix:51 "←ₐ " => MLIR.Assign
+-- scoped notation:51 (priority := high) "input[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetInput v x
+-- scoped notation:51 (priority := high) "output[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetOutput v x
+-- scoped notation:51 "guard " c " then " x:51 => MLIR.If c x
+-- scoped prefix:52 "?₀" => MLIR.Eqz
+-- -- scoped prefix:max "ret" => MLIR.Return
 
-end MLIRNotation
--- Step through the entirety of a `MLIR` MLIR program from initial state
--- `state`, yielding the post-execution state and possibly a constraint
--- (`Prop`), the return value of the program.
-def MLIR.run (state : State) (program : MLIR) : State :=
-  match program with
-  | If x program =>
-    match state.felts x.name with
-      | .some x => if x == 0
-                   then state
-                   else MLIR.run state program
-      | none    => state
-  | Eqz x =>
-    match state.felts x.name with
-      | .some x => {state with constraints := (x = 0) :: state.constraints}
-      | .none   => state
-  | SetInput i x =>
-      match state.felts x.name with
-        | .some x => {state with input := state.input.set i x}
-        | _       => state
-  | SetOutput i x =>
-      match state.felts x.name with
-        | .some x => {state with output := state.output.set i x}
-        | _       => state
-  | Assign name op => Op.assign state op name
-  | Sequence a b => let state' := MLIR.run state a
-                    MLIR.run state' b
+-- end MLIRNotation
+-- -- Step through the entirety of a `MLIR` MLIR program from initial state
+-- -- `state`, yielding the post-execution state and possibly a constraint
+-- -- (`Prop`), the return value of the program.
+-- def MLIR.run (state : State) (program : MLIR) : State :=
+--   match program with
+--   | If x program =>
+--     match state.felts x.name with
+--       | .some x => if x == 0
+--                    then state
+--                    else MLIR.run state program
+--       | none    => state
+--   | Eqz x =>
+--     match state.felts x.name with
+--       | .some x => {state with constraints := (x = 0) :: state.constraints}
+--       | .none   => state
+--   | SetInput i x =>
+--       match state.felts x.name with
+--         | .some x => {state with input := state.input.set i x}
+--         | _       => state
+--   | SetOutput i x =>
+--       match state.felts x.name with
+--         | .some x => {state with output := state.output.set i x}
+--         | _       => state
+--   | Assign name op => Op.assign state op name
+--   | Sequence a b => let state' := MLIR.run state a
+--                     MLIR.run state' b
   
-notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run st p
+-- notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run st p
 
-lemma run_setOutput_of_some
-  {state : State}
-  {i : ℕ}
-  {x₁ : Felt}
-  {x : Variable Felt}
-  (h : state.felts x.name = some x₁) :
-  Γ state ⟦MLIR.SetOutput i x⟧ = {state with output := state.output.set i x₁} := by simp [MLIR.run, h]
+-- lemma run_setOutput_of_some
+--   {state : State}
+--   {i : ℕ}
+--   {x₁ : Felt}
+--   {x : Variable Felt}
+--   (h : state.felts x.name = some x₁) :
+--   Γ state ⟦MLIR.SetOutput i x⟧ = {state with output := state.output.set i x₁} := by simp [MLIR.run, h]
 
-lemma run_Eqz_of_some
-  {state : State}
-  {x₁ : Felt}
-  {x : Variable Felt}
-  (h : state.felts x.name = some x₁) :
-  Γ state ⟦MLIR.Eqz x⟧ = {state with constraints := (x₁ = 0) :: state.constraints } := by simp [MLIR.run, h]
+-- lemma run_Eqz_of_some
+--   {state : State}
+--   {x₁ : Felt}
+--   {x : Variable Felt}
+--   (h : state.felts x.name = some x₁) :
+--   Γ state ⟦MLIR.Eqz x⟧ = {state with constraints := (x₁ = 0) :: state.constraints } := by simp [MLIR.run, h]
 
 end Risc0
