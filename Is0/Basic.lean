@@ -316,7 +316,10 @@ def MLIR.run {α} (program : MLIR α) (st : State) : State :=
     match st.felts x.name with
       | .some x => {st with output := st.output.set i x}
       | _       => st
-  
+
+@[simp, reducible]
+abbrev MLIR.runProgram (program : MLIRProgram) := MLIR.run program
+
 notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run p st
 
 -- lemma run_setOutput_of_some

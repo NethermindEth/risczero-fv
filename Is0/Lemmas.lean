@@ -35,6 +35,13 @@ lemma MLIR.run_Sequence_Set_collapsible
     Γ st ⟦output[i] ←ᵢ ⟨nameₓ⟩; program⟧ = 
     Γ { st with output := st.output.set i x } ⟦program⟧ := by simp [run, *]
 
+lemma MLIR.run_Set_collapsible
+    {nameₓ : String}
+    (x : Felt)
+    (h₁ : st.felts nameₓ = some x) :
+    Γ st ⟦output[i] ←ᵢ ⟨nameₓ⟩⟧ = 
+    { st with output := st.output.set i x } := by simp [run, *]
+
 lemma MLIR.run_if_true {c : Variable Felt}
   (h : st.felts c.name = some 0) :
   Γ st ⟦guard c then prog⟧ = st := by
@@ -84,6 +91,9 @@ lemma MLIR.run_If_collapsible
   = if (x == 0)
       then st
       else Γ st ⟦branch⟧ := by simp [run, h₁]
+
+lemma MLIR.run_Sequence_nondet_collapsible :
+  Γ st ⟦nondet block; program⟧ = Γ (Γ st ⟦block⟧) ⟦program⟧ := rfl
 
 lemma MLIR.run_Eqz_collapsible
     (x : Felt)

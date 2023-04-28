@@ -15,24 +15,27 @@ open MLIRNotation
 
 def is0_witness (input : List Felt) : List Felt :=
   let state' :=
-    MLIR.run { felts := Map.empty
-             , props := Map.empty
-             , input := input
-             , output := [42, 42]
-             , constraints := []
-             } <|
+    MLIR.runProgram (st := 
+      { felts := Map.empty
+      , props := Map.empty
+      , input := input
+      , output := [42, 42]
+      , constraints := []
+      }) <|
     "1"         ←ₐ .Const 1;
     "x"         ←ₐ input[0];
-    "isZeroBit" ←ₐ ??₀⟨"x"⟩;
-    output[0]   ←ᵢ ⟨"isZeroBit"⟩;
-    "invVal"    ←ₐ Inv ⟨"x"⟩;
-    output[1]   ←ᵢ ⟨"invVal"⟩;
+    nondet (
+      "isZeroBit" ←ₐ ??₀⟨"x"⟩;
+      output[0]   ←ᵢ ⟨"isZeroBit"⟩;
+      "invVal"    ←ₐ Inv ⟨"x"⟩;
+      output[1]   ←ᵢ ⟨"invVal"⟩  
+    );
     "arg1[0]"   ←ₐ output[0];
     guard ⟨"arg1[0]"⟩ then
       ?₀ ⟨"x"⟩;
     "1 - arg1[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"arg1[0]"⟩;
     guard ⟨"1 - arg1[0]"⟩ then
-      ("arg1[1]"         ←ₐ output[1];
+      ("arg1[1]"        ←ₐ output[1];
       "x * arg1[1]"     ←ₐ .Mul ⟨"x"⟩ ⟨"arg1[1]"⟩;
       "x * arg1[1] - 1" ←ₐ .Sub ⟨"x * arg1[1]"⟩ ⟨"1"⟩;
       ?₀ ⟨"x * arg1[1] - 1"⟩)
@@ -51,14 +54,15 @@ def is0_witness (input : List Felt) : List Felt :=
     -- %10 = cirgen.and_eqz %1, %9 : <default>
     -- %11 = cirgen.and_cond %5, %6 : <default>, %10
 
-def is0_constraints (input : List Felt) (output : List Felt) : Prop :=
+def is0_constraints (input output : List Felt) : Prop :=
   let state' :=
-    MLIR.run { felts := Map.empty
-             , props := Map.empty
-             , input := input
-             , output := output
-             , constraints := []
-             } <|
+    MLIR.runProgram (st :=
+      { felts := Map.empty
+      , props := Map.empty
+      , input := input
+      , output := output
+      , constraints := []
+      }) <|
     -- %0 = cirgen.const 1
     "1"         ←ₐ C 1; 
     "0"         ←ₐ C 0;
@@ -96,8 +100,10 @@ elab "MLIR" : tactic => do
       rw [MLIR.run_Sequence_Assign_collapsible] |
       rw [MLIR.run_Sequence_Set_collapsible] |
       rw [MLIR.run_Sequence_If_collapsible] |
+      rw [MLIR.run_Sequence_nondet_collapsible] |
       rw [MLIR.run_If_collapsible] |
       rw [MLIR.run_Sequence_Eqz_collapsible] |
+      rw [MLIR.run_Set_collapsible] |
       rw [MLIR.run_Eqz_collapsible]
       all_goals try rfl
       simp
@@ -122,13 +128,14 @@ set_option maxHeartbeats 1000000 in
 lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
     is0_constraints [x] [y₁, y₂]
   ↔ (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by
-  unfold is0_constraints
+  unfold is0_constraints MLIR.runProgram
   MLIR
   MLIR_states
 
+set_option maxHeartbeats 400000 in
 lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   is0_witness [x] = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
-  unfold is0_witness
+  unfold is0_witness MLIR.runProgram
   MLIR
   MLIR_states
   simp [List.set]
