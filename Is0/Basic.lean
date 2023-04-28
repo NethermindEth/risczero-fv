@@ -176,28 +176,6 @@ def Op.eval {x} (state : State) (op : Op x) : Lit :=
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
 
-inductive MLIR : IsNondet → Type where
-  | Assign : String → Op x → MLIR x
-  | Eqz : Variable Felt → MLIR x
-  | If : Variable Felt → MLIR x → MLIR x
-  | Nondet : MLIR InNondet → MLIR NotInNondet
-  | Sequence : MLIR x → MLIR x → MLIR x
-  | SetOutput : Variable Felt → Op x → MLIR InNondet
-
--- Notation for MLIR programs.  
-namespace MLIRNotation
-
-scoped infix:51 "←ₐ " => MLIR.Assign
-scoped prefix:52 "?₀" => MLIR.Eqz
-scoped notation:51 "guard " c " then " x:51 => MLIR.If c x
-scoped prefix:max "nondet" => MLIR.Nondet
-scoped infixr:50 "; " => MLIR.Sequence
-scoped notation:51 (priority := high) "output[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetOutput v x
-
-end MLIRNotation
-
-abbrev MLIRProgram := MLIR NotInNondet
-
 -- open MLIR in
 -- lemma x : MLIRProgram := Sequence (Nondet (Assign "x" (Op.Isz ⟨"y"⟩))) (Assign "z" (Op.Const 4))
 
@@ -279,62 +257,67 @@ end Op
 
 end Op
 
--- -- Evaluate `op` and map `name ↦ result` in `state : State`.
--- def Op.assign (state : State) (op : Op) (name : String) : State :=
---   match (Op.eval state op) with
---   | .Val x => { state with felts := state.felts.update name x }
---   | .Constraint c => { state with props := state.props.update name c }
+inductive MLIR : IsNondet → Type where
+  | Assign : String → Op x → MLIR x
+  | Eqz : Variable Felt → MLIR x
+  | If : Variable Felt → MLIR x → MLIR x
+  | Nondet : MLIR InNondet → MLIR NotInNondet
+  | Sequence : MLIR x → MLIR x → MLIR x
+  | SetOutput : ℕ → Variable Felt → MLIR InNondet
 
--- -- An MLIR program in the `cirgen` (circuit generation) dialect. MLIR ops that
--- -- are not pure functions are implemented here, so they can mess with state. 
--- inductive MLIR where
---   | If : Variable Felt → MLIR → MLIR
---   | Eqz : Variable Felt → MLIR
---   | Assign : String → Op → MLIR
---   | Sequence : MLIR → MLIR → MLIR
---   | SetInput : ℕ → Variable Felt → MLIR
---   | SetOutput : ℕ → Variable Felt → MLIR
+-- Notation for MLIR programs.  
+namespace MLIRNotation
 
--- namespace MLIRNotation
+scoped infix:51 "←ₐ " => MLIR.Assign
+scoped prefix:52 "?₀" => MLIR.Eqz
+scoped notation:51 "guard " c " then " x:51 => MLIR.If c x
+scoped prefix:max "nondet" => MLIR.Nondet
+scoped infixr:50 "; " => MLIR.Sequence
+scoped notation:51 (priority := high) "output[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetOutput v x
 
--- -- Notation for MLIR programs.
--- scoped infixr:50 "; " => MLIR.Sequence
--- scoped infix:51 "←ₐ " => MLIR.Assign
--- scoped notation:51 (priority := high) "input[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetInput v x
--- scoped notation:51 (priority := high) "output[" v:51 "]" " ←ᵢ " x:51 => MLIR.SetOutput v x
--- scoped notation:51 "guard " c " then " x:51 => MLIR.If c x
--- scoped prefix:52 "?₀" => MLIR.Eqz
--- -- scoped prefix:max "ret" => MLIR.Return
+end MLIRNotation
 
--- end MLIRNotation
--- -- Step through the entirety of a `MLIR` MLIR program from initial state
--- -- `state`, yielding the post-execution state and possibly a constraint
--- -- (`Prop`), the return value of the program.
--- def MLIR.run (state : State) (program : MLIR) : State :=
---   match program with
---   | If x program =>
---     match state.felts x.name with
---       | .some x => if x == 0
---                    then state
---                    else MLIR.run state program
---       | none    => state
---   | Eqz x =>
---     match state.felts x.name with
---       | .some x => {state with constraints := (x = 0) :: state.constraints}
---       | .none   => state
---   | SetInput i x =>
---       match state.felts x.name with
---         | .some x => {state with input := state.input.set i x}
---         | _       => state
---   | SetOutput i x =>
---       match state.felts x.name with
---         | .some x => {state with output := state.output.set i x}
---         | _       => state
---   | Assign name op => Op.assign state op name
---   | Sequence a b => let state' := MLIR.run state a
---                     MLIR.run state' b
+abbrev MLIRProgram := MLIR NotInNondet
+
+-- Evaluate `op` and map `name ↦ result` in `state : State`.
+def Op.assign {α} (state : State) (op : Op α) (name : String) : State :=
+  match (Op.eval state op) with
+  | .Val x => { state with felts := state.felts.update name x }
+  | .Constraint c => { state with props := state.props.update name c }
+
+-- inductive MLIR : IsNondet → Type where
+--   | Assign : String → Op x → MLIR x
+--   | Eqz : Variable Felt → MLIR x
+--   | If : Variable Felt → MLIR x → MLIR x
+--   | Nondet : MLIR InNondet → MLIR NotInNondet
+--   | Sequence : MLIR x → MLIR x → MLIR x
+--   | SetOutput : Variable Felt → Op x → MLIR InNondet
+
+-- Step through the entirety of a `MLIR` MLIR program from initial state
+-- `state`, yielding the post-execution state and possibly a constraint
+-- (`Prop`), the return value of the program.
+def MLIR.run {α} (program : MLIR α) (st : State) : State :=
+  match program with
+  | Assign name op => Op.assign st op name
+  | Eqz x =>
+    match st.felts x.name with
+      | .some x => {st with constraints := (x = 0) :: st.constraints}
+      | .none   => st
+  | If x program =>
+    match st.felts x.name with
+      | some x => if x == 0
+                  then st
+                  else MLIR.run program st
+      | none    => st
+  | Nondet block => MLIR.run block st
+  | Sequence a b => let st' := MLIR.run a st
+                    MLIR.run b st'
+  | SetOutput i x =>
+    match st.felts x.name with
+      | .some x => {st with output := st.output.set i x}
+      | _       => st
   
--- notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run st p
+notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run p st
 
 -- lemma run_setOutput_of_some
 --   {state : State}
