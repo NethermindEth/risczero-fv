@@ -10,13 +10,16 @@ namespace Risc0
 
 section WithMLIR 
 
+variable {α : IsNondet} {st : State} {name : String}
+
 open MLIRNotation
+open IsNondet
 
 lemma MLIR.run_assign :
   Γ st ⟦name ←ₐ op⟧ = st[name] := op.eval st := rfl
 
-lemma MLIR.run_Sequence_Assign_collapsible {state : State} {name : String} {op : Op} {program : MLIR} :
-    Γ state ⟦name ←ₐ op; program⟧ = Γ (state[name] := Op.eval state op) ⟦program⟧ := by
+lemma MLIR.run_Sequence_Assign_collapsible {op : Op α} {program : MLIR α} :
+    Γ st ⟦name ←ₐ op; program⟧ = Γ (st[name] := Op.eval st op) ⟦program⟧ := by
   cases op <;> conv => lhs; simp [MLIR.run, State.update, Map.update, beq_iff_eq]
 
 lemma MLIR.run_set : Γ st ⟦MLIR.SetOutput i x⟧ = 
@@ -25,13 +28,12 @@ lemma MLIR.run_set : Γ st ⟦MLIR.SetOutput i x⟧ =
     | _       => st := rfl
 
 lemma MLIR.run_Sequence_Set_collapsible
-    {state : State}
     {nameₓ : String}
-    {program : MLIR}
+    {program : MLIR InNondet}
     (x : Felt)
-    (h₁ : state.felts nameₓ = some x) :
-    Γ state ⟦output[i] ←ᵢ ⟨nameₓ⟩; program⟧ = 
-    Γ { state with output := state.output.set i x } ⟦program⟧ := by simp [run, *]
+    (h₁ : st.felts nameₓ = some x) :
+    Γ st ⟦output[i] ←ᵢ ⟨nameₓ⟩; program⟧ = 
+    Γ { st with output := st.output.set i x } ⟦program⟧ := by simp [run, *]
 
 lemma MLIR.run_if_true {c : Variable Felt}
   (h : st.felts c.name = some 0) :
@@ -60,16 +62,14 @@ lemma MLIR.run_seq :
   Γ st ⟦p₁; p₂⟧ = Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ := rfl
 
 lemma MLIR.run_Sequence_If_collapsible
-    {state : State}
-    {name : String}
-    {branch : MLIR}
-    {program : MLIR}
+    {branch : MLIR α}
+    {program : MLIR α}
     (x : Felt)
-    (h₁ : state.felts name = some x)
-    : Γ state ⟦guard ⟨name⟩ then branch; program⟧
+    (h₁ : st.felts name = some x)
+    : Γ st ⟦guard ⟨name⟩ then branch; program⟧
   = if (x == 0)
-      then Γ state ⟦program⟧
-      else Γ state ⟦branch; program⟧ := by
+      then Γ st ⟦program⟧
+      else Γ st ⟦branch; program⟧ := by
     generalize eq : (x == 0) = cond
     rw [run_seq]
     rcases cond with _ | _ <;> simp only
@@ -77,33 +77,27 @@ lemma MLIR.run_Sequence_If_collapsible
     · rw [run_if_true (by simp at eq; rw [eq] at h₁; exact h₁)]; rfl
 
 lemma MLIR.run_If_collapsible
-    {state : State}
-    {name : String}
-    {branch : MLIR}
+    {branch : MLIR α}
     (x : Felt)
-    (h₁ : state.felts name = some x) :
-    Γ state ⟦guard ⟨name⟩ then branch⟧
+    (h₁ : st.felts name = some x) :
+    Γ st ⟦guard ⟨name⟩ then branch⟧
   = if (x == 0)
-      then state
-      else MLIR.run state branch := by simp [run, h₁]
+      then st
+      else Γ st ⟦branch⟧ := by simp [run, h₁]
 
 lemma MLIR.run_Eqz_collapsible
-    {state : State}
-    {name : String}
     (x : Felt)
-    (h₁ : state.felts name = some x) :
-    Γ state ⟦?₀ ⟨name⟩⟧ 
-  = { state with constraints := (x = 0) :: state.constraints } := by simp [run, *]
+    (h₁ : st.felts name = some x) :
+    Γ st ⟦@MLIR.Eqz α ⟨name⟩⟧ 
+  = { st with constraints := (x = 0) :: st.constraints } := by simp [run, *]
 
 lemma MLIR.run_Sequence_Eqz_collapsible
-    {state : State}
-    {name : String}
-    {program : MLIR}
+    {program : MLIR α}
     (x : Felt)
-    (h₁ : state.felts name = some x) :
-    MLIR.run state (.Sequence (.Eqz (Variable.mk name)) program)
-  = let state₁ := { state with constraints := (x = 0) :: state.constraints }
-    let state₂ := MLIR.run state₁ program
+    (h₁ : st.felts name = some x) :
+    Γ st ⟦.Sequence (.Eqz (Variable.mk name)) program⟧
+  = let state₁ := { st with constraints := (x = 0) :: st.constraints }
+    let state₂ := Γ state₁ ⟦program⟧
     state₂ := by rw [run_seq, run_Eqz_collapsible _ h₁]
 
 end WithMLIR 
