@@ -3,11 +3,11 @@ import Mathlib.Data.Nat.Prime
 import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
-import Mathlib.Tactic.LibrarySearch
 import Mathlib.Tactic.FieldSimp
 
 import Is0.Basic
 import Is0.Lemmas
+import Is0.Wheels
 
 namespace Risc0
 
@@ -97,19 +97,14 @@ open Lean Elab Tactic
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat ( first |
-      rw [MLIR.run_Sequence_Assign_collapsible] |
-      rw [MLIR.run_Sequence_Set_collapsible] |
-      rw [MLIR.run_Sequence_If_collapsible] |
-      rw [MLIR.run_Sequence_nondet_collapsible] |
-      rw [MLIR.run_If_collapsible] |
-      rw [MLIR.run_Sequence_Eqz_collapsible] |
-      rw [MLIR.run_Set_collapsible] |
-      rw [MLIR.run_Eqz_collapsible]
+      rw [MLIR.run_seq_def] | rw [MLIR.run_ass_def] | rw [MLIR.run_set] | rw [MLIR.run_if] |
+      rw [MLIR.run_nondet] |
+      rw [MLIR.run_eqz]
       all_goals try rfl
       simp
     )
   )
-  evalTactic <| ← `(tactic| try rw [MLIR.run_assign])
+  evalTactic <| ← `(tactic| try rw [MLIR.run_ass_def])
   evalTactic <| ← `(tactic| simp)
 
 elab "MLIR_state" : tactic => do
@@ -123,15 +118,16 @@ elab "MLIR_states" : tactic => do
   evalTactic <| ← `(tactic| repeat MLIR_state)
 
 end tactics
-
-set_option maxHeartbeats 1000000 in
+  
+set_option maxHeartbeats 2000000 in
 lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
     is0_constraints [x] [y₁, y₂]
   ↔ (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by
   unfold is0_constraints MLIR.runProgram
   MLIR
   MLIR_states
-
+  aesop
+  
 set_option maxHeartbeats 400000 in
 lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   is0_witness [x] = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
@@ -139,5 +135,6 @@ lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   MLIR
   MLIR_states
   simp [List.set]
+  by_cases eq : x = 0 <;> simp [eq]
 
 end Risc0
