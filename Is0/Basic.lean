@@ -119,31 +119,42 @@ def lub (x₁ x₂ : IsNondet) :=
 -- Pure functional operations from the cirgen (circuit generation) MLIR dialect.
 open VarType in
 inductive Op : IsNondet → Type where
+  -- Constants
   | Const : Felt → Op x
   | True : Op x
-  | GetInput : ℕ → Felt → Op x
-  | GetOutput : ℕ → Felt → Op x
+  -- Arith
   | Add : Variable FeltTag → Variable FeltTag → Op x
   | Sub : Variable FeltTag → Variable FeltTag → Op x
+  | Neg : Variable FeltTag → Op x
   | Mul : Variable FeltTag → Variable FeltTag → Op x
   | Pow : Variable FeltTag → ℕ → Op x
-  | Neg : Variable FeltTag → Op x
-  | AndEqz : Variable PropTag → Variable FeltTag → Op x
-  | AndCond : Variable PropTag → Variable FeltTag → Variable PropTag → Op x
+  -- Logic
   | Isz : Variable FeltTag → Op InNondet
   | Inv : Variable FeltTag → Op InNondet
+  -- Constraints
+  | AndEqz : Variable PropTag → Variable FeltTag → Op x
+  | AndCond : Variable PropTag → Variable FeltTag → Variable PropTag → Op x
+  -- Buffers
+  | GetInput : ℕ → Felt → Op x
+  | GetOutput : ℕ → Felt → Op x
 
 open Op VarType
 
-instance {x : IsNondet} : HAdd (Variable FeltTag) (Variable FeltTag) (Op x) := ⟨Op.Add⟩
-instance {x : IsNondet} : HSub (Variable FeltTag) (Variable FeltTag) (Op x) := ⟨Op.Sub⟩
-instance {x : IsNondet} : HMul (Variable FeltTag) (Variable FeltTag) (Op x) := ⟨Op.Mul⟩
-instance {x : IsNondet} : HPow (Variable FeltTag) ℕ                  (Op x) := ⟨Op.Pow⟩
+instance : HAdd (Variable FeltTag) (Variable FeltTag) (Op IsNondet.InNondet)    := ⟨Op.Add⟩
+instance : HAdd (Variable FeltTag) (Variable FeltTag) (Op IsNondet.NotInNondet) := ⟨Op.Add⟩
+
+instance : HSub (Variable FeltTag) (Variable FeltTag) (Op IsNondet.InNondet)    := ⟨Op.Sub⟩
+instance : HSub (Variable FeltTag) (Variable FeltTag) (Op IsNondet.NotInNondet) := ⟨Op.Sub⟩
+
+instance : HMul (Variable FeltTag) (Variable FeltTag) (Op IsNondet.InNondet)    := ⟨Op.Mul⟩
+instance : HMul (Variable FeltTag) (Variable FeltTag) (Op IsNondet.NotInNondet) := ⟨Op.Mul⟩
+
+instance : HPow (Variable FeltTag) ℕ (Op IsNondet.InNondet)    := ⟨Op.Pow⟩
+instance : HPow (Variable FeltTag) ℕ (Op IsNondet.NotInNondet) := ⟨Op.Pow⟩
 
 -- Notation for Ops.
 namespace MLIRNotation
 
-scoped prefix:max "-" => Op.Neg
 scoped prefix:max "C" => Op.Const
 scoped notation:max "⊤" => Op.True
 scoped notation:max "input[" n "]" => Op.GetInput n 0
