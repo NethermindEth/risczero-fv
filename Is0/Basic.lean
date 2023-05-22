@@ -123,8 +123,11 @@ inductive Op : IsNondet → Type where
   | True : Op x
   | GetInput : ℕ → Felt → Op x
   | GetOutput : ℕ → Felt → Op x
+  | Add : Variable FeltTag → Variable FeltTag → Op x
   | Sub : Variable FeltTag → Variable FeltTag → Op x
   | Mul : Variable FeltTag → Variable FeltTag → Op x
+  | Pow : Variable FeltTag → ℕ → Op x
+  | Neg : Variable FeltTag → Op x
   | AndEqz : Variable PropTag → Variable FeltTag → Op x
   | AndCond : Variable PropTag → Variable FeltTag → Variable PropTag → Op x
   | Isz : Variable FeltTag → Op InNondet
@@ -132,12 +135,15 @@ inductive Op : IsNondet → Type where
 
 open Op VarType
 
+instance {x : IsNondet} : HAdd (Variable FeltTag) (Variable FeltTag) (Op x) := ⟨Op.Add⟩
 instance {x : IsNondet} : HSub (Variable FeltTag) (Variable FeltTag) (Op x) := ⟨Op.Sub⟩
 instance {x : IsNondet} : HMul (Variable FeltTag) (Variable FeltTag) (Op x) := ⟨Op.Mul⟩
+instance {x : IsNondet} : HPow (Variable FeltTag) ℕ                  (Op x) := ⟨Op.Pow⟩
 
 -- Notation for Ops.
 namespace MLIRNotation
 
+scoped prefix:max "-" => Op.Neg
 scoped prefix:max "C" => Op.Const
 scoped notation:max "⊤" => Op.True
 scoped notation:max "input[" n "]" => Op.GetInput n 0
@@ -158,8 +164,11 @@ def Op.eval {x} (st : State) (op : Op x) : Lit :=
   | True          => .Constraint _root_.True
   | GetInput i _  => .Val <| st.input.get! i
   | GetOutput i _ => .Val <| st.output.get! i
+  | Add x y       => .Val <| (st.felts x.name).get! + (st.felts y.name).get!
   | Sub x y       => .Val <| (st.felts x.name).get! - (st.felts y.name).get!
   | Mul x y       => .Val <| (st.felts x.name).get! * (st.felts y.name).get!
+  | Pow x y       => .Val <| (st.felts x.name).get! ^ y
+  | Neg x         => .Val <| 0 - (st.felts x.name).get!
   | AndEqz c x    => .Constraint <| (st.props c.name).get! ∧ (st.felts x.name).get! = 0
   | AndCond old cond inner =>
       .Constraint <| (st.props old.name).get! ∧
