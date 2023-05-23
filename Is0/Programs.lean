@@ -97,7 +97,7 @@ open Lean Elab Tactic
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat ( first |
-      rw [MLIR.run_seq_def] | rw [MLIR.run_ass_def] | rw [MLIR.run_set] | rw [MLIR.run_if] |
+      rw [MLIR.run_seq_def] | rw [MLIR.run_ass_def] | rw [MLIR.run_set_output] | rw [MLIR.run_if] |
       rw [MLIR.run_nondet] |
       rw [MLIR.run_eqz]
       all_goals try rfl
