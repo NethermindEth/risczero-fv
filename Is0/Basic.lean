@@ -65,14 +65,34 @@ end Map
 
 end Map
 
+abbrev Buffer (α : Type) := List (List α)
+
+def Back := ℕ
+
+@[simp]
+def Back.toNat (back : Back) : ℕ := back
+
+instance : HSub ℕ Back Back := ⟨λ lhs rhs => lhs - rhs.toNat⟩
+
+instance : OfNat Back n := ⟨n⟩
+instance {α : Type}: GetElem (Buffer α) (Back × ℕ) α λ buf i =>
+                       ∃ (h : i.1.toNat < buf.length), i.2 < (buf[i.1.toNat]'h).length :=
+  ⟨λ buf i h => (buf[i.1.toNat]'h.1)[i.2]'h.2⟩
+
+def Buffer.get! {α} [Inhabited α] (buffer : Buffer α) (offset : ℕ) (back : Back := 0) : α :=
+  buffer[(back, offset)]!
+
+def Buffer.set (buffer : Buffer α) (offset : ℕ) (currentCycle : ℕ) : Buffer α := 
+  buffer[
+
 -- The first three fields map variable names to values. The last is an
 -- append-only stack of the expressions we assert are equal to zero via `Eqz`.
 structure State where
   felts : Map String Felt
   props : Map String Prop
-  input : List Felt
-  output : List Felt
+  buffers : Map String (Buffer Felt)
   constraints : List Prop
+  cycle : ℕ
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
@@ -92,10 +112,10 @@ lemma State.if_constraints {state₁ state₂ : State} {x : Felt} :
   (if x = 0 then state₁ else state₂).constraints =
   if x = 0 then state₁.constraints else state₂.constraints := by apply apply_ite
 
-@[simp]
-lemma State.if_output {state₁ state₂ : State} {x : Felt} :
-  (if x = 0 then state₁ else state₂).output =
-  if (x = 0) then state₁.output else state₂.output := by apply apply_ite
+-- @[simp]
+-- lemma State.if_output {state₁ state₂ : State} {x : Felt} :
+--   (if x = 0 then state₁ else state₂).output =
+--   if (x = 0) then state₁.output else state₂.output := by apply apply_ite
 
 notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
 
@@ -135,8 +155,7 @@ inductive Op : IsNondet → Type where
   | AndEqz : Variable PropTag → Variable FeltTag → Op x
   | AndCond : Variable PropTag → Variable FeltTag → Variable PropTag → Op x
   -- Buffers
-  | GetInput : ℕ → Felt → Op x
-  | GetOutput : ℕ → Felt → Op x
+  | GetBuffer : Variable ListFeltTag → Back → ℕ → Op x
 
 open Op VarType
 
@@ -173,8 +192,7 @@ def Op.eval {x} (st : State) (op : Op x) : Lit :=
   match op with
   | Const x       => .Val x
   | True          => .Constraint _root_.True
-  | GetInput i _  => .Val <| st.input.get! i
-  | GetOutput i _ => .Val <| st.output.get! i
+  | GetBuffer buf back offset => .Val <| (st.buffers buf.name).get![(st.cycle - back, offset)]!
   | Add x y       => .Val <| (st.felts x.name).get! + (st.felts y.name).get!
   | Sub x y       => .Val <| (st.felts x.name).get! - (st.felts y.name).get!
   | Mul x y       => .Val <| (st.felts x.name).get! * (st.felts y.name).get!
@@ -212,10 +230,8 @@ lemma eval_const : Γ st ⟦@Const α x⟧ₑ = .Val x := rfl
 lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .Constraint (_root_.True) := rfl
 
 @[simp]
-lemma eval_getInput : Γ st ⟦@GetInput α i x⟧ₑ = .Val (st.input.get! i) := rfl
-
-@[simp]
-lemma eval_getOutput : Γ st ⟦@GetOutput α i x⟧ₑ = .Val (st.output.get! i) := rfl
+lemma eval_getBuffer : Γ st ⟦@GetBuffer α buf back offset⟧ₑ =
+  .Val (st.buffers buf.name).get![(st.cycle - back, offset)]! := rfl
 
 @[simp]
 lemma eval_sub : Γ st ⟦@Sub α x y⟧ₑ = .Val ((st.felts x.name).get! - (st.felts y.name).get!) := rfl
@@ -293,7 +309,8 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
     | Sequence a b => b.run (a.run st)
     | SetOutput i x =>
         match st.felts x.name with
-          | .some x => {st with output := st.output.set i x}
+          | .some x => 
+                       {st with buffers := st.buffers.update "output" ((st.buffers "output").get![st.cycle]!.set i x)}
           | _       => st
 
 @[simp]
