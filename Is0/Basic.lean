@@ -12,13 +12,24 @@ def P: ℕ := 15 * 2^27 + 1
 axiom P_prime: Nat.Prime P 
 instance : Fact (Nat.Prime P) := ⟨P_prime⟩
 
+inductive VarType := | FeltTag | PropTag | BufferTag
+open VarType
+
+structure Variable (tag : VarType) :=
+  name : String
+
+abbrev Buffer (α : Type) := List (List α)
+
+def Buffer.empty {α : Type} : Buffer α := []
+
 -- A finite field element.
 abbrev Felt := ZMod P
 
--- A literal, either a finite field element or a constraint.
+-- A literal, either a finite field element, a constraint or a buffer.
 inductive Lit where
-  | Val : Felt → Lit
-  | Constraint : Prop → Lit
+  | Buf        : Buffer Felt → Lit
+  | Constraint : Prop        → Lit
+  | Val        : Felt        → Lit
 
 -- A functional map, used to send variable names to literal values.
 def Map (α : Type) (β : Type) := α → Option β
@@ -65,7 +76,6 @@ end Map
 
 end Map
 
-abbrev Buffer (α : Type) := List (List α)
 def Back := ℕ
 
 @[simp]
@@ -81,12 +91,6 @@ instance {α : Type} : GetElem (Buffer α) (Back × ℕ) α λ buf i =>
 def Buffer.set {α : Type} (buf : Buffer α) (cycle : ℕ) (offset : ℕ) (val : α) : Buffer α :=
   List.set buf cycle (buf[cycle]!.set offset val)
 
-inductive VarType := | FeltTag | PropTag | ListFeltTag
-open VarType
-
-structure Variable (tag : VarType) :=
-  name : String
-
 -- The first three fields map variable names to values. The last is an
 -- append-only stack of the expressions we assert are equal to zero via `Eqz`.
 structure State where
@@ -98,8 +102,9 @@ structure State where
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
-  | .Val x => { state with felts := state.felts.update name x }
-  | .Constraint c => { state with props := state.props.update name c }
+    | .Buf b => {state with buffers := state.buffers[name] := b}
+    | .Constraint c => {state with props := state.props[name] := c}
+    | .Val x => {state with felts := state.felts[name] := x}
 
 @[simp]
 lemma State.update_val {state : State} {name : String} {x : Felt} :
@@ -145,14 +150,16 @@ inductive Op : IsNondet → Type where
   | Neg : Variable FeltTag                    → Op x
   | Mul : Variable FeltTag → Variable FeltTag → Op x
   | Pow : Variable FeltTag → ℕ                → Op x
+  | Inv : Variable FeltTag                    → Op InNondet
   -- Logic
   | Isz : Variable FeltTag → Op InNondet
-  | Inv : Variable FeltTag → Op InNondet
   -- Constraints
   | AndEqz  : Variable PropTag → Variable FeltTag                    → Op x
   | AndCond : Variable PropTag → Variable FeltTag → Variable PropTag → Op x
-  -- State
-  | Get : Variable ListFeltTag → Back → ℕ → Op x
+  -- Buffers
+  | Back  : Variable BufferTag → ℤ        → Op x
+  | Get   : Variable BufferTag → Back → ℕ → Op x
+  | Slice : Variable BufferTag → ℕ    → ℕ → Op x
 
 open Op VarType
 
@@ -183,8 +190,11 @@ end MLIRNotation
 
 instance : Inhabited Felt := ⟨-42⟩
 
-def State.get! (st : State) (buf : Variable ListFeltTag) (back : Back) (offset : ℕ) : Felt := 
+def State.get! (st : State) (buf : Variable BufferTag) (back : Back) (offset : ℕ) : Felt := 
   (st.buffers buf.name).get![(st.cycle - back, offset)]!
+
+def Buffer.slice (buf : Buffer α) (offset size : ℕ) : Buffer α :=
+  buf.drop offset |>.take size
 
 -- Evaluate a pure functional circuit.
 def Op.eval {x} (st : State) (op : Op x) : Lit :=
@@ -198,11 +208,11 @@ def Op.eval {x} (st : State) (op : Op x) : Lit :=
     | Neg lhs     => .Val <| 0                        - (st.felts lhs.name).get!
     | Mul lhs rhs => .Val <| (st.felts lhs.name).get! * (st.felts rhs.name).get!
     | Pow lhs rhs => .Val <| (st.felts lhs.name).get! ^ rhs
-    -- Logic
-    | Isz x => .Val <| if (st.felts x.name).get! = 0 then 1 else 0
     | Inv x => .Val <| match st.felts x.name with
                          | some x => if x = 0 then 0 else x⁻¹
                          | _      => default
+    -- Logic
+    | Isz x => .Val <| if (st.felts x.name).get! = 0 then 1 else 0
     -- Constraints
     | AndEqz c val           => .Constraint <| (st.props c.name).get! ∧ (st.felts val.name).get! = 0
     | AndCond old cond inner =>
@@ -210,8 +220,10 @@ def Op.eval {x} (st : State) (op : Op x) : Lit :=
                        if (st.felts cond.name).get! = 0
                          then _root_.True
                          else (st.props inner.name).get!
-    -- State
+    -- Buffers
+    | Back buf back => .Buf <| (st.buffers buf.name).get!.slice 0 back.toNat -- Why is back signed; this toNat is wrong here, naturally.
     | Get buf back offset => .Val <| st.get! buf back offset
+    | Slice buf offset size => .Buf <| (st.buffers buf.name).get!.slice offset size
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
 
@@ -271,12 +283,14 @@ end Op
 
 inductive MLIR : IsNondet → Type where
   -- Meta
-  | Assign    : String               → Op x   → MLIR x
-  | Eqz       : Variable FeltTag              → MLIR x
-  | If        : Variable FeltTag     → MLIR x → MLIR x
-  | Nondet    : MLIR InNondet                 → MLIR NotInNondet
-  | Sequence  : MLIR x               → MLIR x → MLIR x
-  | Set       : Variable ListFeltTag → ℕ      → Variable FeltTag → MLIR InNondet
+  | Assign    : String           → Op x   → MLIR x
+  | Eqz       : Variable FeltTag          → MLIR x
+  | If        : Variable FeltTag → MLIR x → MLIR x
+  | Nondet    : MLIR InNondet             → MLIR NotInNondet
+  | Sequence  : MLIR x           → MLIR x → MLIR x
+  -- Ops
+  | Alloc : Variable BufferTag                        → MLIR x -- Note: Type info in the signature, differs from their impl.
+  | Set   : Variable BufferTag → ℕ → Variable FeltTag → MLIR InNondet
 
 -- Notation for MLIR programs.  
 namespace MLIRNotation
@@ -298,7 +312,7 @@ abbrev withEqZero (x : Felt) (st : State) : State :=
 @[simp]
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
 
-def State.set (st : State) (buffer : Variable ListFeltTag) (offset : ℕ) (val : Felt) : State := 
+def State.set (st : State) (buffer : Variable BufferTag) (offset : ℕ) (val : Felt) : State := 
   {st with buffers :=
      st.buffers[buffer.name] := ((st.buffers buffer.name).get!.set offset st.cycle val)}
 
@@ -307,6 +321,7 @@ def State.set (st : State) (buffer : Variable ListFeltTag) (offset : ℕ) (val :
 -- (`Prop`), the return value of the program.
 def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
   match program with
+    -- Meta
     | Assign name op => st[name] := Γ st ⟦op⟧ₑ
     | Eqz x =>
         match st.felts x.name with
@@ -318,6 +333,8 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
           | _       => st
     | Nondet block => block.run st
     | Sequence a b => b.run (a.run st)
+    -- Ops
+    | Alloc bufName => {st with buffers := (st.buffers[bufName.name] := Buffer.empty)}
     | Set buf offset val =>
         match st.felts val.name with
           | .some val => st.set buf offset val
