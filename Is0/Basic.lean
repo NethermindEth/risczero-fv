@@ -152,7 +152,7 @@ inductive Op : IsNondet → Type where
   | AndEqz  : Variable PropTag → Variable FeltTag                    → Op x
   | AndCond : Variable PropTag → Variable FeltTag → Variable PropTag → Op x
   -- State
-  | GetBuffer : Variable ListFeltTag → Back → ℕ → Op x
+  | Get : Variable ListFeltTag → Back → ℕ → Op x
 
 open Op VarType
 
@@ -171,14 +171,13 @@ instance : HPow (Variable FeltTag) ℕ (Op IsNondet.NotInNondet) := ⟨Op.Pow⟩
 -- Notation for Ops.
 namespace MLIRNotation
 
-scoped prefix  :max "C"                               => Op.Const
-scoped notation:max "⊤"                               => Op.True
-scoped notation:max "input[" n "]"                    => Op.GetInput n 0
-scoped notation:max "output[" n "]"                   => Op.GetOutput n 0
-scoped infix   :55  " &₀ "                            => Op.AndEqz
-scoped notation:55  " guard " c " & " x " with " y:55 => Op.AndCond x c y
-scoped prefix  :57  "??₀"                             => Op.Isz
-scoped prefix  :max "Inv"                             => Op.Inv
+scoped prefix  :max                    "C"                               => Op.Const
+scoped notation:max                    "⊤"                               => Op.True
+scoped notation:max (priority := high) b "[" "(" r ", " n ")" "]"        => Op.Get b n r
+scoped infix   :55                     " &₀ "                            => Op.AndEqz
+scoped notation:55                     " guard " c " & " x " with " y:55 => Op.AndCond x c y
+scoped prefix  :57                     "??₀"                             => Op.Isz
+scoped prefix  :max                    "Inv"                             => Op.Inv
 
 end MLIRNotation
 
@@ -212,7 +211,7 @@ def Op.eval {x} (st : State) (op : Op x) : Lit :=
                          then _root_.True
                          else (st.props inner.name).get!
     -- State
-    | GetBuffer buf back offset => .Val <| st.get! buf back offset
+    | Get buf back offset => .Val <| st.get! buf back offset
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
 
@@ -237,7 +236,7 @@ lemma eval_const : Γ st ⟦@Const α x⟧ₑ = .Val x := rfl
 lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .Constraint (_root_.True) := rfl
 
 @[simp]
-lemma eval_getBuffer : Γ st ⟦@GetBuffer α buf back offset⟧ₑ =
+lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
   .Val (st.buffers buf.name).get![(st.cycle - back, offset)]! := rfl
 
 @[simp]
@@ -271,6 +270,7 @@ end Op
 end Op
 
 inductive MLIR : IsNondet → Type where
+  -- Meta
   | Assign    : String               → Op x   → MLIR x
   | Eqz       : Variable FeltTag              → MLIR x
   | If        : Variable FeltTag     → MLIR x → MLIR x
