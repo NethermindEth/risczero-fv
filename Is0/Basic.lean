@@ -240,11 +240,12 @@ def Op.eval {x} (st : State) (op : Op x) : Lit :=
                          then _root_.True
                          else (st.props inner.name).get!
     -- Buffers
-    | Alloc size            => .Buf <| Buffer.empty size
-    | Back buf back         => .Buf <| (st.buffers buf.name).get!.2.slice 0 back.toNat -- Why is back signed; this toNat is wrong here, naturally.
-    | Get buf back offset   => .Val <| (st.buffers buf.name).get!.2[(st.cycle - back, offset)]!
-    | GetGlobal buf idx     => .Val <| let ⟨sz, buf⟩ := st.buffers buf.name |>.get!
-                                       buf[rowColOfWidthIdx sz idx]!
+    | Alloc size          => .Buf <| Buffer.empty size
+    | Back buf back       => .Buf <| (st.buffers buf.name).get!.2.slice 0 back.toNat -- Why is back signed; this toNat is wrong here, naturally.
+    | Get buf back offset => .Val <| (st.buffers buf.name).get!.2[(st.cycle - back, offset)]!
+    | GetGlobal buf idx   => .Val <| let ⟨sz, buf⟩ := st.buffers buf.name |>.get!
+                                     buf[rowColOfWidthIdx sz idx]!
+    -- | Lookup 
     | Slice buf offset size => .Buf <| (st.buffers buf.name).get!.2.slice offset size
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
