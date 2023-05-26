@@ -80,9 +80,13 @@ end Map
 end Map
 
 def Back := ℕ
+deriving DecidableEq
 
 @[simp]
 def Back.toNat (back : Back) : ℕ := back
+
+@[simp]
+def Back.ofNat (n : ℕ) : Back := n
 
 instance : HSub ℕ Back Back := ⟨λ lhs rhs => lhs - rhs.toNat⟩
 instance : OfNat Back n := ⟨n⟩
@@ -106,6 +110,11 @@ structure State where
   buffers     : Map String (Σ n : ℕ, Buffer Felt n)
   constraints : List Prop
   cycle       : ℕ
+  -- Many ways to skin this cat. We could have MLIR do State -> Option State,
+  -- but it's not as nice as State -> State. This solution doesn't force us
+  -- to check for failure all the time, but that's necessarily a good thing.
+  -- Let's see how this works out.
+  isFailed    : Bool
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
@@ -164,10 +173,11 @@ inductive Op : IsNondet → Type where
   | AndEqz  : Variable PropTag → Variable FeltTag                    → Op x
   | AndCond : Variable PropTag → Variable FeltTag → Variable PropTag → Op x
   -- Buffers
-  | Alloc : ℕ                                 → Op x
-  | Back  : Variable BufferTag → ℤ        → Op x
-  | Get   : Variable BufferTag → Back → ℕ → Op x
-  | Slice : Variable BufferTag → ℕ    → ℕ → Op x
+  | Alloc     : ℕ                                 → Op x
+  | Back      : Variable BufferTag → ℤ        → Op x
+  | Get       : Variable BufferTag → Back → ℕ → Op x
+  | GetGlobal : Variable BufferTag → ℕ        → Op x
+  | Slice     : Variable BufferTag → ℕ    → ℕ → Op x
 
 open Op VarType
 
@@ -198,11 +208,12 @@ end MLIRNotation
 
 instance : Inhabited Felt := ⟨-42⟩
 
-def State.get! (st : State) (buf : Variable BufferTag) (back : Back) (offset : ℕ) : Felt := 
-  (st.buffers buf.name).get!.2[(st.cycle - back, offset)]!
-
 def Buffer.slice (buf : Buffer α n) (offset size : ℕ) : Buffer α n :=
   buf.drop offset |>.take size
+
+def rowColOfWidthIdx (width idx : ℕ) : Back × ℕ := (idx / width, idx % width)
+
+lemma col_lt_width (h : 0 < width) : (rowColOfWidthIdx width idx).2 < width := Nat.mod_lt _ h
 
 -- Evaluate a pure functional circuit.
 def Op.eval {x} (st : State) (op : Op x) : Lit :=
@@ -231,7 +242,9 @@ def Op.eval {x} (st : State) (op : Op x) : Lit :=
     -- Buffers
     | Alloc size            => .Buf <| Buffer.empty size
     | Back buf back         => .Buf <| (st.buffers buf.name).get!.2.slice 0 back.toNat -- Why is back signed; this toNat is wrong here, naturally.
-    | Get buf back offset   => .Val <| st.get! buf back offset
+    | Get buf back offset   => .Val <| (st.buffers buf.name).get!.2[(st.cycle - back, offset)]!
+    | GetGlobal buf idx     => .Val <| let ⟨sz, buf⟩ := st.buffers buf.name |>.get!
+                                       buf[rowColOfWidthIdx sz idx]!
     | Slice buf offset size => .Buf <| (st.buffers buf.name).get!.2.slice offset size
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
@@ -298,7 +311,9 @@ inductive MLIR : IsNondet → Type where
   | Nondet    : MLIR InNondet             → MLIR NotInNondet
   | Sequence  : MLIR x           → MLIR x → MLIR x
   -- Ops
-  | Set   : Variable BufferTag → ℕ → Variable FeltTag → MLIR InNondet
+  | Fail      :                                             MLIR x
+  | Set       : Variable BufferTag → ℕ → Variable FeltTag → MLIR InNondet
+  | SetGlobal : Variable BufferTag → ℕ → Variable FeltTag → MLIR InNondet
 
 -- Notation for MLIR programs.  
 namespace MLIRNotation
@@ -327,6 +342,19 @@ def State.set! (st : State) (buffer : Variable BufferTag) (offset : ℕ) (val : 
     else {st with buffers := st.buffers[buffer.name] :=
                                ⟨sz, data.set st.cycle ⟨offset, Nat.lt_of_not_le h⟩ val⟩}
 
+private lemma State.setGlobal!aux {P : Prop} (h : ¬(P ∨ sz = 0)) : 0 < sz := by
+  rw [not_or] at h; rcases h with ⟨_, h⟩
+  exact Nat.zero_lt_of_ne_zero h
+
+def State.setGlobal! (st : State) (buffer : Variable BufferTag) (idx : ℕ) (val : Felt) : State := 
+  let ⟨sz, data⟩ := st.buffers buffer.name |>.get!
+  let rowCol := rowColOfWidthIdx sz idx
+  if h : rowCol.1 ≠ st.cycle ∨ sz = 0
+    then st
+    else {st with buffers :=
+            st.buffers[buffer.name] :=
+              ⟨sz, data.set rowCol.1 ⟨rowCol.2, col_lt_width (State.setGlobal!aux h)⟩ val⟩}
+
 -- Step through the entirety of a `MLIR` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
 -- (`Prop`), the return value of the program.
@@ -345,9 +373,14 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
     | Nondet block => block.run st
     | Sequence a b => b.run (a.run st)
     -- Ops
+    | Fail => {st with isFailed := true}
     | Set buf offset val =>
         match st.felts val.name with
           | .some val => st.set! buf offset val
+          | _         => st
+    | SetGlobal buf offset val =>
+        match st.felts val.name with
+          | .some val => st.setGlobal! buf offset val
           | _         => st
 
 @[simp]
