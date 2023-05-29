@@ -21,18 +21,24 @@ structure Variable (tag : VarType) :=
 deriving DecidableEq
 
 -- Imagine using dependent types.
-abbrev Buffer (α : Type) (n : ℕ) := List (Vector α n)
+abbrev Buffer (α : Type) (rows cols : ℕ) := Vector (Vector α cols) rows
 
-def Buffer.empty {α : Type} (n : ℕ) : Buffer α n := []
+def Buffer.empty {α : Type} (cols : ℕ) : Buffer α 0 cols := ⟨[], rfl⟩
+def xx : Vector ℕ 1 := ⟨[42], rfl⟩
+
+def Buffer.set! {α : Type} (row : Vector α cols) (buf : Buffer α rows cols) : Buffer α rows cols :=
+  if h : rows = 0
+    then buf
+    else Vector.set buf ⟨rows - 1, by cases rows <;> aesop⟩ row
 
 -- A finite field element.
 abbrev Felt := ZMod P
 
 -- A literal, either a finite field element, a constraint or a buffer.
 inductive Lit where
-  | Buf        : Buffer Felt n → Lit
-  | Constraint : Prop          → Lit
-  | Val        : Felt          → Lit
+  | Buf        : Vector Felt cols → Lit
+  | Constraint : Prop             → Lit
+  | Val        : Felt             → Lit
 
 -- A functional map, used to send variable names to literal values.
 def Map (α : Type) (β : Type) := α → Option β
@@ -79,37 +85,37 @@ end Map
 
 end Map
 
-def Back := ℕ
-deriving DecidableEq
+-- def Back := ℕ
+-- deriving DecidableEq
 
-@[simp]
-def Back.toNat (back : Back) : ℕ := back
+-- @[simp]
+-- def Back.toNat (back : Back) : ℕ := back
 
-@[simp]
-def Back.ofNat (n : ℕ) : Back := n
+-- @[simp]
+-- def Back.ofNat (n : ℕ) : Back := n
 
-instance : HSub ℕ Back Back := ⟨λ lhs rhs => lhs - rhs.toNat⟩
-instance : OfNat Back n := ⟨n⟩
+-- instance : HSub ℕ Back Back := ⟨λ lhs rhs => lhs - rhs.toNat⟩
+-- instance : OfNat Back n := ⟨n⟩
 
-instance {α : Type} {n : ℕ} : GetElem (Buffer α n) (Back × Fin n) α λ buf i =>
-                                i.1.toNat < buf.length :=
-  ⟨λ buf i h => buf[i.1.toNat]'h |>.get i.2⟩
+-- instance {α : Type} {rows : ℕ} : GetElem (Buffer α n) (Back × Fin n) α λ buf i =>
+--                                 i.1.toNat < buf.length :=
+--   ⟨λ buf i h => buf[i.1.toNat]'h |>.get i.2⟩
 
-instance {α : Type} {n : ℕ} : GetElem (Buffer α n) (Back × ℕ) α λ buf i =>
-                                i.1.toNat < buf.length ∧ i.2 < n :=
-  ⟨λ buf i h => buf[(i.1, @Fin.mk n i.2 h.2)]'h.1⟩
+-- instance {α : Type} {n : ℕ} : GetElem (Buffer α n) (Back × ℕ) α λ buf i =>
+--                                 i.1.toNat < buf.length ∧ i.2 < n :=
+--   ⟨λ buf i h => buf[(i.1, @Fin.mk n i.2 h.2)]'h.1⟩
 
-def Buffer.set (buf : Buffer Felt n) (cycle : ℕ) (offset : Fin n) (val : Felt) : Buffer Felt n :=
-  List.set buf cycle (buf[cycle]!.set offset val)
+-- def Buffer.set (buf : Buffer Felt n) (cycle : ℕ) (offset : Fin n) (val : Felt) : Buffer Felt n :=
+--   List.set buf cycle (buf[cycle]!.set offset val)
 
 -- Imagine using dependent types... don't ever git blame this.
 -- Maybe we can use (Variable <Tag>) as keys here, it's somewhat annoying tho.
 structure State where
   felts       : Map String Felt
   props       : Map String Prop
-  buffers     : Map String (Σ n : ℕ, Buffer Felt n)
-  constraints : List Prop
   cycle       : ℕ
+  buffers     : Map String (Σ cols : ℕ, Buffer Felt cycle cols)
+  constraints : List Prop
   -- Many ways to skin this cat. We could have MLIR do State -> Option State,
   -- but it's not as nice as State -> State. This solution doesn't force us
   -- to check for failure all the time, but that's necessarily a good thing.
@@ -118,9 +124,9 @@ structure State where
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
-    | @Lit.Buf n b  => {state with buffers := state.buffers[name] := ⟨n, b⟩}
-    | .Constraint c => {state with props := state.props[name] := c}
-    | .Val x        => {state with felts := state.felts[name] := x}
+    | @Lit.Buf cols b => {state with buffers := state.buffers[name] := ⟨cols, _⟩}
+    | .Constraint c   => {state with props := state.props[name] := c}
+    | .Val x          => {state with felts := state.felts[name] := x}
 
 @[simp]
 lemma State.update_val {state : State} {name : String} {x : Felt} :
