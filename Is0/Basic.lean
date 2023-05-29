@@ -173,7 +173,7 @@ inductive Op : IsNondet → Type where
   | AndEqz  : Variable PropTag → Variable FeltTag                    → Op x
   | AndCond : Variable PropTag → Variable FeltTag → Variable PropTag → Op x
   -- Buffers
-  | Alloc     : ℕ                                 → Op x
+  | Alloc     : ℕ                             → Op x
   | Back      : Variable BufferTag → ℤ        → Op x
   | Get       : Variable BufferTag → Back → ℕ → Op x
   | GetGlobal : Variable BufferTag → ℕ        → Op x
