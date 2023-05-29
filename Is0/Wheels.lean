@@ -1,14 +1,19 @@
-namespace Risc0
-
-namespace Wheels
+import Mathlib.Data.Vector.Basic
 
 namespace Option
 
-@[simp]
-theorem get_some {α : Type} [Inhabited α] {x : α} :
-  @Option.get! α _ (some x) = x := rfl
-
 end Option
+
+namespace Vector
+
+def push {α : Type} {k : ℕ} (x : α) : Vector α k → Vector α (k + 1)
+  | ⟨l, h⟩ => ⟨l ++ [x], by simp [h]⟩
+
+end Vector
+
+namespace Risc0
+
+namespace Wheels
 
 end Wheels
 

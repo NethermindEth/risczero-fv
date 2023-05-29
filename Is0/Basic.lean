@@ -1,8 +1,12 @@
 import Mathlib.Data.Nat.Prime
+import Mathlib.Data.Finmap
+import Mathlib.Data.List.Basic
 import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.LibrarySearch
+
+import Is0.Wheels
 
 namespace Risc0
 
@@ -20,19 +24,23 @@ structure Variable (tag : VarType) :=
   name : String
 deriving DecidableEq
 
--- Imagine using dependent types.
-abbrev Buffer (α : Type) (rows cols : ℕ) := Vector (Vector α cols) rows
-
-def Buffer.empty {α : Type} (cols : ℕ) : Buffer α 0 cols := ⟨[], rfl⟩
-def xx : Vector ℕ 1 := ⟨[42], rfl⟩
-
-def Buffer.set! {α : Type} (row : Vector α cols) (buf : Buffer α rows cols) : Buffer α rows cols :=
-  if h : rows = 0
-    then buf
-    else Vector.set buf ⟨rows - 1, by cases rows <;> aesop⟩ row
-
 -- A finite field element.
 abbrev Felt := ZMod P
+
+abbrev Row (cols : ℕ) := Vector Felt cols
+
+-- Imagine using dependent types.
+structure Buffer (rows cols : ℕ) :=
+  data     : Vector (Row cols) rows
+  nonempty : 0 < rows
+
+def Buffer.makeDefault (cols : ℕ) : Row cols :=
+  ⟨List.replicate cols 0, List.length_replicate _ _⟩
+
+def Buffer.empty (cols : ℕ) : Buffer 1 cols := ⟨⟨[makeDefault cols], rfl⟩, by constructor⟩
+
+def Buffer.set! (row : Row cols) (buf : Buffer rows cols) : Buffer rows cols :=
+  ⟨Vector.set buf.data ⟨rows - 1, by cases buf; cases rows <;> aesop⟩ row, buf.nonempty⟩
 
 -- A literal, either a finite field element, a constraint or a buffer.
 inductive Lit where
@@ -56,8 +64,8 @@ def update (m : Map α β) (k : α) (v : β) : Map α β :=
 
 def fromList (l : List (α × β)) : Map α β :=
   match l with
-  | [] => Map.empty
-  | (k, v) :: xs => Map.update (Map.fromList xs) k v
+    | [] => Map.empty
+    | (k, v) :: xs => Map.update (Map.fromList xs) k v
 
 notation:61 m "[" k:61 "]" " := " v:49 => Map.update m k v
 
@@ -114,13 +122,32 @@ structure State where
   felts       : Map String Felt
   props       : Map String Prop
   cycle       : ℕ
-  buffers     : Map String (Σ cols : ℕ, Buffer Felt cycle cols)
+  vars        : List String
+  buffers     : Map String (Σ cols : ℕ, Buffer (cycle + 1) cols)
   constraints : List Prop
   -- Many ways to skin this cat. We could have MLIR do State -> Option State,
   -- but it's not as nice as State -> State. This solution doesn't force us
   -- to check for failure all the time, but that's necessarily a good thing.
   -- Let's see how this works out.
   isFailed    : Bool
+
+lemma Buffer.get_rows_sub_one (buf : Buffer rows cols) : rows - 1 < rows := by
+  cases buf; cases rows <;> aesop
+
+def Buffer.last {rows} (buf : Buffer rows cols) : Row cols :=
+  buf.data.get ⟨rows - 1, get_rows_sub_one buf⟩
+
+def Buffer.extend (buf : Buffer rows cols) : Buffer (rows + 1) cols := 
+  ⟨buf.data.push buf.last, by linarith⟩
+
+def State.nextCycle (st : State) : State := {
+  st with
+    cycle := st.cycle + 1
+    buffers := _
+}
+
+-- def State.updateCopy (state : State) (name : String) (x : Lit) : State :=
+
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
