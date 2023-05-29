@@ -27,20 +27,18 @@ deriving DecidableEq
 -- A finite field element.
 abbrev Felt := ZMod P
 
-abbrev Row (cols : ℕ) := Vector Felt cols
+abbrev Row := List Felt
 
 -- Imagine using dependent types.
-structure Buffer (rows cols : ℕ) :=
-  data     : Vector (Row cols) rows
-  nonempty : 0 < rows
+abbrev Buffer := List Row
 
-def Buffer.makeDefault (cols : ℕ) : Row cols :=
-  ⟨List.replicate cols 0, List.length_replicate _ _⟩
+def Buffer.makeDefault : Buffer :=
+  [List.replicate 4 0]
 
-def Buffer.empty (cols : ℕ) : Buffer 1 cols := ⟨⟨[makeDefault cols], rfl⟩, by constructor⟩
+def Buffer.empty : Buffer := []
 
-def Buffer.set! (row : Row cols) (buf : Buffer rows cols) : Buffer rows cols :=
-  ⟨Vector.set buf.data ⟨rows - 1, by cases buf; cases rows <;> aesop⟩ row, buf.nonempty⟩
+def Buffer.set! (row : Row) (buf : Buffer) : Buffer :=
+  List.set buf (buf.length - 1) row
 
 -- A literal, either a finite field element, a constraint or a buffer.
 inductive Lit where
@@ -95,6 +93,11 @@ end Map
 
 instance : Membership α (Map α β) := ⟨λ k m => (m k).isSome⟩
 
+lemma Map.mem_eq {m : Map α β} : (x ∈ m) = (m x).isSome := rfl
+
+lemma Map.mem_in [DecidableEq α] {m : Map α β} {k : α} {v : β} : k ∈ m[k] := v := by
+  rw [mem_eq, Option.isSome_iff_exists, update_get]; use v
+
 -- def Back := ℕ
 -- deriving DecidableEq
 
@@ -125,8 +128,13 @@ structure State where
   props       : Map String Prop
   cycle       : ℕ
   vars        : List String
-  buffers     : Map String (Σ cols : ℕ, Buffer (cycle + 1) cols)
+  distinct    : vars.Nodup
+  buffers     : Map String Buffer
   hVars       : ∀ var, var ∈ vars ↔ var ∈ buffers
+  hCycle      : ∀ var (h : var ∈ vars), ((buffers var).get ((hVars _).1 h)).length = cycle
+  cols        : Map String ℕ
+  hCols       : ∀ var, var ∈ vars ↔ var ∈ cols
+  hColsLen    : ∀ var (h : var ∈ vars), cols var = ((buffers var).get ((hVars _).1 h)).length
   constraints : List Prop
   -- Many ways to skin this cat. We could have MLIR do State -> Option State,
   -- but it's not as nice as State -> State. This solution doesn't force us
@@ -134,20 +142,83 @@ structure State where
   -- Let's see how this works out.
   isFailed    : Bool
 
-lemma Buffer.get_rows_sub_one (buf : Buffer rows cols) : rows - 1 < rows := by
-  cases buf; cases rows <;> aesop
+-- lemma Buffer.get_rows_sub_one (buf : Buffer rows cols) : rows - 1 < rows := by
+--   cases buf; cases rows <;> aesop
 
-def Buffer.last {rows} (buf : Buffer rows cols) : Row cols :=
-  buf.data.get ⟨rows - 1, get_rows_sub_one buf⟩
+def Buffer.last! (buf : Buffer) : Row :=
+  buf.getLast!
 
-def Buffer.copyLast (buf : Buffer rows cols) : Buffer (rows + 1) cols := 
-  ⟨buf.data.push buf.last, by linarith⟩
+def Buffer.copyLast (buf : Buffer) : Buffer := 
+  buf.push buf.last!
+
+def extendBuffers (vars : List String) (buffers : Map String Buffer) : Map String Buffer :=
+  vars.foldl (λ acc k => acc[k] := (buffers k).get!.copyLast) Map.empty
+
+lemma mem_foldl_st_update {x : String} {v : Buffer} {vars : List String}
+                          {buffers : Map String Buffer} {init : Map String Buffer}
+  (h : x ∉ vars)
+  : x ∈ vars.foldl (λ acc k => acc[k] := (buffers k).get!.copyLast) (init[x] := v) := by
+  rw [Map.mem_eq, Option.isSome_iff_exists]
+  use v
+  sorry
+
+lemma mem_extendBuffers_iff_mem_vars_of_mem
+  (h : ∀ var, var ∈ vars ↔ var ∈ buffers)
+  (hk : vars.Nodup)
+  : x ∈ vars ↔ x ∈ extendBuffers vars buffers := by
+  apply Iff.intro <;> intros h₁
+  · unfold extendBuffers
+    induction vars generalizing buffers with
+      | nil => cases h₁
+      | cons hd tl ih =>
+          simp only [List.find?, List.mem_cons] at h₁
+          rcases h₁ with h₁ | h₁
+          · subst h₁
+            simp only [List.foldl]
+            have : x ∈ buffers := by simp [(h x).symm]
+            rw [Map.mem_eq, Option.isSome_iff_exists] at this
+            rcases this with ⟨a, h₂⟩; simp [h₂]
+            apply mem_foldl_st_update ((List.nodup_cons.1 hk).2)
+          · 
+          
+  · sorry
+
+def State.extendBuffers (st : State) : Map String Buffer :=
+  -- or fold over st.buffers with (acc k)?
+  Risc0.extendBuffers st.vars st.buffers
+
+lemma State.mem_extendBuffers_iff_mem_vars {st : State} : x ∈ st.extendBuffers ↔ x ∈ st.vars := sorry
+
+lemma State.mem_extendBuffers_iff_mem_buffers {st : State} : x ∈ st.extendBuffers ↔ x ∈ st.buffers := by
+  unfold extendBuffers
+  exact ⟨
+    λ h => by
+      rcases st with ⟨_, _, _, vars, buffers, hVars, _, _, _, _, _⟩; simp at *
+      induction vars generalizing buffers with
+        | nil => simp only [List.foldl] at h; exact h
+        | cons hd tl ih => simp at h
+                           
+                           
+      done,
+    sorry
+  ⟩
 
 def State.nextCycle (st : State) : State := {
   st with
-    cycle := st.cycle + 1
-    buffers := vars.ma
+    cycle := st.cycle + 1 
+    buffers := st.extendBuffers
     hVars := sorry
+    hCycle := λ var h => by
+      have : ∃ buffer, extendBuffers st var = some buffer := by
+        rcases st with ⟨_, _, _, vars, buffers, hVars, _, _, _, _, _⟩
+        simp at h 
+        have : var ∈ buffers := (hVars _).1 h
+        unfold extendBuffers
+      stop
+      rcases this with ⟨buffer, h₁⟩; simp [h₁]
+      unfold extendBuffers at h₁ 
+      
+
 }
 
 -- def State.updateCopy (state : State) (name : String) (x : Lit) : State :=
