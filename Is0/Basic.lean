@@ -93,6 +93,8 @@ end Map
 
 end Map
 
+instance : Membership α (Map α β) := ⟨λ k m => (m k).isSome⟩
+
 -- def Back := ℕ
 -- deriving DecidableEq
 
@@ -124,6 +126,7 @@ structure State where
   cycle       : ℕ
   vars        : List String
   buffers     : Map String (Σ cols : ℕ, Buffer (cycle + 1) cols)
+  hVars       : ∀ var, var ∈ vars ↔ var ∈ buffers
   constraints : List Prop
   -- Many ways to skin this cat. We could have MLIR do State -> Option State,
   -- but it's not as nice as State -> State. This solution doesn't force us
@@ -137,13 +140,14 @@ lemma Buffer.get_rows_sub_one (buf : Buffer rows cols) : rows - 1 < rows := by
 def Buffer.last {rows} (buf : Buffer rows cols) : Row cols :=
   buf.data.get ⟨rows - 1, get_rows_sub_one buf⟩
 
-def Buffer.extend (buf : Buffer rows cols) : Buffer (rows + 1) cols := 
+def Buffer.copyLast (buf : Buffer rows cols) : Buffer (rows + 1) cols := 
   ⟨buf.data.push buf.last, by linarith⟩
 
 def State.nextCycle (st : State) : State := {
   st with
     cycle := st.cycle + 1
-    buffers := _
+    buffers := vars.ma
+    hVars := sorry
 }
 
 -- def State.updateCopy (state : State) (name : String) (x : Lit) : State :=
