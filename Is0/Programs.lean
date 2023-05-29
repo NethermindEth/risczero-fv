@@ -132,6 +132,59 @@ lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
   MLIR
   MLIR_states
 
+lemma is0_constraints_simplified
+  {input is_0 inv_of_input : Felt} :
+  is0_constraints [input] [is_0, inv_of_input] ↔
+    if is_0 = 1 then
+      input = 0
+    else if is_0 = 0 then
+      ¬input = 0 ∧ input * inv_of_input = 1
+    else
+      True
+  := by
+  simp [is0_constraints_closed_form] -- get the full nested if form of is0_constraints
+  repeat all_goals split
+  all_goals simp [*] at *
+  case inl.inr.inr one_sub_is_0_eq_0 _ is_0_neq_1 =>
+    rewrite [sub_eq_iff_eq_add, zero_add] at one_sub_is_0_eq_0
+    rewrite [one_sub_is_0_eq_0] at is_0_neq_1
+    contradiction
+  case inr.inl.inr is_0_eq_0 _ _ =>
+    rewrite [sub_eq_iff_eq_add, zero_add]
+    apply Iff.intro
+    case mpr =>
+      intro h
+      exact And.right h
+    case mp =>
+      intro prod_inv_eq_one
+      apply And.intro
+
+
+  -- case inl.inl.inl _ is_0_eq_0 is_0_eq_1 =>
+  --   rw [is_0_eq_0] at is_0_eq_1
+  --   contradiction
+  -- case inl.inl.inr one_sub_is_0_eq_0 is_0_eq_0 _ =>
+  --   rw [is_0_eq_0] at one_sub_is_0_eq_0
+  --   contradiction
+  -- case inl.inr one_sub_is_0_eq_0 is_0_neq_0 =>
+  --   rw [sub_eq_iff_eq_add, zero_add] at one_sub_is_0_eq_0
+  --   rw [one_sub_is_0_eq_0]
+  --   simp
+  -- case inr is_0_neq_1 =>
+  --   rw [sub_eq_iff_eq_add, zero_add] at is_0_neq_1
+  --   rw [sub_eq_iff_eq_add, zero_add]
+  --   repeat split
+
+
+
+  -- repeat split
+  -- all_goals simp [*] at *
+  -- repeat split
+  -- all_goals simp [*] at *
+  -- split
+
+
+
 set_option maxHeartbeats 400000 in
 lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   is0_witness [x] = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
@@ -141,3 +194,5 @@ lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   simp [List.set]
 
 end Risc0
+
+

@@ -1,0 +1,49 @@
+if 1 - input_is_zero = 0 then if input_is_zero = 0 then True else input = 0 else (if input_is_zero = 0 then True else input = 0)
+
+if input = 0 then input_is_zero = 1 else input_is_zero = 0
+
+input = 0
+	input_is_zero = 0
+		if 1 - input_is_zero = 0 then if input_is_zero = 0 then True else input = 0 else (if input_is_zero = 0 then True else input = 0) ∧ input * inv_of_input - 1 = 0
+		(if input_is_zero = 0 then True else input = 0) ∧ input * inv_of_input - 1 = 0
+		True ∧ 0 * inv_of_input = 1
+		True ∧ False
+		False
+		
+		if input = 0 then input_is_zero = 1 else input_is_zero = 0
+		if 0 = 0 then 0 = 1 else 0 = 0
+		if True then 0 = 1 else 0 = 0
+		0 = 1
+		False
+	input_is_zero = 1
+		if 1 - input_is_zero = 0 then if input_is_zero = 0 then True else input = 0 else (if input_is_zero = 0 then True else input = 0)
+		if 1 - 1 = 0 then if 1 = 0 then True else 0 = 0 else (if 1 = 0 then True else 0 = 0)
+		if True then if 1 = 0 then True else 0 = 0 else (if 1 = 0 then True else 0 = 0)
+		if 1 = 0 then True else 0 = 0
+		if False then True else 0 = 0
+		0 = 0
+		True
+
+	input_is_zero != 0, 1
+		if 1 - input_is_zero = 0 then if input_is_zero = 0 then True else input = 0 else (if input_is_zero = 0 then True else input = 0)
+		if False then if False then True else input = 0 else (if False then True else input = 0)
+		if False then True else input = 0
+		input = 0
+		True
+input != 0
+	input_is_zero = 0
+		if 1 - input_is_zero = 0 then if input_is_zero = 0 then True else input = 0 else (if input_is_zero = 0 then True else input = 0)
+		if input_is_zero = 0 then True else input = 0
+		True
+
+	input_is_zero = 1
+		if 1 - input_is_zero = 0 then if input_is_zero = 0 then True else input = 0 else (if input_is_zero = 0 then True else input = 0)
+		if input_is_zero = 0 then True else input = 0
+		input = 0
+		False
+
+	input_is_zero != 0, 1
+		if 1 - input_is_zero = 0 then if input_is_zero = 0 then True else input = 0 else (if input_is_zero = 0 then True else input = 0)
+		if input_is_zero = 0 then True else input = 0
+		input = 0
+		False
