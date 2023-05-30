@@ -158,6 +158,38 @@ lemma is0_constraints_simplified
     case mp =>
       intro prod_inv_eq_one
       apply And.intro
+      case left =>
+        intro input_is_zero
+        rewrite [input_is_zero] at prod_inv_eq_one
+        aesop
+      case right =>
+        exact prod_inv_eq_one
+  case inr.inr.inr =>
+    sorry
+
+lemma attempt2 {input is0 inv : Felt} :
+  (if 1 - is0 = 0 then if is0 = 0 then True else input = 0 else (if is0 = 0 then True else input = 0) ∧ input * inv - 1 = 0)
+   ↔
+  ((input = 0 ∧ is0 = 1) ∨ (¬input = 0 ∧ input * inv = 1 ∧ is0 = 0)) := by
+  by_cases input = 0
+  { -- input = 0
+    rewrite [h]
+    simp
+    simp [sub_eq_iff_eq_add, zero_add]
+    apply Iff.intro
+    aesop
+    aesop -- how to manually manipulate if then? e.g. if a then T else F ↔ a
+  }
+  { -- input != 0
+    simp [h]
+    by_cases is0 = 0
+    {
+      simp [h, sub_eq_iff_eq_add, zero_add]
+    }
+    {
+      simp [*]
+    }
+  }
 
 
   -- case inl.inl.inl _ is_0_eq_0 is_0_eq_1 =>

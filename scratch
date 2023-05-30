@@ -47,3 +47,28 @@ input != 0
 		if input_is_zero = 0 then True else input = 0
 		input = 0
 		False
+
+(if 1 - is0 = 0 then True else False) ↔ ¬is0 = 0
+is0: 0: False <-> False
+is0: 1: True <-> True
+is0: 2: False <-> True
+
+
+if 1 - is0 = 0 then
+	if is0 = 0 then
+		True
+	else
+		input = 0
+else
+	(if is0 = 0 then
+		True
+	else
+		input = 0)
+	∧ input * inv - 1 = 0
+
+
+ifs:
+     is0 0 1 2
+input
+0        F T F
+1        T F F
