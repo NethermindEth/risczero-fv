@@ -42,9 +42,9 @@ def Buffer.set! (row : Row) (buf : Buffer) : Buffer :=
 
 -- A literal, either a finite field element, a constraint or a buffer.
 inductive Lit where
-  | Buf        : Vector Felt cols → Lit
-  | Constraint : Prop             → Lit
-  | Val        : Felt             → Lit
+  | Buf        : Row  → Lit
+  | Constraint : Prop → Lit
+  | Val        : Felt → Lit
 
 -- A functional map, used to send variable names to literal values.
 def Map (α : Type) (β : Type) := α → Option β
@@ -98,29 +98,6 @@ lemma Map.mem_eq {m : Map α β} : (x ∈ m) = (m x).isSome := rfl
 lemma Map.mem_in [DecidableEq α] {m : Map α β} {k : α} {v : β} : k ∈ m[k] := v := by
   rw [mem_eq, Option.isSome_iff_exists, update_get]; use v
 
--- def Back := ℕ
--- deriving DecidableEq
-
--- @[simp]
--- def Back.toNat (back : Back) : ℕ := back
-
--- @[simp]
--- def Back.ofNat (n : ℕ) : Back := n
-
--- instance : HSub ℕ Back Back := ⟨λ lhs rhs => lhs - rhs.toNat⟩
--- instance : OfNat Back n := ⟨n⟩
-
--- instance {α : Type} {rows : ℕ} : GetElem (Buffer α n) (Back × Fin n) α λ buf i =>
---                                 i.1.toNat < buf.length :=
---   ⟨λ buf i h => buf[i.1.toNat]'h |>.get i.2⟩
-
--- instance {α : Type} {n : ℕ} : GetElem (Buffer α n) (Back × ℕ) α λ buf i =>
---                                 i.1.toNat < buf.length ∧ i.2 < n :=
---   ⟨λ buf i h => buf[(i.1, @Fin.mk n i.2 h.2)]'h.1⟩
-
--- def Buffer.set (buf : Buffer Felt n) (cycle : ℕ) (offset : Fin n) (val : Felt) : Buffer Felt n :=
---   List.set buf cycle (buf[cycle]!.set offset val)
-
 -- Imagine using dependent types... don't ever git blame this.
 -- Maybe we can use (Variable <Tag>) as keys here, it's somewhat annoying tho.
 structure State where
@@ -131,7 +108,7 @@ structure State where
   distinct    : vars.Nodup
   buffers     : Map String Buffer
   hVars       : ∀ var, var ∈ vars ↔ var ∈ buffers
-  hCycle      : ∀ var (h : var ∈ vars), ((buffers var).get ((hVars _).1 h)).length = cycle
+  hCycle      : ∀ var (h : var ∈ vars), ((buffers var).get ((hVars _).1 h)).length = cycle + 1
   cols        : Map String ℕ
   hCols       : ∀ var, var ∈ vars ↔ var ∈ cols
   hColsLen    : ∀ var (h : var ∈ vars), cols var = ((buffers var).get ((hVars _).1 h)).length
@@ -152,99 +129,25 @@ def Buffer.copyLast (buf : Buffer) : Buffer :=
   buf.push buf.last!
 
 def extendBuffers (vars : List String) (buffers : Map String Buffer) : Map String Buffer :=
-  vars.foldl (λ acc k => acc[k] := (buffers k).get!.copyLast) Map.empty
-
-lemma mem_foldl_st_update {x : String} {v : Buffer} {vars : List String}
-                          {buffers : Map String Buffer} {init : Map String Buffer}
-  : x ∈ vars.foldl (λ acc k => acc[k] := (buffers k).get!.copyLast) (init[x] := v) := by
-  by_cases x ∈ vars
-  · sorry
-  · rw [Map.mem_eq, Option.isSome_iff_exists]
-    use v
-    sorry
-
-lemma mem_extendBuffers_iff_mem_vars_of_mem
-  (h : ∀ var, var ∈ vars ↔ var ∈ buffers) (hk : vars.Nodup)
-  : x ∈ vars ↔ x ∈ extendBuffers vars buffers := by
-  apply Iff.intro <;> intros h₁
-  · unfold extendBuffers
-    generalize eq : Map.empty = init; clear eq
-    induction vars generalizing buffers init with
-      | nil => cases h₁
-      | cons hd tl ih =>
-          simp only [List.find?, List.mem_cons] at h₁
-          rcases h₁ with h₁ | h₁
-          · subst h₁
-            simp only [List.foldl]
-            have : x ∈ buffers := by simp [(h x).symm]
-            rw [Map.mem_eq, Option.isSome_iff_exists] at this
-            rcases this with ⟨a, h₂⟩; simp [h₂]
-            apply mem_foldl_st_update
-          · sorry
-          -- simp 
-          --   apply ih
-          --   intros var'
-          --   apply Iff.intro <;> intros h₂
-          --   rw [←h]
-          --   aesop
-          --   rw [←h] at h₂
-          --   simp at h₂ 
-          --   rcases h₂ with h₂ | h₂
-          --   subst h₂
-          --   specialize h var'
-            
-            
-
-
-            
-            
-          
-  · sorry
+  vars.foldl (λ acc k => acc[k] := (acc k).get!.copyLast) buffers
 
 def State.extendBuffers (st : State) : Map String Buffer :=
-  -- or fold over st.buffers with (acc k)?
+  -- or fold over Map.empty with st.buffers?
   Risc0.extendBuffers st.vars st.buffers
-
-lemma State.mem_extendBuffers_iff_mem_vars {st : State} : x ∈ st.extendBuffers ↔ x ∈ st.vars := sorry
-
-lemma State.mem_extendBuffers_iff_mem_buffers {st : State} : x ∈ st.extendBuffers ↔ x ∈ st.buffers := by
-  unfold extendBuffers
-  exact ⟨
-    λ h => by
-      rcases st with ⟨_, _, _, vars, buffers, hVars, _, _, _, _, _⟩; simp at *
-      induction vars generalizing buffers with
-        | nil => simp only [List.foldl] at h; exact h
-        | cons hd tl ih => simp at h
-                           
-                           
-      done,
-    sorry
-  ⟩
 
 def State.nextCycle (st : State) : State := {
   st with
     cycle := st.cycle + 1 
     buffers := st.extendBuffers
     hVars := sorry
-    hCycle := λ var h => by
-      have : ∃ buffer, extendBuffers st var = some buffer := by
-        rcases st with ⟨_, _, _, vars, buffers, hVars, _, _, _, _, _⟩
-        simp at h 
-        have : var ∈ buffers := (hVars _).1 h
-        unfold extendBuffers
-      stop
-      rcases this with ⟨buffer, h₁⟩; simp [h₁]
-      unfold extendBuffers at h₁ 
-      
-
+    hCycle := sorry
+    hColsLen := sorry
 }
-
--- def State.updateCopy (state : State) (name : String) (x : Lit) : State :=
-
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
-    | @Lit.Buf cols b => {state with buffers := state.buffers[name] := ⟨cols, _⟩}
+    | @Lit.Buf b => {state with buffers := state.buffers[name] := b
+                                hVars := sorry}
     | .Constraint c   => {state with props := state.props[name] := c}
     | .Val x          => {state with felts := state.felts[name] := x}
 
