@@ -156,19 +156,20 @@ def extendBuffers (vars : List String) (buffers : Map String Buffer) : Map Strin
 
 lemma mem_foldl_st_update {x : String} {v : Buffer} {vars : List String}
                           {buffers : Map String Buffer} {init : Map String Buffer}
-  (h : x ∉ vars)
   : x ∈ vars.foldl (λ acc k => acc[k] := (buffers k).get!.copyLast) (init[x] := v) := by
-  rw [Map.mem_eq, Option.isSome_iff_exists]
-  use v
-  sorry
+  by_cases x ∈ vars
+  · sorry
+  · rw [Map.mem_eq, Option.isSome_iff_exists]
+    use v
+    sorry
 
 lemma mem_extendBuffers_iff_mem_vars_of_mem
-  (h : ∀ var, var ∈ vars ↔ var ∈ buffers)
-  (hk : vars.Nodup)
+  (h : ∀ var, var ∈ vars ↔ var ∈ buffers) (hk : vars.Nodup)
   : x ∈ vars ↔ x ∈ extendBuffers vars buffers := by
   apply Iff.intro <;> intros h₁
   · unfold extendBuffers
-    induction vars generalizing buffers with
+    generalize eq : Map.empty = init; clear eq
+    induction vars generalizing buffers init with
       | nil => cases h₁
       | cons hd tl ih =>
           simp only [List.find?, List.mem_cons] at h₁
@@ -178,8 +179,25 @@ lemma mem_extendBuffers_iff_mem_vars_of_mem
             have : x ∈ buffers := by simp [(h x).symm]
             rw [Map.mem_eq, Option.isSome_iff_exists] at this
             rcases this with ⟨a, h₂⟩; simp [h₂]
-            apply mem_foldl_st_update ((List.nodup_cons.1 hk).2)
-          · 
+            apply mem_foldl_st_update
+          · sorry
+          -- simp 
+          --   apply ih
+          --   intros var'
+          --   apply Iff.intro <;> intros h₂
+          --   rw [←h]
+          --   aesop
+          --   rw [←h] at h₂
+          --   simp at h₂ 
+          --   rcases h₂ with h₂ | h₂
+          --   subst h₂
+          --   specialize h var'
+            
+            
+
+
+            
+            
           
   · sorry
 
