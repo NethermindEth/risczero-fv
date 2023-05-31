@@ -36,9 +36,6 @@ abbrev BufferAtTime := List Felt
 -- Imagine using dependent types.
 abbrev Buffer := List BufferAtTime
 
-def Buffer.makeDefault : Buffer :=
-  [List.replicate 4 0]
-
 def Buffer.empty : Buffer := []
 
 def Buffer.set! (row : BufferAtTime) (buf : Buffer) : Buffer :=
@@ -69,7 +66,24 @@ def fromList (l : List (α × β)) : Map α β :=
     | [] => Map.empty
     | (k, v) :: xs => Map.update (Map.fromList xs) k v
 
+end Map
+
+end Map
+
 notation:61 m "[" k:61 "]" " := " v:49 => Map.update m k v
+
+instance {α β : Type} [DecidableEq α] : Membership α (Map α β) := ⟨λ k m => (m k).isSome⟩
+instance {α β : Type} [DecidableEq α] : GetElem (Map α β) α β (λ m k => k ∈ m) :=
+                                          ⟨λ m k h => (m k).get h⟩
+
+lemma getElem_eq {α β : Type} [DecidableEq α] {m : Map α β} {k : α}
+  (h : k ∈ m) : m[k]'h = (m k).get h := rfl
+
+namespace Map
+
+section Map
+
+variable {α : Type} [DecidableEq α] {β : Type} {m : Map α β}
 
 @[simp]
 lemma fromList_nil : fromList ([] : List (α × β)) = Map.empty := rfl
@@ -79,62 +93,149 @@ lemma fromList_cons {k : α} {v : β} {l : List (α × β)} :
   fromList ((k, v) :: l) = Map.update (Map.fromList l) k v := rfl
 
 @[simp]
-lemma update_get {m : Map α β} {k : α} {v : β} :
+lemma update_get {k : α} {v : β} :
   (m[k] := v) k = v := by simp [update]
+  
+@[simp]
+lemma empty_get {k : α} : @Map.empty _ β k = none := rfl
 
-lemma update_update_get {m : Map α β} {k k' : α} {v v' : β} (h : k ≠ k') :
+lemma update_update_get {k k' : α} {v v' : β} (h : k ≠ k') :
   ((m[k] := v)[k'] := v') k = some v := by
   unfold update
   simp [*]
 
-lemma update_get' {m : Map α β} {k k' : α} {v' : β}
+lemma update_get' {k k' : α} {v' : β}
   (v : β) (h : k ≠ k') (h₁ : m k = some v) :
   (m[k'] := v') k = some v := by simp [update, *]
 
-end Map
+lemma mem_eq : (x ∈ m) = (m x).isSome := rfl
 
-end Map
-
-instance : Membership α (Map α β) := ⟨λ k m => (m k).isSome⟩
-instance : GetElem (Map α β) α β (λ m k => k ∈ m) := ⟨λ m k h => (m k).get h⟩
-
-lemma Map.mem_eq {m : Map α β} : (x ∈ m) = (m x).isSome := rfl
-
-lemma Map.mem_in [DecidableEq α] {m : Map α β} {k : α} {v : β} : k ∈ m[k] := v := by
+lemma mem_in {k : α} {v : β} : k ∈ m[k] := v := by
   rw [mem_eq, Option.isSome_iff_exists, update_get]; use v
 
-instance {m : Map α β} : Decidable (k ∈ m) := Map.mem_eq ▸ inferInstance
+lemma mem_in_next (h : k ∈ m) : k ∈ m[k'] := v := by rw [mem_eq, Map.update] ;aesop
+
+@[simp]
+lemma not_mem_empty : k ∉ @empty α β :=
+  λ contra => by rw [Map.mem_eq, empty] at contra; cases contra
+
+lemma mem_fromList {l : List (α × β)} {k : α} : k ∈ fromList l ↔ k ∈ l.map Prod.fst := by
+  induction l with
+    | nil => simp
+    | cons hd tl ih =>
+        rcases hd with ⟨k', v'⟩
+        rw [List.map_cons, List.mem_cons, ←ih]; simp
+        apply Iff.intro <;> intros h <;> {
+          rw [mem_eq] at h ⊢; unfold Map.update at *
+          aesop
+        }
+end Map
+
+end Map
+
+instance {α β : Type} [DecidableEq α] {m : Map α β} {k : α} : Decidable (k ∈ m) :=
+  by rw [Map.mem_eq]; exact inferInstance
+
+section tactics
+
+open Lean Elab Tactic
+
+-- Probably the simplest way to decide membership for maps that contain metavariables.
+-- E.g. 42 ∈ empty[42] := k.succ.
+elab "decide_mem_map" : tactic => do
+  evalTactic <| ← `(
+    tactic| repeat ( first | apply Map.mem_in | apply Map.mem_in_next )
+  )
+
+end tactics
 
 structure State where
   -- Context of buffers.
   buffers      : Map BufferVar Buffer
-  -- Holds widths of buffers.
+  -- A widths for every buffer.
   bufferWidths : Map BufferVar ℕ
+  -- Intermediate constraints.
   constraints  : List Prop
-  -- current PC?
+  -- Current cycle.
   cycle        : ℕ
+  -- Temporary felts.
   felts        : Map FeltVar Felt
+  -- Valid but 'garbage'.
   isFailed     : Bool
+  -- Context of propositions.
   props        : Map PropVar Prop
+  -- Valid variables for buffers.
   vars         : List BufferVar
+
+def varsConsistent (st : State) := ∀ var, var ∈ st.vars ↔ var ∈ st.buffers
+
+def cycleIsRows (st : State) := ∀ var (h₁ : var ∈ st.buffers),
+                                  st.buffers[var].length = st.cycle + 1
+
+def colsConsistent (st : State) := ∀ var, var ∈ st.vars ↔ var ∈ st.bufferWidths
+
+def bufferLensConsistent (st : State) :=
+  ∀ var (h : var ∈ st.buffers) (h₁ : cycleIsRows st),
+    ∀ row (h₂ : row ≤ st.cycle),
+      have : row < st.buffers[var].length := by rw [h₁]; linarith
+      st.bufferWidths var = st.buffers[var][row].length
 
 structure State.valid (st : State) := 
   -- Variable-names/keys of the buffers map are distinct.
   distinct : st.vars.Nodup
   -- Variable-names describe valid buffers.
-  hVars    : ∀ var, var ∈ st.vars ↔ var ∈ st.buffers
+  hVars    : varsConsistent st
   -- There are as many rows in each valid buffer as there are cycles (+1)
-  hCycle   : ∀ var (h : var ∈ st.vars),
-               have : var ∈ st.buffers := (hVars _).1 h
-               st.buffers[var].length = st.cycle + 1
+  hCycle   : cycleIsRows st
   -- Variable-names describe valid rows.
-  hCols    : ∀ var, var ∈ st.vars ↔ var ∈ st.bufferWidths
+  hCols    : colsConsistent st
   -- Every valid row has a known length stored in cols.
-  hColsLen : ∀ var (h : var ∈ st.vars),
-               ∀ row (h₁ : row ≤ st.cycle),
-                 have : var ∈ st.buffers := (hVars _).1 h
-                 have : row < st.buffers[var].length := by rw [hCycle _ h]; linarith
-                 st.bufferWidths var = st.buffers[var][row].length
+  hColsLen : bufferLensConsistent st
+
+def Buffer.init (size : ℕ) : Buffer := [List.replicate size 0]
+
+abbrev Input := "input"
+abbrev Output := "output"
+
+def State.init (numInput numOutput : ℕ) : State where
+  buffers      := Map.fromList [(⟨Input⟩, Buffer.init numInput), (⟨Output⟩, Buffer.init numOutput)]
+  bufferWidths := Map.fromList [(⟨Input⟩, numInput), (⟨Output⟩, numOutput)]
+  constraints  := []
+  cycle        := 0
+  felts        := Map.empty
+  isFailed     := false
+  props        := Map.empty
+  vars         := [⟨Input⟩, ⟨Output⟩]
+
+lemma State.valid_init : (init m n).valid where
+  -- distinct := by simp [init]
+  -- hVars    := λ var => ⟨
+  --     λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
+  --     λ h => by simp [init] at *; simp [Map.mem_eq, Map.update] at h; aesop
+  --   ⟩ 
+  -- hCycle   := λ var h =>
+  --   by have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
+  --        unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
+  --      rcases this with h | h <;> subst h <;> simp [getElem_eq] <;> rfl
+  -- hCols    := λ var => ⟨
+  --     λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
+  --     λ h => by simp [init] at *; simp [Map.mem_eq, Map.update] at h; aesop
+  --   ⟩ 
+  hColsLen := λ var h h₁ row h₂ => by {
+    unfold bufferWidths init Buffer.init
+    have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
+      unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
+    rcases this with h | h <;> subst h <;> simp [getElem_eq]
+    -- inr
+    · unfold Map.update
+      simp
+      
+      
+      
+      
+    
+
+  }
 
 def Buffer.last! (buf : Buffer) : BufferAtTime :=
   buf.getLast!
@@ -156,6 +257,11 @@ def State.nextCycle (st : State) : State := {
   st with cycle := st.cycle + 1 
           buffers := st.extendBuffers
 }
+
+theorem State.valid_nextCycle {st : State} (h : st.valid) : st.nextCycle.valid := by
+  have h₁ : List.Nodup (nextCycle st).vars := h.distinct
+  constructor
+  sorry
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
