@@ -102,14 +102,14 @@ lemma Map.mem_in [DecidableEq α] {m : Map α β} {k : α} {v : β} : k ∈ m[k]
 instance {m : Map α β} : Decidable (k ∈ m) := Map.mem_eq ▸ inferInstance
 
 structure State where
-  felts       : Map String Felt
-  props       : Map String Prop
-  cycle       : ℕ
-  vars        : List String
   buffers     : Map String Buffer
   cols        : Map String ℕ
   constraints : List Prop
+  cycle       : ℕ
+  felts       : Map String Felt
   isFailed    : Bool
+  props       : Map String Prop
+  vars        : List String
 
 structure State.valid (st : State) := 
   -- Variable-names/keys of the buffers map are distinct.
@@ -117,14 +117,17 @@ structure State.valid (st : State) :=
   -- Variable-names describe valid buffers.
   hVars    : ∀ var, var ∈ st.vars ↔ var ∈ st.buffers
   -- There are as many rows in each valid buffer as there are cycles (+1)
-  hCycle   : ∀ var (h : var ∈ st.vars), ((st.buffers var).get ((hVars _).1 h)).length = st.cycle + 1
+  hCycle   : ∀ var (h : var ∈ st.vars),
+               have : var ∈ st.buffers := (hVars _).1 h
+               st.buffers[var].length = st.cycle + 1
   -- Variable-names describe valid rows.
   hCols    : ∀ var, var ∈ st.vars ↔ var ∈ st.cols
   -- Every valid row has a known length stored in cols.
   hColsLen : ∀ var (h : var ∈ st.vars),
                ∀ row (h₁ : row ≤ st.cycle),
-                 st.cols var = (((st.buffers var).get ((hVars _).1 h)).get
-                                 ⟨row, by rw [hCycle _ h]; linarith⟩).length
+                 have : var ∈ st.buffers := (hVars _).1 h
+                 have : row < st.buffers[var].length := by rw [hCycle _ h]; linarith
+                 st.cols var = st.buffers[var][row].length
 
 def Buffer.last! (buf : Buffer) : Row :=
   buf.getLast!
@@ -143,9 +146,8 @@ def Buffer.set (buf : Buffer) (val : Row) : Buffer :=
   List.set buf (buf.length - 1) val
 
 def State.nextCycle (st : State) : State := {
-  st with
-    cycle := st.cycle + 1 
-    buffers := st.extendBuffers
+  st with cycle := st.cycle + 1 
+          buffers := st.extendBuffers
 }
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
