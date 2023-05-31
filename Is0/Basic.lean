@@ -92,35 +92,39 @@ end Map
 end Map
 
 instance : Membership α (Map α β) := ⟨λ k m => (m k).isSome⟩
+instance : GetElem (Map α β) α β (λ m k => k ∈ m) := ⟨λ m k h => (m k).get h⟩
 
 lemma Map.mem_eq {m : Map α β} : (x ∈ m) = (m x).isSome := rfl
 
 lemma Map.mem_in [DecidableEq α] {m : Map α β} {k : α} {v : β} : k ∈ m[k] := v := by
   rw [mem_eq, Option.isSome_iff_exists, update_get]; use v
 
--- Imagine using dependent types... don't ever git blame this.
--- Maybe we can use (Variable <Tag>) as keys here, it's somewhat annoying tho.
+instance {m : Map α β} : Decidable (k ∈ m) := Map.mem_eq ▸ inferInstance
+
 structure State where
   felts       : Map String Felt
   props       : Map String Prop
   cycle       : ℕ
   vars        : List String
-  distinct    : vars.Nodup
   buffers     : Map String Buffer
-  hVars       : ∀ var, var ∈ vars ↔ var ∈ buffers
-  hCycle      : ∀ var (h : var ∈ vars), ((buffers var).get ((hVars _).1 h)).length = cycle + 1
   cols        : Map String ℕ
-  hCols       : ∀ var, var ∈ vars ↔ var ∈ cols
-  hColsLen    : ∀ var (h : var ∈ vars), cols var = ((buffers var).get ((hVars _).1 h)).length
   constraints : List Prop
-  -- Many ways to skin this cat. We could have MLIR do State -> Option State,
-  -- but it's not as nice as State -> State. This solution doesn't force us
-  -- to check for failure all the time, but that's necessarily a good thing.
-  -- Let's see how this works out.
   isFailed    : Bool
 
--- lemma Buffer.get_rows_sub_one (buf : Buffer rows cols) : rows - 1 < rows := by
---   cases buf; cases rows <;> aesop
+structure State.valid (st : State) := 
+  -- Variable-names/keys of the buffers map are distinct.
+  distinct : st.vars.Nodup
+  -- Variable-names describe valid buffers.
+  hVars    : ∀ var, var ∈ st.vars ↔ var ∈ st.buffers
+  -- There are as many rows in each valid buffer as there are cycles (+1)
+  hCycle   : ∀ var (h : var ∈ st.vars), ((st.buffers var).get ((hVars _).1 h)).length = st.cycle + 1
+  -- Variable-names describe valid rows.
+  hCols    : ∀ var, var ∈ st.vars ↔ var ∈ st.cols
+  -- Every valid row has a known length stored in cols.
+  hColsLen : ∀ var (h : var ∈ st.vars),
+               ∀ row (h₁ : row ≤ st.cycle),
+                 st.cols var = (((st.buffers var).get ((hVars _).1 h)).get
+                                 ⟨row, by rw [hCycle _ h]; linarith⟩).length
 
 def Buffer.last! (buf : Buffer) : Row :=
   buf.getLast!
@@ -129,27 +133,26 @@ def Buffer.copyLast (buf : Buffer) : Buffer :=
   buf.push buf.last!
 
 def extendBuffers (vars : List String) (buffers : Map String Buffer) : Map String Buffer :=
-  vars.foldl (λ acc k => acc[k] := (acc k).get!.copyLast) buffers
+  vars.foldl (λ acc k => acc[k] := acc[k]!.copyLast) buffers
 
 def State.extendBuffers (st : State) : Map String Buffer :=
   -- or fold over Map.empty with st.buffers?
   Risc0.extendBuffers st.vars st.buffers
 
+def Buffer.set (buf : Buffer) (val : Row) : Buffer :=
+  List.set buf (buf.length - 1) val
+
 def State.nextCycle (st : State) : State := {
   st with
     cycle := st.cycle + 1 
     buffers := st.extendBuffers
-    hVars := sorry
-    hCycle := sorry
-    hColsLen := sorry
 }
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
-    | @Lit.Buf b => {state with buffers := state.buffers[name] := b
-                                hVars := sorry}
-    | .Constraint c   => {state with props := state.props[name] := c}
-    | .Val x          => {state with felts := state.felts[name] := x}
+    | @Lit.Buf b    => {state with buffers := state.buffers[name] := Buffer.set state.buffers[name]! b}
+    | .Constraint c => {state with props   := state.props[name]   := c}
+    | .Val x        => {state with felts   := state.felts[name]   := x}
 
 @[simp]
 lemma State.update_val {state : State} {name : String} {x : Felt} :
@@ -237,7 +240,7 @@ end MLIRNotation
 
 instance : Inhabited Felt := ⟨-42⟩
 
-def Buffer.slice (buf : Buffer α n) (offset size : ℕ) : Buffer α n :=
+def Buffer.slice (buf : Buffer) (offset size : ℕ) : Buffer :=
   buf.drop offset |>.take size
 
 def rowColOfWidthIdx (width idx : ℕ) : Back × ℕ := (idx / width, idx % width)
