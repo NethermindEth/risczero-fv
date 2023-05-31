@@ -208,33 +208,26 @@ def State.init (numInput numOutput : ℕ) : State where
   vars         := [⟨Input⟩, ⟨Output⟩]
 
 lemma State.valid_init : (init m n).valid where
-  -- distinct := by simp [init]
-  -- hVars    := λ var => ⟨
-  --     λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
-  --     λ h => by simp [init] at *; simp [Map.mem_eq, Map.update] at h; aesop
-  --   ⟩ 
-  -- hCycle   := λ var h =>
-  --   by have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
-  --        unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
-  --      rcases this with h | h <;> subst h <;> simp [getElem_eq] <;> rfl
-  -- hCols    := λ var => ⟨
-  --     λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
-  --     λ h => by simp [init] at *; simp [Map.mem_eq, Map.update] at h; aesop
-  --   ⟩ 
+  distinct := by simp [init]
+  hVars    := λ var => ⟨
+      λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
+      λ h => by simp [init] at *; simp [Map.mem_eq, Map.update] at h; aesop
+    ⟩ 
+  hCycle   := λ var h =>
+    by have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
+         unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
+       rcases this with h | h <;> subst h <;> simp [getElem_eq] <;> rfl
+  hCols    := λ var => ⟨
+      λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
+      λ h => by simp [init] at *; simp [Map.mem_eq, Map.update] at h; aesop
+    ⟩ 
   hColsLen := λ var h h₁ row h₂ => by {
     unfold bufferWidths init Buffer.init
     have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
       unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
-    rcases this with h | h <;> subst h <;> simp [getElem_eq]
-    -- inr
-    · unfold Map.update
-      simp
-      
-      
-      
-      
-    
-
+    have : row = 0 := by simp [init] at h₂; exact h₂
+    subst this; simp
+    rcases this with h | h <;> subst h <;> simp [Map.update, getElem_eq]
   }
 
 def Buffer.last! (buf : Buffer) : BufferAtTime :=
