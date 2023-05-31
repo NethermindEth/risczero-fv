@@ -24,27 +24,31 @@ structure Variable (tag : VarType) :=
   name : String
 deriving DecidableEq
 
+abbrev BufferVar := Variable BufferTag
+abbrev FeltVar := Variable FeltTag
+abbrev PropVar := Variable PropTag
+
 -- A finite field element.
 abbrev Felt := ZMod P
 
-abbrev Row := List Felt
+abbrev BufferAtTime := List Felt
 
 -- Imagine using dependent types.
-abbrev Buffer := List Row
+abbrev Buffer := List BufferAtTime
 
 def Buffer.makeDefault : Buffer :=
   [List.replicate 4 0]
 
 def Buffer.empty : Buffer := []
 
-def Buffer.set! (row : Row) (buf : Buffer) : Buffer :=
+def Buffer.set! (row : BufferAtTime) (buf : Buffer) : Buffer :=
   List.set buf (buf.length - 1) row
 
 -- A literal, either a finite field element, a constraint or a buffer.
 inductive Lit where
-  | Buf        : Row  → Lit
-  | Constraint : Prop → Lit
-  | Val        : Felt → Lit
+  | Buf        : BufferAtTime → Lit
+  | Constraint : Prop         → Lit
+  | Val        : Felt         → Lit
 
 -- A functional map, used to send variable names to literal values.
 def Map (α : Type) (β : Type) := α → Option β
@@ -102,14 +106,17 @@ lemma Map.mem_in [DecidableEq α] {m : Map α β} {k : α} {v : β} : k ∈ m[k]
 instance {m : Map α β} : Decidable (k ∈ m) := Map.mem_eq ▸ inferInstance
 
 structure State where
-  buffers     : Map String Buffer
-  cols        : Map String ℕ
-  constraints : List Prop
-  cycle       : ℕ
-  felts       : Map String Felt
-  isFailed    : Bool
-  props       : Map String Prop
-  vars        : List String
+  -- Context of buffers.
+  buffers      : Map BufferVar Buffer
+  -- Holds widths of buffers.
+  bufferWidths : Map BufferVar ℕ
+  constraints  : List Prop
+  -- current PC?
+  cycle        : ℕ
+  felts        : Map FeltVar Felt
+  isFailed     : Bool
+  props        : Map PropVar Prop
+  vars         : List BufferVar
 
 structure State.valid (st : State) := 
   -- Variable-names/keys of the buffers map are distinct.
@@ -121,28 +128,28 @@ structure State.valid (st : State) :=
                have : var ∈ st.buffers := (hVars _).1 h
                st.buffers[var].length = st.cycle + 1
   -- Variable-names describe valid rows.
-  hCols    : ∀ var, var ∈ st.vars ↔ var ∈ st.cols
+  hCols    : ∀ var, var ∈ st.vars ↔ var ∈ st.bufferWidths
   -- Every valid row has a known length stored in cols.
   hColsLen : ∀ var (h : var ∈ st.vars),
                ∀ row (h₁ : row ≤ st.cycle),
                  have : var ∈ st.buffers := (hVars _).1 h
                  have : row < st.buffers[var].length := by rw [hCycle _ h]; linarith
-                 st.cols var = st.buffers[var][row].length
+                 st.bufferWidths var = st.buffers[var][row].length
 
-def Buffer.last! (buf : Buffer) : Row :=
+def Buffer.last! (buf : Buffer) : BufferAtTime :=
   buf.getLast!
 
 def Buffer.copyLast (buf : Buffer) : Buffer := 
   buf.push buf.last!
 
-def extendBuffers (vars : List String) (buffers : Map String Buffer) : Map String Buffer :=
+def extendBuffers (vars : List BufferVar) (buffers : Map BufferVar Buffer) : Map BufferVar Buffer :=
   vars.foldl (λ acc k => acc[k] := acc[k]!.copyLast) buffers
 
-def State.extendBuffers (st : State) : Map String Buffer :=
+def State.extendBuffers (st : State) : Map BufferVar Buffer :=
   -- or fold over Map.empty with st.buffers?
   Risc0.extendBuffers st.vars st.buffers
 
-def Buffer.set (buf : Buffer) (val : Row) : Buffer :=
+def Buffer.set (buf : Buffer) (val : BufferAtTime) : Buffer :=
   List.set buf (buf.length - 1) val
 
 def State.nextCycle (st : State) : State := {
@@ -152,17 +159,18 @@ def State.nextCycle (st : State) : State := {
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
-    | @Lit.Buf b    => {state with buffers := state.buffers[name] := Buffer.set state.buffers[name]! b}
-    | .Constraint c => {state with props   := state.props[name]   := c}
-    | .Val x        => {state with felts   := state.felts[name]   := x}
+    | @Lit.Buf b    => {state with buffers :=
+                          state.buffers[⟨name⟩] := Buffer.set state.buffers[(⟨name⟩ : BufferVar)]! b}
+    | .Constraint c => {state with props := state.props[⟨name⟩] := c}
+    | .Val x        => {state with felts := state.felts[⟨name⟩] := x}
 
 @[simp]
 lemma State.update_val {state : State} {name : String} {x : Felt} :
-  update state name (.Val x) = { state with felts := state.felts.update name x } := rfl
+  update state name (.Val x) = { state with felts := state.felts.update ⟨name⟩ x } := rfl
 
 @[simp]
 lemma State.update_constraint {state : State} {name : String} {c : Prop} :
-  update state name (.Constraint c) = { state with props := state.props.update name c } := rfl
+  update state name (.Constraint c) = { state with props := state.props.update ⟨name⟩ c } := rfl
 
 @[simp]
 lemma State.if_constraints {state₁ state₂ : State} {x : Felt} :
