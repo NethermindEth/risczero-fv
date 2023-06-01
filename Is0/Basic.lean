@@ -104,9 +104,15 @@ lemma update_update_get {k k' : α} {v v' : β} (h : k ≠ k') :
   unfold update
   simp [*]
 
+lemma update_get_not_equal {k k' : α} {v' : β}
+  (h : k ≠ k') :
+  (m[k'] := v') k = m k := by simp [update, *]
+
 lemma update_get' {k k' : α} {v' : β}
   (v : β) (h : k ≠ k') (h₁ : m k = some v) :
-  (m[k'] := v') k = some v := by simp [update, *]
+  (m[k'] := v') k = some v := by 
+    simp only [update_get_not_equal h]
+    exact h₁
 
 lemma mem_eq : (x ∈ m) = (m x).isSome := rfl
 
