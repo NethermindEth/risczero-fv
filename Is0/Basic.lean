@@ -301,6 +301,9 @@ def lub (x₁ x₂ : IsNondet) :=
     | InNondet => InNondet
     | _ => x₂
 
+
+def Back := ℕ 
+
 -- Pure functional operations from the cirgen (circuit generation) MLIR dialect.
 open VarType in
 inductive Op : IsNondet → Type where
