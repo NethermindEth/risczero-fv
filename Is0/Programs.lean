@@ -172,25 +172,58 @@ lemma attempt2 {input is0 inv : Felt} :
    ↔
   ((input = 0 ∧ is0 = 1) ∨ (¬input = 0 ∧ input * inv = 1 ∧ is0 = 0)) := by
   by_cases input = 0
-  { -- input = 0
-    rewrite [h]
-    simp
-    simp [sub_eq_iff_eq_add, zero_add]
-    apply Iff.intro
-    aesop
-    aesop -- how to manually manipulate if then? e.g. if a then T else F ↔ a
-  }
-  { -- input != 0
-    simp [h]
+  . aesop
+    rewrite [sub_eq_iff_eq_add, zero_add] at * --had to do this because it won't recognise h✝
+    simp [*]
+  . simp [*]
     by_cases is0 = 0
-    {
-      simp [h, sub_eq_iff_eq_add, zero_add]
-    }
-    {
-      simp [*]
-    }
-  }
+    . simp [h, sub_eq_iff_eq_add, zero_add]
+    . simp [*]
+#check if_pos
+lemma attempt3
+  {input is_0 inv_of_input : Felt} :
+  (if 1 - is_0 = 0 then if is_0 = 0 then True else input = 0 else (if is_0 = 0 then True else input = 0) ∧ input * inv_of_inpu - 1 = 0) ↔
+    if is_0 = 1 then
+      input = 0
+    else 
+      input * inv_of_input = 1
+  := by
+  by_cases input = 0
+  . have h₁: 1 - is_0 = 0 ↔ is_0 = 1 := by simp [sub_eq_iff_eq_add, zero_add];
+    simp [*]
+    simp only [sub_eq_iff_eq_add, zero_add]
+    rfl
+  -- repeat all_goals split
+  -- all_goals simp [*] at *
+  -- case inr.inl is0_eq_0 _ =>
+  --   aesop
+  --   rewrite [sub_eq_iff_eq_add, zero_add] at a
+  --   exact a
+  -- case inr.inr h₁ h₂ h₃ =>
+  --   rewrite [sub_eq_iff_eq_add, zero_add] at h₁
+  --   exact absurd h₁.symm h₃
 
+  -- case inl.inr.inr one_sub_is_0_eq_0 _ is_0_neq_1 =>
+  --   rewrite [sub_eq_iff_eq_add, zero_add] at one_sub_is_0_eq_0
+  --   rewrite [one_sub_is_0_eq_0] at is_0_neq_1
+  --   contradiction
+  -- case inr.inl.inr is_0_eq_0 _ _ =>
+  --   rewrite [sub_eq_iff_eq_add, zero_add]
+  --   apply Iff.intro
+  --   case mpr =>
+  --     intro h
+  --     exact And.right h
+  --   case mp =>
+  --     intro prod_inv_eq_one
+  --     apply And.intro
+  --     case left =>
+  --       intro input_is_zero
+  --       rewrite [input_is_zero] at prod_inv_eq_one
+  --       aesop
+  --     case right =>
+  --       exact prod_inv_eq_one
+  -- case inr.inr.inr =>
+  --   sorry
 
   -- case inl.inl.inl _ is_0_eq_0 is_0_eq_1 =>
   --   rw [is_0_eq_0] at is_0_eq_1
