@@ -257,13 +257,6 @@ def State.nextCycle (st : State) : State := {
           buffers := st.extendBuffers
 }
 
-theorem State.valid_nextCycle {st : State} (h : st.valid) : st.nextCycle.valid := by
-  have h₁ : List.Nodup (nextCycle st).vars := h.distinct
-  unfold nextCycle
-  constructor
-  sorry
-    
-
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
     | @Lit.Buf b    => {state with buffers :=
@@ -493,24 +486,20 @@ abbrev withEqZero (x : Felt) (st : State) : State :=
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
 
 def State.set! (st : State) (buffer : Variable BufferTag) (offset : ℕ) (val : Felt) : State := 
-  let ⟨sz, data⟩ := st.buffers buffer.name |>.get!
-  if h : sz ≤ offset
-    then st
-    else {st with buffers := st.buffers[buffer.name] :=
-                               ⟨sz, data.set st.cycle ⟨offset, Nat.lt_of_not_le h⟩ val⟩}
+  {st with buffers := st.buffers[buffer] := st.buffers[buffer]!.set (st.buffers[buffer]!.last!.set offset val) } 
 
 private lemma State.setGlobal!aux {P : Prop} (h : ¬(P ∨ sz = 0)) : 0 < sz := by
   rw [not_or] at h; rcases h with ⟨_, h⟩
   exact Nat.zero_lt_of_ne_zero h
 
-def State.setGlobal! (st : State) (buffer : Variable BufferTag) (idx : ℕ) (val : Felt) : State := 
-  let ⟨sz, data⟩ := st.buffers buffer.name |>.get!
-  let rowCol := rowColOfWidthIdx sz idx
-  if h : rowCol.1 ≠ st.cycle ∨ sz = 0
-    then st
-    else {st with buffers :=
-            st.buffers[buffer.name] :=
-              ⟨sz, data.set rowCol.1 ⟨rowCol.2, col_lt_width (State.setGlobal!aux h)⟩ val⟩}
+-- def State.setGlobal! (st : State) (buffer : Variable BufferTag) (idx : ℕ) (val : Felt) : State := sorry 
+  -- let ⟨sz, data⟩ := st.buffers buffer |>.get!
+  -- let rowCol := rowColOfWidthIdx sz idx
+  -- if h : rowCol.1 ≠ st.cycle ∨ sz = 0
+  --   then st
+  --   else {st with buffers :=
+  --           st.buffers[buffer.name] :=
+  --             ⟨sz, data.set rowCol.1 ⟨rowCol.2, col_lt_width (State.setGlobal!aux h)⟩ val⟩}
 
 -- Step through the entirety of a `MLIR` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
@@ -520,11 +509,11 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
     -- Meta
     | Assign name op => st[name] := Γ st ⟦op⟧ₑ
     | Eqz x =>
-        match st.felts x.name with
+        match st.felts x with
           | .some x => withEqZero x st
           | _       => st
     | If x program =>
-        match st.felts x.name with
+        match st.felts x with
           | .some x => if x = 0 then st else program.run st
           | _       => st
     | Nondet block => block.run st
@@ -532,12 +521,12 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
     -- Ops
     | Fail => {st with isFailed := true}
     | Set buf offset val =>
-        match st.felts val.name with
+        match st.felts val with
           | .some val => st.set! buf offset val
           | _         => st
     | SetGlobal buf offset val =>
-        match st.felts val.name with
-          | .some val => st.setGlobal! buf offset val
+        match st.felts val with
+          | .some val => sorry --st.setGlobal! buf offset val
           | _         => st
 
 @[simp]
