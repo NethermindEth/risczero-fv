@@ -259,8 +259,10 @@ def State.nextCycle (st : State) : State := {
 
 theorem State.valid_nextCycle {st : State} (h : st.valid) : st.nextCycle.valid := by
   have h₁ : List.Nodup (nextCycle st).vars := h.distinct
+  unfold nextCycle
   constructor
   sorry
+    
 
 def State.update (state : State) (name : String) (x : Lit) : State :=
   match x with
@@ -301,8 +303,11 @@ def lub (x₁ x₂ : IsNondet) :=
     | InNondet => InNondet
     | _ => x₂
 
-
 def Back := ℕ 
+
+instance : CommSemiring Back := by unfold Back; exact inferInstance
+
+def Back.toNat (n : Back) : ℕ := n
 
 -- Pure functional operations from the cirgen (circuit generation) MLIR dialect.
 open VarType in
@@ -358,7 +363,7 @@ end MLIRNotation
 
 instance : Inhabited Felt := ⟨-42⟩
 
-def Buffer.slice (buf : Buffer) (offset size : ℕ) : Buffer :=
+def BufferAtTime.slice (buf : BufferAtTime) (offset size : ℕ) : BufferAtTime :=
   buf.drop offset |>.take size
 
 def rowColOfWidthIdx (width idx : ℕ) : Back × ℕ := (idx / width, idx % width)
@@ -372,31 +377,32 @@ def Op.eval {x} (st : State) (op : Op x) : Lit :=
     | Const const => .Val const
     | True        => .Constraint _root_.True
     -- Arith
-    | Add lhs rhs => .Val <| (st.felts lhs.name).get! + (st.felts rhs.name).get!
-    | Sub lhs rhs => .Val <| (st.felts lhs.name).get! - (st.felts rhs.name).get!
-    | Neg lhs     => .Val <| 0                        - (st.felts lhs.name).get!
-    | Mul lhs rhs => .Val <| (st.felts lhs.name).get! * (st.felts rhs.name).get!
-    | Pow lhs rhs => .Val <| (st.felts lhs.name).get! ^ rhs
-    | Inv x => .Val <| match st.felts x.name with
+    | Add lhs rhs => .Val <| (st.felts lhs).get! + (st.felts rhs).get!
+    | Sub lhs rhs => .Val <| (st.felts lhs).get! - (st.felts rhs).get!
+    | Neg lhs     => .Val <| 0                        - (st.felts lhs).get!
+    | Mul lhs rhs => .Val <| (st.felts lhs).get! * (st.felts rhs).get!
+    | Pow lhs rhs => .Val <| (st.felts lhs).get! ^ rhs
+    | Inv x => .Val <| match st.felts x with
                          | some x => if x = 0 then 0 else x⁻¹
                          | _      => default
     -- Logic
-    | Isz x => .Val <| if (st.felts x.name).get! = 0 then 1 else 0
+    | Isz x => .Val <| if (st.felts x).get! = 0 then 1 else 0
     -- Constraints
-    | AndEqz c val           => .Constraint <| (st.props c.name).get! ∧ (st.felts val.name).get! = 0
+    | AndEqz c val           => .Constraint <| (st.props c).get! ∧ (st.felts val).get! = 0
     | AndCond old cond inner =>
-        .Constraint <| (st.props old.name).get! ∧
-                       if (st.felts cond.name).get! = 0
+        .Constraint <| (st.props old).get! ∧
+                       if (st.felts cond).get! = 0
                          then _root_.True
-                         else (st.props inner.name).get!
+                         else (st.props inner).get!
     -- Buffers
-    | Alloc size          => .Buf <| Buffer.empty size
-    | Back buf back       => .Buf <| (st.buffers buf.name).get!.2.slice 0 back.toNat -- Why is back signed; this toNat is wrong here, naturally.
-    | Get buf back offset => .Val <| (st.buffers buf.name).get!.2[(st.cycle - back, offset)]!
-    | GetGlobal buf idx   => .Val <| let ⟨sz, buf⟩ := st.buffers buf.name |>.get!
-                                     buf[rowColOfWidthIdx sz idx]!
+    | Alloc size          => .Buf <| List.replicate size 0
+    | Back buf back       => .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice 0 back.toNat -- Why is back signed; this toNat is wrong here, naturally.
+    | Get buf back offset => .Val <| (st.buffers buf).get!.get! ((st.cycle - 1) - (back.toNat)) |>.get! offset
+    | GetGlobal buf idx   => .Val <| let buf' := st.buffers buf |>.get!
+                                     let bufferWidth := st.bufferWidths buf |>.get!
+                                     buf'.get! (idx.div bufferWidth) |>.get! (idx.mod bufferWidth)
     -- | Lookup 
-    | Slice buf offset size => .Buf <| (st.buffers buf.name).get!.2.slice offset size
+    | Slice buf offset size => .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
 
@@ -422,33 +428,33 @@ lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .Constraint (_root_.True) := rfl
 
 @[simp]
 lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
-  .Val (st.buffers buf.name).get!.2[(st.cycle - back, offset)]! := rfl
+  .Val ((st.buffers buf).get!.get! ((st.cycle - 1) - (back.toNat)) |>.get! offset) := rfl
 
 @[simp]
-lemma eval_sub : Γ st ⟦@Sub α x y⟧ₑ = .Val ((st.felts x.name).get! - (st.felts y.name).get!) := rfl
+lemma eval_sub : Γ st ⟦@Sub α x y⟧ₑ = .Val ((st.felts x).get! - (st.felts y).get!) := rfl
 
 @[simp]
-lemma eval_mul : Γ st ⟦@Mul α x y⟧ₑ = .Val ((st.felts x.name).get! * (st.felts y.name).get!) := rfl
+lemma eval_mul : Γ st ⟦@Mul α x y⟧ₑ = .Val ((st.felts x).get! * (st.felts y).get!) := rfl
 
 @[simp]
-lemma eval_isz : Γ st ⟦??₀x⟧ₑ = .Val (if (st.felts x.name).get! = 0 then 1 else 0) := rfl
+lemma eval_isz : Γ st ⟦??₀x⟧ₑ = .Val (if (st.felts x).get! = 0 then 1 else 0) := rfl
 
 @[simp]
-lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .Val (match st.felts x.name with
+lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .Val (match st.felts x with
                                         | some x => if x = 0 then 0 else x⁻¹
                                         | _      => default) := rfl
 
 @[simp]
 lemma eval_andEqz : Γ st ⟦@AndEqz α c x⟧ₑ =
-                    .Constraint ((st.props c.name).get! ∧ (st.felts x.name).get! = 0) := rfl
+                    .Constraint ((st.props c).get! ∧ (st.felts x).get! = 0) := rfl
 
 @[simp]
 lemma eval_andCond :
   Γ st ⟦@AndCond α old cnd inner⟧ₑ =
-    .Constraint ((st.props old.name).get! ∧
-                 if (st.felts cnd.name).get! = 0
+    .Constraint ((st.props old).get! ∧
+                 if (st.felts cnd).get! = 0
                    then _root_.True
-                   else (st.props inner.name).get!) := rfl
+                   else (st.props inner).get!) := rfl
 
 end Op
 
