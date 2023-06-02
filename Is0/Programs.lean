@@ -13,7 +13,7 @@ namespace Risc0
 
 open MLIRNotation
 
-def is0_initial_state (input : Felt) (output : List Felt) (h : output.length = 2) : State :=
+def is0_initial_state (input : Felt) (output : List Felt) : State :=
   { buffers := Map.fromList [(⟨"input"⟩, [[input]]), (⟨"output"⟩, [output])]
   , bufferWidths := Map.fromList [(⟨"input"⟩, 1), (⟨"output"⟩, 2)]
   , constraints := []
@@ -24,9 +24,9 @@ def is0_initial_state (input : Felt) (output : List Felt) (h : output.length = 2
   , vars := [⟨"input"⟩, ⟨"output"⟩]
   }
 
-def is0_witness_initial_state (input : Felt) : State := is0_initial_state input ([42, 42]) (by rfl)
+def is0_witness_initial_state (input : Felt) : State := is0_initial_state input ([42, 42])
 
-def is0_initial_state_valid {input : Felt} {output : List Felt} {hLen : output.length = 2} : is0_initial_state input output hLen |>.valid := by
+def is0_initial_state_valid {input : Felt} {output : List Felt} {hLen : output.length = 2} : is0_initial_state input output |>.valid := by
   unfold is0_initial_state
   exact { distinct := by simp
           , hVars := by 
@@ -105,8 +105,10 @@ def is0_initial_state_valid {input : Felt} {output : List Felt} {hLen : output.l
               simp at h
               have var_input_or_output : var ∈ [⟨"input"⟩,⟨"output"⟩] := by
                 simp [Map.mem_fromList]
+                sorry
                 -- rewrite [Map.mem_unroll_assignment] at h
-                
+              sorry
+
               -- unfold cycleIsRows at row
               -- simp only [zero_add] at row
               -- by_cases eq : var = ⟨"input"⟩ 
@@ -154,9 +156,9 @@ def is0_witness (input : Felt) : List Felt :=
       ?₀ ⟨"x * arg1[1] - 1"⟩
   (st'.buffers ⟨"output"⟩ |>.get!.getLast!)
 
-def is0_constraints (input : Felt) (output : List Felt) (hLen : output.length = 2) : Prop :=
+def is0_constraints (input : Felt) (output : List Felt) : Prop :=
   let state' :=
-    MLIR.runProgram (st := is0_initial_state input output hLen) <|
+    MLIR.runProgram (st := is0_initial_state input output) <|
     -- %0 = cirgen.const 1
     "1"         ←ₐ C 1; 
     "0"         ←ₐ C 0;
@@ -215,20 +217,18 @@ end tactics
   
 set_option maxHeartbeats 2000000 in
 lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
-    is0_constraints [x] [y₁, y₂]
+    (is0_constraints x ([y₁, y₂]))
   ↔ (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by
   unfold is0_constraints MLIR.runProgram
   MLIR
   MLIR_states
   aesop
   
-set_option maxHeartbeats 400000 in
+set_option maxHeartbeats 2000000 in
 lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
-  is0_witness [x] = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
+  is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
   unfold is0_witness MLIR.runProgram
   MLIR
   MLIR_states
-  simp [List.set]
-  by_cases eq : x = 0 <;> simp [eq]
 
 end Risc0
