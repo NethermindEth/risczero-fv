@@ -135,6 +135,32 @@ lemma mem_fromList {l : List (α × β)} {k : α} : k ∈ fromList l ↔ k ∈ l
           rw [mem_eq] at h ⊢; unfold Map.update at *
           aesop
         }
+
+lemma mem_in_prev (k_mem: k ∈ m[k'] := v) (k_distinct : k ≠ k') : k ∈ m := by
+  simp [mem_eq, Option.isSome_iff_exists] at *
+  rewrite [update_get_not_equal] at k_mem
+  simp [k_mem]
+  simp [k_distinct]
+
+lemma mem_unroll_assignment {k k': α} : k ∈ m[k'] := v ↔ (k=k' ∨ k ∈ m) := by
+  by_cases k=k'
+  . rewrite [h]
+    apply Iff.intro
+    . intro _
+      apply Or.intro_left
+      rfl
+    . intro _
+      exact mem_in
+  . apply Iff.intro
+    . intro k_in_update
+      apply Or.intro_right
+      exact mem_in_prev k_in_update h
+    . intro h'
+      cases h' with
+       | inl a => contradiction
+       | inr k_in_m => exact mem_in_next k_in_m
+
+
 end Map
 
 end Map

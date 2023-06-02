@@ -103,15 +103,19 @@ def is0_initial_state_valid {input : Felt} {output : List Felt} {hLen : output.l
               simp only [List.getElem_eq_get]
               intros var h row x h₁
               simp at h
-              unfold cycleIsRows at row
-              simp only [zero_add] at row
-              by_cases eq : var = ⟨"input"⟩ 
-              subst eq
-              rw [Map.update_get]
-              simp only [Option.some.injEq]
-              simp
-              sorry
-              sorry 
+              have var_input_or_output : var ∈ [⟨"input"⟩,⟨"output"⟩] := by
+                simp [Map.mem_fromList]
+                -- rewrite [Map.mem_unroll_assignment] at h
+                
+              -- unfold cycleIsRows at row
+              -- simp only [zero_add] at row
+              -- by_cases eq : var = ⟨"input"⟩ 
+              -- subst eq
+              -- rw [Map.update_get]
+              -- simp only [Option.some.injEq]
+              -- simp
+              -- sorry
+              -- sorry 
     }
 
 
