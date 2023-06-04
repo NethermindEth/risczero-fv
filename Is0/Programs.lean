@@ -12,7 +12,15 @@ import Is0.Wheels
 namespace Risc0
 
 open MLIRNotation
-
+-- def State.init (numInput numOutput : ℕ) : State where
+--   buffers      := Map.fromList [(⟨Input⟩, Buffer.init numInput), (⟨Output⟩, Buffer.init numOutput)]
+--   bufferWidths := Map.fromList [(⟨Input⟩, numInput), (⟨Output⟩, numOutput)]
+--   constraints  := []
+--   cycle        := 0
+--   felts        := Map.empty
+--   isFailed     := false
+--   props        := Map.empty
+--   vars         := [⟨Input⟩, ⟨Output⟩]
 def is0_initial_state (input : Felt) (output : List Felt) : State :=
   { buffers := Map.fromList [(⟨"input"⟩, [[input]]), (⟨"output"⟩, [output])]
   , bufferWidths := Map.fromList [(⟨"input"⟩, 1), (⟨"output"⟩, 2)]
@@ -24,106 +32,20 @@ def is0_initial_state (input : Felt) (output : List Felt) : State :=
   , vars := [⟨"input"⟩, ⟨"output"⟩]
   }
 
+def is0_initial_state' (input output : List Felt)
+                       (hIn : input.length = 1)
+                       (hOut : output.length = 2) := State.init' 1 2 input output hIn hOut
+
+theorem justToShowInitialEquiv {input : Felt} {output : List Felt} (hOut : output.length = 2) :
+        is0_initial_state input output = is0_initial_state' [input] output rfl hOut := rfl
+
 def is0_witness_initial_state (input : Felt) : State := is0_initial_state input ([42, 42])
 
-def is0_initial_state_valid {input : Felt} {output : List Felt} {hLen : output.length = 2} : is0_initial_state input output |>.valid := by
-  unfold is0_initial_state
-  exact { distinct := by simp
-          , hVars := by 
-              intros var
-              rw [Map.mem_eq]
-              simp
-              apply Iff.intro
-              · intros h
-                rcases h with h | h 
-                simp
-                subst h
-                simp
-                subst h
-                simp only [Map.update_update_get]
-                rfl
-              · by_cases eq : var = ⟨"input"⟩ 
-                subst eq
-                tauto
-                by_cases eq₁ : var = ⟨"output"⟩
-                subst eq₁
-                tauto
-                rw [Map.update_get_not_equal]
-                rw [Map.update_get_not_equal]
-                simp only [Map.empty]
-                tauto
-                exact eq₁
-                exact eq  
-          , hCycle := by
-              simp only [Map.fromList_cons, Map.fromList_nil, decide_False]
-              intros var h
-              simp at h
-              by_cases eq : var = ⟨"input"⟩ 
-              subst eq
-              rw [getElem_eq]
-              simp only [Map.update_get, Option.get_some, List.length_singleton, zero_add]
-              by_cases eq₁ : var = ⟨"output"⟩ 
-              subst eq₁
-              rw [getElem_eq]    
-              simp only [zero_add, Map.empty, Map.update, ite_true, ite_false, Option.get_some, List.length_singleton]
-              simp
-              rw [Map.mem_eq] at h
-              rw [Map.update_get_not_equal eq] at h
-              rw [Map.update_get_not_equal eq₁] at h
-              simp only [Map.empty] at h 
-          , hCols := by
-              intros var
-              apply Iff.intro
-              · intros h
-                simp at h
-                rcases h with h | h
-                · subst h
-                  rw [Map.mem_eq]
-                  simp only
-                · subst h
-                  rw [Map.mem_eq]
-                  simp only
-              · intros h
-                simp at h
-                by_cases eq : var = ⟨"input"⟩ 
-                subst eq
-                simp
-                by_cases eq₁ : var = ⟨"output"⟩ 
-                subst eq₁
-                simp only
-                rw [Map.mem_eq] at h
-                rw [Map.update_get_not_equal] at h
-                rw [Map.update_get_not_equal] at h
-                simp only [Map.empty] at h
-                exact eq₁
-                exact eq 
-          , hColsLen := by
-              simp only [Map.fromList_cons, Map.fromList_nil, decide_False]
-              unfold bufferLensConsistent
-              simp only [List.getElem_eq_get]
-              intros var h row x h₁
-              simp at h
-              have var_input_or_output : var = ⟨"input"⟩ ∨ var = ⟨"output"⟩ := by
-                simp [Map.mem_fromList]
-                sorry
-                -- rewrite [Map.mem_unroll_assignment] at h
-              cases var_input_or_output with
-              | inl var_input =>
-                simp [var_input]
-              | inr var_output => 
-
-              -- unfold cycleIsRows at row
-              -- simp only [zero_add] at row
-              -- by_cases eq : var = ⟨"input"⟩ 
-              -- subst eq
-              -- rw [Map.update_get]
-              -- simp only [Option.some.injEq]
-              -- simp
-              -- sorry
-              -- sorry 
-    }
-
-
+theorem is0_initial_state_valid {input : Felt} {output : List Felt} {hLen : output.length = 2} :
+  is0_initial_state input output |>.valid := by
+    rw [justToShowInitialEquiv hLen]
+    exact State.valid_init'
+    
     -- %0 = cirgen.const 1
     -- %1 = cirgen.true
     -- %2 = cirgen.get %arg0[0] back 0 : <1, constant>
