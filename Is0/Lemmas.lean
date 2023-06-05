@@ -39,6 +39,16 @@ lemma run_if (x : Felt) (h₁ : st.felts ⟨name⟩  = some x) :
 lemma run_eqz (x : Felt) (h₁ : st.felts ⟨name⟩ = some x) :
   Γ st ⟦@MLIR.Eqz α ⟨name⟩⟧ = withEqZero x st := by simp [run, h₁]
 
+lemma run_composes (program_halves: program = (first_half; second_half)) :
+  MLIR.runProgram program start_state = MLIR.runProgram second_half (MLIR.runProgram first_half start_state) := by
+  rewrite [program_halves]
+  unfold runProgram
+  simp [run_seq_def]
+
+lemma seq_associative : MLIR.runProgram (p₁; (p₂; p₃)) state = MLIR.runProgram ((p₁; p₂); p₃) state := by
+  unfold runProgram run
+  simp [run_seq_def]
+
 end MLIR
 
 end WithMLIR 
