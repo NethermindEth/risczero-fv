@@ -4,7 +4,7 @@ import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.LibrarySearch
 
-import Is0.Basic
+import Risc0.Basic
 
 namespace Risc0
 
@@ -38,6 +38,8 @@ lemma run_if (x : Felt) (h₁ : st.felts ⟨name⟩  = some x) :
 
 lemma run_eqz (x : Felt) (h₁ : st.felts ⟨name⟩ = some x) :
   Γ st ⟦@MLIR.Eqz α ⟨name⟩⟧ = withEqZero x st := by simp [run, h₁]
+
+lemma seq_assoc : Γ state ⟦p₁; (p₂; p₃)⟧ = Γ state ⟦(p₁; p₂); p₃⟧ := rfl
 
 end MLIR
 

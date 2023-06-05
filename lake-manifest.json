@@ -6,7 +6,7 @@
     "subDir?": null,
     "rev": "c59c263ccfa439765d0e990b91ab9f4e09541375",
     "name": "mathlib",
-    "inputRev?": null}},
+    "inputRev?": "c59c263ccfa439765d0e990b91ab9f4e09541375"}},
   {"git":
    {"url": "https://github.com/gebner/quote4",
     "subDir?": null,
