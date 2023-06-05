@@ -306,10 +306,19 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
     | Back buf back       => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice 0 back
     | Get buf back offset => if st.cycle ≤ back ∧ offset < st.bufferWidths[buf].get! -- TODO(review): this is equivalent to throwing in Ops.cpp/GetOp::evaluate, right?
                              then .some <| .Val <| (st.buffers buf).get!.get! ((st.cycle - 1) - back.toNat) |>.get! offset
-                             else .none          
-    | GetGlobal buf idx   => .some <| .Val <| let buf' := st.buffers buf |>.get!
-                                              let bufferWidth := st.bufferWidths buf |>.get!
-                                              buf'.get! (idx.div bufferWidth) |>.get! (idx.mod bufferWidth)
+                             else .none
+    | GetGlobal buf offset => if buf ∈ st.vars
+                              then
+                                let buffer := (st.buffers.get! buf)
+                                if buffer.length = 1 -- global buffers don't index by cycle, so should always be 1 deep
+                                then
+                                  let bufferData := buffer.get! 0
+                                  let bufferWidth := st.bufferWidths.get! buf
+                                  if offset < bufferWidth
+                                  then .some <| .Val <| bufferData.get! offset
+                                  else .none
+                                else .none
+                              else .none
     | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
@@ -404,7 +413,7 @@ lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.c
 
 def State.set! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : State := 
   {st with buffers := st.buffers[buffer] :=
-                        (st.buffers.get! buffer).set ((st.buffers.get! buffer).last!.set offset val)} 
+                        (st.buffers.get! buffer).set ((st.buffers.get! buffer).last!.set offset val)}
 
 private lemma State.setGlobal!aux {P : Prop} (h : ¬(P ∨ sz = 0)) : 0 < sz := by
   rw [not_or] at h; rcases h with ⟨_, h⟩
@@ -444,7 +453,7 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
           | _         => st
     | SetGlobal buf offset val =>
         match st.felts val with
-          | .some val => sorry --st.setGlobal! buf offset val
+          | .some val => st.set! buf offset val -- works because set! works on the latest BufferAtTime, and global buffers only have one BufferAtTime
           | _         => st
 
 @[simp]
