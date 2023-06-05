@@ -310,13 +310,11 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
     | GetGlobal buf offset => if buf ∈ st.vars
                               then
                                 let buffer := (st.buffers.get! buf)
-                                if buffer.length = 1 -- global buffers don't index by cycle, so should always be 1 deep
-                                then
-                                  let bufferData := buffer.get! 0
-                                  let bufferWidth := st.bufferWidths.get! buf
-                                  if offset < bufferWidth
-                                  then .some <| .Val <| bufferData.get! offset
-                                  else .none
+                                let bufferWidth := st.bufferWidths.get! buf
+                                let timeIdx := offset.div bufferWidth -- the implementation of getGlobal steps directly into the 1D representation
+                                let dataIdx := offset.mod bufferWidth -- of whatever buffer it is passed
+                                if timeIdx < buffer.length ∧ dataIdx < bufferWidth
+                                then .some <| .Val <| (buffer.get! timeIdx).get! dataIdx
                                 else .none
                               else .none
     | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
