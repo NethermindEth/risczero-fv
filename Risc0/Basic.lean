@@ -1,6 +1,7 @@
 import Mathlib.Data.Nat.Prime
 import Mathlib.Data.Finmap
 import Mathlib.Data.List.Basic
+import Mathlib.Data.Option.Basic
 import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
@@ -49,6 +50,15 @@ def init (size : ℕ) : Buffer := [List.replicate size 0]
 
 def init' (row : BufferAtTime) : Buffer := [row]
 
+def last! (buf : Buffer) : BufferAtTime :=
+  buf.getLast!
+
+def copyLast (buf : Buffer) : Buffer := 
+  buf.push buf.last!
+
+def set (buf : Buffer) (val : BufferAtTime) : Buffer :=
+  List.set buf (buf.length - 1) val
+
 end Buffer
 
 inductive Lit where
@@ -67,12 +77,15 @@ structure State where
   cycle        : ℕ
   -- Temporary felts.
   felts        : Map FeltVar Felt
-  -- Valid but 'garbage'.
+  -- Is the state invalid.
   isFailed     : Bool
   -- Context of propositions.
   props        : Map PropVar Prop
   -- Valid variables for buffers.
   vars         : List BufferVar
+
+abbrev Input := "input"
+abbrev Output := "output"
 
 namespace State
 
@@ -92,7 +105,7 @@ def bufferLensConsistent :=
       have : row < (st.buffers.get h).length := by rw [h₁]; linarith
       st.bufferWidths var = (st.buffers.get h)[row].length
 
-structure valid (st : State) := 
+structure WellFormed (st : State) : Prop := 
   -- Variable-names/keys of the buffers map are distinct.
   distinct : st.vars.Nodup
   -- Variable-names describe valid buffers.
@@ -103,17 +116,12 @@ structure valid (st : State) :=
   hCols    : colsConsistent st
   -- Every valid row has a known length stored in cols.
   hColsLen : bufferLensConsistent st
+  
+def Valid (st : State) := st.WellFormed ∧ st.isFailed
 
-end State
-
-end State
-
-abbrev Input := "input"
-abbrev Output := "output"
-
-def State.init' (numInput numOutput : ℕ)
-                (input : List Felt) (output : List Felt)
-                (_hIn : input.length = numInput) (_hOut : output.length = numOutput) : State where
+def init' (numInput numOutput : ℕ)
+          (input : List Felt) (output : List Felt)
+          (_hIn : input.length = numInput) (_hOut : output.length = numOutput) : State where
   buffers      := Map.fromList [(⟨Input⟩, Buffer.init' input), (⟨Output⟩, Buffer.init' output)]
   bufferWidths := Map.fromList [(⟨Input⟩, numInput), (⟨Output⟩, numOutput)]
   constraints  := []
@@ -123,14 +131,14 @@ def State.init' (numInput numOutput : ℕ)
   props        := Map.empty
   vars         := [⟨Input⟩, ⟨Output⟩]
 
-def State.init (numInput numOutput : ℕ) : State :=
+def init (numInput numOutput : ℕ) : State :=
   init' numInput numOutput
         ((Buffer.init numInput).head (by simp [Buffer.init]))
         ((Buffer.init numOutput).head (by simp [Buffer.init]))
         (by simp [Buffer.init])
         (by simp [Buffer.init])
 
-private lemma State.valid_init'_aux :
+private lemma valid_init'_aux :
   bufferLensConsistent (State.init' m n input output hIn hOut) := λ var h h₁ row h₂ => by
   simp [bufferWidths, init', Buffer.init']
   have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
@@ -139,7 +147,7 @@ private lemma State.valid_init'_aux :
   subst this; simp
   rcases this with h | h <;> subst h <;> simp [Map.update, Map.getElem_def, *]
 
-lemma State.valid_init' : (init' m n input output hIn hOut).valid where
+lemma valid_init' : (init' m n input output hIn hOut).WellFormed where
   distinct := by simp [init']
   hVars    := λ var => ⟨
       λ h => by simp [init'] at *; rcases h with h | h <;> subst h ; decide_mem_map,
@@ -155,53 +163,36 @@ lemma State.valid_init' : (init' m n input output hIn hOut).valid where
     ⟩ 
   hColsLen := valid_init'_aux
 
-lemma State.valid_init : (init m n).valid := valid_init'
+lemma valid_init : (init m n).WellFormed := valid_init'
 
-def Buffer.last! (buf : Buffer) : BufferAtTime :=
-  buf.getLast!
-
-def Buffer.copyLast (buf : Buffer) : Buffer := 
-  buf.push buf.last!
-
-def extendBuffers (vars : List BufferVar) (buffers : Map BufferVar Buffer) : Map BufferVar Buffer :=
-  vars.foldl (λ acc k => acc[k] := acc[k]!.get!.copyLast) buffers
-
-def State.extendBuffers (st : State) : Map BufferVar Buffer :=
-  -- or fold over Map.empty with st.buffers?
-  Risc0.extendBuffers st.vars st.buffers
-
-def Buffer.set (buf : Buffer) (val : BufferAtTime) : Buffer :=
-  List.set buf (buf.length - 1) val
-
-def State.nextCycle (st : State) : State := {
-  st with cycle := st.cycle + 1 
-          buffers := st.extendBuffers
-}
-
-def State.update (state : State) (name : String) (x : Lit) : State :=
+def update (state : State) (name : String) (x : Option Lit) : State :=
   match x with
-    | @Lit.Buf b    => {state with buffers :=
-                          state.buffers[⟨name⟩] := (state.buffers.get! ⟨name⟩).set b}
-    | .Constraint c => {state with props := state.props[⟨name⟩] := c}
-    | .Val x        => {state with felts := state.felts[⟨name⟩] := x}
+    | .none => {state with isFailed := true}
+    | .some lit =>
+      match lit with
+        | @Lit.Buf    b => {state with buffers :=
+                              state.buffers[⟨name⟩] := (state.buffers.get! ⟨name⟩).set b}
+        | .Constraint c => {state with props := state.props[⟨name⟩] := c}
+        | .Val        x => {state with felts := state.felts[⟨name⟩] := x}
 
 @[simp]
-lemma State.update_val {state : State} {name : String} {x : Felt} :
-  update state name (.Val x) = { state with felts := state.felts.update ⟨name⟩ x } := rfl
+lemma update_val {state : State} {name : String} {x : Felt} :
+  update state name (.some (.Val x)) = { state with felts := state.felts.update ⟨name⟩ x } := rfl
 
 @[simp]
-lemma State.update_constraint {state : State} {name : String} {c : Prop} :
-  update state name (.Constraint c) = { state with props := state.props.update ⟨name⟩ c } := rfl
+lemma update_constraint {state : State} {name : String} {c : Prop} :
+  update state name (.some (.Constraint c)) = { state with props := state.props.update ⟨name⟩ c } := rfl
 
 @[simp]
-lemma State.if_constraints {state₁ state₂ : State} {x : Felt} :
+lemma if_constraints {state₁ state₂ : State} {x : Felt} :
   (if x = 0 then state₁ else state₂).constraints =
   if x = 0 then state₁.constraints else state₂.constraints := by apply apply_ite
 
--- @[simp]
--- lemma State.if_output {state₁ state₂ : State} {x : Felt} :
---   (if x = 0 then state₁ else state₂).output =
---   if (x = 0) then state₁.output else state₂.output := by apply apply_ite
+end State
+
+end State
+
+instance : Inhabited State := ⟨State.init 42 42⟩
 
 notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
 
@@ -219,9 +210,9 @@ def lub (x₁ x₂ : IsNondet) :=
 
 def Back := ℕ 
 
-instance : CommSemiring Back := by unfold Back; exact inferInstance
-
 def Back.toNat (n : Back) : ℕ := n
+
+instance : LinearOrderedCommSemiring Back := by unfold Back; exact inferInstance
 
 -- Pure functional operations from the cirgen (circuit generation) MLIR dialect.
 open VarType in
@@ -243,7 +234,7 @@ inductive Op : IsNondet → Type where
   | AndCond : PropVar → FeltVar → PropVar → Op x
   -- Buffers
   | Alloc     : ℕ                    → Op x
-  | Back      : BufferVar → ℤ        → Op x
+  | Back      : BufferVar → ℕ        → Op x
   | Get       : BufferVar → Back → ℕ → Op x
   | GetGlobal : BufferVar → ℕ        → Op x
   | Slice     : BufferVar → ℕ    → ℕ → Op x
@@ -285,38 +276,41 @@ def rowColOfWidthIdx (width idx : ℕ) : Back × ℕ := (idx / width, idx % widt
 lemma col_lt_width (h : 0 < width) : (rowColOfWidthIdx width idx).2 < width := Nat.mod_lt _ h
 
 -- Evaluate a pure functional circuit.
-def Op.eval {x} (st : State) (op : Op x) : Lit :=
+def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
   match op with
     -- Constants
-    | Const const => .Val const
-    | True        => .Constraint _root_.True
+    | Const const => .some <| .Val const
+    | True        => .some <| .Constraint _root_.True
     -- Arith
-    | Add lhs rhs => .Val <| (st.felts lhs).get! + (st.felts rhs).get!
-    | Sub lhs rhs => .Val <| (st.felts lhs).get! - (st.felts rhs).get!
-    | Neg lhs     => .Val <| 0                        - (st.felts lhs).get!
-    | Mul lhs rhs => .Val <| (st.felts lhs).get! * (st.felts rhs).get!
-    | Pow lhs rhs => .Val <| (st.felts lhs).get! ^ rhs
-    | Inv x => .Val <| match st.felts x with
-                         | some x => if x = 0 then 0 else x⁻¹
-                         | _      => default
+    | Add lhs rhs => .some <| .Val <| (st.felts lhs).get! + (st.felts rhs).get!
+    | Sub lhs rhs => .some <| .Val <| (st.felts lhs).get! - (st.felts rhs).get!
+    | Neg lhs     => .some <| .Val <| 0                   - (st.felts lhs).get!
+    | Mul lhs rhs => .some <| .Val <| (st.felts lhs).get! * (st.felts rhs).get!
+    | Pow lhs rhs => .some <| .Val <| (st.felts lhs).get! ^ rhs
+    | Inv x => .some <| .Val <|
+                 match st.felts x with
+                   | some x => if x = 0 then 0 else x⁻¹
+                   | _      => default
     -- Logic
-    | Isz x => .Val <| if (st.felts x).get! = 0 then 1 else 0
+    | Isz x => .some <| .Val <| if (st.felts x).get! = 0 then 1 else 0
     -- Constraints
-    | AndEqz c val           => .Constraint <| (st.props c).get! ∧ (st.felts val).get! = 0
+    | AndEqz c val           => .some <| .Constraint <| (st.props c).get! ∧ (st.felts val).get! = 0
     | AndCond old cond inner =>
-        .Constraint <| (st.props old).get! ∧
-                       if (st.felts cond).get! = 0
-                         then _root_.True
-                         else (st.props inner).get!
+        .some <| .Constraint <|
+          (st.props old).get! ∧
+            if (st.felts cond).get! = 0
+            then _root_.True
+            else (st.props inner).get!
     -- Buffers
-    | Alloc size          => .Buf <| List.replicate size 0
-    | Back buf back       => .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice 0 back.toNat -- Why is back signed; this toNat is wrong here, naturally.
-    | Get buf back offset => .Val <| (st.buffers buf).get!.get! ((st.cycle - 1) - (back.toNat)) |>.get! offset
-    | GetGlobal buf idx   => .Val <| let buf' := st.buffers buf |>.get!
-                                     let bufferWidth := st.bufferWidths buf |>.get!
-                                     buf'.get! (idx.div bufferWidth) |>.get! (idx.mod bufferWidth)
-    -- | Lookup 
-    | Slice buf offset size => .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
+    | Alloc size          => .some <| .Buf <| List.replicate size 0
+    | Back buf back       => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice 0 back
+    | Get buf back offset => if st.cycle ≤ back ∧ offset < st.bufferWidths[buf].get! -- TODO(review): this is equivalent to throwing in Ops.cpp/GetOp::evaluate, right?
+                             then .some <| .Val <| (st.buffers buf).get!.get! ((st.cycle - 1) - back.toNat) |>.get! offset
+                             else .none          
+    | GetGlobal buf idx   => .some <| .Val <| let buf' := st.buffers buf |>.get!
+                                              let bufferWidth := st.bufferWidths buf |>.get!
+                                              buf'.get! (idx.div bufferWidth) |>.get! (idx.mod bufferWidth)
+    | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
 
@@ -335,40 +329,42 @@ open MLIRNotation
 variable {st : State} {α : IsNondet}
 
 @[simp]
-lemma eval_const : Γ st ⟦@Const α x⟧ₑ = .Val x := rfl
+lemma eval_const : Γ st ⟦@Const α x⟧ₑ = .some (.Val x) := rfl
 
 @[simp]
-lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .Constraint (_root_.True) := rfl
+lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .some (.Constraint (_root_.True)) := rfl
 
 @[simp]
 lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
-  .Val ((st.buffers buf).get!.get! ((st.cycle - 1) - (back.toNat)) |>.get! offset) := rfl
+  if st.cycle ≤ back ∧ offset < st.bufferWidths[buf].get!
+  then .some (.Val ((st.buffers buf).get!.get! ((st.cycle - 1) - (back.toNat)) |>.get! offset))
+  else .none := rfl
 
 @[simp]
-lemma eval_sub : Γ st ⟦@Sub α x y⟧ₑ = .Val ((st.felts x).get! - (st.felts y).get!) := rfl
+lemma eval_sub : Γ st ⟦@Sub α x y⟧ₑ = .some (.Val ((st.felts x).get! - (st.felts y).get!)) := rfl
 
 @[simp]
-lemma eval_mul : Γ st ⟦@Mul α x y⟧ₑ = .Val ((st.felts x).get! * (st.felts y).get!) := rfl
+lemma eval_mul : Γ st ⟦@Mul α x y⟧ₑ = .some (.Val ((st.felts x).get! * (st.felts y).get!)) := rfl
 
 @[simp]
-lemma eval_isz : Γ st ⟦??₀x⟧ₑ = .Val (if (st.felts x).get! = 0 then 1 else 0) := rfl
+lemma eval_isz : Γ st ⟦??₀x⟧ₑ = .some (.Val (if (st.felts x).get! = 0 then 1 else 0)) := rfl
 
 @[simp]
-lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .Val (match st.felts x with
-                                        | some x => if x = 0 then 0 else x⁻¹
-                                        | _      => default) := rfl
+lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .some (.Val (match st.felts x with
+                                               | some x => if x = 0 then 0 else x⁻¹
+                                               | _      => default)) := rfl
 
 @[simp]
 lemma eval_andEqz : Γ st ⟦@AndEqz α c x⟧ₑ =
-                    .Constraint ((st.props c).get! ∧ (st.felts x).get! = 0) := rfl
+                    .some (.Constraint ((st.props c).get! ∧ (st.felts x).get! = 0)) := rfl
 
 @[simp]
 lemma eval_andCond :
   Γ st ⟦@AndCond α old cnd inner⟧ₑ =
-    .Constraint ((st.props old).get! ∧
-                 if (st.felts cnd).get! = 0
-                   then _root_.True
-                   else (st.props inner).get!) := rfl
+    .some (.Constraint ((st.props old).get! ∧
+                       if (st.felts cnd).get! = 0
+                       then _root_.True
+                       else (st.props inner).get!)) := rfl
 
 end Op
 
@@ -434,7 +430,7 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
         match st.felts x with
           | .some x => withEqZero x st
           | _       => st
-    | If x program =>
+    | If x program => 
         match st.felts x with
           | .some x => if x = 0 then st else program.run st
           | _       => st
