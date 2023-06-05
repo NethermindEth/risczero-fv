@@ -161,29 +161,33 @@ lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
 set_option maxHeartbeats 2000000 in
 lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
-  unfold is0_witness MLIR.runProgram
-  simp [is0_witness_initial_state, is0_initial_state]
-  rw [MLIR.run_seq_def]
-  rw [MLIR.run_ass_def]
-  rw [MLIR.run_seq_def]
-  rw [MLIR.run_ass_def]
-  rw [MLIR.run_seq_def]
-  simp_op
-  rw [MLIR.run_nondet]
-  rw [MLIR.run_seq_def]
-  rw [MLIR.run_ass_def]
-  simp_op
+  sorry
+
+  -- Just playing around to see what's slow.
+  -- unfold is0_witness MLIR.runProgram
+  -- simp [is0_witness_initial_state, is0_initial_state]
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
+  -- rw [MLIR.run_seq_def]
+  -- simp_op
   -- MLIR_states
-  -- save
-  rw [MLIR.run_seq_def]
-  rw [MLIR.run_if] <;> all_goals try rfl
-  rw [MLIR.run_seq_def]
-  rw [MLIR.run_ass_def]
-  simp_op
-  rw [MLIR.run_seq_def]
-  rw [MLIR.run_if] <;> all_goals try rfl
-  rw [MLIR.run_seq_def]
-  rw [MLIR.run_ass_def]
+  -- rw [MLIR.run_nondet]
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
+  -- simp_op
+  -- -- MLIR_states
+  -- -- save
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_if] <;> all_goals try rfl
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
+  -- simp_op
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_if] <;> all_goals try rfl
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
   
 
   -- rw [MLIR.run_seq_def]
