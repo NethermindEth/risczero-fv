@@ -309,37 +309,37 @@ inductive Op : IsNondet → Type where
   | Const : Felt → Op x
   | True  : Op x
   -- Arith
-  | Add : Variable FeltTag → Variable FeltTag → Op x
-  | Sub : Variable FeltTag → Variable FeltTag → Op x
-  | Neg : Variable FeltTag                    → Op x
-  | Mul : Variable FeltTag → Variable FeltTag → Op x
-  | Pow : Variable FeltTag → ℕ                → Op x
-  | Inv : Variable FeltTag                    → Op InNondet
+  | Add : FeltVar → FeltVar → Op x
+  | Sub : FeltVar → FeltVar → Op x
+  | Neg : FeltVar           → Op x
+  | Mul : FeltVar → FeltVar → Op x
+  | Pow : FeltVar → ℕ       → Op x
+  | Inv : FeltVar           → Op InNondet
   -- Logic
-  | Isz : Variable FeltTag → Op InNondet
+  | Isz : FeltVar → Op InNondet
   -- Constraints
-  | AndEqz  : Variable PropTag → Variable FeltTag                    → Op x
-  | AndCond : Variable PropTag → Variable FeltTag → Variable PropTag → Op x
+  | AndEqz  : PropVar → FeltVar           → Op x
+  | AndCond : PropVar → FeltVar → PropVar → Op x
   -- Buffers
-  | Alloc     : ℕ                             → Op x
-  | Back      : Variable BufferTag → ℤ        → Op x
-  | Get       : Variable BufferTag → Back → ℕ → Op x
-  | GetGlobal : Variable BufferTag → ℕ        → Op x
-  | Slice     : Variable BufferTag → ℕ    → ℕ → Op x
+  | Alloc     : ℕ                    → Op x
+  | Back      : BufferVar → ℤ        → Op x
+  | Get       : BufferVar → Back → ℕ → Op x
+  | GetGlobal : BufferVar → ℕ        → Op x
+  | Slice     : BufferVar → ℕ    → ℕ → Op x
 
 open Op VarType
 
-instance : HAdd (Variable FeltTag) (Variable FeltTag) (Op IsNondet.InNondet)    := ⟨Op.Add⟩
-instance : HAdd (Variable FeltTag) (Variable FeltTag) (Op IsNondet.NotInNondet) := ⟨Op.Add⟩
+instance : HAdd (FeltVar) (FeltVar) (Op IsNondet.InNondet)    := ⟨Op.Add⟩
+instance : HAdd (FeltVar) (FeltVar) (Op IsNondet.NotInNondet) := ⟨Op.Add⟩
 
-instance : HSub (Variable FeltTag) (Variable FeltTag) (Op IsNondet.InNondet)    := ⟨Op.Sub⟩
-instance : HSub (Variable FeltTag) (Variable FeltTag) (Op IsNondet.NotInNondet) := ⟨Op.Sub⟩
+instance : HSub (FeltVar) (FeltVar) (Op IsNondet.InNondet)    := ⟨Op.Sub⟩
+instance : HSub (FeltVar) (FeltVar) (Op IsNondet.NotInNondet) := ⟨Op.Sub⟩
 
-instance : HMul (Variable FeltTag) (Variable FeltTag) (Op IsNondet.InNondet)    := ⟨Op.Mul⟩
-instance : HMul (Variable FeltTag) (Variable FeltTag) (Op IsNondet.NotInNondet) := ⟨Op.Mul⟩
+instance : HMul (FeltVar) (FeltVar) (Op IsNondet.InNondet)    := ⟨Op.Mul⟩
+instance : HMul (FeltVar) (FeltVar) (Op IsNondet.NotInNondet) := ⟨Op.Mul⟩
 
-instance : HPow (Variable FeltTag) ℕ (Op IsNondet.InNondet)    := ⟨Op.Pow⟩
-instance : HPow (Variable FeltTag) ℕ (Op IsNondet.NotInNondet) := ⟨Op.Pow⟩
+instance : HPow (FeltVar) ℕ (Op IsNondet.InNondet)    := ⟨Op.Pow⟩
+instance : HPow (FeltVar) ℕ (Op IsNondet.NotInNondet) := ⟨Op.Pow⟩
 
 -- Notation for Ops.
 namespace MLIRNotation
@@ -455,15 +455,15 @@ end Op
 
 inductive MLIR : IsNondet → Type where
   -- Meta
-  | Assign    : String           → Op x   → MLIR x
-  | Eqz       : Variable FeltTag          → MLIR x
-  | If        : Variable FeltTag → MLIR x → MLIR x
-  | Nondet    : MLIR InNondet             → MLIR NotInNondet
-  | Sequence  : MLIR x           → MLIR x → MLIR x
+  | Assign    : String        → Op x   → MLIR x
+  | Eqz       : FeltVar                → MLIR x
+  | If        : FeltVar       → MLIR x → MLIR x
+  | Nondet    : MLIR InNondet          → MLIR NotInNondet
+  | Sequence  : MLIR x        → MLIR x → MLIR x
   -- Ops
-  | Fail      :                                             MLIR x
-  | Set       : Variable BufferTag → ℕ → Variable FeltTag → MLIR InNondet
-  | SetGlobal : Variable BufferTag → ℕ → Variable FeltTag → MLIR InNondet
+  | Fail      :                           MLIR x
+  | Set       : BufferVar → ℕ → FeltVar → MLIR InNondet
+  | SetGlobal : BufferVar → ℕ → FeltVar → MLIR InNondet
 
 -- Notation for MLIR programs.  
 namespace MLIRNotation
@@ -485,14 +485,14 @@ abbrev withEqZero (x : Felt) (st : State) : State :=
 @[simp]
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
 
-def State.set! (st : State) (buffer : Variable BufferTag) (offset : ℕ) (val : Felt) : State := 
+def State.set! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : State := 
   {st with buffers := st.buffers[buffer] := st.buffers[buffer]!.set (st.buffers[buffer]!.last!.set offset val) } 
 
 private lemma State.setGlobal!aux {P : Prop} (h : ¬(P ∨ sz = 0)) : 0 < sz := by
   rw [not_or] at h; rcases h with ⟨_, h⟩
   exact Nat.zero_lt_of_ne_zero h
 
--- def State.setGlobal! (st : State) (buffer : Variable BufferTag) (idx : ℕ) (val : Felt) : State := sorry 
+-- def State.setGlobal! (st : State) (buffer : BufferVar) (idx : ℕ) (val : Felt) : State := sorry 
   -- let ⟨sz, data⟩ := st.buffers buffer |>.get!
   -- let rowCol := rowColOfWidthIdx sz idx
   -- if h : rowCol.1 ≠ st.cycle ∨ sz = 0
