@@ -115,6 +115,15 @@ section tactics
 
 open Lean Elab Tactic
 
+open Op in
+elab "simp_op" : tactic => do
+  evalTactic <| ← `( tactic|
+    simp only [
+      eval_const, eval_true, eval_getBuffer, eval_sub,
+      eval_mul, eval_isz, eval_inv, eval_andEqz, eval_andCond
+    ]
+  )
+
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat ( first |
@@ -122,7 +131,7 @@ elab "MLIR" : tactic => do
       rw [MLIR.run_nondet] |
       rw [MLIR.run_eqz]
       all_goals try rfl
-      simp
+      simp_op
     )
   )
   evalTactic <| ← `(tactic| try rw [MLIR.run_ass_def])
@@ -133,7 +142,7 @@ elab "MLIR_state" : tactic => do
   evalTactic <| ← `(tactic| all_goals try decide)
   evalTactic <| ← `(tactic| all_goals try rfl)
   evalTactic <| ← `(tactic| all_goals simp only)
-  evalTactic <| ← `(tactic| simp)
+  -- evalTactic <| ← `(tactic| simp)
 
 elab "MLIR_states" : tactic => do
   evalTactic <| ← `(tactic| repeat MLIR_state)
@@ -148,12 +157,61 @@ lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
   MLIR
   MLIR_states
   aesop
-  
+
 set_option maxHeartbeats 2000000 in
 lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
   unfold is0_witness MLIR.runProgram
-  MLIR
-  MLIR_states
+  simp [is0_witness_initial_state, is0_initial_state]
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  rw [MLIR.run_seq_def]
+  simp_op
+  rw [MLIR.run_nondet]
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  simp_op
+  -- MLIR_states
+  -- save
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_if] <;> all_goals try rfl
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  simp_op
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_if] <;> all_goals try rfl
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  
+
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_if]
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
+  -- simp_op
+  -- MLIR_states
+  -- save
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
+  -- save
+  -- rw [MLIR.run_seq_def]
+  -- rw [MLIR.run_ass_def]
+
+
+
+
+  -- simp
+  -- rw [MLIR.run_set_output]
+  -- rw [MLIR.run_if]
+  -- rw [MLIR.run_nondet]
+  -- rw [MLIR.run_eqz]
+  -- MLIR
+  -- MLIR_states
 
 end Risc0
