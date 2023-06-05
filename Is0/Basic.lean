@@ -85,6 +85,9 @@ section Map
 
 variable {α : Type} [DecidableEq α] {β : Type} {m : Map α β}
 
+lemma getElem_def {α β : Type} [DecidableEq α] {m : Map α β} {k : α}
+  (h : k ∈ m) : m[k]'h = (m k).get h := rfl
+
 @[simp]
 lemma fromList_nil : fromList ([] : List (α × β)) = Map.empty := rfl
 
@@ -95,7 +98,7 @@ lemma fromList_cons {k : α} {v : β} {l : List (α × β)} :
 @[simp]
 lemma update_get {k : α} {v : β} :
   (m[k] := v) k = v := by simp [update]
-  
+
 @[simp]
 lemma empty_get {k : α} : @Map.empty _ β k = none := rfl
 
@@ -104,26 +107,24 @@ lemma update_update_get {k k' : α} {v v' : β} (h : k ≠ k') :
   unfold update
   simp [*]
 
-lemma update_get_not_equal {k k' : α} {v' : β}
-  (h : k ≠ k') :
-  (m[k'] := v') k = m k := by simp [update, *]
-
 lemma update_get' {k k' : α} {v' : β}
   (v : β) (h : k ≠ k') (h₁ : m k = some v) :
-  (m[k'] := v') k = some v := by 
-    simp only [update_get_not_equal h]
-    exact h₁
+  (m[k'] := v') k = some v := by simp [update, *]
 
-lemma mem_eq : (x ∈ m) = (m x).isSome := rfl
+lemma mem_def : (x ∈ m) = (m x).isSome := rfl
 
-lemma mem_in {k : α} {v : β} : k ∈ m[k] := v := by
-  rw [mem_eq, Option.isSome_iff_exists, update_get]; use v
+@[simp]
+lemma mem_update_self {k : α} {v : β} : k ∈ m[k] := v := by
+  rw [mem_def, Option.isSome_iff_exists, update_get]; use v
 
-lemma mem_in_next (h : k ∈ m) : k ∈ m[k'] := v := by rw [mem_eq, Map.update] ;aesop
+lemma mem_skip (h : k ∈ m) : k ∈ m[k'] := v := by rw [mem_def, Map.update] ;aesop
 
 @[simp]
 lemma not_mem_empty : k ∉ @empty α β :=
-  λ contra => by rw [Map.mem_eq, empty] at contra; cases contra
+  λ contra => by rw [Map.mem_def, empty] at contra; cases contra
+
+lemma mem_update_of_ne (h : k ≠ k') (h₁ : k ∈ m[k'] := v) : k ∈ m := by
+  rw [mem_def] at *; unfold update at h₁; aesop
 
 lemma mem_fromList {l : List (α × β)} {k : α} : k ∈ fromList l ↔ k ∈ l.map Prod.fst := by
   induction l with
@@ -132,15 +133,36 @@ lemma mem_fromList {l : List (α × β)} {k : α} : k ∈ fromList l ↔ k ∈ l
         rcases hd with ⟨k', v'⟩
         rw [List.map_cons, List.mem_cons, ←ih]; simp
         apply Iff.intro <;> intros h <;> {
-          rw [mem_eq] at h ⊢; unfold Map.update at *
+          rw [mem_def] at h ⊢; unfold Map.update at *
           aesop
         }
+
+lemma mem_in_next (h : k ∈ m) : k ∈ m[k'] := v := by rw [mem_def, Map.update] ;aesop
+
+lemma mem_unroll_assignment {k k': α} : k ∈ m[k'] := v ↔ (k=k' ∨ k ∈ m) := by
+  by_cases k=k'
+  . rewrite [h]
+    apply Iff.intro
+    . intro _
+      apply Or.intro_left
+      rfl
+    . intro _
+      exact mem_update_self
+  . apply Iff.intro
+    . intro k_in_update
+      apply Or.intro_right
+      exact mem_update_of_ne h k_in_update
+    . intro h'
+      cases h' with
+       | inl a => contradiction
+       | inr k_in_m => exact mem_in_next k_in_m
+
 end Map
 
 end Map
 
 instance {α β : Type} [DecidableEq α] {m : Map α β} {k : α} : Decidable (k ∈ m) :=
-  by rw [Map.mem_eq]; exact inferInstance
+  by rw [Map.mem_def]; exact inferInstance
 
 section tactics
 
@@ -150,7 +172,7 @@ open Lean Elab Tactic
 -- E.g. 42 ∈ empty[42] := k.succ.
 elab "decide_mem_map" : tactic => do
   evalTactic <| ← `(
-    tactic| repeat ( first | apply Map.mem_in | apply Map.mem_in_next )
+    tactic| repeat ( first | apply Map.mem_update_self | apply Map.mem_skip )
   )
 
 end tactics
@@ -200,11 +222,15 @@ structure State.valid (st : State) :=
 
 def Buffer.init (size : ℕ) : Buffer := [List.replicate size 0]
 
+def Buffer.init' (row : BufferAtTime) : Buffer := [row]
+
 abbrev Input := "input"
 abbrev Output := "output"
 
-def State.init (numInput numOutput : ℕ) : State where
-  buffers      := Map.fromList [(⟨Input⟩, Buffer.init numInput), (⟨Output⟩, Buffer.init numOutput)]
+def State.init' (numInput numOutput : ℕ)
+                (input : List Felt) (output : List Felt)
+                (_hIn : input.length = numInput) (_hOut : output.length = numOutput) : State where
+  buffers      := Map.fromList [(⟨Input⟩, Buffer.init' input), (⟨Output⟩, Buffer.init' output)]
   bufferWidths := Map.fromList [(⟨Input⟩, numInput), (⟨Output⟩, numOutput)]
   constraints  := []
   cycle        := 0
@@ -213,28 +239,39 @@ def State.init (numInput numOutput : ℕ) : State where
   props        := Map.empty
   vars         := [⟨Input⟩, ⟨Output⟩]
 
-lemma State.valid_init : (init m n).valid where
-  distinct := by simp [init]
+def State.init (numInput numOutput : ℕ) : State :=
+  init' numInput numOutput
+        ((Buffer.init numInput).head (by simp [Buffer.init]))
+        ((Buffer.init numOutput).head (by simp [Buffer.init]))
+        (by simp [Buffer.init])
+        (by simp [Buffer.init])
+
+private lemma State.valid_init'_aux :
+  bufferLensConsistent (State.init' m n input output hIn hOut) := λ var h h₁ row h₂ => by
+  simp [bufferWidths, init', Buffer.init']
+  have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
+    unfold init' at h; rw [Map.mem_fromList] at h; simp at h; exact h
+  have : row = 0 := by simp [init'] at h₂; exact h₂
+  subst this; simp
+  rcases this with h | h <;> subst h <;> simp [Map.update, Map.getElem_def, *]
+
+lemma State.valid_init' : (init' m n input output hIn hOut).valid where
+  distinct := by simp [init']
   hVars    := λ var => ⟨
-      λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
-      λ h => by simp [init] at *; simp [Map.mem_eq, Map.update] at h; aesop
+      λ h => by simp [init'] at *; rcases h with h | h <;> subst h ; decide_mem_map,
+      λ h => by simp [init'] at *; simp [Map.mem_def, Map.update] at h; aesop
     ⟩ 
   hCycle   := λ var h =>
     by have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
-         unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
-       rcases this with h | h <;> subst h <;> simp [getElem_eq] <;> rfl
+         simp only [init'] at h; rw [Map.mem_fromList] at h; simp at h; exact h
+       rcases this with h | h <;> subst h <;> simp [Map.getElem_def] <;> rfl
   hCols    := λ var => ⟨
-      λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
-      λ h => by simp [init] at *; simp [Map.mem_eq, Map.update] at h; aesop
+      λ h => by simp [init'] at h; rcases h with h | h <;> subst h ; decide_mem_map,
+      λ h => by simp [init'] at h ⊢; simp [Map.mem_def, Map.update] at h; aesop
     ⟩ 
-  hColsLen := λ var h h₁ row h₂ => by {
-    unfold bufferWidths init Buffer.init
-    have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
-      unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
-    have : row = 0 := by simp [init] at h₂; exact h₂
-    subst this; simp
-    rcases this with h | h <;> subst h <;> simp [Map.update, getElem_eq]
-  }
+  hColsLen := valid_init'_aux
+
+lemma State.valid_init : (init m n).valid := valid_init'
 
 def Buffer.last! (buf : Buffer) : BufferAtTime :=
   buf.getLast!
