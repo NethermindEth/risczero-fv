@@ -263,6 +263,7 @@ scoped infix   :55                     " &₀ "                            => Op
 scoped notation:55                     " guard " c " & " x " with " y:55 => Op.AndCond x c y
 scoped prefix  :57                     "??₀"                             => Op.Isz
 scoped prefix  :max                    "Inv"                             => Op.Inv
+scoped prefix  :max                    "Load"                            => λ x => Op.Get x 0 0t
 
 end MLIRNotation
 
@@ -310,7 +311,7 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
     | GetGlobal buf idx   => .some <| .Val <| let buf' := st.buffers buf |>.get!
                                               let bufferWidth := st.bufferWidths buf |>.get!
                                               buf'.get! (idx.div bufferWidth) |>.get! (idx.mod bufferWidth)
-    | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
+    | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers.get! buf) (st.cycle - 1)).slice offset size
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
 
@@ -391,6 +392,7 @@ scoped notation:51                    "guard " c " then " x:51   => MLIR.If c x
 scoped prefix  :max                   "nondet"                   => MLIR.Nondet
 scoped infixr  :50                    "; "                       => MLIR.Sequence
 scoped notation:51 (priority := high) b "[" v:51 "]" " ←ᵢ " x:51 => MLIR.Set b v x
+scoped prefix  :max                   "Store"                    => λ buf val MLIR.Set buf 0 val
 
 end MLIRNotation
 
