@@ -59,6 +59,9 @@ def copyLast (buf : Buffer) : Buffer :=
 def set (buf : Buffer) (val : BufferAtTime) : Buffer :=
   List.set buf (buf.length - 1) val
 
+def setAtTime (buf : Buffer) (timeIdx: ℕ) (dataIdx: ℕ) (val: Felt) : Buffer :=
+  List.set buf timeIdx ((buf.get! timeIdx).set dataIdx val)
+
 end Buffer
 
 inductive Lit where
@@ -413,6 +416,13 @@ def State.set! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : S
   {st with buffers := st.buffers[buffer] :=
                         (st.buffers.get! buffer).set ((st.buffers.get! buffer).last!.set offset val)}
 
+def State.setGlobal! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : State :=
+  let width := st.bufferWidths.get! buffer
+  let timeIdx := offset.div width
+  let dataIdx := offset.mod width
+  {st with buffers := st.buffers[buffer] :=
+                        (st.buffers.get! buffer).setAtTime timeIdx dataIdx val }
+
 private lemma State.setGlobal!aux {P : Prop} (h : ¬(P ∨ sz = 0)) : 0 < sz := by
   rw [not_or] at h; rcases h with ⟨_, h⟩
   exact Nat.zero_lt_of_ne_zero h
@@ -451,8 +461,8 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
           | _         => st
     | SetGlobal buf offset val =>
         match st.felts val with
-          | .some val => st.set! buf offset val -- works because set! works on the latest BufferAtTime, and global buffers only have one BufferAtTime
-          | _         => st
+          | .some val => st.setGlobal! buf offset val -- Behind the scenes setGlobal actually flattens a 2d buffer into a 1d buffer
+          | _         => st                           -- and indexes into it. This is a side effect of global buffers only being 1d anyway
 
 @[simp]
 abbrev MLIR.runProgram (program : MLIRProgram) := program.run
