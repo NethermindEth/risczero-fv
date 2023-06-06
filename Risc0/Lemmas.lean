@@ -4,7 +4,7 @@ import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.LibrarySearch
 
-import Is0.Basic
+import Risc0.Basic
 
 namespace Risc0
 
@@ -19,7 +19,7 @@ namespace MLIR
 
 lemma run_ass_def : Γ st ⟦name ←ₐ op⟧ = st[name] := Γ st ⟦op⟧ₑ := rfl
 
-lemma run_set_def : Γ st ⟦buf[offset] ←ᵢ val⟧ = 
+lemma run_set_def : Γ st ⟦buf[offset] ←ᵢ val⟧ =
   match st.felts val with
     | .some val => st.set! buf offset val
     | _         => st := rfl
@@ -38,6 +38,8 @@ lemma run_if (x : Felt) (h₁ : st.felts ⟨name⟩  = some x) :
 
 lemma run_eqz (x : Felt) (h₁ : st.felts ⟨name⟩ = some x) :
   Γ st ⟦@MLIR.Eqz α ⟨name⟩⟧ = withEqZero x st := by simp [run, h₁]
+
+lemma seq_assoc : Γ state ⟦p₁; (p₂; p₃)⟧ = Γ state ⟦(p₁; p₂); p₃⟧ := by simp [run_seq_def]
 
 end MLIR
 

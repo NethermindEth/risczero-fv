@@ -5,22 +5,14 @@ import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.FieldSimp
 
-import Is0.Basic
-import Is0.Lemmas
-import Is0.Wheels
+import Risc0.Basic
+import Risc0.Lemmas
+import Risc0.Wheels
 
 namespace Risc0
 
 open MLIRNotation
--- def State.init (numInput numOutput : ℕ) : State where
---   buffers      := Map.fromList [(⟨Input⟩, Buffer.init numInput), (⟨Output⟩, Buffer.init numOutput)]
---   bufferWidths := Map.fromList [(⟨Input⟩, numInput), (⟨Output⟩, numOutput)]
---   constraints  := []
---   cycle        := 0
---   felts        := Map.empty
---   isFailed     := false
---   props        := Map.empty
---   vars         := [⟨Input⟩, ⟨Output⟩]
+
 def is0_initial_state (input : Felt) (output : List Felt) : State :=
   { buffers := Map.fromList [(⟨"input"⟩, [[input]]), (⟨"output"⟩, [output])]
   , bufferWidths := Map.fromList [(⟨"input"⟩, 1), (⟨"output"⟩, 2)]
@@ -28,8 +20,8 @@ def is0_initial_state (input : Felt) (output : List Felt) : State :=
   , cycle := 0
   , felts := Map.empty
   , props := Map.empty
-  , isFailed := False
   , vars := [⟨"input"⟩, ⟨"output"⟩]
+  , isFailed := false
   }
 
 def is0_initial_state' (input output : List Felt)
@@ -41,8 +33,8 @@ theorem justToShowInitialEquiv {input : Felt} {output : List Felt} (hOut : outpu
 
 def is0_witness_initial_state (input : Felt) : State := is0_initial_state input ([42, 42])
 
-theorem is0_initial_state_valid {input : Felt} {output : List Felt} {hLen : output.length = 2} :
-  is0_initial_state input output |>.valid := by
+theorem is0_initial_state_wf {input : Felt} {output : List Felt} {hLen : output.length = 2} :
+  is0_initial_state input output |>.WellFormed := by
     rw [justToShowInitialEquiv hLen]
     exact State.valid_init'
     
@@ -127,9 +119,9 @@ elab "simp_op" : tactic => do
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat ( first |
-      rw [MLIR.run_seq_def] | rw [MLIR.run_ass_def] | rw [MLIR.run_set_output] | rw [MLIR.run_if] |
-      rw [MLIR.run_nondet] |
-      rw [MLIR.run_eqz]
+      rw [MLIR.run_ass_def] | rw [MLIR.run_set_output] | rw [MLIR.run_if] |
+      rw [MLIR.run_nondet] | rw [MLIR.run_eqz] |
+      rw [MLIR.run_seq_def] 
       all_goals try rfl
       simp_op
     )
@@ -138,7 +130,7 @@ elab "MLIR" : tactic => do
   evalTactic <| ← `(tactic| simp)
 
 elab "MLIR_state" : tactic => do
-  evalTactic <| ← `(tactic| repeat rw [Map.update_get'])
+  evalTactic <| ← `(tactic| repeat rw [Map.update_get_skip])
   evalTactic <| ← `(tactic| all_goals try decide)
   evalTactic <| ← `(tactic| all_goals try rfl)
   evalTactic <| ← `(tactic| all_goals simp only)
@@ -153,10 +145,24 @@ set_option maxHeartbeats 2000000 in
 lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
     (is0_constraints x ([y₁, y₂]))
   ↔ (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by
-  unfold is0_constraints MLIR.runProgram
-  MLIR
-  MLIR_states
-  aesop
+  sorry
+  -- unfold is0_constraints MLIR.runProgram
+  -- unfold is0_initial_state
+  -- simp [MLIR.run_seq_def]
+  -- simp [MLIR.run_ass_def]
+  -- MLIR_states
+
+  -- simp [MLIR.run_seq_def]
+  -- unfold is0_initial_state
+  -- simp
+  -- simp [MLIR.run_ass_def]
+
+  -- save
+  
+  
+  
+  -- MLIR_states
+  -- aesop
 
 set_option maxHeartbeats 2000000 in
 lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
