@@ -32,7 +32,9 @@ abbrev PropVar := Variable PropTag
 
 abbrev Felt := ZMod P
 
-abbrev BufferAtTime := List Felt
+-- none is an unset value which can be written to, but not read
+-- some is a set value which can be read, and can only be written to if the new val is equal
+abbrev BufferAtTime := List (Option Felt)
 
 abbrev Buffer := List BufferAtTime
 
@@ -46,9 +48,11 @@ def set! (row : BufferAtTime) (buf : Buffer) : Buffer :=
 lemma set!_of_nonempty {buf : Buffer} (h : buf ≠ []) : buf.set! row ≠ [] := by
   unfold set!; aesop
 
-def init (size : ℕ) : Buffer := [List.replicate size 0]
+def init (size : ℕ) : Buffer := [List.replicate size .none]
 
 def init' (row : BufferAtTime) : Buffer := [row]
+
+def init'' (row : List Felt) : Buffer := [List.map .some row]
 
 def last! (buf : Buffer) : BufferAtTime :=
   buf.getLast!
@@ -56,11 +60,19 @@ def last! (buf : Buffer) : BufferAtTime :=
 def copyLast (buf : Buffer) : Buffer := 
   buf.push buf.last!
 
-def set (buf : Buffer) (val : BufferAtTime) : Buffer :=
-  List.set buf (buf.length - 1) val
+-- def set (buf : Buffer) (val : BufferAtTime) : Buffer :=
+--   List.set buf (buf.length - 1) val
 
-def setAtTime (buf : Buffer) (timeIdx: ℕ) (dataIdx: ℕ) (val: Felt) : Buffer :=
-  List.set buf timeIdx ((buf.get! timeIdx).set dataIdx val)
+def setAtTimeChecked (buf : Buffer) (timeIdx: ℕ) (dataIdx: ℕ) (val: Felt) : Option Buffer :=
+  let bufferAtTime := buf.get! timeIdx
+  if (bufferAtTime.get! dataIdx).isNone
+  then .some <| List.set buf timeIdx (bufferAtTime.set dataIdx (.some val))
+  else .none
+
+def isValidUpdate (old new : BufferAtTime) :=
+  old.length = new.length ∧
+  (List.zip old new).all
+    λ pair => pair.fst.isNone ∨ pair.fst = pair.snd
 
 end Buffer
 
@@ -122,8 +134,8 @@ structure WellFormed (st : State) : Prop :=
   
 def Valid (st : State) := st.WellFormed ∧ st.isFailed
 
-def init' (numInput numOutput : ℕ)
-          (input : List Felt) (output : List Felt)
+def init (numInput numOutput : ℕ)
+          (input : BufferAtTime) (output : BufferAtTime)
           (_hIn : input.length = numInput) (_hOut : output.length = numOutput) : State where
   buffers      := Map.fromList [(⟨Input⟩, Buffer.init' input), (⟨Output⟩, Buffer.init' output)]
   bufferWidths := Map.fromList [(⟨Input⟩, numInput), (⟨Output⟩, numOutput)]
@@ -134,47 +146,62 @@ def init' (numInput numOutput : ℕ)
   props        := Map.empty
   vars         := [⟨Input⟩, ⟨Output⟩]
 
-def init (numInput numOutput : ℕ) : State :=
-  init' numInput numOutput
+-- Shouldn't be necessary, because why would we want state to have default initialised input
+def init_default (numInput numOutput : ℕ) : State :=
+  init numInput numOutput
         ((Buffer.init numInput).head (by simp [Buffer.init]))
         ((Buffer.init numOutput).head (by simp [Buffer.init]))
         (by simp [Buffer.init])
         (by simp [Buffer.init])
 
 private lemma valid_init'_aux :
-  bufferLensConsistent (State.init' m n input output hIn hOut) := λ var h h₁ row h₂ => by
-  simp [bufferWidths, init', Buffer.init']
+  bufferLensConsistent (State.init m n input output hIn hOut) := λ var h h₁ row h₂ => by
+  simp [bufferWidths, init, Buffer.init']
   have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
-    unfold init' at h; rw [Map.mem_fromList] at h; simp at h; exact h
-  have : row = 0 := by simp [init'] at h₂; exact h₂
+    unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
+  have : row = 0 := by simp [init] at h₂; exact h₂
   subst this; simp
   rcases this with h | h <;> subst h <;> simp [Map.update, Map.getElem_def, *]
 
-lemma valid_init' : (init' m n input output hIn hOut).WellFormed where
-  distinct := by simp [init']
+lemma valid_init' : (init m n input output hIn hOut).WellFormed where
+  distinct := by simp [init]
   hVars    := λ var => ⟨
-      λ h => by simp [init'] at *; rcases h with h | h <;> subst h ; decide_mem_map,
-      λ h => by simp [init'] at *; simp [Map.mem_def, Map.update] at h; split at h <;> aesop 
+      λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
+      λ h => by simp [init] at *; simp [Map.mem_def, Map.update] at h; split at h <;> aesop 
     ⟩ 
   hCycle   := λ var h =>
     by have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
-         simp only [init'] at h; rw [Map.mem_fromList] at h; simp at h; exact h
+         simp only [init] at h; rw [Map.mem_fromList] at h; simp at h; exact h
        rcases this with h | h <;> subst h <;> simp [Map.getElem_def] <;> rfl
   hCols    := λ var => ⟨
-      λ h => by simp [init'] at h; rcases h with h | h <;> subst h ; decide_mem_map,
-      λ h => by simp [init'] at h ⊢; simp [Map.mem_def, Map.update] at h; aesop
+      λ h => by simp [init] at h; rcases h with h | h <;> subst h ; decide_mem_map,
+      λ h => by simp [init] at h ⊢; simp [Map.mem_def, Map.update] at h; aesop
     ⟩ 
   hColsLen := valid_init'_aux
 
-lemma valid_init : (init m n).WellFormed := valid_init'
+lemma valid_init : (init_default m n).WellFormed := valid_init'
+
+-- def isValidUpdate (old new : BufferAtTime) :=
+--   old.length = new.length ∧
+--   (List.zip old new).all
+--     λ pair => pair.fst.isNone ∨ pair.fst = pair.snd
 
 def update (state : State) (name : String) (x : Option Lit) : State :=
   match x with
     | .none => {state with isFailed := true}
     | .some lit =>
       match lit with
-        | @Lit.Buf    b => {state with buffers :=
-                              state.buffers[⟨name⟩] := (state.buffers.get! ⟨name⟩).set b}
+        | @Lit.Buf    b =>
+          let latest := (state.buffers.get! ⟨name⟩).last!
+          if
+            latest.length ≠ b.length ∨
+            (List.zip latest b).any λ pair => pair.fst.isSome ∧ pair.snd.isSome ∧ pair.fst.get! ≠ pair.snd.get!
+          then {state with isFailed := true}
+          else {state with buffers := state.buffers.get! ⟨name⟩}
+          -- if Buffer.isValidUpdate ((state.buffers.get! ⟨name⟩).last!) b
+          -- then {state with buffers := state.buffers[⟨name⟩] := (state.buffers.get! ⟨name⟩).set b}
+          -- else {state with isFailed := true}
+        -- 
         | .Constraint c => {state with props := state.props[⟨name⟩] := c}
         | .Val        x => {state with felts := state.felts[⟨name⟩] := x}
 
@@ -195,7 +222,7 @@ end State
 
 end State
 
-instance : Inhabited State := ⟨State.init 42 42⟩
+instance : Inhabited State := ⟨State.init_default 42 42⟩
 
 notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
 
