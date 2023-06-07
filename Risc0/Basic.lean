@@ -52,8 +52,6 @@ def init (size : ℕ) : Buffer := [List.replicate size .none]
 
 def init' (row : BufferAtTime) : Buffer := [row]
 
-def init'' (row : List Felt) : Buffer := [List.map .some row]
-
 def last! (buf : Buffer) : BufferAtTime :=
   buf.getLast!
 
