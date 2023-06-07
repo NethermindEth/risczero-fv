@@ -74,7 +74,9 @@ def setAtTimeChecked (buf : Buffer) (timeIdx: ℕ) (dataIdx: ℕ) (val: Felt) : 
 def isValidUpdate (old new : BufferAtTime) :=
   old.length = new.length ∧
   (List.zip old new).all
-    λ pair => pair.fst.isNone ∨ pair.fst = pair.snd
+    λ (oldElem, newElem) =>
+      oldElem.isNone ∨
+      oldElem = newElem
 
 end Buffer
 
@@ -193,12 +195,15 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
         | @Lit.Buf    newBufferAtTime =>
           match (state.buffers ⟨name⟩) with
             | .some oldBuffer =>
-              if
-                oldBuffer.last!.length ≠ newBufferAtTime.length ∨
-                (List.zip oldBuffer.last! newBufferAtTime).any
-                  λ pair => pair.fst.isSome ∧ pair.snd.isSome ∧ pair.fst.get! ≠ pair.snd.get!
-              then {state with isFailed := true}
-              else {state with buffers := state.buffers[⟨name⟩] := (oldBuffer.setLatestUnchecked newBufferAtTime)}
+              -- TODO use isValidUpdate here and move comments. Not done currently because of decidability error
+              if                                                  -- for newBufferAtTime to be valid,
+                oldBuffer.last!.length = newBufferAtTime.length ∧ -- it must be the correct length
+                (List.zip oldBuffer.last! newBufferAtTime).all    -- and for all elements
+                  λ (oldElem, newElem) =>
+                    oldElem.isNone ∨                              -- if there was no value previously, the new value can be anything or none
+                    oldElem = newElem                             -- if there was a value previously it must be unchanged
+              then {state with buffers := state.buffers[⟨name⟩] := (oldBuffer.setLatestUnchecked newBufferAtTime)}
+              else {state with isFailed := true}
             | .none        => {state with isFailed := true}
 
 @[simp]
