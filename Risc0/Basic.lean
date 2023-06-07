@@ -148,7 +148,7 @@ def init (numInput numOutput : ℕ)
   props        := Map.empty
   vars         := [⟨Input⟩, ⟨Output⟩]
 
--- Shouldn't be necessary, because why would we want state to have default initialised input
+-- Only used to prove State inhabited, since it initialises both input and output as write-only
 def init_default (numInput numOutput : ℕ) : State :=
   init numInput numOutput
         ((Buffer.init numInput).head (by simp [Buffer.init]))
