@@ -349,8 +349,8 @@ lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .some (.Constraint (_root_.True))
 
 @[simp]
 lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
-  if st.cycle ≤ back ∧ offset < st.bufferWidths[buf].get!
-  then .some (.Val ((st.buffers buf).get!.get! ((st.cycle - 1) - (back.toNat)) |>.get! offset))
+  if back ≤ st.cycle ∧ buf ∈ st.vars ∧ offset < st.bufferWidths.get! buf
+  then .some (.Val ((st.buffers buf).get!.get! (st.cycle - (back.toNat)) |>.get! offset))
   else .none := rfl
 
 @[simp]
@@ -421,8 +421,6 @@ def State.set! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : S
 
 def State.setGlobal! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : State :=
   let width := st.bufferWidths.get! buffer
-  let timeIdx := 
-  let dataIdx := 
   {st with buffers := st.buffers[buffer] :=
                         (st.buffers.get! buffer).setAtTime (offset.div width) (offset.mod width) val }
 
