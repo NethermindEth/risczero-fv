@@ -60,14 +60,18 @@ def last! (buf : Buffer) : BufferAtTime :=
 def copyLast (buf : Buffer) : Buffer := 
   buf.push buf.last!
 
--- def set (buf : Buffer) (val : BufferAtTime) : Buffer :=
---   List.set buf (buf.length - 1) val
+def setLatestUnchecked (buf : Buffer) (val : BufferAtTime) : Buffer :=
+  List.set buf (buf.length - 1) val
 
 def setAtTimeChecked (buf : Buffer) (timeIdx: ℕ) (dataIdx: ℕ) (val: Felt) : Option Buffer :=
   let bufferAtTime := buf.get! timeIdx
-  if (bufferAtTime.get! dataIdx).isNone
-  then .some <| List.set buf timeIdx (bufferAtTime.set dataIdx (.some val))
-  else .none
+  let oldVal := (bufferAtTime.get! dataIdx)
+  if oldVal.isEqSome val
+  then .some buf
+  else
+    if oldVal.isNone
+    then .some <| List.set buf timeIdx (bufferAtTime.set dataIdx (.some val))
+    else .none
 
 def isValidUpdate (old new : BufferAtTime) :=
   old.length = new.length ∧
@@ -191,19 +195,18 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
     | .none => {state with isFailed := true}
     | .some lit =>
       match lit with
-        | @Lit.Buf    b =>
-          let latest := (state.buffers.get! ⟨name⟩).last!
-          if
-            latest.length ≠ b.length ∨
-            (List.zip latest b).any λ pair => pair.fst.isSome ∧ pair.snd.isSome ∧ pair.fst.get! ≠ pair.snd.get!
-          then {state with isFailed := true}
-          else {state with buffers := state.buffers.get! ⟨name⟩}
-          -- if Buffer.isValidUpdate ((state.buffers.get! ⟨name⟩).last!) b
-          -- then {state with buffers := state.buffers[⟨name⟩] := (state.buffers.get! ⟨name⟩).set b}
-          -- else {state with isFailed := true}
-        -- 
         | .Constraint c => {state with props := state.props[⟨name⟩] := c}
         | .Val        x => {state with felts := state.felts[⟨name⟩] := x}
+        | @Lit.Buf    newBufferAtTime =>
+          match (state.buffers ⟨name⟩) with
+            | .some oldBuffer =>
+              if
+                oldBuffer.last!.length ≠ newBufferAtTime.length ∨
+                (List.zip oldBuffer.last! newBufferAtTime).any
+                  λ pair => pair.fst.isSome ∧ pair.snd.isSome ∧ pair.fst.get! ≠ pair.snd.get!
+              then {state with isFailed := true}
+              else {state with buffers := state.buffers[⟨name⟩] := (oldBuffer.setLatestUnchecked newBufferAtTime)}
+            | .none        => {state with isFailed := true}
 
 @[simp]
 lemma update_val {state : State} {name : String} {x : Felt} :
@@ -332,22 +335,25 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
             then _root_.True
             else (st.props inner).get!
     -- Buffers
-    | Alloc size          => .some <| .Buf <| List.replicate size 0
+    | Alloc size          => .some <| .Buf <| List.replicate size .none
     | Back buf back       => .some <| .Buf <| (List.get! (st.buffers.get! buf) st.cycle).slice 0 back
-    | Get buf back offset => if
-                              back ≤ st.cycle ∧
-                              buf ∈ st.vars ∧
-                              offset < st.bufferWidths.get! buf
-                             then .some <| .Val <| (st.buffers.get! buf).get! (st.cycle - back.toNat) |>.get! offset
-                             else .none
+    | Get buf back offset => let val := ((st.buffers.get! buf).get! (st.cycle - back.toNat)).get! offset
+                              if
+                                back ≤ st.cycle ∧
+                                buf ∈ st.vars ∧
+                                offset < st.bufferWidths.get! buf ∧
+                                val.isSome
+                              then .some <| .Val <| val.get!
+                              else .none
     | GetGlobal buf offset => if buf ∈ st.vars
                               then
                                 let buffer := (st.buffers.get! buf)
                                 let bufferWidth := st.bufferWidths.get! buf
                                 let timeIdx := offset.div bufferWidth -- the implementation of getGlobal steps directly into the 1D representation
                                 let dataIdx := offset.mod bufferWidth -- of whatever buffer it is passed
-                                if timeIdx < buffer.length ∧ dataIdx < bufferWidth
-                                then .some <| .Val <| (buffer.get! timeIdx).get! dataIdx
+                                let val := (buffer.get! timeIdx).get! dataIdx
+                                if timeIdx < buffer.length ∧ dataIdx < bufferWidth ∧ val.isSome
+                                then .some <| .Val <| val.get!
                                 else .none
                               else .none
     | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
@@ -376,8 +382,9 @@ lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .some (.Constraint (_root_.True))
 
 @[simp]
 lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
-  if back ≤ st.cycle ∧ buf ∈ st.vars ∧ offset < st.bufferWidths.get! buf
-  then .some (.Val ((st.buffers buf).get!.get! (st.cycle - (back.toNat)) |>.get! offset))
+  let val := ((st.buffers buf).get!.get! (st.cycle - (back.toNat)) |>.get! offset)
+  if back ≤ st.cycle ∧ buf ∈ st.vars ∧ offset < st.bufferWidths.get! buf ∧ val.isSome
+  then .some (.Val val.get!)
   else .none := rfl
 
 @[simp]
@@ -442,14 +449,17 @@ abbrev withEqZero (x : Felt) (st : State) : State :=
 @[simp]
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
 
-def State.set! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : State := 
-  {st with buffers := st.buffers[buffer] :=
-                        (st.buffers.get! buffer).set ((st.buffers.get! buffer).last!.set offset val)}
+def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (timeIdx dataIdx: ℕ) (val : Felt) : State :=
+  match (st.buffers.get! bufferVar).setAtTimeChecked timeIdx dataIdx val with
+    | .some b => {st with buffers := st.buffers[bufferVar] := b}
+    | .none   => {st with isFailed := true}
 
-def State.setGlobal! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : State :=
-  let width := st.bufferWidths.get! buffer
-  {st with buffers := st.buffers[buffer] :=
-                        (st.buffers.get! buffer).setAtTime (offset.div width) (offset.mod width) val }
+def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
+  st.setBufferElementImpl bufferVar ((st.buffers.get! bufferVar).length - 1) offset val
+
+def State.setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
+  let width := st.bufferWidths.get! bufferVar
+  st.setBufferElementImpl bufferVar (offset.div width) (offset.mod width) val
 
 private lemma State.setGlobal!aux {P : Prop} (h : ¬(P ∨ sz = 0)) : 0 < sz := by
   rw [not_or] at h; rcases h with ⟨_, h⟩
