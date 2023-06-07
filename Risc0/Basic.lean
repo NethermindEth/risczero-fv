@@ -418,10 +418,10 @@ def State.set! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : S
 
 def State.setGlobal! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : State :=
   let width := st.bufferWidths.get! buffer
-  let timeIdx := offset.div width
-  let dataIdx := offset.mod width
+  let timeIdx := 
+  let dataIdx := 
   {st with buffers := st.buffers[buffer] :=
-                        (st.buffers.get! buffer).setAtTime timeIdx dataIdx val }
+                        (st.buffers.get! buffer).setAtTime (offset.div width) (offset.mod width) val }
 
 private lemma State.setGlobal!aux {P : Prop} (h : ¬(P ∨ sz = 0)) : 0 < sz := by
   rw [not_or] at h; rcases h with ⟨_, h⟩
