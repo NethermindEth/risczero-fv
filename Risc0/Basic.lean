@@ -306,9 +306,12 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
             else (st.props inner).get!
     -- Buffers
     | Alloc size          => .some <| .Buf <| List.replicate size 0
-    | Back buf back       => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice 0 back
-    | Get buf back offset => if st.cycle ≤ back ∧ offset < st.bufferWidths[buf].get! -- TODO(review): this is equivalent to throwing in Ops.cpp/GetOp::evaluate, right?
-                             then .some <| .Val <| (st.buffers buf).get!.get! ((st.cycle - 1) - back.toNat) |>.get! offset
+    | Back buf back       => .some <| .Buf <| (List.get! (st.buffers.get! buf) st.cycle).slice 0 back
+    | Get buf back offset => if
+                              back ≤ st.cycle ∧
+                              buf ∈ st.vars ∧
+                              offset < st.bufferWidths.get! buf
+                             then .some <| .Val <| (st.buffers.get! buf).get! (st.cycle - back.toNat) |>.get! offset
                              else .none
     | GetGlobal buf offset => if buf ∈ st.vars
                               then
