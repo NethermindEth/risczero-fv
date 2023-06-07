@@ -183,11 +183,6 @@ lemma valid_init' : (init m n input output hIn hOut).WellFormed where
 
 lemma valid_init : (init_default m n).WellFormed := valid_init'
 
--- def isValidUpdate (old new : BufferAtTime) :=
---   old.length = new.length ∧
---   (List.zip old new).all
---     λ pair => pair.fst.isNone ∨ pair.fst = pair.snd
-
 def update (state : State) (name : String) (x : Option Lit) : State :=
   match x with
     | .none => {state with isFailed := true}
