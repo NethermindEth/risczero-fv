@@ -161,7 +161,66 @@ lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
 set_option maxHeartbeats 2000000 in
 lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
-  sorry
+  unfold is0_witness MLIR.runProgram
+  rw [MLIR.run_seq_def]
+  generalize eq: ((is0_witness_initial_state
+            x)) = st
+  rw [MLIR.run_ass_def]
+  generalize eq₁ : (st["1"] := Γ st ⟦C 1⟧ₑ) = st'
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  generalize eq₂ : (st'["x"] := Γ st' ⟦{ name := "input" }[(0, 0)]⟧ₑ) = st''
+  rw [MLIR.run_seq_def]
+  generalize eq₃ : (Γ
+          st'' ⟦nondet("isZeroBit"←ₐ ??₀{ name := "x" };
+              { name := "output" }[0] ←ᵢ { name := "isZeroBit" };
+                "invVal"←ₐ Inv{ name := "x" };
+                  { name := "output" }[1] ←ᵢ
+                    {
+                      name :=
+                        "invVal" })⟧) = st'''
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  generalize eq₄ : (
+          (st'''["arg1[0]"] :=
+          Γ
+            st''' ⟦{ name := "output" }[(0,
+              0)]⟧ₑ)) = st''''
+  rw [MLIR.run_seq_def]
+  generalize eq₅ : (Γ
+          st'''' ⟦guard { name := "arg1[0]" } then
+            ?₀{
+                name :=
+                  "x" }⟧) = s₁
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  generalize eq₆ : (s₁["1 - arg1[0]"] :=
+          Γ
+            s₁ ⟦Op.Sub { name := "1" }
+              {
+                name :=
+                  "arg1[0]" }⟧ₑ) = s₂
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_if]
+  generalize eq₇ : (if ?x = 0 then s₂
+        else
+          Γ
+            s₂ ⟦"arg1[1]"←ₐ
+              { name := "output" }[(1,
+                0)]⟧) = s₃
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  generalize eq₈ : (s₃["x * arg1[1]"] :=
+          Γ
+            s₃ ⟦Op.Mul { name := "x" }
+              {
+                name :=
+                  "arg1[1]" }⟧ₑ) = s₄ 
+  rw [MLIR.run_seq_def]
+  rw [MLIR.run_ass_def]
+  generalize eq₉ : (s₄["x * arg1[1] - 1"] :=
+          Γ s₄ ⟦Op.Sub { name := "x * arg1[1]" } { name := "1" }⟧ₑ) = s₅
+  
 
   -- Just playing around to see what's slow.
   -- unfold is0_witness MLIR.runProgram
