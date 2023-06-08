@@ -78,6 +78,10 @@ def isValidUpdate (old new : BufferAtTime) :=
       oldElem.isNone ∨
       oldElem = newElem
 
+instance {old new} : Decidable (Buffer.isValidUpdate old new) := by
+  unfold Buffer.isValidUpdate
+  exact inferInstance
+
 end Buffer
 
 inductive Lit where
@@ -195,13 +199,7 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
         | @Lit.Buf    newBufferAtTime =>
           match state.buffers ⟨name⟩ with
             | .some oldBuffer =>
-              -- TODO use isValidUpdate here and move comments. Not done currently because of decidability error
-              if                                                  -- for newBufferAtTime to be valid,
-                oldBuffer.last!.length = newBufferAtTime.length ∧ -- it must be the correct length
-                (List.zip oldBuffer.last! newBufferAtTime).all    -- and for all elements
-                  λ (oldElem, newElem) =>
-                    oldElem.isNone ∨                              -- if there was no value previously, the new value can be anything or none
-                    oldElem = newElem                             -- if there was a value previously it must be unchanged
+              if Buffer.isValidUpdate oldBuffer.last! newBufferAtTime
               then {state with buffers := state.buffers[⟨name⟩] := (oldBuffer.setLatest! newBufferAtTime)}
               else {state with isFailed := true}
             | .none        => {state with isFailed := true}
