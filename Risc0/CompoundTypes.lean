@@ -9,10 +9,6 @@ namespace Risc0
 --   | Reserve
 --   | Use
 
--- TODO make matchable
--- split into subtypes
-  -- ContainerType for StructType and UnionType
-  -- ArrayType should be its own thing for subscript
 inductive MemberType where
   | StructType: List (String × MemberType) → MemberType
   | UnionType: List (String × MemberType) → MemberType
@@ -76,37 +72,5 @@ def Subscript {isNondet : IsNondet} (container: BufferVar) (containerType: Membe
     | _ => .none
 
 end CompoundOp
-
--- inductive ContainerTag :=
---   | Struct
---   | Union
-
--- structure ContainerType (containerTag: ContainerTag) :=
---   name: String
---   fields: List FieldInfo
-
--- structure FieldInfo :=
---   name: String
---   type: sorry
-
--- structure ArrayType :=
---   type: sorry
---   length: Nat
-
--- inductive CompoundType :=
---   | ContainerType
---   | ArrayType
-
--- def ToBuffer (x: CompoundType) :=
---   match x with
---     | ContainerType tag => match tag with
---       | ContainerTag.Struct => sorry
---       | ContainerTag.Union => sorry
---     | ArrayType => sorry
-
--- The conversion from compound types to buffers is the issue
--- Our code currently evaluates operations on buffers by taking
--- the name of the buffer and finding it in state.buffers
--- however if an op returns a buffer, not a BufferVar, how can another one take it?
 
 end Risc0
