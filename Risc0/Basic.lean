@@ -313,7 +313,7 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
     | GetGlobal buf idx   => .some <| .Val <| let buf' := st.buffers buf |>.get!
                                               let bufferWidth := st.bufferWidths buf |>.get!
                                               buf'.get! (idx.div bufferWidth) |>.get! (idx.mod bufferWidth)
-    | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
+    | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers.get! buf) (st.cycle - 1)).slice offset size
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
 
