@@ -263,7 +263,6 @@ scoped infix   :55                     " &₀ "                            => Op
 scoped notation:55                     " guard " c " & " x " with " y:55 => Op.AndCond x c y
 scoped prefix  :57                     "??₀"                             => Op.Isz
 scoped prefix  :max                    "Inv"                             => Op.Inv
-scoped prefix  :max                    "Load"                            => λ x => Op.Get x 0 0t
 
 end MLIRNotation
 
@@ -392,7 +391,6 @@ scoped notation:51                    "guard " c " then " x:51   => MLIR.If c x
 scoped prefix  :max                   "nondet"                   => MLIR.Nondet
 scoped infixr  :50                    "; "                       => MLIR.Sequence
 scoped notation:51 (priority := high) b "[" v:51 "]" " ←ᵢ " x:51 => MLIR.Set b v x
-scoped prefix  :max                   "Store"                    => λ buf val MLIR.Set buf 0 val
 
 end MLIRNotation
 
