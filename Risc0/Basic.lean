@@ -193,7 +193,7 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
         | .Constraint c => {state with props := state.props[⟨name⟩] := c}
         | .Val        x => {state with felts := state.felts[⟨name⟩] := x}
         | @Lit.Buf    newBufferAtTime =>
-          match (state.buffers ⟨name⟩) with
+          match state.buffers ⟨name⟩ with
             | .some oldBuffer =>
               -- TODO use isValidUpdate here and move comments. Not done currently because of decidability error
               if                                                  -- for newBufferAtTime to be valid,
@@ -341,17 +341,17 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
                                 buf ∈ st.vars ∧
                                 offset < st.bufferWidths.get! buf ∧
                                 val.isSome
-                              then .some <| .Val <| val.get!
+                              then .some <| .Val val.get!
                               else .none
     | GetGlobal buf offset => if buf ∈ st.vars
                               then
-                                let buffer := (st.buffers.get! buf)
+                                let buffer := st.buffers.get! buf
                                 let bufferWidth := st.bufferWidths.get! buf
                                 let timeIdx := offset.div bufferWidth -- the implementation of getGlobal steps directly into the 1D representation
                                 let dataIdx := offset.mod bufferWidth -- of whatever buffer it is passed
                                 let val := (buffer.get! timeIdx).get! dataIdx
                                 if timeIdx < buffer.length ∧ dataIdx < bufferWidth ∧ val.isSome
-                                then .some <| .Val <| val.get!
+                                then .some <| .Val val.get!
                                 else .none
                               else .none
     | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
