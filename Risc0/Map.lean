@@ -77,6 +77,7 @@ lemma mem_def : (x ∈ m) = m[x].isSome := rfl
 lemma mem_update_self : k ∈ m[k] := v := by
   rw [mem_def, Option.isSome_iff_exists, update_get]; use v
 
+@[simp]
 lemma mem_skip (h : k ∈ m) : k ∈ m[k'] := v := by simp [mem_def, update]; aesop
 
 @[simp]

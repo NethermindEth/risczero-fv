@@ -140,16 +140,102 @@ elab "MLIR_state" : tactic => do
 elab "MLIR_states" : tactic => do
   evalTactic <| ← `(tactic| repeat MLIR_state)
 
+elab "MLIR_statement" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      rewrite [MLIR.run_seq_def]
+      repeat (
+        first
+        | rewrite [MLIR.run_ass_def]
+        | rewrite [MLIR.run_set_output]
+        | rewrite [MLIR.run_if]
+        | rewrite [MLIR.run_nondet]
+        | rewrite [MLIR.run_eqz]
+      )
+      simp_op
+    )
+  )
+
 end tactics
+
+lemma run_preserves_width {st : State} : (st.bufferWidths bufferVar) = (MLIR.run program st).bufferWidths bufferVar := by
+  sorry
+  -- induction program with
+  --   | Assign name op => {
+  --     unfold MLIR.run State.update Op.eval
+  --     aesop
+  --   }
+  --   | Eqz x => {
+  --     unfold MLIR.run
+  --     aesop
+  --   }
+  --   | If cond branch h_branch => {
+  --     cases st.felts cond with
+  --       | some x => {
+  --         unfold MLIR.run
+  --         aesop
+  --       }
+  --       | none => {
+  --         unfold MLIR.run
+  --         aesop
+  --       }
+  --   }
+  --   | Nondet block h_block => {
+  --     unfold MLIR.run
+  --     aesop
+  --   }
+  --   | Sequence a b h₁ h₂ => {
+  --     unfold MLIR.run
+  --     rewrite [h₂]
+  --   }
+  --   | Fail         => {
+
+  --   }
+  --   | Set buf offset val => {
+
+  --   }
+  --   | SetGlobal buf offset val => {
+
+  --   }
   
 set_option maxHeartbeats 2000000 in
 lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
     (is0_constraints x ([y₁, y₂]))
   ↔ (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by
-  sorry
-  -- unfold is0_constraints MLIR.runProgram
-  -- unfold is0_initial_state
-  -- simp [MLIR.run_seq_def]
+  unfold is0_constraints MLIR.runProgram
+  let s₁ : State := is0_initial_state x (Lean.Internal.coeM [y₁, y₂])
+  have hs₁ : is0_initial_state x (Lean.Internal.coeM [y₁, y₂]) = s₁ := by rfl
+  MLIR_statement
+  MLIR_statement
+  MLIR_statement
+  MLIR_statement
+  rewrite [hs₁]
+  let s₂ : State := s₁["1"] := some (Lit.Val 1)
+  have hs₂ : s₁.update "1" (some (Lit.Val 1)) = s₂ := by rfl
+  rewrite [hs₂]
+  let s₃ : State := s₂["0"] := some (Lit.Val 0)
+  have hs₃ : s₂.update "0" (some (Lit.Val 0)) = s₃ := by rfl
+  rewrite [hs₃]
+  let s₄ : State := s₃["true"] := some (Lit.Constraint True)
+  have hs₄ : s₃.update "true" (some (Lit.Constraint True)) = s₄ := by rfl
+  rewrite [hs₄]
+  save
+  have h₁ : 0 ≤ s₄.cycle := by simp
+  have h_input₄ : ⟨"input"⟩  ∈ s₄.vars := by {
+    simp
+    unfold is0_initial_state
+    simp
+  }
+  have h_input_width₄ : 0 < s₄.bufferWidths.get! ⟨"input"⟩ := by {
+    unfold Map.get!
+    simp [run_preserves_width]
+    unfold is0_initial_state
+    simp
+  }
+  -- infoview stops working here
+  have h_input_valid : (s₄.buffers.get! ⟨"input"⟩).get! (s₄.cycle - Back.toNat 0, 0) = some x := by {
+    
+  }
   -- simp [MLIR.run_ass_def]
   -- MLIR_states
 
