@@ -380,7 +380,7 @@ lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .some (.Constraint (_root_.True))
 
 @[simp]
 lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
-  let val := ((st.buffers buf).get!.get! (st.cycle - (back.toNat)) |>.get! offset)
+  let val := ((st.buffers buf).get!.get! (st.cycle - back.toNat) |>.get! offset)
   if back ≤ st.cycle ∧ buf ∈ st.vars ∧ offset < st.bufferWidths.get! buf ∧ val.isSome
   then .some (.Val val.get!)
   else .none := rfl
