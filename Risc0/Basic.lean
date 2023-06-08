@@ -58,10 +58,10 @@ def last! (buf : Buffer) : BufferAtTime :=
 def copyLast (buf : Buffer) : Buffer := 
   buf.push buf.last!
 
-def setLatestUnchecked (buf : Buffer) (val : BufferAtTime) : Buffer :=
+def setLatest! (buf : Buffer) (val : BufferAtTime) : Buffer :=
   List.set buf (buf.length - 1) val
 
-def setAtTimeChecked (buf : Buffer) (timeIdx: ℕ) (dataIdx: ℕ) (val: Felt) : Option Buffer :=
+def setAtTime? (buf : Buffer) (timeIdx: ℕ) (dataIdx: ℕ) (val: Felt) : Option Buffer :=
   let bufferAtTime := buf.get! timeIdx
   let oldVal := (bufferAtTime.get! dataIdx)
   if oldVal.isEqSome val
@@ -202,7 +202,7 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
                   λ (oldElem, newElem) =>
                     oldElem.isNone ∨                              -- if there was no value previously, the new value can be anything or none
                     oldElem = newElem                             -- if there was a value previously it must be unchanged
-              then {state with buffers := state.buffers[⟨name⟩] := (oldBuffer.setLatestUnchecked newBufferAtTime)}
+              then {state with buffers := state.buffers[⟨name⟩] := (oldBuffer.setLatest! newBufferAtTime)}
               else {state with isFailed := true}
             | .none        => {state with isFailed := true}
 
@@ -448,7 +448,7 @@ abbrev withEqZero (x : Felt) (st : State) : State :=
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
 
 def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (timeIdx dataIdx: ℕ) (val : Felt) : State :=
-  match (st.buffers.get! bufferVar).setAtTimeChecked timeIdx dataIdx val with
+  match (st.buffers.get! bufferVar).setAtTime? timeIdx dataIdx val with
     | .some b => {st with buffers := st.buffers[bufferVar] := b}
     | .none   => {st with isFailed := true}
 
