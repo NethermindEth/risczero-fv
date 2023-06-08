@@ -56,11 +56,17 @@ def last! (buf : Buffer) : BufferAtTime :=
 def copyLast (buf : Buffer) : Buffer := 
   buf.push buf.last!
 
+def get! (buf : Buffer) (idx : Idx) : Option Felt :=
+  List.get! (List.get! buf idx.time) idx.data
+
+def getBufferAtTime! (buf : Buffer) (timeIdx : ℕ) : BufferAtTime :=
+  List.get! buf timeIdx
+
 def setAllLatest! (buf : Buffer) (val : BufferAtTime) : Buffer :=
   List.set buf (buf.length - 1) val
 
 def set? (buf : Buffer) (idx: Idx) (val: Felt) : Option Buffer :=
-  let bufferAtTime := buf.get! idx.time
+  let bufferAtTime := buf.getBufferAtTime! idx.time
   let oldVal := (bufferAtTime.get! idx.data)
   if oldVal.isEqSome val
   then .some buf
@@ -338,7 +344,7 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
     -- Buffers
     | Alloc size          => .some <| .Buf <| List.replicate size .none
     | Back buf back       => .some <| .Buf <| (List.get! (st.buffers.get! buf) st.cycle).slice 0 back
-    | Get buf back offset => let val := ((st.buffers.get! buf).get! (st.cycle - back.toNat)).get! offset
+    | Get buf back offset => let val := (st.buffers.get! buf).get! ((st.cycle - back.toNat), offset)
                               if
                                 back ≤ st.cycle ∧
                                 buf ∈ st.vars ∧
@@ -350,10 +356,9 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
                               then
                                 let buffer := st.buffers.get! buf
                                 let bufferWidth := st.bufferWidths.get! buf
-                                let timeIdx := offset.div bufferWidth -- the implementation of getGlobal steps directly into the 1D representation
-                                let dataIdx := offset.mod bufferWidth -- of whatever buffer it is passed
-                                let val := (buffer.get! timeIdx).get! dataIdx
-                                if timeIdx < buffer.length ∧ dataIdx < bufferWidth ∧ val.isSome
+                                let idx := Buffer.Idx.from1D offset bufferWidth -- the implementation of getGlobal steps directly into the 1D representation of whatever buffer it is passed
+                                let val := buffer.get! idx
+                                if idx.time < buffer.length ∧ val.isSome
                                 then .some <| .Val val.get!
                                 else .none
                               else .none
@@ -383,7 +388,7 @@ lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .some (.Constraint (_root_.True))
 
 @[simp]
 lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
-  let val := ((st.buffers buf).get!.get! (st.cycle - back.toNat) |>.get! offset)
+  let val := (st.buffers.get! buf).get! ((st.cycle - back.toNat), offset)
   if back ≤ st.cycle ∧ buf ∈ st.vars ∧ offset < st.bufferWidths.get! buf ∧ val.isSome
   then .some (.Val val.get!)
   else .none := rfl
