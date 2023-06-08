@@ -32,21 +32,21 @@ abbrev PropVar := Variable PropTag
 
 abbrev Felt := ZMod P
 
-abbrev BufferAtTime := List Felt
+-- none is an unset value which can be written to, but not read
+-- some is a set value which can be read, and can only be written to if the new val is equal
+abbrev BufferAtTime := List (Option Felt)
 
 abbrev Buffer := List BufferAtTime
 
 namespace Buffer
 
+abbrev Idx := ℕ × ℕ
+abbrev Idx.time : Idx → ℕ := Prod.fst
+abbrev Idx.data : Idx → ℕ := Prod.snd
+
 def empty : Buffer := []
 
-def set! (row : BufferAtTime) (buf : Buffer) : Buffer :=
-  List.set buf (buf.length - 1) row
-
-lemma set!_of_nonempty {buf : Buffer} (h : buf ≠ []) : buf.set! row ≠ [] := by
-  unfold set!; aesop
-
-def init (size : ℕ) : Buffer := [List.replicate size 0]
+def init (size : ℕ) : Buffer := [List.replicate size .none]
 
 def init' (row : BufferAtTime) : Buffer := [row]
 
@@ -56,8 +56,41 @@ def last! (buf : Buffer) : BufferAtTime :=
 def copyLast (buf : Buffer) : Buffer := 
   buf.push buf.last!
 
-def set (buf : Buffer) (val : BufferAtTime) : Buffer :=
+def get! (buf : Buffer) (idx : Idx) : Option Felt :=
+  List.get! (List.get! buf idx.time) idx.data
+
+def getBufferAtTime! (buf : Buffer) (timeIdx : ℕ) : BufferAtTime :=
+  List.get! buf timeIdx
+
+def setAllLatest! (buf : Buffer) (val : BufferAtTime) : Buffer :=
   List.set buf (buf.length - 1) val
+
+def set? (buf : Buffer) (idx: Idx) (val: Felt) : Option Buffer :=
+  let bufferAtTime := buf.getBufferAtTime! idx.time
+  let oldVal := (bufferAtTime.get! idx.data)
+  if oldVal.isEqSome val
+  then .some buf
+  else
+    if oldVal.isNone
+    then .some <| List.set buf idx.time (bufferAtTime.set idx.data (.some val))
+    else .none
+
+def isValidUpdate (old new : BufferAtTime) :=
+  old.length = new.length ∧
+  (List.zip old new).all
+    λ (oldElem, newElem) =>
+      oldElem.isNone ∨
+      oldElem = newElem
+
+instance {old new} : Decidable (Buffer.isValidUpdate old new) := by
+  unfold Buffer.isValidUpdate
+  exact inferInstance
+
+def Idx.from1D (flatOffset width : ℕ) : Idx :=
+  (flatOffset.div width, flatOffset.mod width)
+
+lemma data_idx_le_width (flatOffset width : ℕ) (h: width > 0) : (Idx.from1D flatOffset width).data < width :=
+  Nat.mod_lt _ h
 
 end Buffer
 
@@ -119,8 +152,8 @@ structure WellFormed (st : State) : Prop :=
   
 def Valid (st : State) := st.WellFormed ∧ st.isFailed
 
-def init' (numInput numOutput : ℕ)
-          (input : List Felt) (output : List Felt)
+def init (numInput numOutput : ℕ)
+          (input : BufferAtTime) (output : BufferAtTime)
           (_hIn : input.length = numInput) (_hOut : output.length = numOutput) : State where
   buffers      := Map.fromList [(⟨Input⟩, Buffer.init' input), (⟨Output⟩, Buffer.init' output)]
   bufferWidths := Map.fromList [(⟨Input⟩, numInput), (⟨Output⟩, numOutput)]
@@ -131,49 +164,55 @@ def init' (numInput numOutput : ℕ)
   props        := Map.empty
   vars         := [⟨Input⟩, ⟨Output⟩]
 
-def init (numInput numOutput : ℕ) : State :=
-  init' numInput numOutput
+-- Only used to prove State inhabited, since it initialises both input and output as write-only
+def init_default (numInput numOutput : ℕ) : State :=
+  init numInput numOutput
         ((Buffer.init numInput).head (by simp [Buffer.init]))
         ((Buffer.init numOutput).head (by simp [Buffer.init]))
         (by simp [Buffer.init])
         (by simp [Buffer.init])
 
 private lemma valid_init'_aux :
-  bufferLensConsistent (State.init' m n input output hIn hOut) := λ var h h₁ row h₂ => by
-  simp [bufferWidths, init', Buffer.init']
+  bufferLensConsistent (State.init m n input output hIn hOut) := λ var h h₁ row h₂ => by
+  simp [bufferWidths, init, Buffer.init']
   have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
-    unfold init' at h; rw [Map.mem_fromList] at h; simp at h; exact h
-  have : row = 0 := by simp [init'] at h₂; exact h₂
+    unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
+  have : row = 0 := by simp [init] at h₂; exact h₂
   subst this; simp
   rcases this with h | h <;> subst h <;> simp [Map.update, Map.getElem_def, *]
 
-lemma valid_init' : (init' m n input output hIn hOut).WellFormed where
-  distinct := by simp [init']
+lemma valid_init' : (init m n input output hIn hOut).WellFormed where
+  distinct := by simp [init]
   hVars    := λ var => ⟨
-      λ h => by simp [init'] at *; rcases h with h | h <;> subst h ; decide_mem_map,
-      λ h => by simp [init'] at *; simp [Map.mem_def, Map.update] at h; split at h <;> aesop 
+      λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
+      λ h => by simp [init] at *; simp [Map.mem_def, Map.update] at h; split at h <;> aesop 
     ⟩ 
   hCycle   := λ var h =>
     by have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
-         simp only [init'] at h; rw [Map.mem_fromList] at h; simp at h; exact h
+         simp only [init] at h; rw [Map.mem_fromList] at h; simp at h; exact h
        rcases this with h | h <;> subst h <;> simp [Map.getElem_def] <;> rfl
   hCols    := λ var => ⟨
-      λ h => by simp [init'] at h; rcases h with h | h <;> subst h ; decide_mem_map,
-      λ h => by simp [init'] at h ⊢; simp [Map.mem_def, Map.update] at h; aesop
+      λ h => by simp [init] at h; rcases h with h | h <;> subst h ; decide_mem_map,
+      λ h => by simp [init] at h ⊢; simp [Map.mem_def, Map.update] at h; aesop
     ⟩ 
   hColsLen := valid_init'_aux
 
-lemma valid_init : (init m n).WellFormed := valid_init'
+lemma valid_init : (init_default m n).WellFormed := valid_init'
 
 def update (state : State) (name : String) (x : Option Lit) : State :=
   match x with
     | .none => {state with isFailed := true}
     | .some lit =>
       match lit with
-        | @Lit.Buf    b => {state with buffers :=
-                              state.buffers[⟨name⟩] := (state.buffers.get! ⟨name⟩).set b}
         | .Constraint c => {state with props := state.props[⟨name⟩] := c}
         | .Val        x => {state with felts := state.felts[⟨name⟩] := x}
+        | @Lit.Buf    newBufferAtTime =>
+          match state.buffers ⟨name⟩ with
+            | .some oldBuffer =>
+              if Buffer.isValidUpdate oldBuffer.last! newBufferAtTime
+              then {state with buffers := state.buffers[⟨name⟩] := (oldBuffer.setAllLatest! newBufferAtTime)}
+              else {state with isFailed := true}
+            | .none        => {state with isFailed := true}
 
 @[simp]
 lemma update_val {state : State} {name : String} {x : Felt} :
@@ -192,7 +231,7 @@ end State
 
 end State
 
-instance : Inhabited State := ⟨State.init 42 42⟩
+instance : Inhabited State := ⟨State.init_default 42 42⟩
 
 notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
 
@@ -302,18 +341,27 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
             then _root_.True
             else (st.props inner).get!
     -- Buffers
-    | Alloc size          => .some <| .Buf <| List.replicate size 0
+    | Alloc size          => .some <| .Buf <| List.replicate size .none
     | Back buf back       => .some <| .Buf <| (List.get! (st.buffers.get! buf) st.cycle).slice 0 back
-    | Get buf back offset => if
-                              back ≤ st.cycle ∧
-                              buf ∈ st.vars ∧
-                              offset < st.bufferWidths.get! buf
-                             then .some <| .Val <| (st.buffers.get! buf).get! (st.cycle - back.toNat) |>.get! offset
-                             else .none          
-    | GetGlobal buf idx   => .some <| .Val <| let buf' := st.buffers buf |>.get!
-                                              let bufferWidth := st.bufferWidths buf |>.get!
-                                              buf'.get! (idx.div bufferWidth) |>.get! (idx.mod bufferWidth)
-    | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers.get! buf) (st.cycle - 1)).slice offset size
+    | Get buf back offset => let val := (st.buffers.get! buf).get! ((st.cycle - back.toNat), offset)
+                              if
+                                back ≤ st.cycle ∧
+                                buf ∈ st.vars ∧
+                                offset < st.bufferWidths.get! buf ∧
+                                val.isSome
+                              then .some <| .Val val.get!
+                              else .none
+    | GetGlobal buf offset => if buf ∈ st.vars
+                              then
+                                let buffer := st.buffers.get! buf
+                                let bufferWidth := st.bufferWidths.get! buf
+                                let idx := Buffer.Idx.from1D offset bufferWidth -- the implementation of getGlobal steps directly into the 1D representation of whatever buffer it is passed
+                                let val := buffer.get! idx
+                                if idx.time < buffer.length ∧ val.isSome
+                                then .some <| .Val val.get!
+                                else .none
+                              else .none
+    | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧ₑ" => Op.eval st p
 
@@ -339,8 +387,9 @@ lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .some (.Constraint (_root_.True))
 
 @[simp]
 lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
-  if st.cycle ≤ back ∧ offset < st.bufferWidths[buf].get!
-  then .some (.Val ((st.buffers buf).get!.get! ((st.cycle - 1) - (back.toNat)) |>.get! offset))
+  let val := (st.buffers.get! buf).get! ((st.cycle - back.toNat), offset)
+  if back ≤ st.cycle ∧ buf ∈ st.vars ∧ offset < st.bufferWidths.get! buf ∧ val.isSome
+  then .some (.Val val.get!)
   else .none := rfl
 
 @[simp]
@@ -405,22 +454,17 @@ abbrev withEqZero (x : Felt) (st : State) : State :=
 @[simp]
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
 
-def State.set! (st : State) (buffer : BufferVar) (offset : ℕ) (val : Felt) : State := 
-  {st with buffers := st.buffers[buffer] :=
-                        (st.buffers.get! buffer).set ((st.buffers.get! buffer).last!.set offset val)} 
+def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer.Idx) (val : Felt) : State :=
+  match (st.buffers.get! bufferVar).set? idx val with
+    | .some b => {st with buffers := st.buffers[bufferVar] := b}
+    | .none   => {st with isFailed := true}
 
-private lemma State.setGlobal!aux {P : Prop} (h : ¬(P ∨ sz = 0)) : 0 < sz := by
-  rw [not_or] at h; rcases h with ⟨_, h⟩
-  exact Nat.zero_lt_of_ne_zero h
+def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
+  st.setBufferElementImpl bufferVar (((st.buffers.get! bufferVar).length - 1), offset) val
 
--- def State.setGlobal! (st : State) (buffer : BufferVar) (idx : ℕ) (val : Felt) : State := sorry 
-  -- let ⟨sz, data⟩ := st.buffers buffer |>.get!
-  -- let rowCol := rowColOfWidthIdx sz idx
-  -- if h : rowCol.1 ≠ st.cycle ∨ sz = 0
-  --   then st
-  --   else {st with buffers :=
-  --           st.buffers[buffer.name] :=
-  --             ⟨sz, data.set rowCol.1 ⟨rowCol.2, col_lt_width (State.setGlobal!aux h)⟩ val⟩}
+def State.setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
+  let width := st.bufferWidths.get! bufferVar
+  st.setBufferElementImpl bufferVar (Buffer.Idx.from1D offset width) val
 
 -- Step through the entirety of a `MLIR` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint
@@ -447,8 +491,8 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
           | _         => st
     | SetGlobal buf offset val =>
         match st.felts val with
-          | .some val => sorry --st.setGlobal! buf offset val
-          | _         => st
+          | .some val => st.setGlobal! buf offset val -- Behind the scenes setGlobal actually flattens a 2d buffer into a 1d buffer
+          | _         => st                           -- and indexes into it. This is a side effect of global buffers only being 1d anyway
 
 @[simp]
 abbrev MLIR.runProgram (program : MLIRProgram) := program.run

@@ -65,10 +65,6 @@ def ContainerType.offsetSize (c : ContainerType) (name : String) : Option (â„• Ã
 
 namespace CompoundOp
 
--- def Lookup
-
--- def Subscript
-
 def Load {isNondet: IsNondet} (ref: BufferVar): Op isNondet := Op.Get ref 0 0
 
 def Store (ref: BufferVar) (val: FeltVar) := MLIR.Set ref 0 val

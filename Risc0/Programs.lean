@@ -13,8 +13,8 @@ namespace Risc0
 
 open MLIRNotation
 
-def is0_initial_state (input : Felt) (output : List Felt) : State :=
-  { buffers := Map.fromList [(⟨"input"⟩, [[input]]), (⟨"output"⟩, [output])]
+def is0_initial_state (input : Felt) (output : BufferAtTime) : State :=
+  { buffers := Map.fromList [(⟨"input"⟩, [[.some input]]), (⟨"output"⟩, [output])]
   , bufferWidths := Map.fromList [(⟨"input"⟩, 1), (⟨"output"⟩, 2)]
   , constraints := []
   , cycle := 0
@@ -24,16 +24,17 @@ def is0_initial_state (input : Felt) (output : List Felt) : State :=
   , isFailed := false
   }
 
-def is0_initial_state' (input output : List Felt)
+def is0_initial_state' (input output : List (Option Felt))
                        (hIn : input.length = 1)
-                       (hOut : output.length = 2) := State.init' 1 2 input output hIn hOut
+                       (hOut : output.length = 2) :=
+  State.init 1 2 input output hIn hOut
 
-theorem justToShowInitialEquiv {input : Felt} {output : List Felt} (hOut : output.length = 2) :
-        is0_initial_state input output = is0_initial_state' [input] output rfl hOut := rfl
+theorem justToShowInitialEquiv {input : Felt} {output : BufferAtTime} (hOut : output.length = 2) :
+        is0_initial_state input output = is0_initial_state' [Option.some input] output rfl hOut := rfl
 
-def is0_witness_initial_state (input : Felt) : State := is0_initial_state input ([42, 42])
+def is0_witness_initial_state (input : Felt) : State := is0_initial_state input ([.none, .none])
 
-theorem is0_initial_state_wf {input : Felt} {output : List Felt} {hLen : output.length = 2} :
+theorem is0_initial_state_wf {input : Felt} {output : BufferAtTime} {hLen : output.length = 2} :
   is0_initial_state input output |>.WellFormed := by
     rw [justToShowInitialEquiv hLen]
     exact State.valid_init'
@@ -52,7 +53,7 @@ theorem is0_initial_state_wf {input : Felt} {output : List Felt} {hLen : output.
     -- %11 = cirgen.and_cond %5, %6 : <default>, %10
 
 
-def is0_witness (input : Felt) : List Felt :=
+def is0_witness (input : Felt) : BufferAtTime :=
     let st' := MLIR.runProgram (st := is0_witness_initial_state input) <|
     "1"         ←ₐ .Const 1;
     "x"         ←ₐ Op.Get ⟨"input"⟩ 0 0;
