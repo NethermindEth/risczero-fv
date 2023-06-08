@@ -16,8 +16,7 @@ inductive ContainerType where
   | UnionType  : List (String × MemberType) → ContainerType
 
 inductive MemberType where
-  | StructType : ContainerType → MemberType
-  | UnionType  : ContainerType → MemberType
+  | ContainerType : ContainerType → MemberType
   | ArrayType  : MemberType → ℕ → MemberType
   | Ref        : MemberType
 
@@ -37,7 +36,7 @@ def ContainerType.size : ContainerType → ℕ
 
 def MemberType.size (memberType: MemberType) : ℕ :=
   match memberType with
-    | .StructType c | .UnionType c => c.size
+    | .ContainerType c => c.size
     | .ArrayType c n               => c.size * n
     | .Ref                         => 1
 
