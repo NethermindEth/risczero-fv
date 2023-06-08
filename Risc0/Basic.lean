@@ -89,9 +89,8 @@ instance {old new} : Decidable (Buffer.isValidUpdate old new) := by
 def Idx.from1D (flatOffset width : ℕ) : Idx :=
   (flatOffset.div width, flatOffset.mod width)
 
-lemma data_idx_le_width (flatOffset width : ℕ) (h: width > 0) : (Idx.from1D flatOffset width).data < width := by
-  apply Nat.mod_lt
-  exact h
+lemma data_idx_le_width (flatOffset width : ℕ) (h: width > 0) : (Idx.from1D flatOffset width).data < width :=
+  Nat.mod_lt _ h
 
 end Buffer
 
