@@ -52,27 +52,59 @@ theorem is0_initial_state_wf {input : Felt} {output : BufferAtTime} {hLen : outp
     -- %10 = cirgen.and_eqz %1, %9 : <default>
     -- %11 = cirgen.and_cond %5, %6 : <default>, %10
 
+def is0_witness_prog : MLIRProgram :=
+  "1"         ←ₐ .Const 1;
+  "x"         ←ₐ Op.Get ⟨"input"⟩ 0 0;
+  nondet (
+    "isZeroBit" ←ₐ ??₀⟨"x"⟩;
+    ⟨"output"⟩[0]   ←ᵢ ⟨"isZeroBit"⟩;
+    "invVal"    ←ₐ Inv ⟨"x"⟩;
+    ⟨"output"⟩[1]   ←ᵢ ⟨"invVal"⟩  
+  );
+  "arg1[0]"   ←ₐ .Get ⟨"output"⟩ 0 0;
+  guard ⟨"arg1[0]"⟩ then
+    ?₀ ⟨"x"⟩;
+  "1 - arg1[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"arg1[0]"⟩;
+  guard ⟨"1 - arg1[0]"⟩ then
+    "arg1[1]"        ←ₐ .Get ⟨"output"⟩ 0 1;
+    "x * arg1[1]"     ←ₐ .Mul ⟨"x"⟩ ⟨"arg1[1]"⟩;
+    "x * arg1[1] - 1" ←ₐ .Sub ⟨"x * arg1[1]"⟩ ⟨"1"⟩;
+    ?₀ ⟨"x * arg1[1] - 1"⟩
 
 def is0_witness (input : Felt) : BufferAtTime :=
-    let st' := MLIR.runProgram (st := is0_witness_initial_state input) <|
-    "1"         ←ₐ .Const 1;
-    "x"         ←ₐ Op.Get ⟨"input"⟩ 0 0;
-    nondet (
-      "isZeroBit" ←ₐ ??₀⟨"x"⟩;
-      ⟨"output"⟩[0]   ←ᵢ ⟨"isZeroBit"⟩;
-      "invVal"    ←ₐ Inv ⟨"x"⟩;
-      ⟨"output"⟩[1]   ←ᵢ ⟨"invVal"⟩  
-    );
-    "arg1[0]"   ←ₐ .Get ⟨"output"⟩ 0 0;
-    guard ⟨"arg1[0]"⟩ then
-      ?₀ ⟨"x"⟩;
-    "1 - arg1[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"arg1[0]"⟩;
-    guard ⟨"1 - arg1[0]"⟩ then
-      "arg1[1]"        ←ₐ .Get ⟨"output"⟩ 0 1;
-      "x * arg1[1]"     ←ₐ .Mul ⟨"x"⟩ ⟨"arg1[1]"⟩;
-      "x * arg1[1] - 1" ←ₐ .Sub ⟨"x * arg1[1]"⟩ ⟨"1"⟩;
-      ?₀ ⟨"x * arg1[1] - 1"⟩
+    let st' := MLIR.runProgram (st := is0_witness_initial_state input) <| is0_witness_prog
   (st'.buffers ⟨"output"⟩ |>.get!.getLast!)
+
+def is0_witness₀ : MLIRProgram := "1" ←ₐ .Const 1;
+                                  "x" ←ₐ Op.Get ⟨"input"⟩ 0 0
+def is0_witness₁ : MLIRProgram := nondet (
+    "isZeroBit" ←ₐ ??₀⟨"x"⟩;
+    ⟨"output"⟩[0]   ←ᵢ ⟨"isZeroBit"⟩;
+    "invVal"    ←ₐ Inv ⟨"x"⟩;
+    ⟨"output"⟩[1]   ←ᵢ ⟨"invVal"⟩  
+  )
+def is0_witness₂ : MLIRProgram := "arg1[0]" ←ₐ .Get ⟨"output"⟩ 0 0
+def is0_witness₃ : MLIRProgram := guard ⟨"arg1[0]"⟩ then ?₀ ⟨"x"⟩
+def is0_witness₄ : MLIRProgram := "1 - arg1[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"arg1[0]"⟩
+def is0_witness₅ : MLIRProgram :=
+  guard ⟨"1 - arg1[0]"⟩ then
+    "arg1[1]"        ←ₐ .Get ⟨"output"⟩ 0 1;
+    "x * arg1[1]"     ←ₐ .Mul ⟨"x"⟩ ⟨"arg1[1]"⟩;
+    "x * arg1[1] - 1" ←ₐ .Sub ⟨"x * arg1[1]"⟩ ⟨"1"⟩;
+    ?₀ ⟨"x * arg1[1] - 1"⟩
+
+lemma is0_witness_per_partes {input} :
+  Γ (is0_witness_initial_state input) ⟦is0_witness_prog⟧ =
+  Γ (is0_witness_initial_state input)
+    ⟦is0_witness₀; is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅⟧ := by 
+  unfold is0_witness_prog
+  unfold is0_witness₀
+  unfold is0_witness₁
+  unfold is0_witness₂ 
+  unfold is0_witness₃
+  unfold is0_witness₄
+  unfold is0_witness₅
+  rw [←MLIR.seq_assoc]
 
 def is0_constraints (input : Felt) (output : List (Option Felt)) : Prop :=
   let state' :=
@@ -197,62 +229,118 @@ lemma run_preserves_width {st : State} : (st.bufferWidths bufferVar) = (MLIR.run
   --   | SetGlobal buf offset val => {
 
   --   }
-  
-set_option maxHeartbeats 2000000 in
-lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Option Felt} :
-    (is0_constraints x ([y₁, y₂]))
-  ↔ (if 1 - y₁.get! = 0 then if y₁.get! = 0 then True else x = 0 else (if y₁.get! = 0 then True else x = 0) ∧ x * y₂.get! - 1 = 0) := by
-  unfold is0_constraints MLIR.runProgram
-  let s₁ : State := is0_initial_state x ([y₁, y₂])
-  have hs₁ : is0_initial_state x ([y₁, y₂]) = s₁ := by rfl
-  MLIR_statement
-  MLIR_statement
-  MLIR_statement
-  MLIR_statement
-  rewrite [hs₁]
-  let s₂ : State := s₁["1"] := some (Lit.Val 1)
-  have hs₂ : s₁.update "1" (some (Lit.Val 1)) = s₂ := by rfl
-  rewrite [hs₂]
-  let s₃ : State := s₂["0"] := some (Lit.Val 0)
-  have hs₃ : s₂.update "0" (some (Lit.Val 0)) = s₃ := by rfl
-  rewrite [hs₃]
-  let s₄ : State := s₃["true"] := some (Lit.Constraint True)
-  have hs₄ : s₃.update "true" (some (Lit.Constraint True)) = s₄ := by rfl
-  rewrite [hs₄]
-  have h₁ : 0 ≤ s₄.cycle := by simp
-  have h_input₄ : ⟨"input"⟩  ∈ s₄.vars := by {
-    simp
-    unfold is0_initial_state
-    simp
-  }
-  have h_input_width₄ : 0 < s₄.bufferWidths.get! ⟨"input"⟩ := by {
-    unfold Map.get!
-    simp [run_preserves_width]
-    unfold is0_initial_state
-    simp
-  }
-  -- infoview stops working here
-  have h_input_valid : (s₄.buffers.get! ⟨"input"⟩).get! (s₄.cycle - Back.toNat 0, 0) = some x := by {
+
+-- set_option maxHeartbeats 2000000 in
+-- lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Option Felt} :
+--     (is0_constraints x ([y₁, y₂]))
+--   ↔ (if 1 - y₁.get! = 0 then if y₁.get! = 0 then True else x = 0 else (if y₁.get! = 0 then True else x = 0) ∧ x * y₂.get! - 1 = 0) := by
+--   unfold is0_constraints MLIR.runProgram
+--   let s₁ : State := is0_initial_state x ([y₁, y₂])
+--   have hs₁ : is0_initial_state x ([y₁, y₂]) = s₁ := by rfl
+--   MLIR_statement
+--   MLIR_statement
+--   MLIR_statement
+--   MLIR_statement
+--   rewrite [hs₁]
+--   let s₂ : State := s₁["1"] := some (Lit.Val 1)
+--   have hs₂ : s₁.update "1" (some (Lit.Val 1)) = s₂ := by rfl
+--   rewrite [hs₂]
+--   let s₃ : State := s₂["0"] := some (Lit.Val 0)
+--   have hs₃ : s₂.update "0" (some (Lit.Val 0)) = s₃ := by rfl
+--   rewrite [hs₃]
+--   let s₄ : State := s₃["true"] := some (Lit.Constraint True)
+--   have hs₄ : s₃.update "true" (some (Lit.Constraint True)) = s₄ := by rfl
+--   rewrite [hs₄]
+--   have h₁ : 0 ≤ s₄.cycle := by simp
+--   have h_input₄ : ⟨"input"⟩  ∈ s₄.vars := by {
+--     simp
+--     unfold is0_initial_state
+--     simp
+--   }
+--   have h_input_width₄ : 0 < s₄.bufferWidths.get! ⟨"input"⟩ := by {
+--     unfold Map.get!
+--     simp [run_preserves_width]
+--     unfold is0_initial_state
+--     simp
+--   }
+--   -- infoview stops working here
+--   have h_input_valid : (s₄.buffers.get! ⟨"input"⟩).get! (s₄.cycle - Back.toNat 0, 0) = some x := by {
     
-  }
-  -- simp [MLIR.run_ass_def]
-  -- MLIR_states
+--   }
+--   -- simp [MLIR.run_ass_def]
+--   -- MLIR_states
 
-  -- simp [MLIR.run_seq_def]
-  -- unfold is0_initial_state
-  -- simp
-  -- simp [MLIR.run_ass_def]
+--   -- simp [MLIR.run_seq_def]
+--   -- unfold is0_initial_state
+--   -- simp
+--   -- simp [MLIR.run_ass_def]
 
-  -- save
+--   -- save
   
   
   
-  -- MLIR_states
-  -- aesop
+--   -- MLIR_states
+--   -- aesop
+
+lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
+  is0_witness x = [y₁, y₂] ↔ _ := by
+  unfold is0_witness MLIR.runProgram; simp only
+  rewrite [is0_witness_per_partes]
+  generalize eq : (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
+  unfold is0_witness₀
+  MLIR_statement
+  MLIR_statement
+  rewrite [←eq]
+  rfl
+
+def st' {x : Felt} : State := ((is0_witness_initial_state x)["1"] := some (Lit.Val 1))["x"] :=
+                if
+                    0 ≤ ((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle ∧
+                      { name := "input" } ∈ ((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).vars ∧
+                        0 < Map.get! ({ name := "input" } : BufferVar) ∧
+                          Option.isSome
+                              (Buffer.get! (Map.get! ({ name := "input" } : BufferVar))
+                                (((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle - Back.toNat 0, 0)) =
+                            true then
+                  some
+                    (Lit.Val
+                      (Option.get!
+                        (Buffer.get! (Map.get! ({ name := "input" } : BufferVar))
+                          (((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle - Back.toNat 0, 0))))
+                else none := _
+
+/-
+⊢ ∀ {x y₁ y₂ : Felt},
+  is0_witness x = Lean.Internal.coeM [y₁, y₂] ↔
+    List.getLast!
+        (Option.get!
+          (State.buffers
+            (Γ
+              ((is0_witness_initial_state x["1"] := some (Lit.Val 1))["x"] :=
+                if
+                    0 ≤ (is0_witness_initial_state x["1"] := some (Lit.Val 1)).cycle ∧
+                      { name := "input" } ∈ (is0_witness_initial_state x["1"] := some (Lit.Val 1)).vars ∧
+                        0 < Map.get! { name := "input" } ∧
+                          Option.isSome
+                              (Buffer.get! (Map.get! { name := "input" })
+                                ((is0_witness_initial_state x["1"] := some (Lit.Val 1)).cycle - Back.toNat 0, 0)) =
+                            true then
+                  some
+                    (Lit.Val
+                      (Option.get!
+                        (Buffer.get! (Map.get! { name := "input" })
+                          ((is0_witness_initial_state x["1"] := some (Lit.Val 1)).cycle - Back.toNat 0, 0))))
+                else none) ⟦is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅⟧)
+            { name := "output" })) =
+      Lean.Internal.coeM [y₁, y₂]
+-/
+#print is0_witness_closed_form
 
 set_option maxHeartbeats 2000000 in
 lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
+  unfold is0_witness MLIR.runProgram; simp only
+  rw [is0_witness_per_partes]
   sorry
 
   -- Just playing around to see what's slow.

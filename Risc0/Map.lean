@@ -42,7 +42,7 @@ variable {α : Type} [DecidableEq α] {β : Type}
 
 def get (h : k ∈ m) := m[k].get h
 
-def get! [Inhabited β] (k : α) := m[k].get!
+def get! [Inhabited β] (m : Map α β) (k : α) := m[k].get!
 
 lemma get_def (h : k ∈ m) : m.get h = m[k].get h := rfl
 
