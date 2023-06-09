@@ -171,14 +171,15 @@ lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   rw [MLIR.run_ass_def]
   generalize eq₂ : (st'["x"] := Γ st' ⟦{ name := "input" }[(0, 0)]⟧ₑ) = st''
   rw [MLIR.run_seq_def]
+  rw [MLIR.run_nondet]
   generalize eq₃ : (Γ
-          st'' ⟦nondet("isZeroBit"←ₐ ??₀{ name := "x" };
-              { name := "output" }[0] ←ᵢ { name := "isZeroBit" };
-                "invVal"←ₐ Inv{ name := "x" };
-                  { name := "output" }[1] ←ᵢ
-                    {
-                      name :=
-                        "invVal" })⟧) = st'''
+          st'' ⟦"isZeroBit"←ₐ ??₀{ name := "x" };
+            { name := "output" }[0] ←ᵢ { name := "isZeroBit" };
+              "invVal"←ₐ Inv{ name := "x" };
+                { name := "output" }[1] ←ᵢ
+                  {
+                    name :=
+                      "invVal" }⟧) = st'''
   rw [MLIR.run_seq_def]
   rw [MLIR.run_ass_def]
   generalize eq₄ : (
@@ -220,7 +221,10 @@ lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
   rw [MLIR.run_ass_def]
   generalize eq₉ : (s₄["x * arg1[1] - 1"] :=
           Γ s₄ ⟦Op.Sub { name := "x * arg1[1]" } { name := "1" }⟧ₑ) = s₅
-  
+  rw [MLIR.run_eqz]
+  simp only [Op.eval_const, State.update_val] at eq₁
+  simp only [Op.eval_getBuffer, ge_iff_le, tsub_le_iff_right, tsub_eq_zero_iff_le, forall_true_left,
+  State.update_val] at eq₂
 
   -- Just playing around to see what's slow.
   -- unfold is0_witness MLIR.runProgram
