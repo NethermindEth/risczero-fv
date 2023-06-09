@@ -180,13 +180,29 @@ elab "MLIR_statement" : tactic => do
         first
         | rewrite [MLIR.run_ass_def]
         | rewrite [MLIR.run_set_output]
-        | rewrite [MLIR.run_if]
+        | rewrite [MLIR.run_if']
         | rewrite [MLIR.run_nondet]
-        | rewrite [MLIR.run_eqz]
+        | rewrite [MLIR.run_eqz']
       )
       simp_op
     )
   )
+
+-- elab "MLIR_statement" : tactic => do
+--   evalTactic <| ← `(
+--     tactic| (
+--       rewrite [MLIR.run_seq_def]
+--       repeat (
+--         first
+--         | rewrite [MLIR.run_ass_def]
+--         | rewrite [MLIR.run_set_output]
+--         | rewrite [MLIR.run_if]
+--         | rewrite [MLIR.run_nondet]
+--         | rewrite [MLIR.run_eqz]
+--       )
+--       simp_op
+--     )
+--   )
 
 end tactics
 
@@ -282,32 +298,1163 @@ lemma run_preserves_width {st : State} : (st.bufferWidths bufferVar) = (MLIR.run
 --   -- MLIR_states
 --   -- aesop
 
-lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
-  is0_witness x = [y₁, y₂] ↔ _ := by
-  unfold is0_witness MLIR.runProgram; simp only
-  rewrite [is0_witness_per_partes]
-  generalize eq : (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
-  unfold is0_witness₀
+
+
+-- lemma is0_witness_closed_form {x} {y₁ y₂ : Option Felt} :
+--   is0_witness x = [y₁, y₂] ↔ _ := by
+--   unfold is0_witness MLIR.runProgram; simp only
+--   rewrite [is0_witness_per_partes]
+--   generalize eq : (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
+--   unfold is0_witness₀
+--   MLIR_statement
+--   MLIR_statement
+--   rewrite [←eq]
+--   rfl
+
+-- lemma is0_witness_part₃ {y₁ y₂ : Option Felt} (st : State) :
+--   let st' := MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st
+--   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+--   unfold MLIR.runProgram; simp only
+--   generalize eq : (is0_witness₄; is0_witness₅) = prog
+--   unfold is0_witness₃
+--   MLIR_statement
+--   rewrite [←eq]
+--   rfl
+
+def part₃_state_update (st : State) : State :=
+  (Γ (if State.felts st { name := "arg1[0]" } = some 0 ∨ ¬{ name := "arg1[0]" } ∈ st.felts then st
+      else if h : { name := "x" } ∈ st.felts
+           then withEqZero (Option.get (State.felts st { name := "x" }) h) st
+           else st) ⟦is0_witness₄; is0_witness₅⟧)
+
+def part₃_updates {y₁ y₂ : Option Felt} (st : State) :=
+  let st' := MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st
+  List.getLast! (Option.get! (State.buffers st' { name := "output" })) = [y₁, y₂] ↔
+  List.getLast! (Option.get! (State.buffers (part₃_state_update st) { name := "output" })) = [y₁, y₂]
+
+-- lemma is0_witness_part₄ {y₁ y₂ : Option Felt} (st : State) :
+--   let st' := MLIR.runProgram (is0_witness₄; is0_witness₅) st
+--   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+--   unfold MLIR.runProgram; simp only
+--   unfold is0_witness₄
+--   MLIR_statement
+--   rfl
+
+def part₄_state_update (st : State) : State :=
+  Γ (st["1 - arg1[0]"] := some (Lit.Val
+    (Option.get! (State.felts st { name := "1" }) -
+     Option.get! (State.felts st { name := "arg1[0]" })))) ⟦is0_witness₅⟧
+
+def part₄_updates {y₁ y₂ : Option Felt} (st : State) :=
+  let st' := MLIR.runProgram (is0_witness₄; is0_witness₅) st
+  List.getLast! (Option.get! (State.buffers st' { name := "output" })) = [y₁, y₂] ↔
+  List.getLast! (Option.get! (State.buffers (part₄_state_update st) { name := "output" })) = [y₁, y₂]
+
+lemma is0_witness_part₄ {y₁ y₂ : Option Felt} (st : State) :
+  let st' := MLIR.runProgram is0_witness₅ st
+  (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+  unfold MLIR.runProgram; simp only
+  unfold is0_witness₅
   MLIR_statement
   MLIR_statement
-  rewrite [←eq]
+  MLIR_statement
   rfl
 
-def st' {x : Felt} : State := ((is0_witness_initial_state x)["1"] := some (Lit.Val 1))["x"] :=
-                if
-                    0 ≤ ((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle ∧
-                      { name := "input" } ∈ ((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).vars ∧
-                        0 < Map.get! ({ name := "input" } : BufferVar) ∧
-                          Option.isSome
-                              (Buffer.get! (Map.get! ({ name := "input" } : BufferVar))
-                                (((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle - Back.toNat 0, 0)) =
-                            true then
+/-
+⊢ ∀ {y₁ y₂ : Option Felt} (st : State),
+  let st' := MLIR.runProgram is0_witness₅ st;
+  List.getLast! (Option.get! (State.buffers st' { name := "output" })) = [y₁, y₂] ↔
+    List.getLast!
+        (Option.get!
+          (State.buffers
+            (if h :
+                { name := "x * arg1[1] - 1" } ∈
+                  (((if State.felts st { name := "1 - arg1[0]" } = some 0 ∨ ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                          st
+                        else
+                          st["arg1[1]"] :=
+                            if
+                                0 ≤ st.cycle ∧
+                                  { name := "output" } ∈ st.vars ∧
+                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                      Option.isSome
+                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                            (st.cycle - Back.toNat 0, 1)) =
+                                        true then
+                              some
+                                (Lit.Val
+                                  (Option.get!
+                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                      (st.cycle - Back.toNat 0, 1))))
+                            else none)["x * arg1[1]"] :=
+                        some
+                          (Lit.Val
+                            (Option.get!
+                                (State.felts
+                                  (if
+                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                    st
+                                  else
+                                    st["arg1[1]"] :=
+                                      if
+                                          0 ≤ st.cycle ∧
+                                            { name := "output" } ∈ st.vars ∧
+                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                Option.isSome
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                  true then
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1))))
+                                      else none)
+                                  { name := "x" }) *
+                              Option.get!
+                                (State.felts
+                                  (if
+                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                    st
+                                  else
+                                    st["arg1[1]"] :=
+                                      if
+                                          0 ≤ st.cycle ∧
+                                            { name := "output" } ∈ st.vars ∧
+                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                Option.isSome
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                  true then
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1))))
+                                      else none)
+                                  { name := "arg1[1]" }))))["x * arg1[1] - 1"] :=
+                      some
+                        (Lit.Val
+                          (Option.get!
+                              (State.felts
+                                ((if
+                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                    st
+                                  else
+                                    st["arg1[1]"] :=
+                                      if
+                                          0 ≤ st.cycle ∧
+                                            { name := "output" } ∈ st.vars ∧
+                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                Option.isSome
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                  true then
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1))))
+                                      else none)["x * arg1[1]"] :=
+                                  some
+                                    (Lit.Val
+                                      (Option.get!
+                                          (State.felts
+                                            (if
+                                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                              st
+                                            else
+                                              st["arg1[1]"] :=
+                                                if
+                                                    0 ≤ st.cycle ∧
+                                                      { name := "output" } ∈ st.vars ∧
+                                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                          Option.isSome
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1)) =
+                                                            true then
+                                                  some
+                                                    (Lit.Val
+                                                      (Option.get!
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1))))
+                                                else none)
+                                            { name := "x" }) *
+                                        Option.get!
+                                          (State.felts
+                                            (if
+                                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                              st
+                                            else
+                                              st["arg1[1]"] :=
+                                                if
+                                                    0 ≤ st.cycle ∧
+                                                      { name := "output" } ∈ st.vars ∧
+                                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                          Option.isSome
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1)) =
+                                                            true then
+                                                  some
+                                                    (Lit.Val
+                                                      (Option.get!
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1))))
+                                                else none)
+                                            { name := "arg1[1]" }))))
+                                { name := "x * arg1[1]" }) -
+                            Option.get!
+                              (State.felts
+                                ((if
+                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                    st
+                                  else
+                                    st["arg1[1]"] :=
+                                      if
+                                          0 ≤ st.cycle ∧
+                                            { name := "output" } ∈ st.vars ∧
+                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                Option.isSome
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                  true then
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1))))
+                                      else none)["x * arg1[1]"] :=
+                                  some
+                                    (Lit.Val
+                                      (Option.get!
+                                          (State.felts
+                                            (if
+                                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                              st
+                                            else
+                                              st["arg1[1]"] :=
+                                                if
+                                                    0 ≤ st.cycle ∧
+                                                      { name := "output" } ∈ st.vars ∧
+                                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                          Option.isSome
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1)) =
+                                                            true then
+                                                  some
+                                                    (Lit.Val
+                                                      (Option.get!
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1))))
+                                                else none)
+                                            { name := "x" }) *
+                                        Option.get!
+                                          (State.felts
+                                            (if
+                                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                              st
+                                            else
+                                              st["arg1[1]"] :=
+                                                if
+                                                    0 ≤ st.cycle ∧
+                                                      { name := "output" } ∈ st.vars ∧
+                                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                          Option.isSome
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1)) =
+                                                            true then
+                                                  some
+                                                    (Lit.Val
+                                                      (Option.get!
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1))))
+                                                else none)
+                                            { name := "arg1[1]" }))))
+                                { name := "1" })))).felts then
+              withEqZero
+                (Option.get
+                  (State.felts
+                    (((if State.felts st { name := "1 - arg1[0]" } = some 0 ∨ ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                          st
+                        else
+                          st["arg1[1]"] :=
+                            if
+                                0 ≤ st.cycle ∧
+                                  { name := "output" } ∈ st.vars ∧
+                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                      Option.isSome
+                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                            (st.cycle - Back.toNat 0, 1)) =
+                                        true then
+                              some
+                                (Lit.Val
+                                  (Option.get!
+                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                      (st.cycle - Back.toNat 0, 1))))
+                            else none)["x * arg1[1]"] :=
+                        some
+                          (Lit.Val
+                            (Option.get!
+                                (State.felts
+                                  (if
+                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                    st
+                                  else
+                                    st["arg1[1]"] :=
+                                      if
+                                          0 ≤ st.cycle ∧
+                                            { name := "output" } ∈ st.vars ∧
+                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                Option.isSome
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                  true then
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1))))
+                                      else none)
+                                  { name := "x" }) *
+                              Option.get!
+                                (State.felts
+                                  (if
+                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                    st
+                                  else
+                                    st["arg1[1]"] :=
+                                      if
+                                          0 ≤ st.cycle ∧
+                                            { name := "output" } ∈ st.vars ∧
+                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                Option.isSome
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                  true then
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1))))
+                                      else none)
+                                  { name := "arg1[1]" }))))["x * arg1[1] - 1"] :=
+                      some
+                        (Lit.Val
+                          (Option.get!
+                              (State.felts
+                                ((if
+                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                    st
+                                  else
+                                    st["arg1[1]"] :=
+                                      if
+                                          0 ≤ st.cycle ∧
+                                            { name := "output" } ∈ st.vars ∧
+                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                Option.isSome
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                  true then
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1))))
+                                      else none)["x * arg1[1]"] :=
+                                  some
+                                    (Lit.Val
+                                      (Option.get!
+                                          (State.felts
+                                            (if
+                                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                              st
+                                            else
+                                              st["arg1[1]"] :=
+                                                if
+                                                    0 ≤ st.cycle ∧
+                                                      { name := "output" } ∈ st.vars ∧
+                                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                          Option.isSome
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1)) =
+                                                            true then
+                                                  some
+                                                    (Lit.Val
+                                                      (Option.get!
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1))))
+                                                else none)
+                                            { name := "x" }) *
+                                        Option.get!
+                                          (State.felts
+                                            (if
+                                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                              st
+                                            else
+                                              st["arg1[1]"] :=
+                                                if
+                                                    0 ≤ st.cycle ∧
+                                                      { name := "output" } ∈ st.vars ∧
+                                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                          Option.isSome
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1)) =
+                                                            true then
+                                                  some
+                                                    (Lit.Val
+                                                      (Option.get!
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1))))
+                                                else none)
+                                            { name := "arg1[1]" }))))
+                                { name := "x * arg1[1]" }) -
+                            Option.get!
+                              (State.felts
+                                ((if
+                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                    st
+                                  else
+                                    st["arg1[1]"] :=
+                                      if
+                                          0 ≤ st.cycle ∧
+                                            { name := "output" } ∈ st.vars ∧
+                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                Option.isSome
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                  true then
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1))))
+                                      else none)["x * arg1[1]"] :=
+                                  some
+                                    (Lit.Val
+                                      (Option.get!
+                                          (State.felts
+                                            (if
+                                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                              st
+                                            else
+                                              st["arg1[1]"] :=
+                                                if
+                                                    0 ≤ st.cycle ∧
+                                                      { name := "output" } ∈ st.vars ∧
+                                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                          Option.isSome
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1)) =
+                                                            true then
+                                                  some
+                                                    (Lit.Val
+                                                      (Option.get!
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1))))
+                                                else none)
+                                            { name := "x" }) *
+                                        Option.get!
+                                          (State.felts
+                                            (if
+                                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                              st
+                                            else
+                                              st["arg1[1]"] :=
+                                                if
+                                                    0 ≤ st.cycle ∧
+                                                      { name := "output" } ∈ st.vars ∧
+                                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                          Option.isSome
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1)) =
+                                                            true then
+                                                  some
+                                                    (Lit.Val
+                                                      (Option.get!
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1))))
+                                                else none)
+                                            { name := "arg1[1]" }))))
+                                { name := "1" }))))
+                    { name := "x * arg1[1] - 1" })
+                  (_ :
+                    Option.isSome
+                        (State.felts
+                          (((if
+                                  State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                    ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                st
+                              else
+                                st["arg1[1]"] :=
+                                  if
+                                      0 ≤ st.cycle ∧
+                                        { name := "output" } ∈ st.vars ∧
+                                          1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                            Option.isSome
+                                                (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                  (st.cycle - Back.toNat 0, 1)) =
+                                              true then
+                                    some
+                                      (Lit.Val
+                                        (Option.get!
+                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                            (st.cycle - Back.toNat 0, 1))))
+                                  else none)["x * arg1[1]"] :=
+                              some
+                                (Lit.Val
+                                  (Option.get!
+                                      (State.felts
+                                        (if
+                                            State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                              ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                          st
+                                        else
+                                          st["arg1[1]"] :=
+                                            if
+                                                0 ≤ st.cycle ∧
+                                                  { name := "output" } ∈ st.vars ∧
+                                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                      Option.isSome
+                                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                            (st.cycle - Back.toNat 0, 1)) =
+                                                        true then
+                                              some
+                                                (Lit.Val
+                                                  (Option.get!
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1))))
+                                            else none)
+                                        { name := "x" }) *
+                                    Option.get!
+                                      (State.felts
+                                        (if
+                                            State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                              ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                          st
+                                        else
+                                          st["arg1[1]"] :=
+                                            if
+                                                0 ≤ st.cycle ∧
+                                                  { name := "output" } ∈ st.vars ∧
+                                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                      Option.isSome
+                                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                            (st.cycle - Back.toNat 0, 1)) =
+                                                        true then
+                                              some
+                                                (Lit.Val
+                                                  (Option.get!
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1))))
+                                            else none)
+                                        { name := "arg1[1]" }))))["x * arg1[1] - 1"] :=
+                            some
+                              (Lit.Val
+                                (Option.get!
+                                    (State.felts
+                                      ((if
+                                            State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                              ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                          st
+                                        else
+                                          st["arg1[1]"] :=
+                                            if
+                                                0 ≤ st.cycle ∧
+                                                  { name := "output" } ∈ st.vars ∧
+                                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                      Option.isSome
+                                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                            (st.cycle - Back.toNat 0, 1)) =
+                                                        true then
+                                              some
+                                                (Lit.Val
+                                                  (Option.get!
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1))))
+                                            else none)["x * arg1[1]"] :=
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                                (State.felts
+                                                  (if
+                                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                                    st
+                                                  else
+                                                    st["arg1[1]"] :=
+                                                      if
+                                                          0 ≤ st.cycle ∧
+                                                            { name := "output" } ∈ st.vars ∧
+                                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                                Option.isSome
+                                                                    (Buffer.get!
+                                                                      (Map.get! st.buffers { name := "output" })
+                                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                                  true then
+                                                        some
+                                                          (Lit.Val
+                                                            (Option.get!
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1))))
+                                                      else none)
+                                                  { name := "x" }) *
+                                              Option.get!
+                                                (State.felts
+                                                  (if
+                                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                                    st
+                                                  else
+                                                    st["arg1[1]"] :=
+                                                      if
+                                                          0 ≤ st.cycle ∧
+                                                            { name := "output" } ∈ st.vars ∧
+                                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                                Option.isSome
+                                                                    (Buffer.get!
+                                                                      (Map.get! st.buffers { name := "output" })
+                                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                                  true then
+                                                        some
+                                                          (Lit.Val
+                                                            (Option.get!
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1))))
+                                                      else none)
+                                                  { name := "arg1[1]" }))))
+                                      { name := "x * arg1[1]" }) -
+                                  Option.get!
+                                    (State.felts
+                                      ((if
+                                            State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                              ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                          st
+                                        else
+                                          st["arg1[1]"] :=
+                                            if
+                                                0 ≤ st.cycle ∧
+                                                  { name := "output" } ∈ st.vars ∧
+                                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                      Option.isSome
+                                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                            (st.cycle - Back.toNat 0, 1)) =
+                                                        true then
+                                              some
+                                                (Lit.Val
+                                                  (Option.get!
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1))))
+                                            else none)["x * arg1[1]"] :=
+                                        some
+                                          (Lit.Val
+                                            (Option.get!
+                                                (State.felts
+                                                  (if
+                                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                                    st
+                                                  else
+                                                    st["arg1[1]"] :=
+                                                      if
+                                                          0 ≤ st.cycle ∧
+                                                            { name := "output" } ∈ st.vars ∧
+                                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                                Option.isSome
+                                                                    (Buffer.get!
+                                                                      (Map.get! st.buffers { name := "output" })
+                                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                                  true then
+                                                        some
+                                                          (Lit.Val
+                                                            (Option.get!
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1))))
+                                                      else none)
+                                                  { name := "x" }) *
+                                              Option.get!
+                                                (State.felts
+                                                  (if
+                                                      State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                                        ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                                    st
+                                                  else
+                                                    st["arg1[1]"] :=
+                                                      if
+                                                          0 ≤ st.cycle ∧
+                                                            { name := "output" } ∈ st.vars ∧
+                                                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                                Option.isSome
+                                                                    (Buffer.get!
+                                                                      (Map.get! st.buffers { name := "output" })
+                                                                      (st.cycle - Back.toNat 0, 1)) =
+                                                                  true then
+                                                        some
+                                                          (Lit.Val
+                                                            (Option.get!
+                                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                                (st.cycle - Back.toNat 0, 1))))
+                                                      else none)
+                                                  { name := "arg1[1]" }))))
+                                      { name := "1" }))))
+                          { name := "x * arg1[1] - 1" }) =
+                      true))
+                (((if State.felts st { name := "1 - arg1[0]" } = some 0 ∨ ¬{ name := "1 - arg1[0]" } ∈ st.felts then st
+                    else
+                      st["arg1[1]"] :=
+                        if
+                            0 ≤ st.cycle ∧
+                              { name := "output" } ∈ st.vars ∧
+                                1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                  Option.isSome
+                                      (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                        (st.cycle - Back.toNat 0, 1)) =
+                                    true then
+                          some
+                            (Lit.Val
+                              (Option.get!
+                                (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1))))
+                        else none)["x * arg1[1]"] :=
+                    some
+                      (Lit.Val
+                        (Option.get!
+                            (State.felts
+                              (if
+                                  State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                    ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                st
+                              else
+                                st["arg1[1]"] :=
+                                  if
+                                      0 ≤ st.cycle ∧
+                                        { name := "output" } ∈ st.vars ∧
+                                          1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                            Option.isSome
+                                                (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                  (st.cycle - Back.toNat 0, 1)) =
+                                              true then
+                                    some
+                                      (Lit.Val
+                                        (Option.get!
+                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                            (st.cycle - Back.toNat 0, 1))))
+                                  else none)
+                              { name := "x" }) *
+                          Option.get!
+                            (State.felts
+                              (if
+                                  State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                    ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                st
+                              else
+                                st["arg1[1]"] :=
+                                  if
+                                      0 ≤ st.cycle ∧
+                                        { name := "output" } ∈ st.vars ∧
+                                          1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                            Option.isSome
+                                                (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                  (st.cycle - Back.toNat 0, 1)) =
+                                              true then
+                                    some
+                                      (Lit.Val
+                                        (Option.get!
+                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                            (st.cycle - Back.toNat 0, 1))))
+                                  else none)
+                              { name := "arg1[1]" }))))["x * arg1[1] - 1"] :=
                   some
                     (Lit.Val
                       (Option.get!
-                        (Buffer.get! (Map.get! ({ name := "input" } : BufferVar))
-                          (((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle - Back.toNat 0, 0))))
-                else none := _
+                          (State.felts
+                            ((if
+                                  State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                    ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                st
+                              else
+                                st["arg1[1]"] :=
+                                  if
+                                      0 ≤ st.cycle ∧
+                                        { name := "output" } ∈ st.vars ∧
+                                          1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                            Option.isSome
+                                                (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                  (st.cycle - Back.toNat 0, 1)) =
+                                              true then
+                                    some
+                                      (Lit.Val
+                                        (Option.get!
+                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                            (st.cycle - Back.toNat 0, 1))))
+                                  else none)["x * arg1[1]"] :=
+                              some
+                                (Lit.Val
+                                  (Option.get!
+                                      (State.felts
+                                        (if
+                                            State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                              ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                          st
+                                        else
+                                          st["arg1[1]"] :=
+                                            if
+                                                0 ≤ st.cycle ∧
+                                                  { name := "output" } ∈ st.vars ∧
+                                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                      Option.isSome
+                                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                            (st.cycle - Back.toNat 0, 1)) =
+                                                        true then
+                                              some
+                                                (Lit.Val
+                                                  (Option.get!
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1))))
+                                            else none)
+                                        { name := "x" }) *
+                                    Option.get!
+                                      (State.felts
+                                        (if
+                                            State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                              ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                          st
+                                        else
+                                          st["arg1[1]"] :=
+                                            if
+                                                0 ≤ st.cycle ∧
+                                                  { name := "output" } ∈ st.vars ∧
+                                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                      Option.isSome
+                                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                            (st.cycle - Back.toNat 0, 1)) =
+                                                        true then
+                                              some
+                                                (Lit.Val
+                                                  (Option.get!
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1))))
+                                            else none)
+                                        { name := "arg1[1]" }))))
+                            { name := "x * arg1[1]" }) -
+                        Option.get!
+                          (State.felts
+                            ((if
+                                  State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                    ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                st
+                              else
+                                st["arg1[1]"] :=
+                                  if
+                                      0 ≤ st.cycle ∧
+                                        { name := "output" } ∈ st.vars ∧
+                                          1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                            Option.isSome
+                                                (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                  (st.cycle - Back.toNat 0, 1)) =
+                                              true then
+                                    some
+                                      (Lit.Val
+                                        (Option.get!
+                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                            (st.cycle - Back.toNat 0, 1))))
+                                  else none)["x * arg1[1]"] :=
+                              some
+                                (Lit.Val
+                                  (Option.get!
+                                      (State.felts
+                                        (if
+                                            State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                              ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                          st
+                                        else
+                                          st["arg1[1]"] :=
+                                            if
+                                                0 ≤ st.cycle ∧
+                                                  { name := "output" } ∈ st.vars ∧
+                                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                      Option.isSome
+                                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                            (st.cycle - Back.toNat 0, 1)) =
+                                                        true then
+                                              some
+                                                (Lit.Val
+                                                  (Option.get!
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1))))
+                                            else none)
+                                        { name := "x" }) *
+                                    Option.get!
+                                      (State.felts
+                                        (if
+                                            State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                              ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                          st
+                                        else
+                                          st["arg1[1]"] :=
+                                            if
+                                                0 ≤ st.cycle ∧
+                                                  { name := "output" } ∈ st.vars ∧
+                                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                      Option.isSome
+                                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                            (st.cycle - Back.toNat 0, 1)) =
+                                                        true then
+                                              some
+                                                (Lit.Val
+                                                  (Option.get!
+                                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                      (st.cycle - Back.toNat 0, 1))))
+                                            else none)
+                                        { name := "arg1[1]" }))))
+                            { name := "1" }))))
+            else
+              ((if State.felts st { name := "1 - arg1[0]" } = some 0 ∨ ¬{ name := "1 - arg1[0]" } ∈ st.felts then st
+                  else
+                    st["arg1[1]"] :=
+                      if
+                          0 ≤ st.cycle ∧
+                            { name := "output" } ∈ st.vars ∧
+                              1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                Option.isSome
+                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                      (st.cycle - Back.toNat 0, 1)) =
+                                  true then
+                        some
+                          (Lit.Val
+                            (Option.get!
+                              (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1))))
+                      else none)["x * arg1[1]"] :=
+                  some
+                    (Lit.Val
+                      (Option.get!
+                          (State.felts
+                            (if
+                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                              st
+                            else
+                              st["arg1[1]"] :=
+                                if
+                                    0 ≤ st.cycle ∧
+                                      { name := "output" } ∈ st.vars ∧
+                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                          Option.isSome
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1)) =
+                                            true then
+                                  some
+                                    (Lit.Val
+                                      (Option.get!
+                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                          (st.cycle - Back.toNat 0, 1))))
+                                else none)
+                            { name := "x" }) *
+                        Option.get!
+                          (State.felts
+                            (if
+                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                              st
+                            else
+                              st["arg1[1]"] :=
+                                if
+                                    0 ≤ st.cycle ∧
+                                      { name := "output" } ∈ st.vars ∧
+                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                          Option.isSome
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1)) =
+                                            true then
+                                  some
+                                    (Lit.Val
+                                      (Option.get!
+                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                          (st.cycle - Back.toNat 0, 1))))
+                                else none)
+                            { name := "arg1[1]" }))))["x * arg1[1] - 1"] :=
+                some
+                  (Lit.Val
+                    (Option.get!
+                        (State.felts
+                          ((if
+                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                              st
+                            else
+                              st["arg1[1]"] :=
+                                if
+                                    0 ≤ st.cycle ∧
+                                      { name := "output" } ∈ st.vars ∧
+                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                          Option.isSome
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1)) =
+                                            true then
+                                  some
+                                    (Lit.Val
+                                      (Option.get!
+                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                          (st.cycle - Back.toNat 0, 1))))
+                                else none)["x * arg1[1]"] :=
+                            some
+                              (Lit.Val
+                                (Option.get!
+                                    (State.felts
+                                      (if
+                                          State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                            ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                        st
+                                      else
+                                        st["arg1[1]"] :=
+                                          if
+                                              0 ≤ st.cycle ∧
+                                                { name := "output" } ∈ st.vars ∧
+                                                  1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                    Option.isSome
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1)) =
+                                                      true then
+                                            some
+                                              (Lit.Val
+                                                (Option.get!
+                                                  (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                    (st.cycle - Back.toNat 0, 1))))
+                                          else none)
+                                      { name := "x" }) *
+                                  Option.get!
+                                    (State.felts
+                                      (if
+                                          State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                            ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                        st
+                                      else
+                                        st["arg1[1]"] :=
+                                          if
+                                              0 ≤ st.cycle ∧
+                                                { name := "output" } ∈ st.vars ∧
+                                                  1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                    Option.isSome
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1)) =
+                                                      true then
+                                            some
+                                              (Lit.Val
+                                                (Option.get!
+                                                  (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                    (st.cycle - Back.toNat 0, 1))))
+                                          else none)
+                                      { name := "arg1[1]" }))))
+                          { name := "x * arg1[1]" }) -
+                      Option.get!
+                        (State.felts
+                          ((if
+                                State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                  ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                              st
+                            else
+                              st["arg1[1]"] :=
+                                if
+                                    0 ≤ st.cycle ∧
+                                      { name := "output" } ∈ st.vars ∧
+                                        1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                          Option.isSome
+                                              (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                (st.cycle - Back.toNat 0, 1)) =
+                                            true then
+                                  some
+                                    (Lit.Val
+                                      (Option.get!
+                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                          (st.cycle - Back.toNat 0, 1))))
+                                else none)["x * arg1[1]"] :=
+                            some
+                              (Lit.Val
+                                (Option.get!
+                                    (State.felts
+                                      (if
+                                          State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                            ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                        st
+                                      else
+                                        st["arg1[1]"] :=
+                                          if
+                                              0 ≤ st.cycle ∧
+                                                { name := "output" } ∈ st.vars ∧
+                                                  1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                    Option.isSome
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1)) =
+                                                      true then
+                                            some
+                                              (Lit.Val
+                                                (Option.get!
+                                                  (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                    (st.cycle - Back.toNat 0, 1))))
+                                          else none)
+                                      { name := "x" }) *
+                                  Option.get!
+                                    (State.felts
+                                      (if
+                                          State.felts st { name := "1 - arg1[0]" } = some 0 ∨
+                                            ¬{ name := "1 - arg1[0]" } ∈ st.felts then
+                                        st
+                                      else
+                                        st["arg1[1]"] :=
+                                          if
+                                              0 ≤ st.cycle ∧
+                                                { name := "output" } ∈ st.vars ∧
+                                                  1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                                    Option.isSome
+                                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                          (st.cycle - Back.toNat 0, 1)) =
+                                                      true then
+                                            some
+                                              (Lit.Val
+                                                (Option.get!
+                                                  (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                    (st.cycle - Back.toNat 0, 1))))
+                                          else none)
+                                      { name := "arg1[1]" }))))
+                          { name := "1" }))))
+            { name := "output" })) =
+      [y₁, y₂]
+-/
+-- #print is0_witness_part₄
+
+/-
+⊢ ∀ {y₁ y₂ : Option Felt} (st : State),
+  let st' := MLIR.runProgram (is0_witness₄; is0_witness₅) st;
+  List.getLast! (Option.get! (State.buffers st' { name := "output" })) = [y₁, y₂] ↔
+    List.getLast!
+        (Option.get!
+          (State.buffers
+            (Γ
+              (st["1 - arg1[0]"] :=
+                some
+                  (Lit.Val
+                    (Option.get! (State.felts st { name := "1" }) -
+                      Option.get! (State.felts st { name := "arg1[0]" })))) ⟦is0_witness₅⟧)
+            { name := "output" })) =
+      [y₁, y₂]
+-/
+
+
+-- #check part₃_updates
 
 /-
 ⊢ ∀ {x y₁ y₂ : Felt},
@@ -334,14 +1481,14 @@ def st' {x : Felt} : State := ((is0_witness_initial_state x)["1"] := some (Lit.V
             { name := "output" })) =
       Lean.Internal.coeM [y₁, y₂]
 -/
-#print is0_witness_closed_form
+-- #print is0_witness_closed_form
 
-set_option maxHeartbeats 2000000 in
-lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
-  is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
-  unfold is0_witness MLIR.runProgram; simp only
-  rw [is0_witness_per_partes]
-  sorry
+-- set_option maxHeartbeats 2000000 in
+-- lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
+--   is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
+--   unfold is0_witness MLIR.runProgram; simp only
+--   rw [is0_witness_per_partes]
+--   sorry
 
   -- Just playing around to see what's slow.
   -- unfold is0_witness MLIR.runProgram

@@ -104,6 +104,9 @@ lemma mem_fromList {l : List (α × β)} : k ∈ fromList l ↔ k ∈ l.map Prod
 lemma mem_unroll_assignment : k ∈ m[k'] := v ↔ (k = k' ∨ k ∈ m) := by
   simp [update, mem_def]; aesop
 
+lemma not_mem_iff_none : k ∉ m ↔ m[k] = none := by
+  rw [mem_def]; aesop; rwa [Option.isNone_iff_eq_none] at a
+
 end Map
 
 end Map
