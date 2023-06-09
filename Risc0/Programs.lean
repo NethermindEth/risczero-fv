@@ -74,7 +74,7 @@ def is0_witness (input : Felt) : BufferAtTime :=
       ?₀ ⟨"x * arg1[1] - 1"⟩
   (st'.buffers ⟨"output"⟩ |>.get!.getLast!)
 
-def is0_constraints (input : Felt) (output : List Felt) : Prop :=
+def is0_constraints (input : Felt) (output : List (Option Felt)) : Prop :=
   let state' :=
     MLIR.runProgram (st := is0_initial_state input output) <|
     -- %0 = cirgen.const 1
@@ -199,12 +199,12 @@ lemma run_preserves_width {st : State} : (st.bufferWidths bufferVar) = (MLIR.run
   --   }
   
 set_option maxHeartbeats 2000000 in
-lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
+lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Option Felt} :
     (is0_constraints x ([y₁, y₂]))
-  ↔ (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by
+  ↔ (if 1 - y₁.get! = 0 then if y₁.get! = 0 then True else x = 0 else (if y₁.get! = 0 then True else x = 0) ∧ x * y₂.get! - 1 = 0) := by
   unfold is0_constraints MLIR.runProgram
-  let s₁ : State := is0_initial_state x (Lean.Internal.coeM [y₁, y₂])
-  have hs₁ : is0_initial_state x (Lean.Internal.coeM [y₁, y₂]) = s₁ := by rfl
+  let s₁ : State := is0_initial_state x ([y₁, y₂])
+  have hs₁ : is0_initial_state x ([y₁, y₂]) = s₁ := by rfl
   MLIR_statement
   MLIR_statement
   MLIR_statement
@@ -219,7 +219,6 @@ lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
   let s₄ : State := s₃["true"] := some (Lit.Constraint True)
   have hs₄ : s₃.update "true" (some (Lit.Constraint True)) = s₄ := by rfl
   rewrite [hs₄]
-  save
   have h₁ : 0 ≤ s₄.cycle := by simp
   have h_input₄ : ⟨"input"⟩  ∈ s₄.vars := by {
     simp
