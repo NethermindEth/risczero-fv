@@ -282,32 +282,67 @@ lemma run_preserves_width {st : State} : (st.bufferWidths bufferVar) = (MLIR.run
 --   -- MLIR_states
 --   -- aesop
 
-lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
-  is0_witness x = [y₁, y₂] ↔ _ := by
-  unfold is0_witness MLIR.runProgram; simp only
-  rewrite [is0_witness_per_partes]
-  generalize eq : (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
-  unfold is0_witness₀
-  MLIR_statement
-  MLIR_statement
-  rewrite [←eq]
-  rfl
+-- lemma is0_witness₀_state {x y₁ y₂ : Felt} :  
+--   ∀ st', MLIR.runProgram is0_witness₀ 
 
-def st' {x : Felt} : State := ((is0_witness_initial_state x)["1"] := some (Lit.Val 1))["x"] :=
+
+-- lemma is0_witness₀_closed_form {x : Felt} :
+--   MLIR.runProgram is0_witness₀ (is0_witness_initial_state x) = 
+
+def is0_witness₀_final_state (x : Felt) : State := (((is0_witness_initial_state x)["1"] := some (Lit.Val 1))["x"] :=
                 if
                     0 ≤ ((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle ∧
                       { name := "input" } ∈ ((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).vars ∧
-                        0 < Map.get! ({ name := "input" } : BufferVar) ∧
+                        0 <
+                            Map.get! ((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).bufferWidths
+                              { name := "input" } ∧
                           Option.isSome
-                              (Buffer.get! (Map.get! ({ name := "input" } : BufferVar))
+                              (Buffer.get!
+                                (Map.get! ((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).buffers
+                                  { name := "input" })
                                 (((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle - Back.toNat 0, 0)) =
                             true then
                   some
                     (Lit.Val
                       (Option.get!
-                        (Buffer.get! (Map.get! ({ name := "input" } : BufferVar))
-                          (((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle - Back.toNat 0, 0))))
-                else none := _
+                        (Buffer.get!
+                          (Map.get! ((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).buffers { name := "input" })
+                          (((is0_witness_initial_state x)["1"] := some (Lit.Val 1)).cycle - Back.toNat 0, 0)))) else none)
+
+lemma is0_witness₀_closed_form {x y₁ y₂ : Felt} :
+  MLIR.runProgram is0_witness₀ (is0_witness_initial_state x) = is0_witness₀_final_state x := by
+  unfold is0_witness₀ MLIR.runProgram is0_witness₀_final_state; simp only
+  MLIR
+  MLIR_states
+
+lemma x_simp {x : Felt} :
+  State.felts (is0_witness₀_final_state x) { name := "x" } = some x := by
+  unfold is0_witness₀_final_state
+  simp only [State.update_val, zero_le, List.find?, ge_iff_le, true_and]
+  simp only [List.find?, ge_iff_le]
+  unfold is0_witness_initial_state
+  simp only [List.find?, ge_iff_le]
+  unfold is0_initial_state
+  simp only [Map.fromList_cons, Map.fromList_nil, List.find?, List.mem_cons, ge_iff_le, tsub_eq_zero_of_le,
+  true_and]
+  rfl
+
+
+lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
+  ((MLIR.runProgram is0_witness₁ (is0_witness₀_final_state x)).buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+  unfold is0_witness₁ MLIR.runProgram; simp only
+  rewrite [MLIR.run_nondet]
+  MLIR_statement
+  MLIR_statement
+  MLIR_statement
+  rewrite [MLIR.run_set_def]
+  rewrite [MLIR.run_set_def]
+  simp only [State.update_val]
+  
+  simp_op
+  rfl
+
+#print is0_witness_closed_form
 
 /-
 ⊢ ∀ {x y₁ y₂ : Felt},
