@@ -328,17 +328,28 @@ lemma x_simp {x : Felt} :
   rfl
 
 
-lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
+lemma is0_witness_closed_form {x y₁ y₂ : Felt} {h: x = 0} :
   ((MLIR.runProgram is0_witness₁ (is0_witness₀_final_state x)).buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
   unfold is0_witness₁ MLIR.runProgram; simp only
   rewrite [MLIR.run_nondet]
   MLIR_statement
+  rewrite [x_simp]
+  simp only [Option.get!_of_some]
+  subst h
+  simp only [ite_true]
   MLIR_statement
+  rewrite [MLIR.run_set_def]
+  simp only [Map.update_get]
+  rewrite [Map.update_get]
   MLIR_statement
   rewrite [MLIR.run_set_def]
   rewrite [MLIR.run_set_def]
   simp only [State.update_val]
   
+  simp only [Option.get!_of_some]
+  subst h
+  simp [ite_true]
+  rewrite [Map.update_get]
   simp_op
   rfl
 
