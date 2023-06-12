@@ -220,8 +220,10 @@ lemma valid_init' : (init m n input output hIn hOut).WellFormed where
 
 lemma valid_init : (init_default m n).WellFormed := valid_init'
 
-lemma l {a b} {m: List α} (h_a : a ∈ m) (h_b : ¬b ∈ m) : a ≠ b := by
+-- REVIEW: temp lemma, there must be some simple way to do this inline
+lemma l {a b} {l: List α} (h_a : a ∈ l) (h_b : ¬b ∈ l) : a ≠ b := by
   aesop
+
 lemma addBuffer_preserves_wellformed {st: State} {name: String} {buffer: Buffer}
   (h_wf: st.WellFormed) (h_distinct: ¬⟨name⟩ ∈ st.vars) (h_cycle: buffer.length = st.cycle + 1):
   (st.addBuffer name buffer).WellFormed where
@@ -232,7 +234,7 @@ lemma addBuffer_preserves_wellformed {st: State} {name: String} {buffer: Buffer}
     unfold varsConsistent addBuffer
     aesop
     . show var ∈ st.buffers[⟨name⟩] := buffer -- with var ∈ vars
-      have var_not_name: var ≠ ⟨name⟩ := l (m := st.vars) h h_distinct
+      have var_not_name: var ≠ ⟨name⟩ := l (l := st.vars) h h_distinct
       have var_in_buffers: var ∈ st.buffers := Iff.mp (h_wf.hVars var) h
       exact Map.mem_skip var_in_buffers
     . show var = { name := name } ∨ var ∈ st.vars -- with var ∈ st.buffers[⟨name⟩] := buffer
