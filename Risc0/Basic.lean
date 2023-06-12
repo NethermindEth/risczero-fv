@@ -128,6 +128,25 @@ section State
 
 variable (st : State)
 
+def empty : State :=
+  {
+    buffers := Map.empty
+    bufferWidths := Map.empty,
+    constraints := [],
+    cycle := 0, -- should cycle actually equal zero here or should it be arbitrary?
+    felts := Map.empty,
+    props := Map.empty,
+    vars := [],
+    isFailed := false,
+  }
+
+def addBuffer (name: String) (buffer: Buffer): State :=
+  { st with
+    buffers := st.buffers[⟨name⟩] := buffer,
+    bufferWidths := st.bufferWidths[⟨name⟩] := buffer.last!.length,
+    vars := ⟨name⟩ :: st.vars
+  }
+
 def varsConsistent := ∀ var, var ∈ st.vars ↔ var ∈ st.buffers
 
 def cycleIsRows := ∀ var (h₁ : var ∈ st.buffers), (st.buffers.get h₁).length = st.cycle + 1
