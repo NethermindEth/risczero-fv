@@ -5,4 +5,4 @@ import Risc0.Lemmas
 import Risc0.Map
 import Risc0.Programs
 import Risc0.Wheels
-import OneHot.Programs
+import Risc0.OneHot
