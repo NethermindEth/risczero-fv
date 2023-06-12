@@ -67,6 +67,9 @@ lemma update_get : (m[k] := v)[k] = v := by simp [update]
 @[simp]
 lemma empty_get : (@Map.empty α β)[k] = none := by rfl
 
+lemma update_get_skip' (h : k ≠ k') :
+  ((m[k'] := v')[k] = m[k]) := by simp [update, h]
+
 lemma update_get_skip (h : k ≠ k') (h₁ : m[k] = some v) :
   (m[k'] := v')[k] = some v := by simp [update, h, getElem_def ▸ h₁]
 

@@ -339,7 +339,17 @@ lemma is0_witness_closed_form {x y₁ y₂ : Felt} {h: x = 0} :
   simp only [ite_true]
   MLIR_statement
   rewrite [MLIR.run_set_def]
-  simp only [Map.update_get]
+  simp only [State.update_val]
+  by_cases eq: ((is0_witness₀_final_state 0).felts[{ name := "isZeroBit" }] := 1) ({ name := "isZeroBit" } : FeltVar) = some 1
+  rw [eq]
+  simp
+  MLIR_statement
+  simp only [State.update_val]
+  simp only [State.felts]
+  simp only [Map.update_get] at eq
+  have hh : ((is0_witness₀_final_state 0).felts[{ name := "isZeroBit" }] := 1) { name := "isZeroBit" } := some (Lit.Val 1))  = some 1 := by {
+
+  }
   rewrite [Map.update_get]
   MLIR_statement
   rewrite [MLIR.run_set_def]
