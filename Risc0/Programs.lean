@@ -334,15 +334,15 @@ def part₀_updates {y₁ y₂ : Option Felt} (st : State) :=
   List.getLast! (Option.get! (State.buffers st' { name := "output" })) = [y₁, y₂] ↔
   List.getLast! (Option.get! (State.buffers (part₀_state_update st) { name := "output" })) = [y₁, y₂]
 
-lemma is0_witness_part₃ {y₁ y₂ : Option Felt} (st : State) :
-  let st' := MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st
-  (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
-  unfold MLIR.runProgram; simp only
-  generalize eq : (is0_witness₄; is0_witness₅) = prog
-  unfold is0_witness₃
-  MLIR_statement
-  rewrite [←eq]
-  rfl
+-- lemma is0_witness_part₁ {y₁ y₂ : Option Felt} (st : State) :
+--   let st' := MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st
+--   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+--   unfold MLIR.runProgram; simp only
+--   generalize eq : (is0_witness₄; is0_witness₅) = prog
+--   unfold is0_witness₃
+--   MLIR_statement
+--   rewrite [←eq]
+--   rfl
 
 /- #print is0_witness_part₀
 ⊢ ∀ {x : State} {st : State} {y₁ y₂ : Option Felt},
@@ -386,17 +386,17 @@ lemma is0_witness_part₃ {y₁ y₂ : Option Felt} (st : State) :
             { name := "output" })) =
       [y₁, y₂]
 -/
-#print is0_witness_part₀
+-- #print is0_witness_part₀
 
--- lemma is0_witness_part₃ {y₁ y₂ : Option Felt} (st : State) :
---   let st' := MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st
---   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
---   unfold MLIR.runProgram; simp only
---   generalize eq : (is0_witness₄; is0_witness₅) = prog
---   unfold is0_witness₃
---   MLIR_statement
---   rewrite [←eq]
---   rfl
+lemma is0_witness_part₃ {y₁ y₂ : Option Felt} (st : State) :
+  let st' := MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st
+  (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+  unfold MLIR.runProgram; simp only
+  generalize eq : (is0_witness₄; is0_witness₅) = prog
+  unfold is0_witness₃
+  MLIR_statement
+  rewrite [←eq]
+  rfl
 
 def part₃_state_update (st : State) : State :=
   (Γ (if State.felts st { name := "arg1[0]" } = some 0 ∨ ¬{ name := "arg1[0]" } ∈ st.felts then st
@@ -427,16 +427,17 @@ def part₄_updates {y₁ y₂ : Option Felt} (st : State) :=
   List.getLast! (Option.get! (State.buffers st' { name := "output" })) = [y₁, y₂] ↔
   List.getLast! (Option.get! (State.buffers (part₄_state_update st) { name := "output" })) = [y₁, y₂]
 
--- lemma is0_witness_part₄ {y₁ y₂ : Option Felt} (st : State) :
---   let st' := MLIR.runProgram is0_witness₅ st
---   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
---   unfold MLIR.runProgram; simp only
---   unfold is0_witness₅
---   MLIR_statement
---   MLIR_statement
---   MLIR_statement
---   simp
---   rfl
+lemma is0_witness_part₄ {y₁ y₂ : Option Felt} (st : State) :
+  let st' := MLIR.runProgram is0_witness₅ st
+  (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+  unfold MLIR.runProgram; simp only
+  unfold is0_witness₅
+  MLIR_statement
+  MLIR_statement
+  MLIR_statement
+  simp
+  rfl
+
 
 def part₅_state_update (st : State) : State :=
   (if State.felts st { name := "1 - arg1[0]" } = some 0 ∨ ¬{ name := "1 - arg1[0]" } ∈ st.felts
