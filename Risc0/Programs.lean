@@ -307,17 +307,17 @@ lemma run_preserves_width {st : State} : (st.bufferWidths bufferVar) = (MLIR.run
 --   -- MLIR_states
 --   -- aesop
 
-lemma is0_witness_part₀ {st : State} {y₁ y₂ : Option Felt} :
-  is0_witness st = [y₁, y₂] ↔ _ := by
-  unfold is0_witness MLIR.runProgram; simp only
-  rewrite [is0_witness_per_partes]
-  generalize eq : (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
-  unfold is0_witness₀
-  MLIR_statement
-  MLIR_statement
-  rewrite [←eq]
-  simp
-  rfl
+-- lemma is0_witness_part₀ {st : State} {y₁ y₂ : Option Felt} :
+--   is0_witness st = [y₁, y₂] ↔ _ := by
+--   unfold is0_witness MLIR.runProgram; simp only
+--   rewrite [is0_witness_per_partes]
+--   generalize eq : (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
+--   unfold is0_witness₀
+--   MLIR_statement
+--   MLIR_statement
+--   rewrite [←eq]
+--   simp
+--   rfl
 
 def part₀_state_update (st : State) : State :=
   (Γ ({ buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
@@ -333,6 +333,16 @@ def part₀_updates {y₁ y₂ : Option Felt} (st : State) :=
   let st' := MLIR.runProgram (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) st
   List.getLast! (Option.get! (State.buffers st' { name := "output" })) = [y₁, y₂] ↔
   List.getLast! (Option.get! (State.buffers (part₀_state_update st) { name := "output" })) = [y₁, y₂]
+
+lemma is0_witness_part₃ {y₁ y₂ : Option Felt} (st : State) :
+  let st' := MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st
+  (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+  unfold MLIR.runProgram; simp only
+  generalize eq : (is0_witness₄; is0_witness₅) = prog
+  unfold is0_witness₃
+  MLIR_statement
+  rewrite [←eq]
+  rfl
 
 /- #print is0_witness_part₀
 ⊢ ∀ {x : State} {st : State} {y₁ y₂ : Option Felt},
