@@ -399,6 +399,25 @@ lemma is0_witness_part₁ {y₁ y₂ : Option Felt} (st : State) :
 -/
 -- #print is0_witness_part₀
 
+lemma is0_witness_part₂ {y₁ y₂ : Option Felt} (st : State) :
+  let st' := MLIR.runProgram (is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) st
+  (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+  unfold MLIR.runProgram; simp only
+  generalize eq : (is0_witness₃; is0_witness₄; is0_witness₅) = prog
+  unfold is0_witness₂
+  MLIR_statement
+  rewrite [←eq]
+  rfl
+
+def part₂_state_update (st : State) : State :=
+  (Γ (st["arg1[0]"] := 
+    if 0 ≤ st.cycle ∧
+      { name := "output" } ∈ st.vars ∧
+        0 < Map.get! st.bufferWidths { name := "output" } ∧
+          Option.isSome (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 0)) = true 
+    then some (Lit.Val (Option.get! (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 0))))
+    else none) ⟦is0_witness₃; is0_witness₄; is0_witness₅⟧)
+
 lemma is0_witness_part₃ {y₁ y₂ : Option Felt} (st : State) :
   let st' := MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st
   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
