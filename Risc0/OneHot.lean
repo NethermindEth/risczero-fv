@@ -12,10 +12,24 @@ namespace Risc0.OneHot
 
 open MLIRNotation
 
-def initial_witness_state (input : Felt) : State :=
+def witness_start_state (st: State) :=
+  st.WellFormed ∧
+  ∃ input, (st.buffers.get! ⟨"input"⟩).last! = [some input] ∧
+  (st.buffers.get! ⟨"output"⟩).last! = [none, none, none]
+
+def witness_start_state_instance (input : Felt) : State :=
   State.empty
   |>.addBuffer "input" (Buffer.init_values [input])
   |>.addBuffer "output" (Buffer.init_unset 3)
+
+lemma witness_start_state_instance_correct {input : Felt} :
+  witness_start_state (witness_start_state_instance input) := by
+  unfold witness_start_state witness_start_state_instance
+  aesop
+  . show State.empty.addBuffer "input" (Buffer.init_values [input]) |>.addBuffer "output" (Buffer.init_unset 3) |>.WellFormed
+    
+  . exists input
+
 
 def initial_constraint_state (input : Felt) (output : BufferAtTime) : State :=
   State.empty
@@ -193,7 +207,7 @@ def witness_prog_4_final_constraints : MLIRProgram :=
   ?₀ ⟨"outputSum - 1"⟩
 
 def witness (input : Felt) : BufferAtTime :=
-  witness_prog_full.run (initial_witness_state input)
+  witness_prog_full.run (witness_start_state_instance input)
   |>.buffers.get! ⟨"output"⟩
   |>.last!
 
