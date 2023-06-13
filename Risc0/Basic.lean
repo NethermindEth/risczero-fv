@@ -46,11 +46,9 @@ abbrev Idx.data : Idx → ℕ := Prod.snd
 
 def empty : Buffer := []
 
-def init_unset (size : ℕ) : Buffer := [List.replicate size .none]
+def init (size : ℕ) : Buffer := [List.replicate size .none]
 
 def init' (row : BufferAtTime) : Buffer := [row]
-
-def init_values (values: List Felt) : Buffer := [values.map some]
 
 def last! (buf : Buffer) : BufferAtTime :=
   buf.getLast!
@@ -128,25 +126,6 @@ section State
 
 variable (st : State)
 
-def empty : State :=
-  {
-    buffers := Map.empty
-    bufferWidths := Map.empty,
-    constraints := [],
-    cycle := 0, -- should cycle actually equal zero here or should it be arbitrary?
-    felts := Map.empty,
-    props := Map.empty,
-    vars := [],
-    isFailed := false,
-  }
-
-def addBuffer (name: String) (buffer: Buffer): State :=
-  { st with
-    buffers := st.buffers[⟨name⟩] := buffer,
-    bufferWidths := st.bufferWidths[⟨name⟩] := buffer.last!.length,
-    vars := ⟨name⟩ :: st.vars
-  }
-
 def varsConsistent := ∀ var, var ∈ st.vars ↔ var ∈ st.buffers
 
 def cycleIsRows := ∀ var (h₁ : var ∈ st.buffers), (st.buffers.get h₁).length = st.cycle + 1
@@ -185,13 +164,16 @@ def init (numInput numOutput : ℕ)
   props        := Map.empty
   vars         := [⟨Input⟩, ⟨Output⟩]
 
+def lastOutput (st : State) :=
+  st.buffers ⟨Output⟩ |>.get!.getLast!
+
 -- Only used to prove State inhabited, since it initialises both input and output as write-only
 def init_default (numInput numOutput : ℕ) : State :=
   init numInput numOutput
-        ((Buffer.init_unset numInput).head (by simp [Buffer.init_unset]))
-        ((Buffer.init_unset numOutput).head (by simp [Buffer.init_unset]))
-        (by simp [Buffer.init_unset])
-        (by simp [Buffer.init_unset])
+        ((Buffer.init numInput).head (by simp [Buffer.init]))
+        ((Buffer.init numOutput).head (by simp [Buffer.init]))
+        (by simp [Buffer.init])
+        (by simp [Buffer.init])
 
 private lemma valid_init'_aux :
   bufferLensConsistent (State.init m n input output hIn hOut) := λ var h h₁ row h₂ => by
@@ -225,19 +207,29 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
     | .none => {state with isFailed := true}
     | .some lit =>
       match lit with
-        | .Constraint c => {state with props := state.props[⟨name⟩] := c}
-        | .Val        x => {state with felts := state.felts[⟨name⟩] := x}
+        | .Constraint c => {state with props := state.props[⟨name⟩] ←ₘ c}
+        | .Val        x => {state with felts := state.felts[⟨name⟩] ←ₘ x}
         | @Lit.Buf    newBufferAtTime =>
           match state.buffers ⟨name⟩ with
             | .some oldBuffer =>
               if Buffer.isValidUpdate oldBuffer.last! newBufferAtTime
-              then {state with buffers := state.buffers[⟨name⟩] := (oldBuffer.setAllLatest! newBufferAtTime)}
+              then {state with buffers := state.buffers[⟨name⟩] ←ₘ (oldBuffer.setAllLatest! newBufferAtTime)}
               else {state with isFailed := true}
             | .none        => {state with isFailed := true}
 
-@[simp]
+def updateFelts (state : State) (name : String) (x : Felt) : State :=
+  { state with felts := state.felts[⟨name⟩] ←ₘ x }
+
+lemma updateFelts_def : 
+  updateFelts st k v = { st with felts := st.felts[⟨k⟩] ←ₘ v } := rfl
+
+-- @[simp]
 lemma update_val {state : State} {name : String} {x : Felt} :
-  update state name (.some (.Val x)) = { state with felts := state.felts.update ⟨name⟩ x } := rfl
+  update state name (.some (.Val x)) = { state with felts := state.felts[⟨name⟩] ←ₘ x } := rfl
+
+@[simp]
+lemma update_val' {state : State} {name : String} {x : Felt} :
+  update state name (.some (.Val x)) = state.updateFelts name x := rfl
 
 @[simp]
 lemma update_constraint {state : State} {name : String} {c : Prop} :
@@ -254,7 +246,7 @@ end State
 
 instance : Inhabited State := ⟨State.init_default 42 42⟩
 
-notation:61 st "[" n:61 "]" " := " x:49 => State.update st n x
+notation:61 st "[" n:61 "]" " ←ₛ " x:49 => State.update st n x
 
 inductive IsNondet :=
   | InNondet
@@ -477,7 +469,7 @@ lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.c
 
 def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer.Idx) (val : Felt) : State :=
   match (st.buffers.get! bufferVar).set? idx val with
-    | .some b => {st with buffers := st.buffers[bufferVar] := b}
+    | .some b => {st with buffers := st.buffers[bufferVar] ←ₘ b}
     | .none   => {st with isFailed := true}
 
 def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
@@ -493,7 +485,7 @@ def State.setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : 
 def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
   match program with
     -- Meta
-    | Assign name op => st[name] := Γ st ⟦op⟧ₑ
+    | Assign name op => st[name] ←ₛ Γ st ⟦op⟧ₑ
     | Eqz x =>
         match st.felts x with
           | .some x => withEqZero x st

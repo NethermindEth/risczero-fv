@@ -52,29 +52,67 @@ theorem is0_initial_state_wf {input : Felt} {output : BufferAtTime} {hLen : outp
     -- %10 = cirgen.and_eqz %1, %9 : <default>
     -- %11 = cirgen.and_cond %5, %6 : <default>, %10
 
+def is0_witness_prog : MLIRProgram :=
+  "1"         ←ₐ .Const 1;
+  "x"         ←ₐ Op.Get ⟨"input"⟩ 0 0;
+  nondet (
+    "isZeroBit" ←ₐ ??₀⟨"x"⟩;
+    ⟨"output"⟩[0]   ←ᵢ ⟨"isZeroBit"⟩;
+    "invVal"    ←ₐ Inv ⟨"x"⟩;
+    ⟨"output"⟩[1]   ←ᵢ ⟨"invVal"⟩  
+  );
+  "arg1[0]"   ←ₐ .Get ⟨"output"⟩ 0 0;
+  guard ⟨"arg1[0]"⟩ then
+    ?₀ ⟨"x"⟩;
+  "1 - arg1[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"arg1[0]"⟩;
+  guard ⟨"1 - arg1[0]"⟩ then
+    "arg1[1]"        ←ₐ .Get ⟨"output"⟩ 0 1;
+    "x * arg1[1]"     ←ₐ .Mul ⟨"x"⟩ ⟨"arg1[1]"⟩;
+    "x * arg1[1] - 1" ←ₐ .Sub ⟨"x * arg1[1]"⟩ ⟨"1"⟩;
+    ?₀ ⟨"x * arg1[1] - 1"⟩
 
-def is0_witness (input : Felt) : BufferAtTime :=
-    let st' := MLIR.runProgram (st := is0_witness_initial_state input) <|
-    "1"         ←ₐ .Const 1;
-    "x"         ←ₐ Op.Get ⟨"input"⟩ 0 0;
-    nondet (
-      "isZeroBit" ←ₐ ??₀⟨"x"⟩;
-      ⟨"output"⟩[0]   ←ᵢ ⟨"isZeroBit"⟩;
-      "invVal"    ←ₐ Inv ⟨"x"⟩;
-      ⟨"output"⟩[1]   ←ᵢ ⟨"invVal"⟩  
-    );
-    "arg1[0]"   ←ₐ .Get ⟨"output"⟩ 0 0;
-    guard ⟨"arg1[0]"⟩ then
-      ?₀ ⟨"x"⟩;
-    "1 - arg1[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"arg1[0]"⟩;
-    guard ⟨"1 - arg1[0]"⟩ then
-      "arg1[1]"        ←ₐ .Get ⟨"output"⟩ 0 1;
-      "x * arg1[1]"     ←ₐ .Mul ⟨"x"⟩ ⟨"arg1[1]"⟩;
-      "x * arg1[1] - 1" ←ₐ .Sub ⟨"x * arg1[1]"⟩ ⟨"1"⟩;
-      ?₀ ⟨"x * arg1[1] - 1"⟩
-  (st'.buffers ⟨"output"⟩ |>.get!.getLast!)
+def is0_witness (st : State) : BufferAtTime :=
+  is0_witness_prog.runProgram st |>.lastOutput
 
-def is0_constraints (input : Felt) (output : List Felt) : Prop :=
+def is0_witness_initial (input : Felt) : BufferAtTime :=
+  is0_witness_prog.runProgram (is0_witness_initial_state input) |>.lastOutput
+
+def is0_witness₀ : MLIRProgram := "1" ←ₐ .Const 1;
+                                  "x" ←ₐ Op.Get ⟨"input"⟩ 0 0
+def is0_witness₁ : MLIRProgram := nondet (
+    "isZeroBit" ←ₐ ??₀⟨"x"⟩;
+    ⟨"output"⟩[0]   ←ᵢ ⟨"isZeroBit"⟩;
+    "invVal"    ←ₐ Inv ⟨"x"⟩;
+    ⟨"output"⟩[1]   ←ᵢ ⟨"invVal"⟩  
+  )
+def is0_witness₂ : MLIRProgram := "arg1[0]" ←ₐ .Get ⟨"output"⟩ 0 0
+def is0_witness₃ : MLIRProgram := guard ⟨"arg1[0]"⟩ then ?₀ ⟨"x"⟩
+def is0_witness₄ : MLIRProgram := "1 - arg1[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"arg1[0]"⟩
+def is0_witness₅ : MLIRProgram :=
+  guard ⟨"1 - arg1[0]"⟩ then
+    "arg1[1]"        ←ₐ .Get ⟨"output"⟩ 0 1;
+    "x * arg1[1]"     ←ₐ .Mul ⟨"x"⟩ ⟨"arg1[1]"⟩;
+    "x * arg1[1] - 1" ←ₐ .Sub ⟨"x * arg1[1]"⟩ ⟨"1"⟩;
+    ?₀ ⟨"x * arg1[1] - 1"⟩
+
+abbrev is0_witness_program_full : MLIRProgram :=
+  is0_witness₀; is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅
+
+lemma is0_witness_per_partes {st : State} :
+  Γ st ⟦is0_witness_prog⟧ =
+  Γ st ⟦is0_witness_program_full⟧ := by 
+  unfold is0_witness_program_full
+         is0_witness_prog
+         is0_witness₀ is0_witness₁ is0_witness₂ is0_witness₃ is0_witness₄ is0_witness₅
+  rw [←MLIR.seq_assoc]
+
+lemma is0_witness_per_partes_initial {input} :
+  Γ (is0_witness_initial_state input) ⟦is0_witness_prog⟧ =
+  Γ (is0_witness_initial_state input)
+    ⟦is0_witness₀; is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅⟧ :=
+  is0_witness_per_partes
+
+def is0_constraints (input : Felt) (output : List (Option Felt)) : Prop :=
   let state' :=
     MLIR.runProgram (st := is0_initial_state input output) <|
     -- %0 = cirgen.const 1
@@ -117,18 +155,18 @@ elab "simp_op" : tactic => do
     ]
   )
 
-elab "MLIR" : tactic => do
-  evalTactic <| ← `(
-    tactic| repeat ( first |
-      rw [MLIR.run_ass_def] | rw [MLIR.run_set_output] | rw [MLIR.run_if] |
-      rw [MLIR.run_nondet] | rw [MLIR.run_eqz] |
-      rw [MLIR.run_seq_def] 
-      all_goals try rfl
-      simp_op
-    )
-  )
-  evalTactic <| ← `(tactic| try rw [MLIR.run_ass_def])
-  evalTactic <| ← `(tactic| simp)
+-- elab "MLIR" : tactic => do
+--   evalTactic <| ← `(
+--     tactic| repeat ( first |
+--       rw [MLIR.run_ass_def] | rw [MLIR.run_set_output] | rw [MLIR.run_if] |
+--       rw [MLIR.run_nondet] | rw [MLIR.run_eqz] |
+--       rw [MLIR.run_seq_def] 
+--       all_goals try rfl
+--       simp_op
+--     )
+--   )
+--   evalTactic <| ← `(tactic| try rw [MLIR.run_ass_def])
+--   evalTactic <| ← `(tactic| simp)
 
 elab "MLIR_state" : tactic => do
   evalTactic <| ← `(tactic| repeat rw [Map.update_get_skip])
@@ -140,35 +178,420 @@ elab "MLIR_state" : tactic => do
 elab "MLIR_states" : tactic => do
   evalTactic <| ← `(tactic| repeat MLIR_state)
 
+elab "MLIR_statement" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      rewrite [MLIR.run_seq_def]
+      repeat (
+        first
+        | rewrite [MLIR.run_ass_def]
+        | rewrite [MLIR.run_set_def]
+        | rewrite [MLIR.run_if']
+        | rewrite [MLIR.run_nondet]
+        | rewrite [MLIR.run_eqz']
+      )
+      simp_op
+    )
+  )
+
+elab "MLIR" : tactic => do
+  evalTactic <| ← `(
+    tactic| repeat MLIR_statement
+  )
+
+-- elab "MLIR_statement" : tactic => do
+--   evalTactic <| ← `(
+--     tactic| (
+--       rewrite [MLIR.run_seq_def]
+--       repeat (
+--         first
+--         | rewrite [MLIR.run_ass_def]
+--         | rewrite [MLIR.run_set_output]
+--         | rewrite [MLIR.run_if]
+--         | rewrite [MLIR.run_nondet]
+--         | rewrite [MLIR.run_eqz]
+--       )
+--       simp_op
+--     )
+--   )
+
+elab "MLIR_states_simple" : tactic => do
+  evalTactic <| ← `(tactic|
+    simp only [
+      Map.update, ite_true, Option.get!_of_some, ite_false, true_and, Option.getD_some
+    ])
+
 end tactics
-  
-set_option maxHeartbeats 2000000 in
-lemma is0_constraints_closed_form {x y₁ y₂ : Felt} :
-    (is0_constraints x ([y₁, y₂]))
-  ↔ (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by
+
+lemma run_preserves_width {st : State} : (st.bufferWidths bufferVar) = (MLIR.run program st).bufferWidths bufferVar := by
   sorry
-  -- unfold is0_constraints MLIR.runProgram
-  -- unfold is0_initial_state
-  -- simp [MLIR.run_seq_def]
-  -- simp [MLIR.run_ass_def]
-  -- MLIR_states
+  -- induction program with
+  --   | Assign name op => {
+  --     unfold MLIR.run State.update Op.eval
+  --     aesop
+  --   }
+  --   | Eqz x => {
+  --     unfold MLIR.run
+  --     aesop
+  --   }
+  --   | If cond branch h_branch => {
+  --     cases st.felts cond with
+  --       | some x => {
+  --         unfold MLIR.run
+  --         aesop
+  --       }
+  --       | none => {
+  --         unfold MLIR.run
+  --         aesop
+  --       }
+  --   }
+  --   | Nondet block h_block => {
+  --     unfold MLIR.run
+  --     aesop
+  --   }
+  --   | Sequence a b h₁ h₂ => {
+  --     unfold MLIR.run
+  --     rewrite [h₂]
+  --   }
+  --   | Fail         => {
 
-  -- simp [MLIR.run_seq_def]
-  -- unfold is0_initial_state
-  -- simp
-  -- simp [MLIR.run_ass_def]
+  --   }
+  --   | Set buf offset val => {
 
-  -- save
+  --   }
+  --   | SetGlobal buf offset val => {
+
+  --   }
+
+-- set_option maxHeartbeats 2000000 in
+-- lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Option Felt} :
+--     (is0_constraints x ([y₁, y₂]))
+--   ↔ (if 1 - y₁.get! = 0 then if y₁.get! = 0 then True else x = 0 else (if y₁.get! = 0 then True else x = 0) ∧ x * y₂.get! - 1 = 0) := by
+--   unfold is0_constraints MLIR.runProgram
+--   let s₁ : State := is0_initial_state x ([y₁, y₂])
+--   have hs₁ : is0_initial_state x ([y₁, y₂]) = s₁ := by rfl
+--   MLIR_statement
+--   MLIR_statement
+--   MLIR_statement
+--   MLIR_statement
+--   rewrite [hs₁]
+--   let s₂ : State := s₁["1"] := some (Lit.Val 1)
+--   have hs₂ : s₁.update "1" (some (Lit.Val 1)) = s₂ := by rfl
+--   rewrite [hs₂]
+--   let s₃ : State := s₂["0"] := some (Lit.Val 0)
+--   have hs₃ : s₂.update "0" (some (Lit.Val 0)) = s₃ := by rfl
+--   rewrite [hs₃]
+--   let s₄ : State := s₃["true"] := some (Lit.Constraint True)
+--   have hs₄ : s₃.update "true" (some (Lit.Constraint True)) = s₄ := by rfl
+--   rewrite [hs₄]
+--   have h₁ : 0 ≤ s₄.cycle := by simp
+--   have h_input₄ : ⟨"input"⟩  ∈ s₄.vars := by {
+--     simp
+--     unfold is0_initial_state
+--     simp
+--   }
+--   have h_input_width₄ : 0 < s₄.bufferWidths.get! ⟨"input"⟩ := by {
+--     unfold Map.get!
+--     simp [run_preserves_width]
+--     unfold is0_initial_state
+--     simp
+--   }
+--   -- infoview stops working here
+--   have h_input_valid : (s₄.buffers.get! ⟨"input"⟩).get! (s₄.cycle - Back.toNat 0, 0) = some x := by {
+    
+--   }
+--   -- simp [MLIR.run_ass_def]
+--   -- MLIR_states
+
+--   -- simp [MLIR.run_seq_def]
+--   -- unfold is0_initial_state
+--   -- simp
+--   -- simp [MLIR.run_ass_def]
+
+--   -- save
   
   
   
-  -- MLIR_states
+--   -- MLIR_states
+--   -- aesop
+
+
+-- ****************************** WEAKEST PRE - Part₀ ******************************
+-- lemma is0_witness_part₀ {st : State} {y₁ y₂ : Option Felt} :
+--   is0_witness st = [y₁, y₂] ↔ _ := by
+--   unfold is0_witness MLIR.runProgram; simp only
+--   rewrite [is0_witness_per_partes]; unfold is0_witness_program_full
+--   generalize eq : (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
+--   unfold is0_witness₀
+--   MLIR
+--   rewrite [←eq]
+--   rfl
+-- ****************************** WEAKEST PRE - Part₀ ******************************
+
+def part₀_state (st : State) : State := 
+  (st["1"] ←ₛ some (Lit.Val 1))["x"] ←ₛ
+    if 0 ≤ (st["1"] ←ₛ some (Lit.Val 1)).cycle ∧
+      { name := "input" } ∈ (st["1"] ←ₛ some (Lit.Val 1)).vars ∧
+      0 < Map.get! (st["1"] ←ₛ some (Lit.Val 1)).bufferWidths { name := "input" } ∧
+      Option.isSome (Buffer.get! (Map.get! (st["1"] ←ₛ some (Lit.Val 1)).buffers { name := "input" })
+                    ((st["1"] ←ₛ some (Lit.Val 1)).cycle - Back.toNat 0, 0)) = true
+    then some (Lit.Val (Option.get! (Buffer.get! (Map.get! (st["1"] ←ₛ some (Lit.Val 1)).buffers
+              { name := "input" }) ((st["1"] ←ₛ some (Lit.Val 1)).cycle - Back.toNat 0, 0))))
+    else none
+
+def part₀_state_update (st : State) : State :=
+  Γ (part₀_state st) ⟦is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅⟧
+
+lemma part₀_updates {y₁ y₂ : Option Felt} (st : State) :
+  (MLIR.runProgram (is0_witness₀; is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) st).lastOutput = [y₁, y₂] ↔
+  (part₀_state_update st).lastOutput = [y₁, y₂] := by
+  simp only [part₀_state, part₀_state_update, MLIR.runProgram]
+  unfold is0_witness₀
+  MLIR
+
+-- ****************************** WEAKEST PRE - Part₁ ******************************
+-- lemma is0_witness_part₁ {y₁ y₂ : Option Felt} (st : State) :
+--   let st' := MLIR.runProgram (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) st
+--   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+--   unfold MLIR.runProgram; simp only
+--   generalize eq : (is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
+--   unfold is0_witness₁
+--   MLIR_statement
+--   MLIR_statement
+--   MLIR_statement
+--   MLIR_statement
+--   simp only [State.update_val]
+--   MLIR_states_simple
+--   generalize update₀ : (λ x => 
+--                         if x = { name := "isZeroBit" }
+--                         then some (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0)
+--                         else State.felts st x) = feltmap₀
+--   generalize eq₄ : ({ buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
+--                         cycle := st.cycle,
+--                         felts := feltmap₀,
+--                         isFailed := st.isFailed, props := st.props, vars := st.vars } : State) = jibadiba
+--   have tit : jibadiba = State.updateFelts st "isZeroBit" (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0) := by
+--     rw [←eq₄, ←update₀]
+--     congr
+--   generalize eq₂ : State.set! jibadiba { name := "output" } 0
+--                      (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0) = podajiba
+--   generalize update₁ : (λ x =>
+--                         if x = { name := "invVal" }
+--                         then some (match State.felts podajiba { name := "x" } with
+--                                       | some x => if x = 0 then 0 else x⁻¹
+--                                       | x => default)
+--                         else State.felts podajiba x) = feltmap₁
+--   generalize eq₃ :
+--     ({ buffers := podajiba.buffers, bufferWidths := podajiba.bufferWidths, constraints := podajiba.constraints,
+--        cycle := podajiba.cycle,
+--        felts := feltmap₁,
+--        isFailed := podajiba.isFailed, props := podajiba.props, vars := podajiba.vars } : State) = st₀
+--   have : st₀ = State.updateFelts podajiba "invVal" (match State.felts podajiba { name := "x" } with
+--                                       | some x => if x = 0 then 0 else x⁻¹
+--                                       | x => default) := by
+--     rw [←eq₃, ←update₁]
+--     congr
+--   rw [this, ←eq₂, tit]
+--   rewrite [←eq]
+--   rfl
+-- ****************************** WEAKEST PRE - Part₁ ******************************
+
+def part₁_state (st : State) : State :=
+  State.set! (State.updateFelts (State.set! (State.updateFelts st "isZeroBit"
+    (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
+    { name := "output" } 0 (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
+      "invVal"
+      (match
+        State.felts
+          (State.set!
+            (State.updateFelts st "isZeroBit"
+              (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
+            { name := "output" } 0 (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
+          { name := "x" } with
+      | some x => if x = 0 then 0 else x⁻¹
+      | _ => default))
+    { name := "output" } 1
+    (match
+      State.felts
+        (State.set!
+          (State.updateFelts st "isZeroBit"
+            (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
+          { name := "output" } 0 (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
+        { name := "x" } with
+    | some x => if x = 0 then 0 else x⁻¹
+    | _ => default)
+
+def part₁_state_update (st : State) : State :=
+  Γ (part₁_state st) ⟦is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅⟧
+
+lemma part₁_updates {y₁ y₂ : Option Felt} (st : State) :
+  (MLIR.runProgram (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) st).lastOutput = [y₁, y₂] ↔
+  (part₁_state_update st).lastOutput = [y₁, y₂] := by
+  simp only [MLIR.runProgram]
+  generalize eq : (is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
+  unfold is0_witness₁ 
+  MLIR
+  simp only [State.update_val', State.updateFelts, Map.update]
+  unfold part₁_state_update
+  aesop
+
+lemma part₁_updates_opaque {st : State} : 
+  (part₀_state_update st).lastOutput = [y₁, y₂] ↔
+  (part₁_state_update (part₀_state st)).lastOutput = [y₁, y₂] := by
+  simp [part₀_state_update, part₁_updates]
+
+def part₂_state (st : State) : State :=
+  st["arg1[0]"] ←ₛ 
+    if 0 ≤ st.cycle ∧
+      { name := "output" } ∈ st.vars ∧
+      0 < Map.get! st.bufferWidths { name := "output" } ∧
+      Option.isSome (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 0)) = true 
+    then some (Lit.Val (Option.get! (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 0))))
+    else none
+
+def part₂_state_update (st : State) : State :=
+  Γ (part₂_state st) ⟦is0_witness₃; is0_witness₄; is0_witness₅⟧
+
+lemma part₂_updates {y₁ y₂ : Option Felt} (st : State) :
+  (MLIR.runProgram (is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) st).lastOutput = [y₁, y₂] ↔
+  (part₂_state_update st).lastOutput = [y₁, y₂] := by
+  simp only [part₂_state, MLIR.runProgram, part₂_state_update]
+  generalize eq : (is0_witness₃; is0_witness₄; is0_witness₅) = prog
+  unfold is0_witness₂
+  MLIR
+
+lemma part₂_updates_opaque {st : State} : 
+  (part₁_state_update st).lastOutput = [y₁, y₂] ↔
+  (part₂_state_update (part₁_state st)).lastOutput = [y₁, y₂] := by
+  simp [part₁_state_update, part₂_updates]
+
+-- ****************************** WEAKEST PRE - Part₃ ******************************
+-- lemma is0_witness_part₃ {y₁ y₂ : Option Felt} (st : State) :
+--   let st' := MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st
+--   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+--   unfold MLIR.runProgram; simp only
+--   generalize eq : (is0_witness₄; is0_witness₅) = prog
+--   unfold is0_witness₃
+--   MLIR_statement
+--   rewrite [←eq]
+--   rfl
+-- ****************************** WEAKEST PRE - Part₃ ******************************
+
+def part₃_state (st : State) : State :=
+  if State.felts st { name := "arg1[0]" } = some 0 ∨ ¬{ name := "arg1[0]" } ∈ st.felts then st
+  else if h : { name := "x" } ∈ st.felts
+        then withEqZero (Option.get (State.felts st { name := "x" }) h) st
+        else st
+
+def part₃_state_update (st : State) : State :=
+  Γ (part₃_state st) ⟦is0_witness₄; is0_witness₅⟧
+
+lemma part₃_updates {y₁ y₂ : Option Felt} (st : State) :
+  (MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st).lastOutput = [y₁, y₂] ↔
+  (part₃_state_update st).lastOutput = [y₁, y₂] := by
+  simp only [part₃_state, MLIR.runProgram, part₃_state_update]
+  generalize eq : (is0_witness₄; is0_witness₅) = prog
+  unfold is0_witness₃
+  MLIR
+
+lemma part₃_updates_opaque {st : State} : 
+  (part₂_state_update st).lastOutput = [y₁, y₂] ↔
+  (part₃_state_update (part₂_state st)).lastOutput = [y₁, y₂] := by
+  simp [part₂_state_update, part₃_updates]
+
+-- ****************************** WEAKEST PRE - Part₄ ******************************
+-- lemma is0_witness_part₄ {y₁ y₂ : Option Felt} (st : State) :
+--   let st' := MLIR.runProgram (is0_witness₄; is0_witness₅) st
+--   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+--   unfold MLIR.runProgram; simp only
+--   unfold is0_witness₄
+--   MLIR_statement
+--   rfl
+-- ****************************** WEAKEST PRE - Part₄ ******************************
+
+def part₄_state (st : State) : State :=
+  st["1 - arg1[0]"] ←ₛ some (Lit.Val
+    (Option.get! (State.felts st { name := "1" }) -
+     Option.get! (State.felts st { name := "arg1[0]" })))
+
+def part₄_state_update (st : State) : State :=
+  Γ (part₄_state st) ⟦is0_witness₅⟧
+
+def part₄_updates {y₁ y₂ : Option Felt} (st : State) :
+  (MLIR.runProgram (is0_witness₄; is0_witness₅) st).lastOutput = [y₁, y₂] ↔
+  (part₄_state_update st).lastOutput = [y₁, y₂] := by
+  simp only [part₄_state, MLIR.runProgram, part₄_state_update]
+  generalize eq : (is0_witness₅) = prog
+  unfold is0_witness₄
+  MLIR
+
+lemma part₄_updates_opaque {st : State} : 
+  (part₃_state_update st).lastOutput = [y₁, y₂] ↔
+  (part₄_state_update (part₃_state st)).lastOutput = [y₁, y₂] := by
+  simp [part₃_state_update, part₄_updates]
+
+-- ****************************** WEAKEST PRE - Part₄ ******************************
+-- lemma is0_witness_part₄ {y₁ y₂ : Option Felt} (st : State) :
+--   let st' := MLIR.runProgram is0_witness₅ st
+--   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
+--   unfold MLIR.runProgram; simp only
+--   unfold is0_witness₅
+--   MLIR_statement
+--   MLIR_statement
+--   MLIR_statement
+--   simp
+--   rfl
+-- ****************************** WEAKEST PRE - Part₄ ******************************
+
+def part₅_state_update (st : State) : State :=
+  if State.felts st { name := "1 - arg1[0]" } = some 0 ∨ ¬{ name := "1 - arg1[0]" } ∈ st.felts
+  then st
+  else st["arg1[1]"] ←ₛ
+    if 0 ≤ st.cycle ∧ { name := "output" } ∈ st.vars ∧
+       1 < Map.get! st.bufferWidths { name := "output" } ∧
+       Option.isSome (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1)) = true
+    then some (Lit.Val (Option.get! (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1))))
+    else none
+
+def part₅_updates {y₁ y₂ : Option Felt} (st : State) :
+  (MLIR.runProgram is0_witness₅ st).lastOutput = [y₁, y₂] ↔
+  (part₅_state_update st).lastOutput = [y₁, y₂] := by
+  simp only [MLIR.runProgram, part₅_state_update]
+  unfold is0_witness₅
+  MLIR
+  MLIR_states_simple
+  rfl
+
+lemma part₅_updates_opaque {st : State} : 
+  (part₄_state_update st).lastOutput = [y₁, y₂] ↔
+  (part₅_state_update (part₄_state st)).lastOutput = [y₁, y₂] := by
+  simp [part₄_state_update, part₅_updates]
+
+lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
+  is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
+  unfold is0_witness_initial MLIR.runProgram; simp only [is0_witness_per_partes]
+  rw [part₀_updates]
+  rw [part₁_updates_opaque]
+  rw [part₂_updates_opaque]
+  rw [part₃_updates_opaque]
+  rw [part₄_updates_opaque]
+  rw [part₅_updates_opaque]
+
+
+  -- rw [part₀_updates]; unfold part₀_state_update
+  -- rw [part₁_updates]; unfold part₁_state_update
+  -- rw [part₂_updates]; unfold part₂_state_update
+  -- rw [part₃_updates]; unfold part₃_state_update
+  -- rw [part₄_updates]; unfold part₄_state_update
+  -- rw [part₅_updates]; unfold part₅_state_update
   -- aesop
 
-set_option maxHeartbeats 2000000 in
-lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
-  is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
-  sorry
+-- set_option maxHeartbeats 2000000 in
+-- lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
+--   is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
+--   unfold is0_witness MLIR.runProgram; simp only
+--   rw [is0_witness_per_partes]
+--   sorry
 
   -- Just playing around to see what's slow.
   -- unfold is0_witness MLIR.runProgram
