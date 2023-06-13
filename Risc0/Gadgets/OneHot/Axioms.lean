@@ -332,6 +332,7 @@ def witness_prog_full : MLIRProgram :=
 --   |>.buffers.get! ⟨"output"⟩
 --   |>.last!
 
+set_option maxHeartbeats 0 in
 lemma constraints_closed_form {input : Felt} {output: BufferAtTime} :
   -- constraints input output ↔ (
   --   input = 0 ∧ output = [1,0,0].map some ∨
