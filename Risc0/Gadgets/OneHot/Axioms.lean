@@ -288,8 +288,8 @@ def prog: MLIRProgram :=
 def closed_form (st: State) :
   pre st → (
     (
-      (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 1)).get! = 0 ∨
-      (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 1)).get! = 1
+      (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 2)).get! = 0 ∨
+      (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 2)).get! = 1
     ) ∧
     (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 0)).get! +
     (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 1)).get! +
