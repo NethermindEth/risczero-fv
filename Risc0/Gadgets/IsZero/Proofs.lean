@@ -8,7 +8,6 @@ import Mathlib.Tactic.FieldSimp
 
 import Risc0.Basic
 import Risc0.Lemmas
-import Risc0.Programs
 
 namespace Risc0
 
