@@ -116,6 +116,11 @@ namespace WitnessParts
 
 namespace Setup0
 
+def pre (st: State) (input : Felt) : Prop :=
+  st.Valid ∧
+  (st.buffers.get! ⟨"input"⟩ |>.last!) = [some input] ∧
+  (st.buffers.get! ⟨"output"⟩ |>.last!) = [none, none, none]
+
 def prog : MLIRProgram :=
 -- %0 = cirgen.const 2
   "2" ←ₐ .Const 2;
@@ -126,12 +131,14 @@ def prog : MLIRProgram :=
   -- %3 = cirgen.get %arg0[0] back 0 : <1, constant>
   "input" ←ₐ .Get ⟨"input"⟩ 0 0
 
-lemma closed_form {input : Felt} :
-  (prog.run (initial_witness_state input)).felts.get! ⟨"2"⟩ = 2 ∧
-  (prog.run (initial_witness_state input)).felts.get! ⟨"1"⟩ = 1 ∧
-  (prog.run (initial_witness_state input)).felts.get! ⟨"0"⟩ = 0 ∧
-  (prog.run (initial_witness_state input)).felts.get! ⟨"input"⟩ = input := by
-  aesop
+lemma closed_form {input : Felt} (st: State) :
+  pre st input → (
+    (prog.run st).felts.get! ⟨"2"⟩ = 2 ∧
+    (prog.run st).felts.get! ⟨"1"⟩ = 1 ∧
+    (prog.run st).felts.get! ⟨"0"⟩ = 0 ∧
+    (prog.run st).felts.get! ⟨"input"⟩ = input
+  ) := by
+  sorry
   
 end Setup0
 
@@ -254,9 +261,15 @@ def closed_form (st: State) :
 
 end Output1Boolean4
 
-end WitnessParts
+namespace FinalConstraints5
 
-def witness_prog_4_final_constraints : MLIRProgram :=
+def pre (st: State) : Prop :=
+  st.felts.get! ⟨"1"⟩ = 1 ∧
+  st.felts.get! ⟨"output[0]"⟩ = (st.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 0)) ∧
+  st.felts.get! ⟨"output[0]"⟩ = (st.buffers.get! ⟨"output[1]"⟩ |>.get! (st.cycle, 1)) ∧
+  st.felts.get! ⟨"output[0]"⟩ = (st.buffers.get! ⟨"output[2]"⟩ |>.get! (st.cycle, 2))
+
+def prog: MLIRProgram :=
    -- %14 = cirgen.add %9 : <default>, %4 : <default>
   "output[0]AddOutput[1]" ←ₐ .Add ⟨"output[0]"⟩ ⟨"output[1]"⟩;
    -- %15 = cirgen.sub %1 : <default>, %5 : <default>
@@ -271,6 +284,22 @@ def witness_prog_4_final_constraints : MLIRProgram :=
   "outputSum - 1" ←ₐ .Sub ⟨"outputSum"⟩ ⟨"1"⟩;
   --     cirgen.eqz %18 : <default>
   ?₀ ⟨"outputSum - 1"⟩
+
+def closed_form (st: State) :
+  pre st → (
+    (
+      (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 1)).get! = 0 ∨
+      (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 1)).get! = 1
+    ) ∧
+    (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 0)).get! +
+    (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 1)).get! +
+    (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 2)).get! = 1
+  ) := by
+  sorry
+
+end FinalConstraints5
+
+end WitnessParts
 
 def witness (input : Felt) : BufferAtTime :=
   witness_prog_full.run (initial_witness_state input)
