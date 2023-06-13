@@ -112,15 +112,31 @@ def witness_prog_full : MLIRProgram :=
   "outputSum - 1" ←ₐ .Sub ⟨"outputSum"⟩ ⟨"1"⟩;
   ?₀ ⟨"outputSum - 1"⟩
 
-def witness_prog_0_setup : MLIRProgram :=
- -- %0 = cirgen.const 2
+namespace WitnessParts
+
+namespace Setup0
+
+def prog : MLIRProgram :=
+-- %0 = cirgen.const 2
   "2" ←ₐ .Const 2;
-   -- %1 = cirgen.const 1
+  -- %1 = cirgen.const 1
   "1" ←ₐ .Const 1;
-   -- %2 = cirgen.const 0
+  -- %2 = cirgen.const 0
   "0" ←ₐ .Const 0;
-   -- %3 = cirgen.get %arg0[0] back 0 : <1, constant>
+  -- %3 = cirgen.get %arg0[0] back 0 : <1, constant>
   "input" ←ₐ .Get ⟨"input"⟩ 0 0
+
+lemma closed_form {input : Felt} :
+  (prog.run (initial_witness_state input)).felts.get! ⟨"2"⟩ = 2 ∧
+  (prog.run (initial_witness_state input)).felts.get! ⟨"1"⟩ = 1 ∧
+  (prog.run (initial_witness_state input)).felts.get! ⟨"0"⟩ = 0 ∧
+  (prog.run (initial_witness_state input)).felts.get! ⟨"input"⟩ = input := by
+  aesop
+  
+end Setup0
+
+end WitnessParts
+
 
 def witness_prog_1_nondet : MLIRProgram :=
    -- cirgen.nondet {
