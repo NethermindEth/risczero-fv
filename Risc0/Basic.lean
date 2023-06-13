@@ -46,9 +46,11 @@ abbrev Idx.data : Idx → ℕ := Prod.snd
 
 def empty : Buffer := []
 
-def init (size : ℕ) : Buffer := [List.replicate size .none]
+def init_unset (size : ℕ) : Buffer := [List.replicate size .none]
 
 def init' (row : BufferAtTime) : Buffer := [row]
+
+def init_values (values: List Felt) : Buffer := [values.map some]
 
 def last! (buf : Buffer) : BufferAtTime :=
   buf.getLast!
@@ -126,6 +128,25 @@ section State
 
 variable (st : State)
 
+def empty : State :=
+  {
+    buffers := Map.empty
+    bufferWidths := Map.empty,
+    constraints := [],
+    cycle := 0, -- should cycle actually equal zero here or should it be arbitrary?
+    felts := Map.empty,
+    props := Map.empty,
+    vars := [],
+    isFailed := false,
+  }
+
+def addBuffer (name: String) (buffer: Buffer): State :=
+  { st with
+    buffers := st.buffers[⟨name⟩] := buffer,
+    bufferWidths := st.bufferWidths[⟨name⟩] := buffer.last!.length,
+    vars := ⟨name⟩ :: st.vars
+  }
+
 def varsConsistent := ∀ var, var ∈ st.vars ↔ var ∈ st.buffers
 
 def cycleIsRows := ∀ var (h₁ : var ∈ st.buffers), (st.buffers.get h₁).length = st.cycle + 1
@@ -167,10 +188,10 @@ def init (numInput numOutput : ℕ)
 -- Only used to prove State inhabited, since it initialises both input and output as write-only
 def init_default (numInput numOutput : ℕ) : State :=
   init numInput numOutput
-        ((Buffer.init numInput).head (by simp [Buffer.init]))
-        ((Buffer.init numOutput).head (by simp [Buffer.init]))
-        (by simp [Buffer.init])
-        (by simp [Buffer.init])
+        ((Buffer.init_unset numInput).head (by simp [Buffer.init_unset]))
+        ((Buffer.init_unset numOutput).head (by simp [Buffer.init_unset]))
+        (by simp [Buffer.init_unset])
+        (by simp [Buffer.init_unset])
 
 private lemma valid_init'_aux :
   bufferLensConsistent (State.init m n input output hIn hOut) := λ var h h₁ row h₂ => by
