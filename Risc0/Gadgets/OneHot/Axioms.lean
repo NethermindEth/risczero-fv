@@ -135,10 +135,14 @@ lemma closed_form {input : Felt} :
   
 end Setup0
 
-end WitnessParts
+namespace Nondet1
 
+def pre (st : State) (input : Felt) : Prop :=
+  st.felts.get! ⟨"input"⟩ = input ∧
+  st.felts.get! ⟨"1"⟩ = 1 ∧
+  st.felts.get! ⟨"2"⟩ = 2
 
-def witness_prog_1_nondet : MLIRProgram :=
+def prog : MLIRProgram :=
    -- cirgen.nondet {
   nondet (
      --   %19 = cirgen.isz %3 : <default>
@@ -159,6 +163,20 @@ def witness_prog_1_nondet : MLIRProgram :=
     ⟨"output"⟩[2] ←ᵢ ⟨"input == 2"⟩
      -- }
   )
+
+lemma closed_form {input : Felt} (st: State) :
+  pre st input → (
+    (input = 0 → (prog.run st |>.buffers.get! ⟨"output"⟩ |>.last!) = [1,0,0].map some) ∧
+    (input = 1 → (prog.run st |>.buffers.get! ⟨"output"⟩ |>.last!) = [0,1,0].map some) ∧
+    (input = 2 → (prog.run st |>.buffers.get! ⟨"output"⟩ |>.last!) = [0,0,1].map some)
+  ) := by
+  sorry
+
+end Nondet1
+
+end WitnessParts
+
+
 
 def witness_prog_2_projection : MLIRProgram :=
    -- %4 = cirgen.get %arg1[1] back 0 : <3, mutable>

@@ -40,7 +40,7 @@ abbrev Buffer := List BufferAtTime
 
 namespace Buffer
 
-abbrev Idx := ℕ × ℕ
+abbrev Idx := ℕ × ℕ -- time, data
 abbrev Idx.time : Idx → ℕ := Prod.fst
 abbrev Idx.data : Idx → ℕ := Prod.snd
 
