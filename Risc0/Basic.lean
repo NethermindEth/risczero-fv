@@ -171,7 +171,7 @@ structure WellFormed (st : State) : Prop :=
   -- Every valid row has a known length stored in cols.
   hColsLen : bufferLensConsistent st
   
-def Valid (st : State) := st.WellFormed ∧ st.isFailed
+def Valid (st : State) := st.WellFormed ∧ ¬st.isFailed
 
 def init (numInput numOutput : ℕ)
           (input : BufferAtTime) (output : BufferAtTime)
