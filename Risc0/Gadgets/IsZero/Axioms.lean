@@ -218,7 +218,9 @@ elab "MLIR" : tactic => do
 elab "MLIR_states_simple" : tactic => do
   evalTactic <| ← `(tactic|
     simp only [
-      Map.update, ite_true, Option.get!_of_some, ite_false, true_and, Option.getD_some
+      Map.update, ite_true, Option.get!_of_some, ite_false, true_and, Option.getD_some,
+      State.updateFelts, Map.fromList_cons, Map.fromList_nil, State.update_val', 
+      le_refl, List.find?, List.mem_cons, ge_iff_le, tsub_eq_zero_of_le
     ])
 
 end tactics
@@ -570,13 +572,95 @@ lemma part₅_updates_opaque {st : State} :
 lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
   is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
   unfold is0_witness_initial MLIR.runProgram; simp only [is0_witness_per_partes]
-  rw [part₀_updates]
-  rw [part₁_updates_opaque]
-  rw [part₂_updates_opaque]
-  rw [part₃_updates_opaque]
-  rw [part₄_updates_opaque]
-  rw [part₅_updates_opaque]
+  rewrite [part₀_updates]
+  rewrite [part₁_updates_opaque]
+  rewrite [part₂_updates_opaque]
+  rewrite [part₃_updates_opaque]
+  rewrite [part₄_updates_opaque]
+  rewrite [part₅_updates_opaque]
 
+  unfold is0_witness_initial_state is0_initial_state
+
+  unfold part₀_state
+  simp [State.updateFelts, Map.get!, Option.get!, Buffer.get!]
+  MLIR_states_simple
+  
+  unfold part₁_state
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple
+  
+  unfold part₂_state
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple
+
+  unfold part₃_state
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple
+
+  unfold part₄_state
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple
+
+  unfold part₅_state_update
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple
+
+  simp [State.felts, State.lastOutput, State.buffers, Option.get!, List.getLast!, List.get!]
+  MLIR_states_simple
+
+  simp [Buffer.Idx.data, List.get!, Buffer.Idx.time]
+
+  simp [State.buffers, List.get!]
+  MLIR_states_simple
+  MLIR_states
+  -- unfold is0_witness_initial_state is0_initial_state
+  -- unfold part₀_state
+  -- MLIR_states_simple
+  -- simp
+
+  -- unfold part₁_state
+  -- MLIR_states_simple
+  -- simp
+  
+  -- unfold part₂_state
+  -- MLIR_states_simple
+  -- simp 
+
+  -- unfold part₃_state
+  -- MLIR_states_simple
+  -- simp 
+
+  -- unfold part₄_state
+  -- MLIR_states_simple
+  -- simp 
+
+  -- unfold part₅_state_update
+  -- MLIR_states_simple
+  -- simp 
+
+  -- rfl
+
+  -- aesop
 
   -- rw [part₀_updates]; unfold part₀_state_update
   -- rw [part₁_updates]; unfold part₁_state_update
