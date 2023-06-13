@@ -174,11 +174,15 @@ lemma closed_form {input : Felt} (st: State) :
 
 end Nondet1
 
-end WitnessParts
+namespace Projection2
 
+def pre (st : State) (input : Felt): Prop :=
+  st.WellFormed ∧
+  st.bufferWidths.get! ⟨"output"⟩ = 3 ∧
+  st.felts.get! ⟨"2"⟩ = 2 ∧
+  st.felts.get! ⟨"input"⟩ = input
 
-
-def witness_prog_2_projection : MLIRProgram :=
+def prog : MLIRProgram :=
    -- %4 = cirgen.get %arg1[1] back 0 : <3, mutable>
   "output[1]" ←ₐ .Get ⟨"output"⟩ 0 1;
    -- %5 = cirgen.get %arg1[2] back 0 : <3, mutable>
@@ -192,8 +196,24 @@ def witness_prog_2_projection : MLIRProgram :=
    -- cirgen.eqz %8 : <default>
   ?₀ ⟨"2*output[2]+output[1] - input"⟩
 
-def witness_prog_3_output0_le_1 : MLIRProgram :=
-   -- %9 = cirgen.get %arg1[0] back 0 : <3, mutable>
+lemma closed_form {input : Felt} (st: State) :
+  pre st input → (
+    (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 1)).get! +
+    (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 2)).get! * 2 =
+    input
+  ) := by
+  sorry
+
+end Projection2
+
+namespace Output0Boolean3
+
+def pre (st : State) : Prop :=
+  st.felts.get! ⟨"1"⟩ = 1 ∧
+  st.bufferWidths.get! ⟨"output"⟩ = 3
+
+def prog : MLIRProgram :=
+  -- %9 = cirgen.get %arg1[0] back 0 : <3, mutable>
   "output[0]" ←ₐ .Get ⟨"output"⟩ 0 0;
    -- %10 = cirgen.sub %1 : <default>, %9 : <default>
   "1 - Output[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"output[0]"⟩;
@@ -202,13 +222,39 @@ def witness_prog_3_output0_le_1 : MLIRProgram :=
    -- cirgen.eqz %11 : <default>
   ?₀ ⟨"output[0] <= 1"⟩
 
-def witness_prog_3_output1_le_1 : MLIRProgram :=
-   -- %12 = cirgen.sub %1 : <default>, %4 : <default>
+def closed_form (st: State) :
+  pre st → (
+    (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 0)).get! = 0 ∨
+    (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 0)).get! = 1 -- Review: how to rewrite as ≤ 1? (getting failed to synthesize instance)
+  ) := by
+  sorry
+
+end Output0Boolean3
+
+namespace Output1Boolean4
+
+def pre (st : State) : Prop :=
+  st.felts.get! ⟨"1"⟩ = 1 ∧
+  st.bufferWidths.get! ⟨"output"⟩ = 3
+
+def prog : MLIRProgram :=
+  -- %12 = cirgen.sub %1 : <default>, %4 : <default>
   "1 - Output[1]" ←ₐ .Sub ⟨"1"⟩ ⟨"output[1]"⟩;
    -- %13 = cirgen.mul %4 : <default>, %12 : <default>
   "output[1] <= 1" ←ₐ .Mul ⟨"output[1]"⟩ ⟨"1 - Output[1]"⟩;
    -- cirgen.eqz %13 : <default>
   ?₀ ⟨"output[1] <= 1"⟩
+
+def closed_form (st: State) :
+  pre st → (
+    (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 1)).get! = 0 ∨
+    (prog.run st |>.buffers.get! ⟨"output"⟩ |>.get! (st.cycle, 1)).get! = 1
+  ) := by
+  sorry
+
+end Output1Boolean4
+
+end WitnessParts
 
 def witness_prog_4_final_constraints : MLIRProgram :=
    -- %14 = cirgen.add %9 : <default>, %4 : <default>
