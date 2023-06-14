@@ -1,4 +1,3 @@
--- This file contains the MLIR program labeled `ORIGINAL` in the `nonzero-example` output.
 import Mathlib.Data.Nat.Prime
 import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
@@ -155,19 +154,6 @@ elab "simp_op" : tactic => do
     ]
   )
 
--- elab "MLIR" : tactic => do
---   evalTactic <| ← `(
---     tactic| repeat ( first |
---       rw [MLIR.run_ass_def] | rw [MLIR.run_set_output] | rw [MLIR.run_if] |
---       rw [MLIR.run_nondet] | rw [MLIR.run_eqz] |
---       rw [MLIR.run_seq_def] 
---       all_goals try rfl
---       simp_op
---     )
---   )
---   evalTactic <| ← `(tactic| try rw [MLIR.run_ass_def])
---   evalTactic <| ← `(tactic| simp)
-
 elab "MLIR_state" : tactic => do
   evalTactic <| ← `(tactic| repeat rw [Map.update_get_skip])
   evalTactic <| ← `(tactic| all_goals try decide)
@@ -199,22 +185,6 @@ elab "MLIR" : tactic => do
     tactic| repeat MLIR_statement
   )
 
--- elab "MLIR_statement" : tactic => do
---   evalTactic <| ← `(
---     tactic| (
---       rewrite [MLIR.run_seq_def]
---       repeat (
---         first
---         | rewrite [MLIR.run_ass_def]
---         | rewrite [MLIR.run_set_output]
---         | rewrite [MLIR.run_if]
---         | rewrite [MLIR.run_nondet]
---         | rewrite [MLIR.run_eqz]
---       )
---       simp_op
---     )
---   )
-
 elab "MLIR_states_simple" : tactic => do
   evalTactic <| ← `(tactic|
     simp only [
@@ -224,99 +194,6 @@ elab "MLIR_states_simple" : tactic => do
     ])
 
 end tactics
-
-lemma run_preserves_width {st : State} : (st.bufferWidths bufferVar) = (MLIR.run program st).bufferWidths bufferVar := by
-  sorry
-  -- induction program with
-  --   | Assign name op => {
-  --     unfold MLIR.run State.update Op.eval
-  --     aesop
-  --   }
-  --   | Eqz x => {
-  --     unfold MLIR.run
-  --     aesop
-  --   }
-  --   | If cond branch h_branch => {
-  --     cases st.felts cond with
-  --       | some x => {
-  --         unfold MLIR.run
-  --         aesop
-  --       }
-  --       | none => {
-  --         unfold MLIR.run
-  --         aesop
-  --       }
-  --   }
-  --   | Nondet block h_block => {
-  --     unfold MLIR.run
-  --     aesop
-  --   }
-  --   | Sequence a b h₁ h₂ => {
-  --     unfold MLIR.run
-  --     rewrite [h₂]
-  --   }
-  --   | Fail         => {
-
-  --   }
-  --   | Set buf offset val => {
-
-  --   }
-  --   | SetGlobal buf offset val => {
-
-  --   }
-
--- set_option maxHeartbeats 2000000 in
--- lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Option Felt} :
---     (is0_constraints x ([y₁, y₂]))
---   ↔ (if 1 - y₁.get! = 0 then if y₁.get! = 0 then True else x = 0 else (if y₁.get! = 0 then True else x = 0) ∧ x * y₂.get! - 1 = 0) := by
---   unfold is0_constraints MLIR.runProgram
---   let s₁ : State := is0_initial_state x ([y₁, y₂])
---   have hs₁ : is0_initial_state x ([y₁, y₂]) = s₁ := by rfl
---   MLIR_statement
---   MLIR_statement
---   MLIR_statement
---   MLIR_statement
---   rewrite [hs₁]
---   let s₂ : State := s₁["1"] := some (Lit.Val 1)
---   have hs₂ : s₁.update "1" (some (Lit.Val 1)) = s₂ := by rfl
---   rewrite [hs₂]
---   let s₃ : State := s₂["0"] := some (Lit.Val 0)
---   have hs₃ : s₂.update "0" (some (Lit.Val 0)) = s₃ := by rfl
---   rewrite [hs₃]
---   let s₄ : State := s₃["true"] := some (Lit.Constraint True)
---   have hs₄ : s₃.update "true" (some (Lit.Constraint True)) = s₄ := by rfl
---   rewrite [hs₄]
---   have h₁ : 0 ≤ s₄.cycle := by simp
---   have h_input₄ : ⟨"input"⟩  ∈ s₄.vars := by {
---     simp
---     unfold is0_initial_state
---     simp
---   }
---   have h_input_width₄ : 0 < s₄.bufferWidths.get! ⟨"input"⟩ := by {
---     unfold Map.get!
---     simp [run_preserves_width]
---     unfold is0_initial_state
---     simp
---   }
---   -- infoview stops working here
---   have h_input_valid : (s₄.buffers.get! ⟨"input"⟩).get! (s₄.cycle - Back.toNat 0, 0) = some x := by {
-    
---   }
---   -- simp [MLIR.run_ass_def]
---   -- MLIR_states
-
---   -- simp [MLIR.run_seq_def]
---   -- unfold is0_initial_state
---   -- simp
---   -- simp [MLIR.run_ass_def]
-
---   -- save
-  
-  
-  
---   -- MLIR_states
---   -- aesop
-
 
 -- ****************************** WEAKEST PRE - Part₀ ******************************
 -- lemma is0_witness_part₀ {st : State} {y₁ y₂ : Option Felt} :
@@ -661,12 +538,5 @@ lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
   MLIR_states_simple; simp only [Map.update_def.symm]
 
   simp [List.getLast]
-
--- set_option maxHeartbeats 2000000 in
--- lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
---   is0_witness x = [y₁, y₂] ↔ (if x = 0 then 1 else 0) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
---   unfold is0_witness MLIR.runProgram; simp only
---   rw [is0_witness_per_partes]
---   sorry
 
 end Risc0
