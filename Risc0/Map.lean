@@ -13,7 +13,7 @@ variable {α : Type} [DecidableEq α] {β : Type}
 def empty : Map α β := λ _ => none
 
 def update (m : Map α β) (k : α) (v : β) : Map α β :=
-  λ x => if x = k then v else m x
+  λ x => if x = k then some v else m x
 
 end Map
 
@@ -44,6 +44,8 @@ def get (h : k ∈ m) := m[k].get h
 
 def get! [Inhabited β] (m : Map α β) (k : α) := m[k].get!
 
+lemma update_def : update m k v = λ x => if x = k then some v else m x := rfl
+
 lemma get_def (h : k ∈ m) : m.get h = m[k].get h := rfl
 
 def fromList (l : List (α × β)) : Map α β :=
@@ -69,6 +71,9 @@ lemma empty_get : (@Map.empty α β)[k] = none := by rfl
 
 lemma update_get_skip (h : k ≠ k') (h₁ : m[k] = some v) :
   (m[k'] ←ₘ v')[k] = some v := by simp [update, h, getElem_def ▸ h₁]
+
+lemma update_get_next (h : k ≠ k') :
+  (m[k] ←ₘ v)[k'] = m[k'] := by simp [update, h.symm]
 
 -- Membership lemmas.
 lemma mem_def : (x ∈ m) = m[x].isSome := rfl

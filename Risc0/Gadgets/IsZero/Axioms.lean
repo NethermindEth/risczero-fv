@@ -532,7 +532,7 @@ lemma part₄_updates_opaque {st : State} :
   (part₄_state_update (part₃_state st)).lastOutput = [y₁, y₂] := by
   simp [part₃_state_update, part₄_updates]
 
--- ****************************** WEAKEST PRE - Part₄ ******************************
+-- ****************************** WEAKEST PRE - Part₅ ******************************
 -- lemma is0_witness_part₄ {y₁ y₂ : Option Felt} (st : State) :
 --   let st' := MLIR.runProgram is0_witness₅ st
 --   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
@@ -543,7 +543,7 @@ lemma part₄_updates_opaque {st : State} :
 --   MLIR_statement
 --   simp
 --   rfl
--- ****************************** WEAKEST PRE - Part₄ ******************************
+-- ****************************** WEAKEST PRE - Part₅ ******************************
 
 def part₅_state_update (st : State) : State :=
   if State.felts st { name := "1 - arg1[0]" } = some 0 ∨ ¬{ name := "1 - arg1[0]" } ∈ st.felts
@@ -583,15 +583,14 @@ lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
 
   unfold part₀_state
   simp [State.updateFelts, Map.get!, Option.get!, Buffer.get!]
-  MLIR_states_simple
-  
+
   unfold part₁_state
   simp [
     State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple
+  MLIR_states_simple; simp only [Map.update_def.symm]
   
   unfold part₂_state
   simp [
@@ -599,76 +598,69 @@ lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple
+  MLIR_states_simple; simp only [Map.update_def.symm]
 
   unfold part₃_state
   simp [
     State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set
+    Option.isEqSome, List.set, Map.mem_def
   ]
-  MLIR_states_simple
-
+  MLIR_states_simple; simp only [Map.update_def.symm]
+  
   unfold part₄_state
   simp [
     State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple
-
+  MLIR_states_simple; simp only [Map.update_def.symm]
+  
   unfold part₅_state_update
   simp [
     State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple
+  MLIR_states_simple; simp only [Map.update_def.symm]
 
-  simp [State.felts, State.lastOutput, State.buffers, Option.get!, List.getLast!, List.get!]
-  MLIR_states_simple
+  MLIR_states_simple; simp only [Map.update_def.symm]
 
-  simp [Buffer.Idx.data, List.get!, Buffer.Idx.time]
+  rw [State.felts_if] <;> try rfl
+  simp [State.felts]
+  MLIR_states_simple; simp only [Map.update_def.symm]
 
-  simp [State.buffers, List.get!]
-  MLIR_states_simple
-  MLIR_states
-  -- unfold is0_witness_initial_state is0_initial_state
-  -- unfold part₀_state
-  -- MLIR_states_simple
-  -- simp
+  rw [State.buffers_if] <;> try rfl
+  simp [State.buffers]
+  MLIR_states_simple; simp only [Map.update_def.symm]
 
-  -- unfold part₁_state
-  -- MLIR_states_simple
-  -- simp
+  rw [State.bufferWidths_if] <;> try rfl
+  simp [State.bufferWidths]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.cycle_if] <;> try rfl
+  simp [State.cycle]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.isFailed_if] <;> try rfl
+  simp [State.isFailed]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.props_if] <;> try rfl
+  simp [State.props]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.vars_if] <;> try rfl
+  simp [State.vars]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
   
-  -- unfold part₂_state
-  -- MLIR_states_simple
-  -- simp 
+  rw [State.buffers_if] <;> try rfl
+  simp [State.buffers]
+  MLIR_states_simple; simp only [Map.update_def.symm]
 
-  -- unfold part₃_state
-  -- MLIR_states_simple
-  -- simp 
-
-  -- unfold part₄_state
-  -- MLIR_states_simple
-  -- simp 
-
-  -- unfold part₅_state_update
-  -- MLIR_states_simple
-  -- simp 
-
-  -- rfl
-
-  -- aesop
-
-  -- rw [part₀_updates]; unfold part₀_state_update
-  -- rw [part₁_updates]; unfold part₁_state_update
-  -- rw [part₂_updates]; unfold part₂_state_update
-  -- rw [part₃_updates]; unfold part₃_state_update
-  -- rw [part₄_updates]; unfold part₄_state_update
-  -- rw [part₅_updates]; unfold part₅_state_update
-  -- aesop
+  simp [List.getLast]
 
 -- set_option maxHeartbeats 2000000 in
 -- lemma is0_witness_closed_form {x y₁ y₂ : Felt} :
@@ -676,60 +668,5 @@ lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
 --   unfold is0_witness MLIR.runProgram; simp only
 --   rw [is0_witness_per_partes]
 --   sorry
-
-  -- Just playing around to see what's slow.
-  -- unfold is0_witness MLIR.runProgram
-  -- simp [is0_witness_initial_state, is0_initial_state]
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-  -- rw [MLIR.run_seq_def]
-  -- simp_op
-  -- MLIR_states
-  -- rw [MLIR.run_nondet]
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-  -- simp_op
-  -- -- MLIR_states
-  -- -- save
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_if] <;> all_goals try rfl
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-  -- simp_op
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_if] <;> all_goals try rfl
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-  
-
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_if]
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-  -- simp_op
-  -- MLIR_states
-  -- save
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-  -- save
-  -- rw [MLIR.run_seq_def]
-  -- rw [MLIR.run_ass_def]
-
-
-
-
-  -- simp
-  -- rw [MLIR.run_set_output]
-  -- rw [MLIR.run_if]
-  -- rw [MLIR.run_nondet]
-  -- rw [MLIR.run_eqz]
-  -- MLIR
-  -- MLIR_states
 
 end Risc0

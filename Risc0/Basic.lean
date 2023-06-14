@@ -240,6 +240,30 @@ lemma if_constraints {state₁ state₂ : State} {x : Felt} :
   (if x = 0 then state₁ else state₂).constraints =
   if x = 0 then state₁.constraints else state₂.constraints := by apply apply_ite
 
+lemma buffers_if {c} [Decidable c] {st st' : State} (h : st.buffers = st'.buffers) :
+  State.buffers (if c then st else st') = st.buffers := by aesop
+
+lemma bufferWidths_if {c} [Decidable c] {st st' : State} (h : st.bufferWidths = st'.bufferWidths) :
+  State.bufferWidths (if c then st else st') = st.bufferWidths := by aesop
+
+lemma constraints_if {c} [Decidable c] {st st' : State} (h : st.constraints = st'.constraints) :
+  State.constraints (if c then st else st') = st.constraints := by aesop
+
+lemma cycle_if {c} [Decidable c] {st st' : State} (h : st.cycle = st'.cycle) :
+  State.cycle (if c then st else st') = st.cycle := by aesop
+
+lemma felts_if {c} [Decidable c] {st st' : State} (h : st.felts = st'.felts) :
+  State.felts (if c then st else st') = st.felts := by aesop
+
+lemma isFailed_if {c} [Decidable c] {st st' : State} (h : st.isFailed = st'.isFailed) :
+  State.isFailed (if c then st else st') = st.isFailed := by aesop
+
+lemma props_if {c} [Decidable c] {st st' : State} (h : st.props = st'.props) :
+  State.props (if c then st else st') = st.props := by aesop
+
+lemma vars_if {c} [Decidable c] {st st' : State} (h : st.vars = st'.vars) :
+  State.vars (if c then st else st') = st.vars := by aesop
+
 end State
 
 end State
