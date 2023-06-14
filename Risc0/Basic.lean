@@ -147,6 +147,13 @@ def addBuffer (name: String) (buffer: Buffer): State :=
     vars := ⟨name⟩ :: st.vars
   }
 
+def hasFelts (felts: List (String × Felt)) : Prop :=
+  match felts with
+  | [] => True
+  | (name, value) :: fs =>
+    st.felts.get! ⟨name⟩ = value ∧
+    hasFelts fs
+
 def varsConsistent := ∀ var, var ∈ st.vars ↔ var ∈ st.buffers
 
 def cycleIsRows := ∀ var (h₁ : var ∈ st.buffers), (st.buffers.get h₁).length = st.cycle + 1

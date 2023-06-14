@@ -7,6 +7,7 @@ import Mathlib.Tactic.FieldSimp
 import Risc0.Basic
 import Risc0.Lemmas
 import Risc0.Wheels
+import Risc0.MlirTactics
 
 namespace Risc0.OneHot
 
@@ -116,13 +117,13 @@ namespace WitnessParts
 
 namespace Setup0
 
-def pre (st: State) (input : Felt) : Prop :=
+def pre (st : State) (input : Felt) : Prop :=
   st.Valid ∧
   (st.buffers.get! ⟨"input"⟩ |>.last!) = [some input] ∧
   (st.buffers.get! ⟨"output"⟩ |>.last!) = [none, none, none]
 
 def prog : MLIRProgram :=
--- %0 = cirgen.const 2
+  -- %0 = cirgen.const 2
   "2" ←ₐ .Const 2;
   -- %1 = cirgen.const 1
   "1" ←ₐ .Const 1;
@@ -131,14 +132,11 @@ def prog : MLIRProgram :=
   -- %3 = cirgen.get %arg0[0] back 0 : <1, constant>
   "input" ←ₐ .Get ⟨"input"⟩ 0 0
 
-lemma closed_form {input : Felt} (st: State) :
-  pre st input → (
-    (prog.run st).felts.get! ⟨"2"⟩ = 2 ∧
-    (prog.run st).felts.get! ⟨"1"⟩ = 1 ∧
-    (prog.run st).felts.get! ⟨"0"⟩ = 0 ∧
-    (prog.run st).felts.get! ⟨"input"⟩ = input
-  ) := by
-  sorry
+def post (st: State) (input : Felt) : Prop :=
+  st.Valid ∧
+  st.hasFelts [("0", 0), ("1", 1), ("2", 2), ("input", input)] ∧
+  (st.buffers.get! ⟨"input"⟩ |>.last!) = [some input] ∧
+  (st.buffers.get! ⟨"output"⟩ |>.last!) = [none, none, none]
   
 end Setup0
 
