@@ -6,6 +6,7 @@ namespace Risc0.OneHot.Code
 
 open MLIRNotation
 
+-- TODO move to constraints folder and changes namespace to .Witness.Code not .Code.Witness
 def constraints : MLIRProgram :=
   --     %0 = cirgen.const 1  
   "1" ←ₐ C 1;
@@ -180,7 +181,9 @@ def part₇ : MLIRProgram :=
    -- %16 = cirgen.mul %5 : <default>, %15 : <default>
   "output[2] <= 1" ←ₐ .Mul ⟨"output[2]"⟩ ⟨"1 - Output[2]"⟩;
    -- cirgen.eqz %16 : <default>
-  ?₀ ⟨"output[2] <= 1"⟩;
+  ?₀ ⟨"output[2] <= 1"⟩
+
+def part₈ : MLIRProgram :=
    -- %17 = cirgen.add %14 : <default>, %5 : <default>
   "outputSum" ←ₐ .Add ⟨"output[0]AddOutput[1]"⟩ ⟨"output[2]"⟩;
    -- %18 = cirgen.sub %17 : <default>, %1 : <default>
@@ -189,13 +192,13 @@ def part₇ : MLIRProgram :=
   ?₀ ⟨"outputSum - 1"⟩
 
 abbrev parts_combined : MLIRProgram :=
-  part₀; part₁; part₂; part₃; part₄; part₅; part₆; part₇
+  part₀; part₁; part₂; part₃; part₄; part₅; part₆; part₇; part₈
 
 lemma parts_combine {st: State} :
   Γ st ⟦full⟧ =
   Γ st ⟦parts_combined⟧ := by
   unfold full parts_combined
-    part₀ part₁ part₂ part₃ part₄ part₅ part₆ part₇
+    part₀ part₁ part₂ part₃ part₄ part₅ part₆ part₇ part₈
   simp [MLIR.seq_assoc, MLIR.run_seq_def, MLIR.nondet_blocks_split]
 
 end Witness

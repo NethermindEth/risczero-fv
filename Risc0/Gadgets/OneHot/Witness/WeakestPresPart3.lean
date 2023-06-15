@@ -1,6 +1,7 @@
 import Risc0.Basic
 import Risc0.MlirTactics
 import Risc0.Gadgets.OneHot.Witness.Code
+import Risc0.Gadgets.OneHot.Witness.WeakestPresPart2
 
 namespace Risc0.OneHot.WP
 
@@ -151,14 +152,14 @@ def part₃_state (st: State) : State := ((st["output[1]"] ←ₛ
 
 -- Run the program from part₃ onwards by using part₃_state rather than Witness.part₃
 def part₃_state_update (st: State): State :=
-  Γ (part₃_state st) ⟦Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇⟧
+  Γ (part₃_state st) ⟦Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈⟧
 
 -- ****************************** WEAKEST PRE - Part₃ ******************************
 lemma part₃_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
-  (MLIR.runProgram (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) st).lastOutput = [y₁, y₂, y₃] ↔
+  (MLIR.runProgram (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₃_state_update st).lastOutput = [y₁, y₂, y₃] := by
   unfold MLIR.runProgram; simp only
-  generalize eq : (Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) = prog
+  generalize eq : (Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) = prog
   unfold Witness.part₃
   MLIR
   rewrite [←eq]
@@ -169,11 +170,16 @@ lemma part₃_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
 
 -- Prove that substituting part₃_state for Witness.part₃ produces the same result
 lemma part₃_updates {y₁ y₂ y₃: Option Felt} (st : State) :
-  (MLIR.runProgram (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) st).lastOutput = [y₁, y₂, y₃] ↔
+  (MLIR.runProgram (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₃_state_update st).lastOutput = [y₁, y₂, y₃] := by
   simp only [part₃_state, part₃_state_update, MLIR.runProgram]
   unfold Witness.part₃
   MLIR
+
+lemma part₃_updates_opaque {st : State} : 
+  (part₂_state_update st).lastOutput = [y₁, y₂, y₃] ↔
+  (part₃_state_update (part₂_state st)).lastOutput = [y₁, y₂, y₃] := by
+  simp [part₂_state_update, part₃_updates]
 
 end Witness
 

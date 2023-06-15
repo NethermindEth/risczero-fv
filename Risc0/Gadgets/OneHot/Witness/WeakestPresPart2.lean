@@ -1,6 +1,7 @@
 import Risc0.Basic
 import Risc0.MlirTactics
 import Risc0.Gadgets.OneHot.Witness.Code
+import Risc0.Gadgets.OneHot.Witness.WeakestPresPart1
 
 namespace Risc0.OneHot.WP
 
@@ -45,14 +46,14 @@ def part₂_state (st: State) : State := State.set!
 
 -- Run the program from part₂ onwards by using part₂_state rather than Witness.part₂
 def part₂_state_update (st: State): State :=
-  Γ (part₂_state st) ⟦Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇⟧
+  Γ (part₂_state st) ⟦Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈⟧
 
 -- ****************************** WEAKEST PRE - Part₂ ******************************
 lemma part₂_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
-  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) st).lastOutput = [y₁, y₂, y₃] ↔
+  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₂_state_update st).lastOutput = [y₁, y₂, y₃] := by
   unfold MLIR.runProgram; simp only
-  generalize eq : (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) = prog
+  generalize eq : (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) = prog
   unfold Witness.part₂
   MLIR
   rewrite [←eq]
@@ -62,12 +63,17 @@ lemma part₂_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
 
 -- Prove that substituting part₂_state for Witness.part₂ produces the same result
 lemma part₂_updates {y₁ y₂ y₃: Option Felt} (st : State) :
-  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) st).lastOutput = [y₁, y₂, y₃] ↔
+  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₂_state_update st).lastOutput = [y₁, y₂, y₃] := by
   simp only [part₂_state, part₂_state_update, MLIR.runProgram]
   unfold Witness.part₂
   MLIR
   rfl
+
+lemma part₂_updates_opaque {st : State} : 
+  (part₁_state_update st).lastOutput = [y₁, y₂, y₃] ↔
+  (part₂_state_update (part₁_state st)).lastOutput = [y₁, y₂, y₃] := by
+  simp [part₁_state_update, part₂_updates]
 
 end Witness
 
