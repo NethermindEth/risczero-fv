@@ -45,23 +45,24 @@ def part₂_state (st: State) : State := State.set!
 
 -- Run the program from part₂ onwards by using part₂_state rather than Witness.part₂
 def part₂_state_update (st: State): State :=
-  Γ (part₂_state st) ⟦Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆⟧
+  Γ (part₂_state st) ⟦Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇⟧
 
 -- ****************************** WEAKEST PRE - Part₂ ******************************
 lemma part₂_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
-  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆) st).lastOutput = [y₁, y₂, y₃] ↔
-  State.lastOutput (part₂_state_update st) = [y₁, y₂, y₃] := by
+  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) st).lastOutput = [y₁, y₂, y₃] ↔
+  (part₂_state_update st).lastOutput = [y₁, y₂, y₃] := by
   unfold MLIR.runProgram; simp only
-  generalize eq : (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆) = prog
+  generalize eq : (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) = prog
   unfold Witness.part₂
   MLIR
   rewrite [←eq]
+  unfold part₂_state_update part₂_state
   rfl
 -- ****************************** WEAKEST PRE - Part₂ ******************************
 
 -- Prove that substituting part₂_state for Witness.part₂ produces the same result
 lemma part₂_updates {y₁ y₂ y₃: Option Felt} (st : State) :
-  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆) st).lastOutput = [y₁, y₂, y₃] ↔
+  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₂_state_update st).lastOutput = [y₁, y₂, y₃] := by
   simp only [part₂_state, part₂_state_update, MLIR.runProgram]
   unfold Witness.part₂

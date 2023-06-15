@@ -10,3 +10,4 @@ import Risc0.Gadgets.OneHot.Witness.WeakestPresPart0
 import Risc0.Gadgets.OneHot.Witness.WeakestPresPart1
 import Risc0.Gadgets.OneHot.Witness.WeakestPresPart2
 import Risc0.Gadgets.OneHot.Witness.WeakestPresPart3
+import Risc0.Gadgets.OneHot.Witness.WeakestPresPart4

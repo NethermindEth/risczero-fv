@@ -142,7 +142,9 @@ def part₃ : MLIRProgram :=
    -- %4 = cirgen.get %arg1[1] back 0 : <3, mutable>
   "output[1]" ←ₐ .Get ⟨"output"⟩ 0 1;
    -- %5 = cirgen.get %arg1[2] back 0 : <3, mutable>
-  "output[2]" ←ₐ .Get ⟨"output"⟩ 0 2;
+  "output[2]" ←ₐ .Get ⟨"output"⟩ 0 2
+
+def part₄ : MLIRProgram :=
    -- %6 = cirgen.mul %5 : <default>, %0 : <default>
   "output[2] * 2" ←ₐ .Mul ⟨"output[2]"⟩ ⟨"2"⟩;
    -- %7 = cirgen.add %4 : <default>, %6 : <default>
@@ -152,7 +154,7 @@ def part₃ : MLIRProgram :=
    -- cirgen.eqz %8 : <default>
   ?₀ ⟨"2*output[2]+output[1] - input"⟩
 
-def part₄ : MLIRProgram :=
+def part₅ : MLIRProgram :=
   -- %9 = cirgen.get %arg1[0] back 0 : <3, mutable>
   "output[0]" ←ₐ .Get ⟨"output"⟩ 0 0;
    -- %10 = cirgen.sub %1 : <default>, %9 : <default>
@@ -162,7 +164,7 @@ def part₄ : MLIRProgram :=
    -- cirgen.eqz %11 : <default>
   ?₀ ⟨"output[0] <= 1"⟩
 
-def part₅ : MLIRProgram :=
+def part₆ : MLIRProgram :=
   -- %12 = cirgen.sub %1 : <default>, %4 : <default>
   "1 - Output[1]" ←ₐ .Sub ⟨"1"⟩ ⟨"output[1]"⟩;
    -- %13 = cirgen.mul %4 : <default>, %12 : <default>
@@ -170,7 +172,7 @@ def part₅ : MLIRProgram :=
    -- cirgen.eqz %13 : <default>
   ?₀ ⟨"output[1] <= 1"⟩
 
-def part₆ : MLIRProgram :=
+def part₇ : MLIRProgram :=
    -- %14 = cirgen.add %9 : <default>, %4 : <default>
   "output[0]AddOutput[1]" ←ₐ .Add ⟨"output[0]"⟩ ⟨"output[1]"⟩;
    -- %15 = cirgen.sub %1 : <default>, %5 : <default>
@@ -187,13 +189,13 @@ def part₆ : MLIRProgram :=
   ?₀ ⟨"outputSum - 1"⟩
 
 abbrev parts_combined : MLIRProgram :=
-  part₀; part₁; part₂; part₃; part₄; part₅; part₆
+  part₀; part₁; part₂; part₃; part₄; part₅; part₆; part₇
 
 lemma parts_combine {st: State} :
   Γ st ⟦full⟧ =
   Γ st ⟦parts_combined⟧ := by
   unfold full parts_combined
-    part₀ part₁ part₂ part₃ part₄ part₅ part₆
+    part₀ part₁ part₂ part₃ part₄ part₅ part₆ part₇
   simp [MLIR.seq_assoc, MLIR.run_seq_def, MLIR.nondet_blocks_split]
 
 end Witness

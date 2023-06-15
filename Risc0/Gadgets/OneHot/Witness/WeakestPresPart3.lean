@@ -10,33 +10,170 @@ open Code
 namespace Witness
 
 -- The state obtained by running Witness.part₃ on st
-def part₃_state (st: State) : State := sorry
+def part₃_state (st: State) : State := ((st["output[1]"] ←ₛ
+              if
+                  0 ≤ st.cycle ∧
+                    { name := "output" } ∈ st.vars ∧
+                      1 < Map.get! st.bufferWidths { name := "output" } ∧
+                        Option.isSome
+                            (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1)) =
+                          true then
+                some
+                  (Lit.Val
+                    (Option.get! (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1))))
+              else none)["output[2]"] ←ₛ
+            if
+                0 ≤
+                    (st["output[1]"] ←ₛ
+                        if
+                            0 ≤ st.cycle ∧
+                              { name := "output" } ∈ st.vars ∧
+                                1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                  Option.isSome
+                                      (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                        (st.cycle - Back.toNat 0, 1)) =
+                                    true then
+                          some
+                            (Lit.Val
+                              (Option.get!
+                                (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1))))
+                        else none).cycle ∧
+                  { name := "output" } ∈
+                      (st["output[1]"] ←ₛ
+                          if
+                              0 ≤ st.cycle ∧
+                                { name := "output" } ∈ st.vars ∧
+                                  1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                    Option.isSome
+                                        (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                          (st.cycle - Back.toNat 0, 1)) =
+                                      true then
+                            some
+                              (Lit.Val
+                                (Option.get!
+                                  (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                    (st.cycle - Back.toNat 0, 1))))
+                          else none).vars ∧
+                    2 <
+                        Map.get!
+                          (st["output[1]"] ←ₛ
+                              if
+                                  0 ≤ st.cycle ∧
+                                    { name := "output" } ∈ st.vars ∧
+                                      1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                        Option.isSome
+                                            (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                              (st.cycle - Back.toNat 0, 1)) =
+                                          true then
+                                some
+                                  (Lit.Val
+                                    (Option.get!
+                                      (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                        (st.cycle - Back.toNat 0, 1))))
+                              else none).bufferWidths
+                          { name := "output" } ∧
+                      Option.isSome
+                          (Buffer.get!
+                            (Map.get!
+                              (st["output[1]"] ←ₛ
+                                  if
+                                      0 ≤ st.cycle ∧
+                                        { name := "output" } ∈ st.vars ∧
+                                          1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                            Option.isSome
+                                                (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                  (st.cycle - Back.toNat 0, 1)) =
+                                              true then
+                                    some
+                                      (Lit.Val
+                                        (Option.get!
+                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                            (st.cycle - Back.toNat 0, 1))))
+                                  else none).buffers
+                              { name := "output" })
+                            ((st["output[1]"] ←ₛ
+                                    if
+                                        0 ≤ st.cycle ∧
+                                          { name := "output" } ∈ st.vars ∧
+                                            1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                              Option.isSome
+                                                  (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                                    (st.cycle - Back.toNat 0, 1)) =
+                                                true then
+                                      some
+                                        (Lit.Val
+                                          (Option.get!
+                                            (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                              (st.cycle - Back.toNat 0, 1))))
+                                    else none).cycle -
+                                Back.toNat 0,
+                              2)) =
+                        true then
+              some
+                (Lit.Val
+                  (Option.get!
+                    (Buffer.get!
+                      (Map.get!
+                        (st["output[1]"] ←ₛ
+                            if
+                                0 ≤ st.cycle ∧
+                                  { name := "output" } ∈ st.vars ∧
+                                    1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                      Option.isSome
+                                          (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                            (st.cycle - Back.toNat 0, 1)) =
+                                        true then
+                              some
+                                (Lit.Val
+                                  (Option.get!
+                                    (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                      (st.cycle - Back.toNat 0, 1))))
+                            else none).buffers
+                        { name := "output" })
+                      ((st["output[1]"] ←ₛ
+                              if
+                                  0 ≤ st.cycle ∧
+                                    { name := "output" } ∈ st.vars ∧
+                                      1 < Map.get! st.bufferWidths { name := "output" } ∧
+                                        Option.isSome
+                                            (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                              (st.cycle - Back.toNat 0, 1)) =
+                                          true then
+                                some
+                                  (Lit.Val
+                                    (Option.get!
+                                      (Buffer.get! (Map.get! st.buffers { name := "output" })
+                                        (st.cycle - Back.toNat 0, 1))))
+                              else none).cycle -
+                          Back.toNat 0,
+                        2))))
+            else none)
 
 -- Run the program from part₃ onwards by using part₃_state rather than Witness.part₃
 def part₃_state_update (st: State): State :=
-  Γ (part₃_state st) ⟦Witness.part₄; Witness.part₅; Witness.part₆⟧
+  Γ (part₃_state st) ⟦Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇⟧
 
 -- ****************************** WEAKEST PRE - Part₃ ******************************
 lemma part₃_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
-  (MLIR.runProgram (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆) st).lastOutput = [y₁, y₂, y₃] ↔
-  State.lastOutput (part₃_state_update st) = [y₁, y₂, y₃] := by
+  (MLIR.runProgram (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) st).lastOutput = [y₁, y₂, y₃] ↔
+  (part₃_state_update st).lastOutput = [y₁, y₂, y₃] := by
   unfold MLIR.runProgram; simp only
-  generalize eq : (Witness.part₄; Witness.part₅; Witness.part₆) = prog
+  generalize eq : (Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) = prog
   unfold Witness.part₃
   MLIR
   rewrite [←eq]
+  unfold part₃_state_update part₃_state
   rfl
--- ****************************** WEAKEST PRE - Part₁ ******************************
+-- ****************************** WEAKEST PRE - Part₃ ******************************
 
 
 -- Prove that substituting part₃_state for Witness.part₃ produces the same result
 lemma part₃_updates {y₁ y₂ y₃: Option Felt} (st : State) :
-  (MLIR.runProgram (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆) st).lastOutput = [y₁, y₂, y₃] ↔
+  (MLIR.runProgram (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₃_state_update st).lastOutput = [y₁, y₂, y₃] := by
   simp only [part₃_state, part₃_state_update, MLIR.runProgram]
   unfold Witness.part₃
   MLIR
-  rfl
 
 end Witness
 

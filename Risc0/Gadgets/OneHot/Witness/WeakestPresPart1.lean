@@ -59,12 +59,13 @@ def part₁_state_update (st: State): State :=
 -- ****************************** WEAKEST PRE - Part₁ ******************************
 lemma part₁_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
   (MLIR.runProgram (Witness.part₁; Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆) st).lastOutput = [y₁, y₂, y₃] ↔
-  State.lastOutput (part₁_state_update st) = [y₁, y₂, y₃] := by
+  (part₁_state_update st).lastOutput = [y₁, y₂, y₃] := by
   unfold MLIR.runProgram; simp only
   generalize eq : (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆) = prog
   unfold Witness.part₁
   MLIR
   rewrite [←eq]
+  unfold part₁_state_update part₁_state
   rfl
 -- ****************************** WEAKEST PRE - Part₁ ******************************
 
