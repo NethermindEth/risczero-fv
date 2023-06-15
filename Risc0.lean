@@ -5,4 +5,5 @@ import Risc0.Map
 import Risc0.Wheels
 import Risc0.Gadgets.IsZero.Axioms
 import Risc0.Gadgets.IsZero.Proofs
-import Risc0.Gadgets.OneHot.Axioms
+import Risc0.Gadgets.OneHot.Code
+import Risc0.Gadgets.OneHot.WeakestPres

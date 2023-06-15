@@ -59,22 +59,22 @@ lemma run_if {x : FeltVar} :
 lemma run_eqz {x : FeltVar} :
   Γ st ⟦@MLIR.Eqz α x⟧ = withEqZero st.felts[x]!.get! st := rfl
 
-lemma run_valid_get {st: State} {name: String} {x y: Option Lit} {back offset : ℕ} 
-  (h_cycle: back ≤ st.cycle) (h_vars: ⟨name⟩ ∈ st.vars)
-  (h_offset: offset < st.bufferWidths.get! ⟨name⟩)
-  (h_value: ((st.buffers.get! ⟨name⟩).get! (st.cycle - Back.toNat back, offset)).isSome = true) :
-  (
-    st[name] := if
-      back ≤ st.cycle ∧
-      ⟨name⟩ ∈ st.vars ∧
-      offset < st.bufferWidths.get! ⟨name⟩ ∧
-      Option.isSome (Buffer.get! (st.buffers.get! ⟨name⟩) (st.cycle - Back.toNat back, offset)) = true
-    then x
-    else y
-  )
-  =
-  (st[name] := x) := by
-  aesop
+-- lemma run_valid_get {st: State} {name: String} {x y: Option Lit} {back offset : ℕ} 
+--   (h_cycle: back ≤ st.cycle) (h_vars: ⟨name⟩ ∈ st.vars)
+--   (h_offset: offset < st.bufferWidths.get! ⟨name⟩)
+--   (h_value: ((st.buffers.get! ⟨name⟩).get! (st.cycle - Back.toNat back, offset)).isSome = true) :
+--   (
+--     st[name] ←ₛ if
+--       back ≤ st.cycle ∧
+--       ⟨name⟩ ∈ st.vars ∧
+--       offset < st.bufferWidths.get! ⟨name⟩ ∧
+--       Option.isSome (Buffer.get! (st.buffers.get! ⟨name⟩) (st.cycle - Back.toNat back, offset)) = true
+--     then x
+--     else y
+--   )
+--   =
+--   (st[name] ←ₛ x) := by
+--   aesop
 
 lemma seq_assoc : Γ state ⟦p₁; (p₂; p₃)⟧ = Γ state ⟦(p₁; p₂); p₃⟧ := by simp [run_seq_def]
 

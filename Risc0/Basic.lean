@@ -143,8 +143,8 @@ def empty : State :=
 
 def addBuffer (name: String) (buffer: Buffer): State :=
   { st with
-    buffers := st.buffers[⟨name⟩] := buffer,
-    bufferWidths := st.bufferWidths[⟨name⟩] := buffer.last!.length,
+    buffers := st.buffers[⟨name⟩] ←ₘ buffer,
+    bufferWidths := st.bufferWidths[⟨name⟩] ←ₘ buffer.last!.length,
     vars := ⟨name⟩ :: st.vars
   }
 
