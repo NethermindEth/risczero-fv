@@ -112,6 +112,8 @@ lemma is0_witness_per_partes_initial {input} :
     ⟦is0_witness₀; is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅⟧ :=
   is0_witness_per_partes
 
+abbrev is0_constraints_prog_return := "if other cond"
+
 def is0_constraints_prog : MLIRProgram :=
   "1"         ←ₐ C 1; 
   "0"         ←ₐ C 0;
@@ -136,13 +138,15 @@ def is0_constraints_prog : MLIRProgram :=
   -- %10 = cirgen.and_eqz %1, %9 : <default>
   "other cond" ←ₐ ⟨"true"⟩ &₀ ⟨"x * out[1] - 1"⟩; 
   -- %11 = cirgen.and_cond %5, %6 : <default>, %10
-  "if other cond" ←ₐ guard ⟨"1 - out[0]"⟩ & ⟨"if out[0] then eqz x"⟩ with ⟨"other cond"⟩ 
+  is0_constraints_prog_return ←ₐ guard ⟨"1 - out[0]"⟩ & ⟨"if out[0] then eqz x"⟩ with ⟨"other cond"⟩ 
 
 def is0_constraints (st : State) : BufferAtTime := 
   is0_constraints_prog.runProgram st |>.lastOutput
 
+abbrev State.is0ConstraintsProps (st : State) := st |>.constraintsInVar ⟨is0_constraints_prog_return⟩
+
 def is0_constraints_initial (input : Felt) (output : List (Option Felt)) : Prop :=
-  is0_constraints_prog.runProgram (is0_initial_state input output) |>.props ⟨"if other cond"⟩ |>.getD True
+  is0_constraints_prog.runProgram (is0_initial_state input output) |>.is0ConstraintsProps
 
 def is0_constraints₀ : MLIRProgram :=
   "1"         ←ₐ C 1; 
@@ -192,6 +196,11 @@ lemma is0_constraints_per_partes {st : State} :
          is0_constraints₃
          is0_constraints₄
   simp [MLIR.run_seq_def] -- Lazy :)  
+
+lemma is0_constraints_per_partes_initial {input} :
+  Γ (is0_witness_initial_state input) ⟦is0_constraints_prog⟧ =
+  Γ (is0_witness_initial_state input) ⟦is0_constraints_program_full⟧ :=
+  is0_constraints_per_partes
 
 section tactics
 
@@ -440,8 +449,8 @@ lemma part₂_updates_opaque {st : State} :
 def part₃_state (st : State) : State :=
   if State.felts st { name := "arg1[0]" } = some 0 ∨ ¬{ name := "arg1[0]" } ∈ st.felts then st
   else if h : { name := "x" } ∈ st.felts
-        then withEqZero (Option.get (State.felts st { name := "x" }) h) st
-        else st
+       then withEqZero (Option.get (State.felts st { name := "x" }) h) st
+       else st
 
 def part₃_state_update (st : State) : State :=
   Γ (part₃_state st) ⟦is0_witness₄; is0_witness₅⟧
@@ -620,6 +629,8 @@ lemma part₅_updates_opaque {st : State} :
 
 --   simp [List.getLast]
 
+namespace constraints
+
 -- ****************************** WEAKEST PRE - Part₀ ******************************
 -- lemma is0_witness_part₀ {st : State} {y₁ y₂ : Option Felt} :
 --   is0_constraints st = [y₁, y₂] ↔ _ := by
@@ -632,34 +643,106 @@ lemma part₅_updates_opaque {st : State} :
 --   rfl
 -- ****************************** WEAKEST PRE - Part₀ ******************************
 
-/-
-⊢ ∀ {st : State} {y₁ y₂ : Option Felt},
-  is0_constraints st = [y₁, y₂] ↔
-    State.lastOutput
-        (Γ
-           ⟦is0_constraints₁; is0_constraints₂; is0_constraints₃; is0_constraints₄⟧) =
-      [y₁, y₂]
--/
-
-namespace constraints
-
 def part₀_state (st : State) : State :=
   ((st["1"] ←ₛ some (Lit.Val 1))["0"] ←ₛ some (Lit.Val 0))["true"] ←ₛ some (Lit.Constraint True)
 
 def part₀_state_update (st : State) : State :=
   Γ (part₀_state st) ⟦is0_constraints₁; is0_constraints₂; is0_constraints₃; is0_constraints₄⟧
 
-lemma part₀_updates {y₁ y₂ : Option Felt} (st : State) :
-  (MLIR.runProgram (is0_constraints₀; is0_constraints₁; is0_constraints₂; is0_constraints₃; is0_constraints₄) st).lastOutput = [y₁, y₂] ↔
-  (part₀_state_update st).lastOutput = [y₁, y₂] := by
+lemma part₀_updates {st : State} :
+  (MLIR.runProgram (is0_constraints₀; is0_constraints₁; is0_constraints₂; is0_constraints₃; is0_constraints₄) st).is0ConstraintsProps ↔
+  (part₀_state_update st).is0ConstraintsProps := by
   simp only [part₀_state, part₀_state_update, MLIR.runProgram]
   unfold is0_constraints₀
   MLIR
 
+-- ****************************** WEAKEST PRE - Part₁ ******************************
+lemma is0_witness_part₁ {st : State} {y₁ y₂ : Option Felt} :
+  let st' := MLIR.runProgram (is0_constraints₁; is0_constraints₂; is0_constraints₃; is0_constraints₄) st
+  st'.is0ConstraintsProps ↔ _ := by
+  unfold MLIR.runProgram; simp only
+  generalize eq : (is0_constraints₂; is0_constraints₃; is0_constraints₄) = prog
+  unfold is0_constraints₁
+  MLIR
+  rewrite [←eq]
+  simp
+  rfl
+-- ****************************** WEAKEST PRE - Part₁ ******************************
+
+def part₁_state (st : State) : State := sorry
+
+def part₁_state_update (st : State) : State :=
+  Γ (part₁_state st) ⟦is0_constraints₂; is0_constraints₃; is0_constraints₄⟧
+
+lemma part₁_updates {st : State} :
+  (MLIR.runProgram (is0_constraints₁; is0_constraints₂; is0_constraints₃; is0_constraints₄) st).is0ConstraintsProps ↔
+  (part₁_state_update st).is0ConstraintsProps := sorry
+
+-- ****************************** WEAKEST PRE - Part₂ ******************************
+-- lemma is0_witness_part₀ {st : State} {y₁ y₂ : Option Felt} :
+--   is0_constraints st = [y₁, y₂] ↔ _ := by
+--   unfold is0_constraints MLIR.runProgram; simp only
+--   rewrite [is0_constraints_per_partes]; unfold is0_constraints_program_full
+--   generalize eq : (is0_constraints₁; is0_constraints₂; is0_constraints₃; is0_constraints₄) = prog
+--   unfold is0_constraints₀
+--   MLIR
+--   rewrite [←eq]
+--   rfl
+-- ****************************** WEAKEST PRE - Part₂ ******************************
+
+def part₂_state (st : State) : State := sorry
+
+def part₂_state_update (st : State) : State :=
+  Γ (part₂_state st) ⟦is0_constraints₃; is0_constraints₄⟧
+
+lemma part₂_updates {st : State} :
+  (MLIR.runProgram (is0_constraints₂; is0_constraints₃; is0_constraints₄) st).is0ConstraintsProps ↔
+  (part₂_state_update st).is0ConstraintsProps := sorry
+
+-- ****************************** WEAKEST PRE - Part₃ ******************************
+-- lemma is0_witness_part₀ {st : State} {y₁ y₂ : Option Felt} :
+--   is0_constraints st = [y₁, y₂] ↔ _ := by
+--   unfold is0_constraints MLIR.runProgram; simp only
+--   rewrite [is0_constraints_per_partes]; unfold is0_constraints_program_full
+--   generalize eq : (is0_constraints₁; is0_constraints₂; is0_constraints₃; is0_constraints₄) = prog
+--   unfold is0_constraints₀
+--   MLIR
+--   rewrite [←eq]
+--   rfl
+-- ****************************** WEAKEST PRE - Part₃ ******************************
+
+def part₃_state (st : State) : State := sorry
+
+def part₃_state_update (st : State) : State :=
+  Γ (part₃_state st) ⟦is0_constraints₄⟧
+
+lemma part₃_updates {st : State} :
+  (MLIR.runProgram (is0_constraints₃; is0_constraints₄) st).is0ConstraintsProps ↔
+  (part₃_state_update st).is0ConstraintsProps := sorry
+
+-- ****************************** WEAKEST PRE - Part₄ ******************************
+-- lemma is0_witness_part₀ {st : State} {y₁ y₂ : Option Felt} :
+--   is0_constraints st = [y₁, y₂] ↔ _ := by
+--   unfold is0_constraints MLIR.runProgram; simp only
+--   rewrite [is0_constraints_per_partes]; unfold is0_constraints_program_full
+--   generalize eq : (is0_constraints₁; is0_constraints₂; is0_constraints₃; is0_constraints₄) = prog
+--   unfold is0_constraints₀
+--   MLIR
+--   rewrite [←eq]
+--   rfl
+-- ****************************** WEAKEST PRE - Part₄ ******************************
+
+def part₄_state_update (st : State) : State := sorry
+
+lemma part₄_updates {st : State} :
+  (MLIR.runProgram (is0_constraints₃; is0_constraints₄) st).is0ConstraintsProps ↔
+  (part₄_state_update st).is0ConstraintsProps := sorry
+
 lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Option Felt} :
     is0_constraints_initial x ([y₁, y₂]) ↔
     (if 1 - y₁.get! = 0 then if y₁.get! = 0 then True else x = 0 else (if y₁.get! = 0 then True else x = 0) ∧ x * y₂.get! - 1 = 0) := by    
-  -- unfold is0_constraints
+  unfold is0_constraints_initial MLIR.runProgram; simp only [is0_constraints_per_partes]
+  rw [part₀_updates]
   -- simp [MLIR.runProgram, is0_initial_state]
 
   -- MLIR_statement

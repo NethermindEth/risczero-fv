@@ -167,6 +167,9 @@ def init (numInput numOutput : ℕ)
 def lastOutput (st : State) :=
   st.buffers ⟨Output⟩ |>.get!.getLast!
 
+def constraintsInVar (st : State) (var : PropVar) :=
+  st.props var |>.getD True
+
 -- Only used to prove State inhabited, since it initialises both input and output as write-only
 def init_default (numInput numOutput : ℕ) : State :=
   init numInput numOutput
@@ -356,7 +359,6 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
   match op with
     -- Constants
     | Const const => .some <| .Val const
-    | True        => .some <| .Constraint _root_.True
     -- Arith
     | Add lhs rhs => .some <| .Val <| (st.felts lhs).get! + (st.felts rhs).get!
     | Sub lhs rhs => .some <| .Val <| (st.felts lhs).get! - (st.felts rhs).get!
@@ -377,6 +379,7 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
             if (st.felts cond).get! = 0
             then _root_.True
             else (st.props inner).get!
+    | True                   => .some <| .Constraint _root_.True
     -- Buffers
     | Alloc size          => .some <| .Buf <| List.replicate size .none
     | Back buf back       => .some <| .Buf <| (List.get! (st.buffers.get! buf) st.cycle).slice 0 back
