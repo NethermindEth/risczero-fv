@@ -78,6 +78,9 @@ lemma run_eqz {x : FeltVar} :
 
 lemma seq_assoc : Γ state ⟦p₁; (p₂; p₃)⟧ = Γ state ⟦(p₁; p₂); p₃⟧ := by simp [run_seq_def]
 
+lemma nondet_blocks_split : Γ state ⟦nondet (s₁; s₂)⟧ = Γ state ⟦nondet s₁; nondet s₂⟧ := by
+  simp [run_nondet, run_seq_def]
+
 end MLIR
 
 end WithMLIR 

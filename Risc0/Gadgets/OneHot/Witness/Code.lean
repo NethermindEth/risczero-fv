@@ -1,9 +1,3 @@
--- import Mathlib.Data.Nat.Prime
--- import Mathlib.Data.Vector
--- import Mathlib.Data.ZMod.Defs
--- import Mathlib.Data.ZMod.Basic
--- import Mathlib.Tactic.FieldSimp
-
 import Risc0.Basic
 import Risc0.Lemmas
 import Risc0.Wheels
@@ -126,7 +120,13 @@ def part₁ : MLIRProgram :=
      --   %20 = cirgen.sub %3 : <default>, %1 : <default>
     "input - 1" ←ₐ .Sub ⟨"input"⟩ ⟨"1"⟩;
      --   %21 = cirgen.isz %20 : <default>
-    "input == 1" ←ₐ ??₀⟨"input - 1"⟩;
+    "input == 1" ←ₐ ??₀⟨"input - 1"⟩
+     -- }
+  )
+
+def part₂ : MLIRProgram :=
+   -- cirgen.nondet {
+  nondet (
      --   cirgen.set %arg1 : <3, mutable>[1] = %21 : <default>
     ⟨"output"⟩[1] ←ᵢ ⟨"input == 1"⟩;
      --   %22 = cirgen.sub %3 : <default>, %0 : <default>
@@ -138,7 +138,7 @@ def part₁ : MLIRProgram :=
      -- }
   )
 
-def part₂ : MLIRProgram :=
+def part₃ : MLIRProgram :=
    -- %4 = cirgen.get %arg1[1] back 0 : <3, mutable>
   "output[1]" ←ₐ .Get ⟨"output"⟩ 0 1;
    -- %5 = cirgen.get %arg1[2] back 0 : <3, mutable>
@@ -152,7 +152,7 @@ def part₂ : MLIRProgram :=
    -- cirgen.eqz %8 : <default>
   ?₀ ⟨"2*output[2]+output[1] - input"⟩
 
-def part₃ : MLIRProgram :=
+def part₄ : MLIRProgram :=
   -- %9 = cirgen.get %arg1[0] back 0 : <3, mutable>
   "output[0]" ←ₐ .Get ⟨"output"⟩ 0 0;
    -- %10 = cirgen.sub %1 : <default>, %9 : <default>
@@ -162,7 +162,7 @@ def part₃ : MLIRProgram :=
    -- cirgen.eqz %11 : <default>
   ?₀ ⟨"output[0] <= 1"⟩
 
-def part₄ : MLIRProgram :=
+def part₅ : MLIRProgram :=
   -- %12 = cirgen.sub %1 : <default>, %4 : <default>
   "1 - Output[1]" ←ₐ .Sub ⟨"1"⟩ ⟨"output[1]"⟩;
    -- %13 = cirgen.mul %4 : <default>, %12 : <default>
@@ -170,7 +170,7 @@ def part₄ : MLIRProgram :=
    -- cirgen.eqz %13 : <default>
   ?₀ ⟨"output[1] <= 1"⟩
 
-def part₅ : MLIRProgram :=
+def part₆ : MLIRProgram :=
    -- %14 = cirgen.add %9 : <default>, %4 : <default>
   "output[0]AddOutput[1]" ←ₐ .Add ⟨"output[0]"⟩ ⟨"output[1]"⟩;
    -- %15 = cirgen.sub %1 : <default>, %5 : <default>
@@ -187,14 +187,14 @@ def part₅ : MLIRProgram :=
   ?₀ ⟨"outputSum - 1"⟩
 
 abbrev parts_combined : MLIRProgram :=
-  part₀; part₁; part₂; part₃; part₄; part₅
+  part₀; part₁; part₂; part₃; part₄; part₅; part₆
 
 lemma parts_combine {st: State} :
   Γ st ⟦full⟧ =
   Γ st ⟦parts_combined⟧ := by
   unfold full parts_combined
-    part₀ part₁ part₂ part₃ part₄ part₅
-  simp [MLIR.seq_assoc, MLIR.run_seq_def]
+    part₀ part₁ part₂ part₃ part₄ part₅ part₆
+  simp [MLIR.seq_assoc, MLIR.run_seq_def, MLIR.nondet_blocks_split]
 
 end Witness
 
