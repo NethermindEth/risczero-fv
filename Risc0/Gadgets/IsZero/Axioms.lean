@@ -238,6 +238,34 @@ elab "MLIR_state" : tactic => do
 elab "MLIR_states" : tactic => do
   evalTactic <| ← `(tactic| repeat MLIR_state)
 
+-- private lemma run_set_enforce_aux {st : State} (h : val ∈ st.felts) :
+--   Γ st ⟦buf[offset] ←ᵢ val⟧ = st.set! buf offset (st.felts[val].get h) := by
+--   simp [State.update, MLIR.run]
+--   rw [Map.mem_def, Map.getElem_def, Option.isSome_iff_exists] at h; rcases h with ⟨w, h⟩
+--   simp [h]
+
+-- private lemma run_set_enforce_aux! {st : State} (h : val ∈ st.felts) :
+--   Γ st ⟦buf[offset] ←ᵢ val⟧ = st.set! buf offset st.felts[val].get! := by
+--   simp [State.update, MLIR.run]
+--   rw [Map.mem_def, Map.getElem_def, Option.isSome_iff_exists] at h; rcases h with ⟨w, h⟩
+--   simp [h]
+
+-- elab "MLIR_statement" : tactic => do
+--   evalTactic <| ← `(
+--     tactic| (
+--       rewrite [MLIR.run_seq_def]
+--       repeat (
+--         first
+--         | rewrite [MLIR.run_ass_def]
+--         | (rewrite [run_set_enforce_aux!] <;> try decide_mem_map)
+--         | rewrite [MLIR.run_if']
+--         | rewrite [MLIR.run_nondet]
+--         | rewrite [MLIR.run_eqz']
+--       )
+--       simp_op
+--     )
+--   )
+
 elab "MLIR_statement" : tactic => do
   evalTactic <| ← `(
     tactic| (
@@ -246,9 +274,9 @@ elab "MLIR_statement" : tactic => do
         first
         | rewrite [MLIR.run_ass_def]
         | rewrite [MLIR.run_set_def]
-        | rewrite [MLIR.run_if']
+        | rewrite [MLIR.run_if]
         | rewrite [MLIR.run_nondet]
-        | rewrite [MLIR.run_eqz']
+        | rewrite [MLIR.run_eqz]
       )
       simp_op
     )
@@ -258,7 +286,8 @@ elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
   )
-
+  evalTactic <| ← `(tactic| try simp)
+  
 -- elab "MLIR_statement" : tactic => do
 --   evalTactic <| ← `(
 --     tactic| (
@@ -318,6 +347,8 @@ lemma part₀_updates {y₁ y₂ : Option Felt} (st : State) :
   unfold is0_witness₀
   MLIR
 
+-- example {st : State} {x : Felt} : (st["isZeroBit"] ←ₛ Option.some (.Val x)).felts {name := "isZeroBit"} = _ := by
+
 -- ****************************** WEAKEST PRE - Part₁ ******************************
 -- lemma is0_witness_part₁ {y₁ y₂ : Option Felt} (st : State) :
 --   let st' := MLIR.runProgram (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) st
@@ -325,70 +356,18 @@ lemma part₀_updates {y₁ y₂ : Option Felt} (st : State) :
 --   unfold MLIR.runProgram; simp only
 --   generalize eq : (is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
 --   unfold is0_witness₁
---   MLIR_statement
---   MLIR_statement
---   MLIR_statement
---   MLIR_statement
---   simp only [State.update_val]
---   MLIR_states_simple
---   generalize update₀ : (λ x => 
---                         if x = { name := "isZeroBit" }
---                         then some (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0)
---                         else State.felts st x) = feltmap₀
---   generalize eq₄ : ({ buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
---                         cycle := st.cycle,
---                         felts := feltmap₀,
---                         isFailed := st.isFailed, props := st.props, vars := st.vars } : State) = jibadiba
---   have tit : jibadiba = State.updateFelts st "isZeroBit" (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0) := by
---     rw [←eq₄, ←update₀]
---     congr
---   generalize eq₂ : State.set! jibadiba { name := "output" } 0
---                      (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0) = podajiba
---   generalize update₁ : (λ x =>
---                         if x = { name := "invVal" }
---                         then some (match State.felts podajiba { name := "x" } with
---                                       | some x => if x = 0 then 0 else x⁻¹
---                                       | x => default)
---                         else State.felts podajiba x) = feltmap₁
---   generalize eq₃ :
---     ({ buffers := podajiba.buffers, bufferWidths := podajiba.bufferWidths, constraints := podajiba.constraints,
---        cycle := podajiba.cycle,
---        felts := feltmap₁,
---        isFailed := podajiba.isFailed, props := podajiba.props, vars := podajiba.vars } : State) = st₀
---   have : st₀ = State.updateFelts podajiba "invVal" (match State.felts podajiba { name := "x" } with
---                                       | some x => if x = 0 then 0 else x⁻¹
---                                       | x => default) := by
---     rw [←eq₃, ←update₁]
---     congr
---   rw [this, ←eq₂, tit]
+--   MLIR
 --   rewrite [←eq]
 --   rfl
 -- ****************************** WEAKEST PRE - Part₁ ******************************
 
 def part₁_state (st : State) : State :=
-  State.set! (State.updateFelts (State.set! (State.updateFelts st "isZeroBit"
-    (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
-    { name := "output" } 0 (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
-      "invVal"
-      (match
-        State.felts
-          (State.set!
-            (State.updateFelts st "isZeroBit"
-              (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
-            { name := "output" } 0 (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
-          { name := "x" } with
-      | some x => if x = 0 then 0 else x⁻¹
-      | _ => default))
-    { name := "output" } 1
-    (match
-      State.felts
-        (State.set!
-          (State.updateFelts st "isZeroBit"
-            (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
-          { name := "output" } 0 (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0))
-        { name := "x" } with
-    | some x => if x = 0 then 0 else x⁻¹
-    | _ => default)
+  State.set! (State.updateFelts (State.set! (State.updateFelts st
+    { name := "isZeroBit" }
+    (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0)) { name := "output" } 0
+    (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0)) { name := "invVal" }
+    (if Option.get! st.felts[({ name := "x" } : FeltVar)]! = 0 then 0 else (Option.get! st.felts[({ name := "x" } : FeltVar)]!)⁻¹)) { name := "output" } 1
+    (if Option.get! st.felts[({ name := "x" } : FeltVar)]! = 0 then 0 else (Option.get! st.felts[({ name := "x" } : FeltVar)]!)⁻¹)
 
 def part₁_state_update (st : State) : State :=
   Γ (part₁_state st) ⟦is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅⟧
@@ -396,13 +375,11 @@ def part₁_state_update (st : State) : State :=
 lemma part₁_updates {y₁ y₂ : Option Felt} (st : State) :
   (MLIR.runProgram (is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) st).lastOutput = [y₁, y₂] ↔
   (part₁_state_update st).lastOutput = [y₁, y₂] := by
-  simp only [MLIR.runProgram]
+  simp only [MLIR.runProgram, part₁_state_update]
   generalize eq : (is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅) = prog
   unfold is0_witness₁ 
   MLIR
-  simp only [State.update_val', State.updateFelts, Map.update]
-  unfold part₁_state_update
-  aesop
+  rfl
 
 lemma part₁_updates_opaque {st : State} : 
   (part₀_state_update st).lastOutput = [y₁, y₂] ↔
@@ -447,10 +424,9 @@ lemma part₂_updates_opaque {st : State} :
 -- ****************************** WEAKEST PRE - Part₃ ******************************
 
 def part₃_state (st : State) : State :=
-  if State.felts st { name := "arg1[0]" } = some 0 ∨ ¬{ name := "arg1[0]" } ∈ st.felts then st
-  else if h : { name := "x" } ∈ st.felts
-       then withEqZero (Option.get (State.felts st { name := "x" }) h) st
-       else st
+  if Option.get! st.felts[({ name := "arg1[0]" } : FeltVar)]! = 0
+  then st
+  else withEqZero (Option.get! st.felts[({ name := "x" } : FeltVar)]!) st
 
 def part₃_state_update (st : State) : State :=
   Γ (part₃_state st) ⟦is0_witness₄; is0_witness₅⟧
@@ -458,7 +434,7 @@ def part₃_state_update (st : State) : State :=
 lemma part₃_updates {y₁ y₂ : Option Felt} (st : State) :
   (MLIR.runProgram (is0_witness₃; is0_witness₄; is0_witness₅) st).lastOutput = [y₁, y₂] ↔
   (part₃_state_update st).lastOutput = [y₁, y₂] := by
-  simp only [part₃_state, MLIR.runProgram, part₃_state_update]
+  unfold part₃_state_update part₃_state MLIR.runProgram
   generalize eq : (is0_witness₄; is0_witness₅) = prog
   unfold is0_witness₃
   MLIR
@@ -500,27 +476,25 @@ lemma part₄_updates_opaque {st : State} :
   simp [part₃_state_update, part₄_updates]
 
 -- ****************************** WEAKEST PRE - Part₅ ******************************
--- lemma is0_witness_part₄ {y₁ y₂ : Option Felt} (st : State) :
+-- lemma is0_witness_part₅ {y₁ y₂ : Option Felt} (st : State) :
 --   let st' := MLIR.runProgram is0_witness₅ st
 --   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
 --   unfold MLIR.runProgram; simp only
 --   unfold is0_witness₅
---   MLIR_statement
---   MLIR_statement
---   MLIR_statement
---   simp
+--   MLIR
+--   simp [State.updateFelts]
 --   rfl
 -- ****************************** WEAKEST PRE - Part₅ ******************************
 
 def part₅_state_update (st : State) : State :=
-  if State.felts st { name := "1 - arg1[0]" } = some 0 ∨ ¬{ name := "1 - arg1[0]" } ∈ st.felts
-  then st
+  if Option.get! st.felts[({ name := "1 - arg1[0]" } : FeltVar)]! = 0 then st
   else st["arg1[1]"] ←ₛ
-    if 0 ≤ st.cycle ∧ { name := "output" } ∈ st.vars ∧
-       1 < Map.get! st.bufferWidths { name := "output" } ∧
-       Option.isSome (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1)) = true
-    then some (Lit.Val (Option.get! (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1))))
-    else none
+  if 0 ≤ st.cycle ∧
+     { name := "output" } ∈ st.vars ∧
+     1 < Map.get! st.bufferWidths { name := "output" } ∧
+     Option.isSome (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1)) = true
+  then some (Lit.Val (Option.get! (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1))))
+  else none
 
 def part₅_updates {y₁ y₂ : Option Felt} (st : State) :
   (MLIR.runProgram is0_witness₅ st).lastOutput = [y₁, y₂] ↔
@@ -528,106 +502,119 @@ def part₅_updates {y₁ y₂ : Option Felt} (st : State) :
   simp only [MLIR.runProgram, part₅_state_update]
   unfold is0_witness₅
   MLIR
-  MLIR_states_simple
-  rfl
+  aesop
 
 lemma part₅_updates_opaque {st : State} : 
   (part₄_state_update st).lastOutput = [y₁, y₂] ↔
   (part₅_state_update (part₄_state st)).lastOutput = [y₁, y₂] := by
   simp [part₄_state_update, part₅_updates]
 
--- lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
+-- lemma is0_witness_closed_form_WAGH! {x : Felt} {y₁ y₂ : Option Felt} :
 --   is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
---   unfold is0_witness_initial MLIR.runProgram; simp only [is0_witness_per_partes]
---   rewrite [part₀_updates]
---   rewrite [part₁_updates_opaque]
---   rewrite [part₂_updates_opaque]
---   rewrite [part₃_updates_opaque]
---   rewrite [part₄_updates_opaque]
---   rewrite [part₅_updates_opaque]
-
---   unfold is0_witness_initial_state is0_initial_state
-
---   unfold part₀_state
---   simp [State.updateFelts, Map.get!, Option.get!, Buffer.get!]
-
---   unfold part₁_state
---   simp [
---     State.updateFelts, Map.get!, Option.get!, Buffer.get!,
---     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
---     Option.isEqSome, List.set
---   ]
---   MLIR_states_simple; simp only [Map.update_def.symm]
+--   unfold is0_witness_initial MLIR.runProgram is0_witness_prog is0_witness_initial_state is0_initial_state
+--   MLIR_statement; simp
+--   MLIR_statement; simp
   
---   unfold part₂_state
---   simp [
---     State.updateFelts, Map.get!, Option.get!, Buffer.get!,
---     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
---     Option.isEqSome, List.set
---   ]
---   MLIR_states_simple; simp only [Map.update_def.symm]
-
---   unfold part₃_state
---   simp [
---     State.updateFelts, Map.get!, Option.get!, Buffer.get!,
---     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
---     Option.isEqSome, List.set, Map.mem_def
---   ]
---   MLIR_states_simple; simp only [Map.update_def.symm]
+--   MLIR_statement
+--   MLIR_statement
   
---   unfold part₄_state
---   simp [
---     State.updateFelts, Map.get!, Option.get!, Buffer.get!,
---     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
---     Option.isEqSome, List.set
---   ]
---   MLIR_states_simple; simp only [Map.update_def.symm]
   
---   unfold part₅_state_update
---   simp [
---     State.updateFelts, Map.get!, Option.get!, Buffer.get!,
---     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
---     Option.isEqSome, List.set
---   ]
---   MLIR_states_simple; simp only [Map.update_def.symm]
 
---   MLIR_states_simple; simp only [Map.update_def.symm]
-
---   rw [State.felts_if] <;> try rfl
---   simp [State.felts]
---   MLIR_states_simple; simp only [Map.update_def.symm]
-
---   rw [State.buffers_if] <;> try rfl
---   simp [State.buffers]
---   MLIR_states_simple; simp only [Map.update_def.symm]
-
---   rw [State.bufferWidths_if] <;> try rfl
---   simp [State.bufferWidths]
---   MLIR_states_simple; simp only [Map.update_def.symm]
-
---   rw [State.cycle_if] <;> try rfl
---   simp [State.cycle]
---   MLIR_states_simple; simp only [Map.update_def.symm]
-
---   rw [State.isFailed_if] <;> try rfl
---   simp [State.isFailed]
---   MLIR_states_simple; simp only [Map.update_def.symm]
-
---   rw [State.props_if] <;> try rfl
---   simp [State.props]
---   MLIR_states_simple; simp only [Map.update_def.symm]
-
---   rw [State.vars_if] <;> try rfl
---   simp [State.vars]
---   MLIR_states_simple; simp only [Map.update_def.symm]
-
---   simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
   
---   rw [State.buffers_if] <;> try rfl
---   simp [State.buffers]
---   MLIR_states_simple; simp only [Map.update_def.symm]
 
---   simp [List.getLast]
+
+lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
+  is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
+  unfold is0_witness_initial MLIR.runProgram; simp only [is0_witness_per_partes]
+  rewrite [part₀_updates]
+  rewrite [part₁_updates_opaque]
+  rewrite [part₂_updates_opaque]
+  rewrite [part₃_updates_opaque]
+  rewrite [part₄_updates_opaque]
+  rewrite [part₅_updates_opaque]
+
+  unfold is0_witness_initial_state is0_initial_state
+
+  unfold part₀_state
+  simp [State.updateFelts, Map.get!, Option.get!, Buffer.get!]
+
+  unfold part₁_state
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+  
+  unfold part₂_state
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+  
+  unfold part₃_state
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set, Map.mem_def
+  ]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+  
+  unfold part₄_state
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  unfold part₅_state_update
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.felts_if] <;> try rfl
+  simp [State.felts]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.buffers_if] <;> try rfl
+  simp [State.buffers]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.bufferWidths_if] <;> try rfl
+  simp [State.bufferWidths]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.cycle_if] <;> try rfl
+  simp [State.cycle]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.isFailed_if] <;> try rfl
+  simp [State.isFailed]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.props_if] <;> try rfl
+  simp [State.props]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  rw [State.vars_if] <;> try rfl
+  simp [State.vars]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
+  
+  rw [State.buffers_if] <;> try rfl
+  simp [State.buffers]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  simp [List.getLast]
 
 namespace constraints
 

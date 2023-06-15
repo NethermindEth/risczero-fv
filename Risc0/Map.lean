@@ -57,6 +57,10 @@ def fromList (l : List (α × β)) : Map α β :=
 lemma getElem_def : m[k] = m k := rfl
 
 @[simp]
+lemma get!_def [Inhabited β] : get! (m[k] ←ₘ v) k = v := by
+  simp [get!, update, Option.get!]
+
+@[simp]
 lemma fromList_nil : fromList ([] : List (α × β)) = Map.empty := rfl
 
 @[simp]
@@ -65,6 +69,9 @@ lemma fromList_cons {l : List (α × β)} :
 
 @[simp]
 lemma update_get : (m[k] ←ₘ v)[k] = v := by simp [update]
+
+@[simp]
+lemma update_get! : (m[k] ←ₘ v)[k]! = v := by simp [update, getElem!]
 
 @[simp]
 lemma empty_get : (@Map.empty α β)[k] = none := by rfl
