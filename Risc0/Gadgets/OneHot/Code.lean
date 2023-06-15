@@ -192,7 +192,9 @@ abbrev parts_combined : MLIRProgram :=
 lemma parts_combine {st: State} :
   Γ st ⟦full⟧ =
   Γ st ⟦parts_combined⟧ := by
-  sorry
+  unfold full parts_combined
+    part₀ part₁ part₂ part₃ part₄ part₅
+  simp [MLIR.seq_assoc, MLIR.run_seq_def]
 
 end Witness
 

@@ -24,7 +24,7 @@ def part₀_state (st: State) : State :=
   )
 
 -- ****************************** WEAKEST PRE - Part₀ ******************************
-lemma is0_witness_part₀ {st : State} {y₁ y₂ y₃ : Option Felt} :
+lemma part₀_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
   Witness.run st = [y₁, y₂, y₃] ↔
   State.lastOutput (Γ (part₀_state st) ⟦Witness.part₁; Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅⟧) = [y₁, y₂, y₃] := by
   unfold Witness.run MLIR.runProgram; simp only
