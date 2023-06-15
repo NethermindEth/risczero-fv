@@ -325,3 +325,15 @@ theorem witness_implies_constraints {input : Felt} {output : BufferAtTime} :
   simp [constraints_closed_form, witness_closed_form]
 
 end Risc0.OneHot
+
+
+-- notes
+-- start with _ as weakest pre
+-- split the program into subprograms
+-- prove evaluating concatenation of subprograms is same as full using seq assoc
+-- initially do _ weakest pre for everything but generalize all but first
+-- use MLIR and copy the state changes
+
+-- from then run from the next part and repeat
+-- create state_update def
+-- weakest pre branch
