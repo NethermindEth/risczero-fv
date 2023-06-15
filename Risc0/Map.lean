@@ -13,13 +13,13 @@ variable {α : Type} [DecidableEq α] {β : Type}
 def empty : Map α β := λ _ => none
 
 def update (m : Map α β) (k : α) (v : β) : Map α β :=
-  λ x => if x = k then v else m x
+  λ x => if x = k then some v else m x
 
 end Map
 
 end Map
 
-notation:61 m "[" k:61 "]" " := " v:49 => Map.update m k v
+notation:61 m "[" k:61 "]" " ←ₘ " v:49 => Map.update m k v
 
 section Map.Instances
 
@@ -42,42 +42,54 @@ variable {α : Type} [DecidableEq α] {β : Type}
 
 def get (h : k ∈ m) := m[k].get h
 
-def get! [Inhabited β] (k : α) := m[k].get!
+def get! [Inhabited β] (m : Map α β) (k : α) := m[k].get!
+
+lemma update_def : update m k v = λ x => if x = k then some v else m x := rfl
 
 lemma get_def (h : k ∈ m) : m.get h = m[k].get h := rfl
 
 def fromList (l : List (α × β)) : Map α β :=
   match l with
     | [] => Map.empty
-    | (k, v) :: xs => Map.update (Map.fromList xs) k v
+    | (k, v) :: xs => (Map.fromList xs)[k] ←ₘ v
 
 @[simp]
 lemma getElem_def : m[k] = m k := rfl
+
+@[simp]
+lemma get!_def [Inhabited β] : get! (m[k] ←ₘ v) k = v := by
+  simp [get!, update, Option.get!]
 
 @[simp]
 lemma fromList_nil : fromList ([] : List (α × β)) = Map.empty := rfl
 
 @[simp]
 lemma fromList_cons {l : List (α × β)} :
-  fromList ((k, v) :: l) = Map.update (Map.fromList l) k v := rfl
+  fromList ((k, v) :: l) = (Map.fromList l)[k] ←ₘ v := rfl
 
 @[simp]
-lemma update_get : (m[k] := v)[k] = v := by simp [update]
+lemma update_get : (m[k] ←ₘ v)[k] = v := by simp [update]
+
+@[simp]
+lemma update_get! : (m[k] ←ₘ v)[k]! = v := by simp [update, getElem!]
 
 @[simp]
 lemma empty_get : (@Map.empty α β)[k] = none := by rfl
 
 lemma update_get_skip (h : k ≠ k') (h₁ : m[k] = some v) :
-  (m[k'] := v')[k] = some v := by simp [update, h, getElem_def ▸ h₁]
+  (m[k'] ←ₘ v')[k] = some v := by simp [update, h, getElem_def ▸ h₁]
+
+lemma update_get_next (h : k ≠ k') :
+  (m[k] ←ₘ v)[k'] = m[k'] := by simp [update, h.symm]
 
 -- Membership lemmas.
 lemma mem_def : (x ∈ m) = m[x].isSome := rfl
 
 @[simp]
-lemma mem_update_self : k ∈ m[k] := v := by
+lemma mem_update_self : k ∈ m[k] ←ₘ v := by
   rw [mem_def, Option.isSome_iff_exists, update_get]; use v
 
-lemma mem_skip (h : k ∈ m) : k ∈ m[k'] := v := by simp [mem_def, update]; aesop
+lemma mem_skip (h : k ∈ m) : k ∈ m[k'] ←ₘ v := by simp [mem_def, update]; aesop
 
 @[simp]
 lemma not_mem_empty : k ∉ @empty α β :=
@@ -86,7 +98,7 @@ lemma not_mem_empty : k ∉ @empty α β :=
 @[simp]
 lemma not_empty_eq_some : ¬Option.isSome (@empty α β var) = true := not_mem_empty
 
-lemma mem_update_of_ne (h : k ≠ k') (h₁ : k ∈ m[k'] := v) : k ∈ m := by
+lemma mem_update_of_ne (h : k ≠ k') (h₁ : k ∈ m[k'] ←ₘ v) : k ∈ m := by
   rw [mem_def] at *; unfold update at h₁; aesop
 
 lemma mem_fromList {l : List (α × β)} : k ∈ fromList l ↔ k ∈ l.map Prod.fst := by
@@ -100,8 +112,11 @@ lemma mem_fromList {l : List (α × β)} : k ∈ fromList l ↔ k ∈ l.map Prod
           aesop
         }
 
-lemma mem_unroll_assignment : k ∈ m[k'] := v ↔ (k = k' ∨ k ∈ m) := by
+lemma mem_unroll_assignment : k ∈ m[k'] ←ₘ v ↔ (k = k' ∨ k ∈ m) := by
   simp [update, mem_def]; aesop
+
+lemma not_mem_iff_none : k ∉ m ↔ m[k] = none := by
+  rw [mem_def]; aesop; rwa [Option.isNone_iff_eq_none] at a
 
 end Map
 
