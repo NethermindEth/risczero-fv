@@ -6,6 +6,8 @@ namespace Risc0.OneHot.WP.Witness
 
 def start_state (input: Felt) (st: State) :=
   st.WellFormed ∧
+  ⟨"input"⟩ ∈ st.vars ∧
+  ⟨"output"⟩ ∈ st.vars ∧
   (st.buffers.get! ⟨"input"⟩).last! = [some input] ∧
   (st.buffers.get! ⟨"output"⟩).last! = [none, none, none]
 
@@ -28,7 +30,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
 
   unfold part₀_state
   simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    h_pre, State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
@@ -36,7 +38,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
 
   unfold part₁_state
   simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    h_pre, State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
@@ -44,7 +46,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
 
   unfold part₂_state
   simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    h_pre, State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
@@ -52,7 +54,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
 
   unfold part₃_state
   simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    h_pre, State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
@@ -60,7 +62,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
 
   unfold part₄_state
   simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    h_pre, State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
@@ -68,7 +70,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
 
   unfold part₅_state
   simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    h_pre, State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
@@ -76,7 +78,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
 
   unfold part₆_state
   simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    h_pre, State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
@@ -84,7 +86,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
 
   unfold part₇_state
   simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    h_pre, State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
@@ -92,7 +94,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
 
   unfold part₈_state
   simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    h_pre, State.updateFelts, Map.get!, Option.get!, Buffer.get!,
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
@@ -101,39 +103,39 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
   MLIR_states_simple; simp only [Map.update_def.symm]
 
   rw [State.felts_if] <;> try rfl
-  simp [State.felts]
+  simp [h_pre, State.felts]
   MLIR_states_simple; simp only [Map.update_def.symm]
 
   rw [State.buffers_if] <;> try rfl
-  simp [State.buffers]
+  simp [h_pre, State.buffers]
   MLIR_states_simple; simp only [Map.update_def.symm]
 
   rw [State.bufferWidths_if] <;> try rfl
-  simp [State.bufferWidths]
+  simp [h_pre, State.bufferWidths]
   MLIR_states_simple; simp only [Map.update_def.symm]
 
   rw [State.cycle_if] <;> try rfl
-  simp [State.cycle]
+  simp [h_pre, State.cycle]
   MLIR_states_simple; simp only [Map.update_def.symm]
 
   rw [State.isFailed_if] <;> try rfl
-  simp [State.isFailed]
+  simp [h_pre, State.isFailed]
   MLIR_states_simple; simp only [Map.update_def.symm]
 
   rw [State.props_if] <;> try rfl
-  simp [State.props]
+  simp [h_pre, State.props]
   MLIR_states_simple; simp only [Map.update_def.symm]
 
   rw [State.vars_if] <;> try rfl
-  simp [State.vars]
+  simp [h_pre, State.vars]
   MLIR_states_simple; simp only [Map.update_def.symm]
 
-  simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
+  simp [h_pre, State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
   
   rw [State.buffers_if] <;> try rfl
-  simp [State.buffers]
+  simp [h_pre, State.buffers]
   MLIR_states_simple; simp only [Map.update_def.symm]
 
-  simp [List.getLast]
+  simp [h_pre, List.getLast]
 
 end Risc0.OneHot.WP.Witness
