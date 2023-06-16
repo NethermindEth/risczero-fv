@@ -3,14 +3,11 @@ import Risc0.MlirTactics
 import Risc0.Gadgets.OneHot.Witness.Code
 import Risc0.Gadgets.OneHot.Witness.WeakestPresPart1
 
-namespace Risc0.OneHot.WP
+namespace Risc0.OneHot.Witness.WP
 
 open MLIRNotation
-open Code
 
-namespace Witness
-
--- The state obtained by running Witness.part₂ on st
+-- The state obtained by running Code.part₂ on st
 def part₂_state (st: State) : State := State.set!
             (State.updateFelts
               (State.updateFelts
@@ -44,37 +41,27 @@ def part₂_state (st: State) : State := State.set!
               1
             else 0)
 
--- Run the program from part₂ onwards by using part₂_state rather than Witness.part₂
+-- Run the program from part₂ onwards by using part₂_state rather than Code.part₂
 def part₂_state_update (st: State): State :=
-  Γ (part₂_state st) ⟦Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈⟧
+  Γ (part₂_state st) ⟦Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈⟧
 
+-- Prove that substituting part₂_state for Code.part₂ produces the same result
 -- ****************************** WEAKEST PRE - Part₂ ******************************
 lemma part₂_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
-  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
+  (MLIR.runProgram (Code.part₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₂_state_update st).lastOutput = [y₁, y₂, y₃] := by
   unfold MLIR.runProgram; simp only
-  generalize eq : (Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) = prog
-  unfold Witness.part₂
+  generalize eq : (Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) = prog
+  unfold Code.part₂
   MLIR
   rewrite [←eq]
   unfold part₂_state_update part₂_state
   rfl
 -- ****************************** WEAKEST PRE - Part₂ ******************************
 
--- Prove that substituting part₂_state for Witness.part₂ produces the same result
-lemma part₂_updates {y₁ y₂ y₃: Option Felt} (st : State) :
-  (MLIR.runProgram (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
-  (part₂_state_update st).lastOutput = [y₁, y₂, y₃] := by
-  simp only [part₂_state, part₂_state_update, MLIR.runProgram]
-  unfold Witness.part₂
-  MLIR
-  rfl
-
 lemma part₂_updates_opaque {st : State} : 
   (part₁_state_update st).lastOutput = [y₁, y₂, y₃] ↔
   (part₂_state_update (part₁_state st)).lastOutput = [y₁, y₂, y₃] := by
-  simp [part₁_state_update, part₂_updates]
+  simp [part₁_state_update, part₂_wp]
 
-end Witness
-
-end Risc0.OneHot.WP
+end Risc0.OneHot.Witness.WP

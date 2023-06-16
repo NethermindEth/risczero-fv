@@ -3,14 +3,11 @@ import Risc0.MlirTactics
 import Risc0.Gadgets.OneHot.Witness.Code
 import Risc0.Gadgets.OneHot.Witness.WeakestPresPart4
 
-namespace Risc0.OneHot.WP
+namespace Risc0.OneHot.Witness.WP
 
 open MLIRNotation
-open Code
 
-namespace Witness
-
--- The state obtained by running Witness.part₅ on st
+-- The state obtained by running Code.part₅ on st
 def part₅_state (st: State) : State := {
           buffers :=
             (st["output[0]"] ←ₛ
@@ -392,41 +389,27 @@ def part₅_state (st: State) : State := {
                         (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 0))))
                 else none).vars }
 
--- Run the program from part₅ onwards by using part₅_state rather than Witness.part₅
+-- Run the program from part₅ onwards by using part₅_state rather than Code.part₅
 def part₅_state_update (st: State): State :=
-  Γ (part₅_state st) ⟦Witness.part₆; Witness.part₇; Witness.part₈⟧
+  Γ (part₅_state st) ⟦Code.part₆; Code.part₇; Code.part₈⟧
 
+-- Prove that substituting part₅_state for Code.part₅ produces the same result
 -- ****************************** WEAKEST PRE - Part₅ ******************************
 lemma part₅_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
-  (MLIR.runProgram (Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
+  (MLIR.runProgram (Code.part₅; Code.part₆; Code.part₇; Code.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₅_state_update st).lastOutput = [y₁, y₂, y₃] := by
   unfold MLIR.runProgram; simp only
-  generalize eq : (Witness.part₆; Witness.part₇; Witness.part₈) = prog
-  unfold Witness.part₅
+  generalize eq : (Code.part₆; Code.part₇; Code.part₈) = prog
+  unfold Code.part₅
   MLIR
   rewrite [←eq]
   unfold part₅_state_update part₅_state
   rfl
 -- ****************************** WEAKEST PRE - Part₅ ******************************
-
-
--- Prove that substituting part₅_state for Witness.part₅ produces the same result
-lemma part₅_updates {y₁ y₂ y₃: Option Felt} (st : State) :
-  (MLIR.runProgram (Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
-  (part₅_state_update st).lastOutput = [y₁, y₂, y₃] := by
-  unfold MLIR.runProgram; simp only
-  generalize eq : (Witness.part₆; Witness.part₇; Witness.part₈) = prog
-  unfold Witness.part₅
-  MLIR
-  rewrite [←eq]
-  unfold part₅_state_update part₅_state
-  rfl
 
 lemma part₅_updates_opaque {st : State} : 
   (part₄_state_update st).lastOutput = [y₁, y₂, y₃] ↔
-  (part₅_state_update (@part₄_state IsNondet.NotInNondet st)).lastOutput = [y₁, y₂, y₃] := by
-  simp [part₄_state_update, part₅_updates]
+  (part₅_state_update (part₄_state st)).lastOutput = [y₁, y₂, y₃] := by
+  simp [part₄_state_update, part₅_wp]
 
-end Witness
-
-end Risc0.OneHot.WP
+end Risc0.OneHot.Witness.WP
