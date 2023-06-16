@@ -152,20 +152,20 @@ def hasFelts (felts: List (String × Felt)) : Prop :=
   match felts with
   | [] => True
   | (name, value) :: fs =>
-    st.felts.get! ⟨name⟩ = value ∧
+    st.felts[(⟨name⟩ : FeltVar)]!.get! = value ∧
     hasFelts fs
 
 def varsConsistent := ∀ var, var ∈ st.vars ↔ var ∈ st.buffers
 
-def cycleIsRows := ∀ var (h₁ : var ∈ st.buffers), (st.buffers.get h₁).length = st.cycle + 1
+def cycleIsRows := ∀ var (h₁ : var ∈ st.buffers), (st.buffers[var].get h₁).length = st.cycle + 1
 
 def colsConsistent := ∀ var, var ∈ st.vars ↔ var ∈ st.bufferWidths
 
 def bufferLensConsistent :=
   ∀ var (h : var ∈ st.buffers) (h₁ : cycleIsRows st),
     ∀ row (h₂ : row ≤ st.cycle),
-      have : row < (st.buffers.get h).length := by rw [h₁]; linarith
-      st.bufferWidths var = (st.buffers.get h)[row].length
+      have : row < (st.buffers[var].get h).length := by rw [h₁]; linarith
+      st.bufferWidths var = (st.buffers[var].get h)[row].length
 
 structure WellFormed (st : State) : Prop := 
   -- Variable-names/keys of the buffers map are distinct.
@@ -220,7 +220,7 @@ lemma valid_init' : (init m n input output hIn hOut).WellFormed where
   distinct := by simp [init]
   hVars    := λ var => ⟨
       λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
-      λ h => by simp [init] at *; simp [Map.mem_def, Map.update] at h; split at h <;> aesop 
+      λ h => by simp [init] at *; simp [Map.mem_def, Map.update, Map.getElem_def] at h; split at h <;> aesop 
     ⟩ 
   hCycle   := λ var h =>
     by have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
@@ -228,7 +228,7 @@ lemma valid_init' : (init m n input output hIn hOut).WellFormed where
        rcases this with h | h <;> subst h <;> simp [Map.getElem_def] <;> rfl
   hCols    := λ var => ⟨
       λ h => by simp [init] at h; rcases h with h | h <;> subst h ; decide_mem_map,
-      λ h => by simp [init] at h ⊢; simp [Map.mem_def, Map.update] at h; aesop
+      λ h => by simp [init] at h ⊢; simp [Map.mem_def, Map.update, Map.getElem_def] at h; aesop
     ⟩ 
   hColsLen := valid_init'_aux
 
@@ -258,13 +258,20 @@ lemma updateFelts_def :
 @[simp]
 lemma updateFelts_felts_get {st : State} {name : FeltVar} {x : Felt} :
   (updateFelts st name x).felts[name]! = some x := by
-  simp [updateFelts, Map.update_def, getElem!]
+  simp [updateFelts, Map.update_def, Map.getElem_def, getElem!]
+
+-- TODO: This technically shouldn't exist, refine later?
+-- m[k] should not unfold to m k, yet there are instances in automated rewriting
+-- where this somehow occurs.
+@[simp]
+lemma updateFelts_felts_get_wobbly {st : State} {name : FeltVar} {x : Felt} :
+  (updateFelts st name x).felts name = some x := updateFelts_felts_get
 
 -- This simp lemma feels bad with name ≠ name' but somehow it works out in our context.
 @[simp]
 lemma updateFelts_felts_get_ne {st : State} {name name' : FeltVar} {x : Felt}
   (h : name ≠ name') : (updateFelts st name x).felts[name']! = st.felts[name']! := by
-  simp [updateFelts, Map.update_def, getElem!]
+  simp [updateFelts, Map.update_def, getElem!, Map.getElem_def]
   aesop
 
 @[simp]
@@ -424,14 +431,36 @@ def rowColOfWidthIdx (width idx : ℕ) : Back × ℕ := (idx / width, idx % widt
 
 lemma col_lt_width (h : 0 < width) : (rowColOfWidthIdx width idx).2 < width := Nat.mod_lt _ h
 
-abbrev Buffer.back (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
+def Buffer.back (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
   st.buffers[buf].get!.get! (st.cycle - back.toNat, offset)
 
-abbrev isGetValid (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
+lemma Buffer.back_def {st : State} {buf : BufferVar} {back : Back} :
+  Buffer.back st buf back offset = st.buffers[buf].get!.get! (st.cycle - back.toNat, offset) := rfl
+
+def isGetValid (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
   back ≤ st.cycle ∧
   buf ∈ st.vars ∧
-  offset < st.bufferWidths.get! buf ∧
+  offset < st.bufferWidths[buf].get! ∧
   (Buffer.back st buf back offset).isSome
+
+lemma isGetValid_def :
+  isGetValid st buf back offset = 
+  (back ≤ st.cycle ∧
+   buf ∈ st.vars ∧
+   offset < st.bufferWidths[buf].get! ∧
+   (Buffer.back st buf back offset).isSome) := rfl
+
+instance : Decidable (isGetValid st buf back offset) := by unfold isGetValid; exact inferInstance
+
+def getImpl (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
+  if isGetValid st buf back offset
+  then Option.some <| Lit.Val (Buffer.back st buf back offset).get!
+  else .none
+
+lemma getImpl_def : getImpl st buf back offset = 
+                    if isGetValid st buf back offset
+                    then Option.some <| Lit.Val (Buffer.back st buf back offset).get!
+                    else .none := rfl
 
 -- Evaluate a pure functional circuit.
 def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
@@ -456,15 +485,13 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
                                 else st.props[inner].get!
     | True                   => .some <| .Constraint _root_.True
     -- Buffers
-    | Alloc size          => .some <| .Buf <| List.replicate size .none
-    | Back buf back       => .some <| .Buf <| st.buffers[buf].get![st.cycle]!.slice 0 back
-    | Get buf back offset => if isGetValid st buf back offset
-                             then .some <| .Val (Buffer.back st buf back offset).get!
-                             else .none
+    | Alloc size           => .some <| .Buf <| List.replicate size .none
+    | Back buf back        => .some <| .Buf <| st.buffers[buf].get![st.cycle]!.slice 0 back
+    | Get buf back offset  => getImpl st buf back offset
     | GetGlobal buf offset => if buf ∈ st.vars
                               then
-                                let buffer := st.buffers.get! buf
-                                let bufferWidth := st.bufferWidths.get! buf
+                                let buffer := st.buffers[buf].get!
+                                let bufferWidth := st.bufferWidths[buf].get!
                                 let idx := Buffer.Idx.from1D offset bufferWidth -- the implementation of getGlobal steps directly into the 1D representation of whatever buffer it is passed
                                 let val := buffer.get! idx
                                 if idx.time < buffer.length ∧ val.isSome
@@ -497,8 +524,8 @@ lemma eval_true : Γ st ⟦@Op.True α⟧ₑ = .some (.Constraint (_root_.True))
 
 @[simp]
 lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
-  let val := (st.buffers.get! buf).get! ((st.cycle - back.toNat), offset)
-  if back ≤ st.cycle ∧ buf ∈ st.vars ∧ offset < st.bufferWidths.get! buf ∧ val.isSome
+  let val := (st.buffers[buf].get!).get! ((st.cycle - back.toNat), offset)
+  if back ≤ st.cycle ∧ buf ∈ st.vars ∧ offset < st.bufferWidths[buf].get! ∧ val.isSome
   then .some (.Val val.get!)
   else .none := rfl
 
@@ -563,12 +590,12 @@ abbrev withEqZero (x : Felt) (st : State) : State :=
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
 
 def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer.Idx) (val : Felt) : State :=
-  match (st.buffers.get! bufferVar).set? idx val with
+  match (st.buffers[bufferVar].get!).set? idx val with
     | .some b => {st with buffers := st.buffers[bufferVar] ←ₘ b}
     | .none   => {st with isFailed := true}
 
 def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
-  st.setBufferElementImpl bufferVar (((st.buffers.get! bufferVar).length - 1), offset) val
+  st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
 
 @[simp]
 lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val : Felt} :
@@ -577,7 +604,7 @@ lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val 
   aesop
 
 def State.setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
-  let width := st.bufferWidths.get! bufferVar
+  let width := st.bufferWidths[bufferVar].get!
   st.setBufferElementImpl bufferVar (Buffer.Idx.from1D offset width) val
 
 -- Step through the entirety of a `MLIR` MLIR program from initial state

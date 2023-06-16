@@ -11,38 +11,51 @@ open Code
 namespace Witness
 
 -- The state obtained by running Witness.part₂ on st
+-- def part₂_state (st: State) : State := State.set!
+--             (State.updateFelts
+--               (State.updateFelts
+--                 (State.set! st { name := "output" } 1 (st.felts.get! ⟨"input == 1"⟩))
+--                 { name := "input - 2" }
+--                 (Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" })))
+--               { name := "input == 2" }
+--               (if
+--                   Option.get!
+--                       (State.felts
+--                         (State.updateFelts
+--                           (State.set! st { name := "output" } 1 (st.felts.get! ⟨"input == 1"⟩))
+--                           { name := "input - 2" }
+--                           (Option.get! (State.felts st { name := "input" }) -
+--                             Option.get! (State.felts st { name := "2" })))
+--                         { name := "input - 2" }) =
+--                     0 then
+--                 1
+--               else 0))
+--             { name := "output" } 2
+--             (if
+--                 Option.get!
+--                     (State.felts
+--                       (State.updateFelts
+--                         (State.set! st { name := "output" } 1 (st.felts.get! ⟨"input == 1"⟩))
+--                         { name := "input - 2" }
+--                         (Option.get! (State.felts st { name := "input" }) -
+--                           Option.get! (State.felts st { name := "2" })))
+--                       { name := "input - 2" }) =
+--                   0 then
+--               1
+--             else 0)
+
 def part₂_state (st: State) : State := State.set!
-            (State.updateFelts
-              (State.updateFelts
-                (State.set! st { name := "output" } 1 (st.felts.get! ⟨"input == 1"⟩))
-                { name := "input - 2" }
-                (Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" })))
-              { name := "input == 2" }
-              (if
-                  Option.get!
-                      (State.felts
-                        (State.updateFelts
-                          (State.set! st { name := "output" } 1 (st.felts.get! ⟨"input == 1"⟩))
-                          { name := "input - 2" }
-                          (Option.get! (State.felts st { name := "input" }) -
-                            Option.get! (State.felts st { name := "2" })))
-                        { name := "input - 2" }) =
-                    0 then
-                1
-              else 0))
-            { name := "output" } 2
-            (if
-                Option.get!
-                    (State.felts
-                      (State.updateFelts
-                        (State.set! st { name := "output" } 1 (st.felts.get! ⟨"input == 1"⟩))
-                        { name := "input - 2" }
-                        (Option.get! (State.felts st { name := "input" }) -
-                          Option.get! (State.felts st { name := "2" })))
-                      { name := "input - 2" }) =
-                  0 then
-              1
-            else 0)
+  (State.updateFelts
+    (State.updateFelts (State.set! st { name := "output" } 1 (Option.get! st.felts[({ name := "input == 1" } : FeltVar)]!))
+      { name := "input - 2" }
+      (Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" })))
+    { name := "input == 2" }
+    (if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" }) = 0 then
+      1
+    else 0))
+  { name := "output" } 2
+  (if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" }) = 0 then 1
+  else 0)
 
 -- Run the program from part₂ onwards by using part₂_state rather than Witness.part₂
 def part₂_state_update (st: State): State :=
@@ -68,7 +81,6 @@ lemma part₂_updates {y₁ y₂ y₃: Option Felt} (st : State) :
   simp only [part₂_state, part₂_state_update, MLIR.runProgram]
   unfold Witness.part₂
   MLIR
-  rfl
 
 lemma part₂_updates_opaque {st : State} : 
   (part₁_state_update st).lastOutput = [y₁, y₂, y₃] ↔

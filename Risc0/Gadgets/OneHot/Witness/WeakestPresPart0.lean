@@ -11,17 +11,12 @@ namespace Witness
 
 -- The state obtained by running Witness.part₀ on st
 def part₀_state (st: State) : State :=
-  ((((st.updateFelts ⟨"2"⟩ 2).updateFelts ⟨"1"⟩ 1).updateFelts  ⟨"0"⟩ 0)["input"] ←ₛ
-    if
-      0 ≤ st.cycle ∧
-      ⟨"input"⟩ ∈ st.vars ∧
-      0 < st.bufferWidths.get! ⟨"input"⟩ ∧
-      ((st.buffers.get! ⟨"input"⟩).get! (st.cycle - Back.toNat 0, 0)).isSome = true
-    then
-      some (Lit.Val (((st.buffers.get! ⟨"input"⟩).get! (st.cycle - Back.toNat 0, 0)).get!))
-    else
-      none
-  )
+  (State.updateFelts
+    (State.updateFelts
+      (State.updateFelts st
+        { name := "2" } 2)
+        { name := "1" } 1)
+        { name := "0" } 0)["input"] ←ₛ getImpl st { name := "input" } 0 0
 
 -- Run the whole program by using part₀_state rather than Witness.part₀
 def part₀_state_update (st: State): State :=
