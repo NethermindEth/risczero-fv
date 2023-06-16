@@ -24,3 +24,4 @@ import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart3
 import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart4
 import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart5
 import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart6
+-- import Risc0.Gadgets.OneHot.Constraints.WeakestPreFull
