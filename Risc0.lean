@@ -20,3 +20,7 @@ import Risc0.Gadgets.OneHot.Constraints.Code
 import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart0
 import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart1
 import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart2
+import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart3
+import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart4
+import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart5
+import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart6
