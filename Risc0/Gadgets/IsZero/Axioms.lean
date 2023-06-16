@@ -418,7 +418,7 @@ lemma part₂_updates_opaque {st : State} :
 --   unfold MLIR.runProgram; simp only
 --   generalize eq : (is0_witness₄; is0_witness₅) = prog
 --   unfold is0_witness₃
---   MLIR_statement
+--   MLIR
 --   rewrite [←eq]
 --   rfl
 -- ****************************** WEAKEST PRE - Part₃ ******************************
@@ -450,7 +450,7 @@ lemma part₃_updates_opaque {st : State} :
 --   (st'.buffers ⟨"output"⟩ |>.get!.getLast!) = [y₁, y₂] ↔ _ := by
 --   unfold MLIR.runProgram; simp only
 --   unfold is0_witness₄
---   MLIR_statement
+--   MLIR
 --   rfl
 -- ****************************** WEAKEST PRE - Part₄ ******************************
 
@@ -496,7 +496,7 @@ def part₅_state_update (st : State) : State :=
   then some (Lit.Val (Option.get! (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1))))
   else none
 
-def part₅_updates {y₁ y₂ : Option Felt} (st : State) :
+theorem part₅_updates {y₁ y₂ : Option Felt} (st : State) :
   (MLIR.runProgram is0_witness₅ st).lastOutput = [y₁, y₂] ↔
   (part₅_state_update st).lastOutput = [y₁, y₂] := by
   simp only [MLIR.runProgram, part₅_state_update]
@@ -512,16 +512,13 @@ lemma part₅_updates_opaque {st : State} :
 -- lemma is0_witness_closed_form_WAGH! {x : Felt} {y₁ y₂ : Option Felt} :
 --   is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
 --   unfold is0_witness_initial MLIR.runProgram is0_witness_prog is0_witness_initial_state is0_initial_state
---   MLIR_statement; simp
---   MLIR_statement; simp
-  
 --   MLIR_statement
 --   MLIR_statement
-  
-  
-
-  
-
+--   MLIR_statement
+--   MLIR_statement
+--   MLIR_statement
+--   MLIR_statement; simp
+--   MLIR_statement; simp
 
 lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
   is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
