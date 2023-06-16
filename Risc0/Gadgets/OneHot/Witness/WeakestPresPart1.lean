@@ -65,6 +65,8 @@ lemma part₁_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
   generalize eq : (Witness.part₂; Witness.part₃; Witness.part₄; Witness.part₅; Witness.part₆; Witness.part₇; Witness.part₈) = prog
   unfold Witness.part₁
   MLIR
+  -- simp [State.set!, State.setBufferElementImpl, Buffer.set?, Option.isEqSome, Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data, List.get!]
+  
   rewrite [←eq]
   unfold part₁_state_update part₁_state
   rfl
