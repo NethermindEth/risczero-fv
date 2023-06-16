@@ -66,6 +66,14 @@ lemma closed_form {st: State} : Code.run st ↔ sorry := by
   ]
   MLIR_states_simple; simp only [Map.update_def.symm]
 
+  unfold part₆_state_update part₆_state
+  simp [
+    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
+    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ]
+  MLIR_states_simple; simp only [Map.update_def.symm]
+
   MLIR_states_simple; simp only [Map.update_def.symm]
 
   rw [State.felts_if] <;> try rfl
