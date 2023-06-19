@@ -252,13 +252,24 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
 def updateFelts (state : State) (name : FeltVar) (x : Felt) : State :=
   { state with felts := state.felts[name] ←ₘ x }
 
+def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
+  { state with props := state.props[name] ←ₘ x }
+
 lemma updateFelts_def : 
   updateFelts st k v = { st with felts := st.felts[k] ←ₘ v } := rfl
+
+lemma updateProps_def :
+  updateProps st k v = { st with props := st.props[k] ←ₘ v } := rfl
 
 @[simp]
 lemma updateFelts_felts_get {st : State} {name : FeltVar} {x : Felt} :
   (updateFelts st name x).felts[name]! = some x := by
   simp [updateFelts, Map.update_def, Map.getElem_def, getElem!]
+
+@[simp]
+lemma updateProps_props_get {st : State} {name : PropVar} {x : Prop} :
+  (updateProps st name x).props[name]! = some x := by
+  simp [updateProps, Map.update_def, Map.getElem_def, getElem!]
 
 -- TODO: This technically shouldn't exist, refine later?
 -- m[k] should not unfold to m k, yet there are instances in automated rewriting
@@ -267,11 +278,22 @@ lemma updateFelts_felts_get {st : State} {name : FeltVar} {x : Felt} :
 lemma updateFelts_felts_get_wobbly {st : State} {name : FeltVar} {x : Felt} :
   (updateFelts st name x).felts name = some x := updateFelts_felts_get
 
+@[simp]
+lemma updateProps_props_get_wobbly {st : State} {name : PropVar} {x : Prop} :
+  (updateProps st name x).props name = some x := updateProps_props_get
+
 -- This simp lemma feels bad with name ≠ name' but somehow it works out in our context.
 @[simp]
 lemma updateFelts_felts_get_ne {st : State} {name name' : FeltVar} {x : Felt}
   (h : name ≠ name') : (updateFelts st name x).felts[name']! = st.felts[name']! := by
   simp [updateFelts, Map.update_def, getElem!, Map.getElem_def]
+  aesop
+
+-- This simp lemma feels bad with name ≠ name' but somehow it works out in our context.
+@[simp]
+lemma updateProps_props_get_ne {st : State} {name name' : PropVar} {x : Prop}
+  (h : name ≠ name') : (updateProps st name x).props[name']! = st.props[name']! := by
+  simp [updateProps, Map.update_def, getElem!, Map.getElem_def]
   aesop
 
 @[simp]
@@ -295,15 +317,43 @@ lemma updateFelts_props : (updateFelts st name x).props = st.props := by simp [u
 @[simp]
 lemma updateFelts_vars : (updateFelts st name x).vars = st.vars := by simp [updateFelts]
 
+@[simp]
+lemma updateProps_buffers : (updateProps st name x).buffers = st.buffers := by simp [updateProps]
+
+@[simp]
+lemma updateProps_bufferWidths : (updateProps st name x).bufferWidths = st.bufferWidths := by simp [updateProps]
+
+@[simp]
+lemma updateProps_constraints : (updateProps st name x).constraints = st.constraints := by simp [updateProps]
+
+@[simp]
+lemma updateProps_cycle : (updateProps st name x).cycle = st.cycle := by simp [updateProps]
+
+@[simp]
+lemma updateProps_isFailed : (updateProps st name x).isFailed = st.isFailed := by simp [updateProps]
+
+@[simp]
+lemma updateProps_felts : (updateProps st name x).felts = st.felts := by simp [updateProps]
+
+@[simp]
+lemma updateProps_vars : (updateProps st name x).vars = st.vars := by simp [updateProps]
+
 -- @[simp]
 lemma update_val {state : State} {name : String} {x : Felt} :
   update state name (.some (.Val x)) = { state with felts := state.felts[⟨name⟩] ←ₘ x } := rfl
+
+lemma update_constr {state : State} {name : String} {x : Prop} :
+  update state name (.some (.Constraint x)) = { state with props := state.props[⟨name⟩] ←ₘ x } := rfl
 
 @[simp]
 lemma update_val' {state : State} {name : String} {x : Felt} :
   update state name (.some (.Val x)) = state.updateFelts ⟨name⟩ x := rfl
 
 @[simp]
+lemma update_constr' {state : State} {name : String} {x : Prop} :
+  update state name (.some (.Constraint x)) = state.updateProps ⟨name⟩ x := rfl
+
+-- @[simp]
 lemma update_constraint {state : State} {name : String} {c : Prop} :
   update state name (.some (.Constraint c)) = { state with props := state.props.update ⟨name⟩ c } := rfl
 
@@ -345,6 +395,34 @@ instance : Inhabited State := ⟨State.init_default 42 42⟩
 notation:61 st "[" n:61 "]" " ←ₛ " x:49 => State.update st n x
 
 namespace State
+
+variable {st : State}
+
+-- TODO: Rework to updateConstraints (done?)
+-- @[simp]
+-- lemma updateConstraints_buffers {st : State} :
+--   (st[k] ←ₛ some (Lit.Constraint c)).buffers = st.buffers := by simp [State.update]
+
+-- @[simp]
+-- lemma updateConstraints_bufferWidths :
+--   (st[k] ←ₛ some (Lit.Constraint c)).bufferWidths = st.bufferWidths := by simp [State.update]
+
+-- @[simp]
+-- lemma updateConstraints_felts :
+--   (st[k] ←ₛ some (Lit.Constraint c)).felts = st.felts := by simp [State.update]
+
+-- @[simp]
+-- lemma updateConstraints_cycle :
+--   (st[k] ←ₛ some (Lit.Constraint c)).cycle = st.cycle := by simp [State.update]
+
+-- @[simp]
+-- lemma updateConstraints_isFailed :
+--   (st[k] ←ₛ some (Lit.Constraint c)).isFailed = st.isFailed := by simp [State.update]
+
+-- @[simp]
+-- lemma updateConstraints_vars :
+--   (st[k] ←ₛ some (Lit.Constraint c)).vars = st.vars := by simp [State.update]
+
 
 -- @[simp]
 -- lemma set_felts {st : State} {name : String} {x} :

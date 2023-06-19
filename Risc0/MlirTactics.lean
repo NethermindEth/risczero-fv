@@ -50,7 +50,9 @@ elab "MLIR_states_new" : tactic => do
   evalTactic <| ← `(tactic| simp [
     getImpl, isGetValid, Buffer.back, State.updateFelts, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set
+    Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
+    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
+    State.constraints_if, State.props_if
   ])
 
 -- private lemma run_set_enforce_aux {st : State} (h : val ∈ st.felts) :
@@ -101,7 +103,7 @@ elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
   )
-  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+  evalTactic <| ← `(tactic| try simp? [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
   
 -- elab "MLIR_statement" : tactic => do
 --   evalTactic <| ← `(
@@ -126,7 +128,8 @@ elab "MLIR_decide_updates" : tactic => do
       State.updateFelts, Map.fromList_cons, Map.fromList_nil, State.update_val', 
       le_refl, List.find?, List.mem_cons, ge_iff_le, tsub_eq_zero_of_le,
       List.cons.injEq, and_imp, forall_apply_eq_imp_iff', forall_eq',
-      Nat.succ_ne_self, IsEmpty.forall_iff, implies_true, forall_const, Nat.succ.injEq
+      Nat.succ_ne_self, IsEmpty.forall_iff, implies_true, forall_const, Nat.succ.injEq,
+      getElem, instGetElemMapOptionTrue
     ])
   evalTactic <| ← `(tactic| simp only [Map.update_def.symm])
 
