@@ -639,7 +639,7 @@ lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Felt} :
   simp [State.is0ConstraintsProps, State.constraintsInVar, State.constraints]
   rw [←eq]
   
-  
+  aesop
 
 end constraints
 
