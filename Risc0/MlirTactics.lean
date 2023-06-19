@@ -18,7 +18,7 @@ open Op in
 elab "simp_op" : tactic => do
   evalTactic <| ← `( tactic|
     simp only [
-      eval_const, eval_true, eval_getBuffer, eval_sub,
+      eval_const, eval_true, eval_getBuffer, eval_add, eval_sub,
       eval_mul, eval_isz, eval_inv, eval_andEqz, eval_andCond
     ]
   )

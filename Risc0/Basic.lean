@@ -614,6 +614,9 @@ lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
   else .none := rfl
 
 @[simp]
+lemma eval_add : Γ st ⟦@Add α x y⟧ₑ = .some (.Val ((st.felts x).get! + (st.felts y).get!)) := rfl
+
+@[simp]
 lemma eval_sub : Γ st ⟦@Sub α x y⟧ₑ = .some (.Val ((st.felts x).get! - (st.felts y).get!)) := rfl
 
 @[simp]
