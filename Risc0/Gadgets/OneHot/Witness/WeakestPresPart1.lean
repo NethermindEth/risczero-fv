@@ -8,7 +8,8 @@ namespace Risc0.OneHot.Witness.WP
 open MLIRNotation
 
 -- The state obtained by running Code.part₁ on st
-def part₁_state (st: State) : State := State.updateFelts
+def part₁_state (st: State) : State :=
+  State.updateFelts
           (State.updateFelts
             (State.set!
               (State.updateFelts st { name := "input == 0" }
@@ -16,36 +17,23 @@ def part₁_state (st: State) : State := State.updateFelts
               { name := "output" } 0 (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))
             { name := "input - 1" }
             (Option.get!
-                (State.felts
-                  (State.updateFelts st { name := "input == 0" }
-                    (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))
+                ((st.felts[{ name := "input == 0" }] ←ₘ
+                    if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
                   { name := "input" }) -
               Option.get!
-                (State.felts
-                  (State.updateFelts st { name := "input == 0" }
-                    (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))
+                ((st.felts[{ name := "input == 0" }] ←ₘ
+                    if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
                   { name := "1" })))
           { name := "input == 1" }
           (if
               Option.get!
-                  (State.felts
-                    (State.updateFelts
-                      (State.set!
-                        (State.updateFelts st { name := "input == 0" }
-                          (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))
-                        { name := "output" } 0 (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))
-                      { name := "input - 1" }
-                      (Option.get!
-                          (State.felts
-                            (State.updateFelts st { name := "input == 0" }
-                              (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))
-                            { name := "input" }) -
-                        Option.get!
-                          (State.felts
-                            (State.updateFelts st { name := "input == 0" }
-                              (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))
-                            { name := "1" })))
-                    { name := "input - 1" }) =
+                    ((st.felts[{ name := "input == 0" }] ←ₘ
+                        if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
+                      { name := "input" }) -
+                  Option.get!
+                    ((st.felts[{ name := "input == 0" }] ←ₘ
+                        if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
+                      { name := "1" }) =
                 0 then
             1
           else 0)
