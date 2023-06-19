@@ -8,26 +8,37 @@ import Mathlib.Tactic.FieldSimp
 
 import Risc0.Basic
 import Risc0.Lemmas
+import Risc0.Gadgets.IsZero.Axioms
 
 namespace Risc0
 
 open MLIRNotation
 
--- open MLIR in
--- theorem is0_constraints_if_is0_witness
---   {input output : List Felt}
---   (h : input.length = 1 ∧ output.length = 2) :
---   (is0_witness input = output → is0_constraints input output) := by
---   rcases h with ⟨hin, hout⟩
---   rcases input with _ | ⟨x, _ | _⟩ <;> simp at *
---   rcases output with _ | ⟨y₁, _ | ⟨y₂, ⟨_ | _⟩⟩⟩ <;> simp at *
---   rw [is0_constraints_closed_form, is0_witness_closed_form]
---   repeat split; all_goals simp [*] at *; try intros ; simp [*] at *
---   aesop
+open MLIR in
+theorem is0_constraints_if_is0_witness
+  {input : Felt}
+  {output : List (Option Felt)}
+  (h : output.length = 2) 
+  (h₁ : output.all Option.isSome) :
+  is0_witness_initial input = output → is0_constraints_initial input output := by
+  rcases output with _ | ⟨y₁, _ | ⟨y₂, ⟨_ | _⟩⟩⟩ <;> simp at *
+  simp only [Option.isSome_iff_exists] at h₁
+  rcases h₁ with ⟨⟨w₁, h₁⟩, ⟨w₂, h₂⟩⟩; subst h₁ h₂
+  rw [constraints.is0_constraints_closed_form, is0_witness_closed_form]
+  repeat split; all_goals simp [*] at *; try intros ; simp [*] at *
+  aesop
 
--- theorem pseudocompleteness {x y₁ y₂ : Felt} {state : State} :
---   is0_constraints [x] [y₁, y₂] → .Val y₁ = Op.eval {state with felts := Map.empty["x"] := x} (.Isz ⟨"x"⟩) := by
---   rw [is0_constraints_closed_form]; aesop; aesop
---   rw [sub_eq_iff_eq_add] at h; simp [h]
+theorem is0_spec_of_constraints {x} {y₁ y₂ : Option Felt} {state : State}
+  (h : y₁.isSome) (h₁ : y₂.isSome) :
+  is0_constraints_initial x ([y₁, y₂]) → .some (.Val y₁.get!) = Op.eval {state with felts := Map.empty[⟨"x"⟩] ←ₘ x} (.Isz ⟨"x"⟩) := by
+  simp only [Option.isSome_iff_exists] at h h₁
+  rcases h with ⟨w, h⟩
+  rcases h₁ with ⟨w₁, h₁⟩
+  subst h h₁
+  rw [constraints.is0_constraints_closed_form]; aesop; aesop
+  rw [sub_eq_iff_eq_add] at h; simp [h]; aesop
+  simp [Option.get!, Map.update] at h
+  subst h
+  simp at a
 
 end Risc0
