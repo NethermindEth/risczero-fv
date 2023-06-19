@@ -8,113 +8,35 @@ namespace Risc0.OneHot.Constraints.WP
 open MLIRNotation
 
 -- The state obtained by running Code.part₆ on st
-def part₆_state (st: State) : State := {
-  buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints, cycle := st.cycle,
-      felts :=
-        (State.updateFelts
-            (State.updateFelts
-              { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                props :=
-                  st.props[{ name := "andEqz output[2]<=1" }] ←ₘ
-                    (Option.get! (State.props st { name := "andEqz output[1]<=1" }) ∧
-                      Option.get! (State.felts st { name := "output[2]<=1" }) = 0),
-                vars := st.vars }
-              { name := "outputSum" }
-              (Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
-                Option.get! (State.felts st { name := "output[2]" })))
-            { name := "outputSum-1" }
-            (Option.get!
-                (State.felts
-                  (State.updateFelts
-                    { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                      cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                      props :=
-                        st.props[{ name := "andEqz output[2]<=1" }] ←ₘ
-                          (Option.get! (State.props st { name := "andEqz output[1]<=1" }) ∧
-                            Option.get! (State.felts st { name := "output[2]<=1" }) = 0),
-                      vars := st.vars }
-                    { name := "outputSum" }
-                    (Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
-                      Option.get! (State.felts st { name := "output[2]" })))
-                  { name := "outputSum" }) -
-              Option.get!
-                (State.felts
-                  (State.updateFelts
-                    { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                      cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                      props :=
-                        st.props[{ name := "andEqz output[2]<=1" }] ←ₘ
-                          (Option.get! (State.props st { name := "andEqz output[1]<=1" }) ∧
-                            Option.get! (State.felts st { name := "output[2]<=1" }) = 0),
-                      vars := st.vars }
-                    { name := "outputSum" }
-                    (Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
-                      Option.get! (State.felts st { name := "output[2]" })))
-                  { name := "1" }))).felts,
-      isFailed := st.isFailed,
-      props :=
-        (st.props[{ name := "andEqz output[2]<=1" }] ←ₘ
+def part₆_state (st: State) : State :=
+  ((((st[props][{ name := "andEqz output[2]<=1" }] ←
             (Option.get! (State.props st { name := "andEqz output[1]<=1" }) ∧
-              Option.get! (State.felts st { name := "output[2]<=1" }) = 0))[{ name := "andEqz outputSum-1" }] ←ₘ
-          (Option.get!
-              ((st.props[{ name := "andEqz output[2]<=1" }] ←ₘ
-                  (Option.get! (State.props st { name := "andEqz output[1]<=1" }) ∧
-                    Option.get! (State.felts st { name := "output[2]<=1" }) = 0))
-                { name := "andEqz output[2]<=1" }) ∧
+              Option.get! (State.felts st { name := "output[2]<=1" }) = 0))[felts][{ name := "outputSum" }] ←
+          Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
+            Option.get! (State.felts st { name := "output[2]" }))[felts][{ name := "outputSum-1" }] ←
+        Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
+            Option.get! (State.felts st { name := "output[2]" }) -
+          Option.get!
+            ((st.felts[{ name := "outputSum" }] ←ₘ
+                Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
+                  Option.get! (State.felts st { name := "output[2]" }))
+              { name := "1" }))[props][{ name := "andEqz outputSum-1" }] ←
+      ((Option.get! (State.props st { name := "andEqz output[1]<=1" }) ∧
+          Option.get! (State.felts st { name := "output[2]<=1" }) = 0) ∧
+        Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
+              Option.get! (State.felts st { name := "output[2]" }) -
             Option.get!
-                (State.felts
-                  (State.updateFelts
-                    (State.updateFelts
-                      { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                        cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                        props :=
-                          st.props[{ name := "andEqz output[2]<=1" }] ←ₘ
-                            (Option.get! (State.props st { name := "andEqz output[1]<=1" }) ∧
-                              Option.get! (State.felts st { name := "output[2]<=1" }) = 0),
-                        vars := st.vars }
-                      { name := "outputSum" }
-                      (Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
-                        Option.get! (State.felts st { name := "output[2]" })))
-                    { name := "outputSum-1" }
-                    (Option.get!
-                        (State.felts
-                          (State.updateFelts
-                            { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                              cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                              props :=
-                                st.props[{ name := "andEqz output[2]<=1" }] ←ₘ
-                                  (Option.get! (State.props st { name := "andEqz output[1]<=1" }) ∧
-                                    Option.get! (State.felts st { name := "output[2]<=1" }) = 0),
-                              vars := st.vars }
-                            { name := "outputSum" }
-                            (Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
-                              Option.get! (State.felts st { name := "output[2]" })))
-                          { name := "outputSum" }) -
-                      Option.get!
-                        (State.felts
-                          (State.updateFelts
-                            { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                              cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                              props :=
-                                st.props[{ name := "andEqz output[2]<=1" }] ←ₘ
-                                  (Option.get! (State.props st { name := "andEqz output[1]<=1" }) ∧
-                                    Option.get! (State.felts st { name := "output[2]<=1" }) = 0),
-                              vars := st.vars }
-                            { name := "outputSum" }
-                            (Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
-                              Option.get! (State.felts st { name := "output[2]" })))
-                          { name := "1" })))
-                  { name := "outputSum-1" }) =
-              0),
-      vars := st.vars }
+              ((st.felts[{ name := "outputSum" }] ←ₘ
+                  Option.get! (State.felts st { name := "output[0]+Output[1]" }) +
+                    Option.get! (State.felts st { name := "output[2]" }))
+                { name := "1" }) =
+          0))
 
 -- Run the whole program by using part₆_state rather than Code.part₆
 def part₆_state_update (st: State): State :=
   part₆_state st
 
 -- Prove that substituting part₆_state for Code.part₆ produces the same result
--- ****************************** WEAKEST PRE - Part₆ ******************************
 lemma part₆_wp {st : State} :
   Code.getReturn (MLIR.runProgram Code.part₆ st) ↔
   Code.getReturn (part₆_state_update st) := by
@@ -123,7 +45,6 @@ lemma part₆_wp {st : State} :
   MLIR
   unfold part₆_state_update part₆_state
   rfl
--- ****************************** WEAKEST PRE - Part₆ ******************************
 
 lemma part₆_updates_opaque {st : State} : 
   Code.getReturn (part₅_state_update st) ↔

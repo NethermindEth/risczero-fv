@@ -8,136 +8,52 @@ namespace Risc0.OneHot.Constraints.WP
 open MLIRNotation
 
 -- The state obtained by running Code.part₅ on st
-def part₅_state (st: State) : State := State.updateFelts
-        (State.updateFelts
-          (State.updateFelts
-            { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints, cycle := st.cycle,
-              felts := st.felts, isFailed := st.isFailed,
-              props :=
-                st.props[{ name := "andEqz output[1]<=1" }] ←ₘ
-                  (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
-                    Option.get! (State.felts st { name := "output[1]<=1" }) = 0),
-              vars := st.vars }
-            { name := "output[0]+Output[1]" }
-            (Option.get! (State.felts st { name := "output[0]" }) +
-              Option.get! (State.felts st { name := "output[1]" })))
-          { name := "1-Output[2]" }
-          (Option.get!
-              (State.felts
-                (State.updateFelts
-                  { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                    cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                    props :=
-                      st.props[{ name := "andEqz output[1]<=1" }] ←ₘ
-                        (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
-                          Option.get! (State.felts st { name := "output[1]<=1" }) = 0),
-                    vars := st.vars }
-                  { name := "output[0]+Output[1]" }
-                  (Option.get! (State.felts st { name := "output[0]" }) +
-                    Option.get! (State.felts st { name := "output[1]" })))
+def part₅_state (st: State) : State :=
+  ((((st[props][{ name := "andEqz output[1]<=1" }] ←
+              (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
+                Option.get! (State.felts st { name := "output[1]<=1" }) =
+                  0))[felts][{ name := "output[0]+Output[1]" }] ←
+            Option.get! (State.felts st { name := "output[0]" }) +
+              Option.get! (State.felts st { name := "output[1]" }))[felts][{ name := "1-Output[2]" }] ←
+          Option.get!
+              ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
+                  Option.get! (State.felts st { name := "output[0]" }) +
+                    Option.get! (State.felts st { name := "output[1]" }))
                 { name := "1" }) -
             Option.get!
-              (State.felts
-                (State.updateFelts
-                  { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                    cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                    props :=
-                      st.props[{ name := "andEqz output[1]<=1" }] ←ₘ
-                        (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
-                          Option.get! (State.felts st { name := "output[1]<=1" }) = 0),
-                    vars := st.vars }
-                  { name := "output[0]+Output[1]" }
-                  (Option.get! (State.felts st { name := "output[0]" }) +
-                    Option.get! (State.felts st { name := "output[1]" })))
-                { name := "output[2]" })))
-        { name := "output[2]<=1" }
-        (Option.get!
-            (State.felts
-              (State.updateFelts
-                (State.updateFelts
-                  { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                    cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                    props :=
-                      st.props[{ name := "andEqz output[1]<=1" }] ←ₘ
-                        (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
-                          Option.get! (State.felts st { name := "output[1]<=1" }) = 0),
-                    vars := st.vars }
-                  { name := "output[0]+Output[1]" }
-                  (Option.get! (State.felts st { name := "output[0]" }) +
-                    Option.get! (State.felts st { name := "output[1]" })))
-                { name := "1-Output[2]" }
-                (Option.get!
-                    (State.felts
-                      (State.updateFelts
-                        { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                          cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                          props :=
-                            st.props[{ name := "andEqz output[1]<=1" }] ←ₘ
-                              (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
-                                Option.get! (State.felts st { name := "output[1]<=1" }) = 0),
-                          vars := st.vars }
-                        { name := "output[0]+Output[1]" }
-                        (Option.get! (State.felts st { name := "output[0]" }) +
-                          Option.get! (State.felts st { name := "output[1]" })))
+              ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
+                  Option.get! (State.felts st { name := "output[0]" }) +
+                    Option.get! (State.felts st { name := "output[1]" }))
+                { name := "output[2]" }))[felts][{ name := "output[2]<=1" }] ←
+        Option.get!
+            (((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
+                  Option.get! (State.felts st { name := "output[0]" }) +
+                    Option.get! (State.felts st { name := "output[1]" }))[{ name := "1-Output[2]" }] ←ₘ
+                Option.get!
+                    ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
+                        Option.get! (State.felts st { name := "output[0]" }) +
+                          Option.get! (State.felts st { name := "output[1]" }))
                       { name := "1" }) -
                   Option.get!
-                    (State.felts
-                      (State.updateFelts
-                        { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                          cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                          props :=
-                            st.props[{ name := "andEqz output[1]<=1" }] ←ₘ
-                              (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
-                                Option.get! (State.felts st { name := "output[1]<=1" }) = 0),
-                          vars := st.vars }
-                        { name := "output[0]+Output[1]" }
-                        (Option.get! (State.felts st { name := "output[0]" }) +
-                          Option.get! (State.felts st { name := "output[1]" })))
-                      { name := "output[2]" })))
+                    ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
+                        Option.get! (State.felts st { name := "output[0]" }) +
+                          Option.get! (State.felts st { name := "output[1]" }))
+                      { name := "output[2]" }))
               { name := "output[1]" }) *
           Option.get!
-            (State.felts
-              (State.updateFelts
-                (State.updateFelts
-                  { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                    cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                    props :=
-                      st.props[{ name := "andEqz output[1]<=1" }] ←ₘ
-                        (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
-                          Option.get! (State.felts st { name := "output[1]<=1" }) = 0),
-                    vars := st.vars }
-                  { name := "output[0]+Output[1]" }
-                  (Option.get! (State.felts st { name := "output[0]" }) +
-                    Option.get! (State.felts st { name := "output[1]" })))
-                { name := "1-Output[2]" }
-                (Option.get!
-                    (State.felts
-                      (State.updateFelts
-                        { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                          cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                          props :=
-                            st.props[{ name := "andEqz output[1]<=1" }] ←ₘ
-                              (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
-                                Option.get! (State.felts st { name := "output[1]<=1" }) = 0),
-                          vars := st.vars }
-                        { name := "output[0]+Output[1]" }
-                        (Option.get! (State.felts st { name := "output[0]" }) +
-                          Option.get! (State.felts st { name := "output[1]" })))
+            (((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
+                  Option.get! (State.felts st { name := "output[0]" }) +
+                    Option.get! (State.felts st { name := "output[1]" }))[{ name := "1-Output[2]" }] ←ₘ
+                Option.get!
+                    ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
+                        Option.get! (State.felts st { name := "output[0]" }) +
+                          Option.get! (State.felts st { name := "output[1]" }))
                       { name := "1" }) -
                   Option.get!
-                    (State.felts
-                      (State.updateFelts
-                        { buffers := st.buffers, bufferWidths := st.bufferWidths, constraints := st.constraints,
-                          cycle := st.cycle, felts := st.felts, isFailed := st.isFailed,
-                          props :=
-                            st.props[{ name := "andEqz output[1]<=1" }] ←ₘ
-                              (Option.get! (State.props st { name := "andEqz output[0]<=1" }) ∧
-                                Option.get! (State.felts st { name := "output[1]<=1" }) = 0),
-                          vars := st.vars }
-                        { name := "output[0]+Output[1]" }
-                        (Option.get! (State.felts st { name := "output[0]" }) +
-                          Option.get! (State.felts st { name := "output[1]" })))
-                      { name := "output[2]" })))
+                    ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
+                        Option.get! (State.felts st { name := "output[0]" }) +
+                          Option.get! (State.felts st { name := "output[1]" }))
+                      { name := "output[2]" }))
               { name := "1-Output[1]" }))
 
 -- Run the whole program by using part₅_state rather than Code.part₅
@@ -145,7 +61,6 @@ def part₅_state_update (st: State): State :=
   Γ (part₅_state st) ⟦Code.part₆⟧
 
 -- Prove that substituting part₅_state for Code.part₅ produces the same result
--- ****************************** WEAKEST PRE - Part₅ ******************************
 lemma part₅_wp {st : State} :
   Code.getReturn (MLIR.runProgram (Code.part₅; Code.part₆) st) ↔
   Code.getReturn (part₅_state_update st) := by
@@ -156,7 +71,6 @@ lemma part₅_wp {st : State} :
   unfold part₅_state_update part₅_state
   rewrite [←eq]
   rfl
--- ****************************** WEAKEST PRE - Part₅ ******************************
 
 lemma part₅_updates_opaque {st : State} : 
   Code.getReturn (part₄_state_update st) ↔

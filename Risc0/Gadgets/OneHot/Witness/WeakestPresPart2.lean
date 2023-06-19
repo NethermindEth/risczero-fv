@@ -9,9 +9,9 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₂ on st
 def part₂_state (st: State) : State :=
-  State.set!
+  (State.set!
           ((State.set! st { name := "output" } 1
-                (Option.get! st.felts[({ name := "input == 1" } : FeltVar)]!)[felts][{ name := "input - 2" }] ←
+                (Option.get! st.felts[({ name := "input == 1" }: FeltVar)]!)[felts][{ name := "input - 2" }] ←
               Option.get! (State.felts st { name := "input" }) -
                 Option.get! (State.felts st { name := "2" }))[felts][{ name := "input == 2" }] ←
             if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" }) = 0 then
@@ -19,14 +19,13 @@ def part₂_state (st: State) : State :=
             else 0)
           { name := "output" } 2
           (if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" }) = 0 then 1
-          else 0)
+          else 0))
 
 -- Run the program from part₂ onwards by using part₂_state rather than Code.part₂
 def part₂_state_update (st: State): State :=
   Γ (part₂_state st) ⟦Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈⟧
 
 -- Prove that substituting part₂_state for Code.part₂ produces the same result
--- ****************************** WEAKEST PRE - Part₂ ******************************
 lemma part₂_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
   (MLIR.runProgram (Code.part₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₂_state_update st).lastOutput = [y₁, y₂, y₃] := by
@@ -37,7 +36,6 @@ lemma part₂_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
   rewrite [←eq]
   unfold part₂_state_update part₂_state
   rfl
--- ****************************** WEAKEST PRE - Part₂ ******************************
 
 lemma part₂_updates_opaque {st : State} : 
   (part₁_state_update st).lastOutput = [y₁, y₂, y₃] ↔

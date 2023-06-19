@@ -8,8 +8,8 @@ namespace Risc0.OneHot.Witness.WP
 open MLIRNotation
 
 -- The state obtained by running Code.part₇ on st
-def part₇_state (st: State) : State := {
-  buffers := st.buffers, bufferWidths := st.bufferWidths,
+def part₇_state (st: State) : State :=
+  { buffers := st.buffers, bufferWidths := st.bufferWidths,
           constraints :=
             (Option.get!
                     (((st.felts[{ name := "output[0]AddOutput[1]" }] ←ₘ
@@ -86,7 +86,6 @@ def part₇_state_update (st: State): State :=
   Γ (part₇_state st) ⟦Code.part₈⟧
 
 -- Prove that substituting part₇_state for Code.part₇ produces the same result
--- ****************************** WEAKEST PRE - Part₇ ******************************
 lemma part₇_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
   (MLIR.runProgram (Code.part₇; Code.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₇_state_update st).lastOutput = [y₁, y₂, y₃] := by
@@ -97,7 +96,6 @@ lemma part₇_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
   rewrite [←eq]
   unfold part₇_state_update part₇_state
   rfl
--- ****************************** WEAKEST PRE - Part₇ ******************************
 
 lemma part₇_updates_opaque {st : State} : 
   (part₆_state_update st).lastOutput = [y₁, y₂, y₃] ↔
