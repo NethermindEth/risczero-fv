@@ -607,9 +607,9 @@ lemma part₄_updates_opaque {st : State} :
   (part₄_state_update (part₃_state st)).is0ConstraintsProps := by
   simp [part₃_state_update, part₄_updates]
 
-lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Option Felt} :
-    is0_constraints_initial x ([y₁, y₂]) ↔
-    (if 1 - y₁.get! = 0 then if y₁.get! = 0 then True else x = 0 else (if y₁.get! = 0 then True else x = 0) ∧ x * y₂.get! - 1 = 0) := by    
+lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Felt} :
+    is0_constraints_initial x ([some y₁, some y₂]) ↔
+    (if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0) := by    
   unfold is0_constraints_initial MLIR.runProgram; simp only [is0_constraints_per_partes]
   rw [part₀_updates]
   rw [part₁_updates_opaque]
@@ -617,7 +617,7 @@ lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Option Felt} :
   rw [part₃_updates_opaque]
   rw [part₄_updates_opaque]
 
-  generalize eq : if 1 - y₁.get! = 0 then if y₁.get! = 0 then True else x = 0 else (if y₁.get! = 0 then True else x = 0) ∧ x * y₂.get! - 1 = 0 = rhs
+  generalize eq : if 1 - y₁ = 0 then if y₁ = 0 then True else x = 0 else (if y₁ = 0 then True else x = 0) ∧ x * y₂ - 1 = 0 = rhs
 
   unfold is0_initial_state
 
@@ -626,33 +626,20 @@ lemma is0_constraints_closed_form {x: Felt} {y₁ y₂ : Option Felt} :
 
   unfold part₁_state
   MLIR_states_updates
+  
+  unfold part₂_state
+  MLIR_states_updates
 
-  simp [State.constraints]
+  unfold part₃_state
+  MLIR_states_updates
 
-  -- unfold part₂_state
-  -- MLIR_states_updates
+  unfold part₄_state_update
+  MLIR_states_updates
 
-  -- unfold part₃_state
-  -- MLIR_states_updates
-
-  -- unfold part₄_state
-  -- MLIR_states_updates
-
-  -- unfold part₅_state_update
-  -- MLIR_states_updates
-
-  -- simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
-  -- MLIR_states_updates
-  -- simp [List.getLast]
+  simp [State.is0ConstraintsProps, State.constraintsInVar, State.constraints]
+  rw [←eq]
   
   
-  -- simp [MLIR.runProgram, is0_initial_state]
-
-  -- MLIR_statement
-  -- MLIR_statement
-  -- MLIR_statement
-  -- MLIR_statement
-  -- MLIR_statement
 
 end constraints
 

@@ -252,8 +252,12 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
 def updateFelts (state : State) (name : FeltVar) (x : Felt) : State :=
   { state with felts := state.felts[name] ←ₘ x }
 
+notation:61 st "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
+
 def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
   { state with props := state.props[name] ←ₘ x }
+
+notation:61 st "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
 
 lemma updateFelts_def : 
   updateFelts st k v = { st with felts := st.felts[k] ←ₘ v } := rfl
@@ -270,6 +274,14 @@ lemma updateFelts_felts_get {st : State} {name : FeltVar} {x : Felt} :
 lemma updateProps_props_get {st : State} {name : PropVar} {x : Prop} :
   (updateProps st name x).props[name]! = some x := by
   simp [updateProps, Map.update_def, Map.getElem_def, getElem!]
+
+-- @[simp]
+-- lemma updateFelts_props {st : State} {name : FeltVar} {x : Felt} :
+--   (st[felts][name] ← x).props = st.props := by simp [updateFelts]
+
+-- @[simp]
+-- lemma updateProps_felts {st : State} {name : PropVar} {x : Prop} :
+--   (st[props][name] ← x).felts = st.felts := by simp [updateProps]
 
 -- TODO: This technically shouldn't exist, refine later?
 -- m[k] should not unfold to m k, yet there are instances in automated rewriting
