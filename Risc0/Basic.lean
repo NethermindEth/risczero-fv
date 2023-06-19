@@ -318,6 +318,9 @@ lemma updateFelts_props : (updateFelts st name x).props = st.props := by simp [u
 lemma updateFelts_vars : (updateFelts st name x).vars = st.vars := by simp [updateFelts]
 
 @[simp]
+lemma updateFelts_felts : (updateFelts st name x).felts = st.felts[name] ←ₘ x := by simp [updateFelts]
+
+@[simp]
 lemma updateProps_buffers : (updateProps st name x).buffers = st.buffers := by simp [updateProps]
 
 @[simp]
@@ -337,6 +340,9 @@ lemma updateProps_felts : (updateProps st name x).felts = st.felts := by simp [u
 
 @[simp]
 lemma updateProps_vars : (updateProps st name x).vars = st.vars := by simp [updateProps]
+
+@[simp]
+lemma updateProps_props : (updateProps st name x).props = st.props[name] ←ₘ x := by simp [updateProps]
 
 -- @[simp]
 lemma update_val {state : State} {name : String} {x : Felt} :

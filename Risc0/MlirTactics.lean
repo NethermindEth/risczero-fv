@@ -48,7 +48,7 @@ elab "MLIR_states" : tactic => do
 
 elab "MLIR_states_new" : tactic => do
   evalTactic <| ← `(tactic| simp [
-    getImpl, isGetValid, Buffer.back, State.updateFelts, Option.get!,
+    getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
     State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
@@ -125,7 +125,7 @@ elab "MLIR_decide_updates" : tactic => do
   evalTactic <| ← `(tactic|
     simp only [
       Map.update, getElem!, ite_true, Option.get!_of_some, ite_false, true_and, Option.getD_some,
-      State.updateFelts, Map.fromList_cons, Map.fromList_nil, State.update_val', 
+      Map.fromList_cons, Map.fromList_nil, State.update_val', 
       le_refl, List.find?, List.mem_cons, ge_iff_le, tsub_eq_zero_of_le,
       List.cons.injEq, and_imp, forall_apply_eq_imp_iff', forall_eq',
       Nat.succ_ne_self, IsEmpty.forall_iff, implies_true, forall_const, Nat.succ.injEq,

@@ -379,39 +379,39 @@ lemma part₅_updates_opaque {st : State} :
   (part₅_state_update (part₄_state st)).lastOutput = [y₁, y₂] := by
   simp [part₄_state_update, part₅_updates]
 
--- lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
---   is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
---   unfold is0_witness_initial MLIR.runProgram; simp only [is0_witness_per_partes]
---   rewrite [part₀_updates]
---   rewrite [part₁_updates_opaque]
---   rewrite [part₂_updates_opaque]
---   rewrite [part₃_updates_opaque]
---   rewrite [part₄_updates_opaque]
---   rewrite [part₅_updates_opaque]
+lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
+  is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
+  unfold is0_witness_initial MLIR.runProgram; simp only [is0_witness_per_partes]
+  rewrite [part₀_updates]
+  rewrite [part₁_updates_opaque]
+  rewrite [part₂_updates_opaque]
+  rewrite [part₃_updates_opaque]
+  rewrite [part₄_updates_opaque]
+  rewrite [part₅_updates_opaque]
 
---   unfold is0_witness_initial_state is0_initial_state
+  unfold is0_witness_initial_state is0_initial_state
 
---   unfold part₀_state
---   MLIR_states_updates
+  unfold part₀_state
+  MLIR_states_updates
 
---   unfold part₁_state
---   MLIR_states_updates
+  unfold part₁_state
+  MLIR_states_updates
 
---   unfold part₂_state
---   MLIR_states_updates
+  unfold part₂_state
+  MLIR_states_updates
 
---   unfold part₃_state
---   MLIR_states_updates
+  unfold part₃_state
+  MLIR_states_updates
 
---   unfold part₄_state
---   MLIR_states_updates
+  unfold part₄_state
+  MLIR_states_updates
 
---   unfold part₅_state_update
---   MLIR_states_updates
+  unfold part₅_state_update
+  MLIR_states_updates
 
---   simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
---   MLIR_states_updates
---   simp [List.getLast]
+  simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
+  MLIR_states_updates
+  simp [List.getLast]
 
 namespace constraints
 
