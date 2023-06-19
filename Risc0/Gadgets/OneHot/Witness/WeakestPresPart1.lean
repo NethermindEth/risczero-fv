@@ -9,23 +9,20 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₁ on st
 def part₁_state (st: State) : State :=
-  State.updateFelts
-          (State.updateFelts
-            (State.set!
-              (State.updateFelts st { name := "input == 0" }
-                (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))
-              { name := "output" } 0 (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))
-            { name := "input - 1" }
-            (Option.get!
+  (State.set!
+              (st[felts][{ name := "input == 0" }] ←
+                if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
+              { name := "output" } 0
+              (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)[felts][{ name := "input - 1" }] ←
+            Option.get!
                 ((st.felts[{ name := "input == 0" }] ←ₘ
                     if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
                   { name := "input" }) -
               Option.get!
                 ((st.felts[{ name := "input == 0" }] ←ₘ
                     if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
-                  { name := "1" })))
-          { name := "input == 1" }
-          (if
+                  { name := "1" }))[felts][{ name := "input == 1" }] ←
+          if
               Option.get!
                     ((st.felts[{ name := "input == 0" }] ←ₘ
                         if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
@@ -36,7 +33,7 @@ def part₁_state (st: State) : State :=
                       { name := "1" }) =
                 0 then
             1
-          else 0)
+          else 0
 
 -- Run the program from part₁ onwards by using part₁_state rather than Code.part₁
 def part₁_state_update (st: State): State :=
@@ -51,8 +48,6 @@ lemma part₁_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
   generalize eq : (Code.part₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) = prog
   unfold Code.part₁
   MLIR
-  -- simp [State.set!, State.setBufferElementImpl, Buffer.set?, Option.isEqSome, Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data, List.get!]
-  
   rewrite [←eq]
   unfold part₁_state_update part₁_state
   rfl

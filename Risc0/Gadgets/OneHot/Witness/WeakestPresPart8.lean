@@ -11,39 +11,27 @@ open MLIRNotation
 def part₈_state (st: State) : State := {
   buffers := st.buffers, bufferWidths := st.bufferWidths,
         constraints :=
-          (Option.get!
-                  (State.felts
-                    (State.updateFelts st { name := "outputSum" }
-                      (Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                        Option.get! (State.felts st { name := "output[2]" })))
-                    { name := "outputSum" }) -
+          (Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
+                  Option.get! (State.felts st { name := "output[2]" }) -
                 Option.get!
-                  (State.felts
-                    (State.updateFelts st { name := "outputSum" }
-                      (Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                        Option.get! (State.felts st { name := "output[2]" })))
+                  ((st.felts[{ name := "outputSum" }] ←ₘ
+                      Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
+                        Option.get! (State.felts st { name := "output[2]" }))
                     { name := "1" }) =
               0) ::
             st.constraints,
         cycle := st.cycle,
         felts :=
-          (State.updateFelts
-              (State.updateFelts st { name := "outputSum" }
-                (Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                  Option.get! (State.felts st { name := "output[2]" })))
-              { name := "outputSum - 1" }
-              (Option.get!
-                  (State.felts
-                    (State.updateFelts st { name := "outputSum" }
-                      (Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                        Option.get! (State.felts st { name := "output[2]" })))
-                    { name := "outputSum" }) -
-                Option.get!
-                  (State.felts
-                    (State.updateFelts st { name := "outputSum" }
-                      (Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                        Option.get! (State.felts st { name := "output[2]" })))
-                    { name := "1" }))).felts,
+          (st.felts[{ name := "outputSum" }] ←ₘ
+              Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
+                Option.get! (State.felts st { name := "output[2]" }))[{ name := "outputSum - 1" }] ←ₘ
+            Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
+                Option.get! (State.felts st { name := "output[2]" }) -
+              Option.get!
+                ((st.felts[{ name := "outputSum" }] ←ₘ
+                    Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
+                      Option.get! (State.felts st { name := "output[2]" }))
+                  { name := "1" }),
         isFailed := st.isFailed, props := st.props, vars := st.vars }
 
 -- part₈_state_update would be exactly part₈_state, since there is no remaining program to run afterwards

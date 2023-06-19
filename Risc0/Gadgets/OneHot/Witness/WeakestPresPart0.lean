@@ -7,13 +7,9 @@ namespace Risc0.OneHot.Witness.WP
 open MLIRNotation
 
 -- The state obtained by running Code.part₀ on st
-def part₀_state (st: State) : State :=
-  (State.updateFelts
-    (State.updateFelts
-      (State.updateFelts st
-        { name := "2" } 2)
-        { name := "1" } 1)
-        { name := "0" } 0)["input"] ←ₛ getImpl st { name := "input" } 0 0
+def part₀_state (st: State) : State := (((st[felts][{ name := "2" }] ← 2)[felts][{ name := "1" }] ← 1)[felts][{ name := "0" }] ← 0)["input"] ←ₛ
+          getImpl st { name := "input" } 0
+            0
 
 -- Run the whole program by using part₀_state rather than Code.part₀
 def part₀_state_update (st: State): State :=

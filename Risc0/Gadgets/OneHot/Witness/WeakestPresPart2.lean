@@ -8,18 +8,18 @@ namespace Risc0.OneHot.Witness.WP
 open MLIRNotation
 
 -- The state obtained by running Code.part₂ on st
-def part₂_state (st: State) : State := State.set!
-  (State.updateFelts
-    (State.updateFelts (State.set! st { name := "output" } 1 (Option.get! st.felts[({ name := "input == 1" } : FeltVar)]!))
-      { name := "input - 2" }
-      (Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" })))
-    { name := "input == 2" }
-    (if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" }) = 0 then
-      1
-    else 0))
-  { name := "output" } 2
-  (if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" }) = 0 then 1
-  else 0)
+def part₂_state (st: State) : State :=
+  State.set!
+          ((State.set! st { name := "output" } 1
+                (Option.get! st.felts[({ name := "input == 1" } : FeltVar)]!)[felts][{ name := "input - 2" }] ←
+              Option.get! (State.felts st { name := "input" }) -
+                Option.get! (State.felts st { name := "2" }))[felts][{ name := "input == 2" }] ←
+            if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" }) = 0 then
+              1
+            else 0)
+          { name := "output" } 2
+          (if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" }) = 0 then 1
+          else 0)
 
 -- Run the program from part₂ onwards by using part₂_state rather than Code.part₂
 def part₂_state_update (st: State): State :=
