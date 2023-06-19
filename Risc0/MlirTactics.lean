@@ -46,6 +46,13 @@ elab "MLIR_state" : tactic => do
 elab "MLIR_states" : tactic => do
   evalTactic <| ← `(tactic| repeat MLIR_state)
 
+elab "MLIR_states_new" : tactic => do
+  evalTactic <| ← `(tactic| simp [
+    getImpl, isGetValid, Buffer.back, State.updateFelts, Option.get!,
+    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set
+  ])
+
 -- private lemma run_set_enforce_aux {st : State} (h : val ∈ st.felts) :
 --   Γ st ⟦buf[offset] ←ᵢ val⟧ = st.set! buf offset (st.felts[val].get h) := by
 --   simp [State.update, MLIR.run]
@@ -94,7 +101,7 @@ elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
   )
-  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm])
+  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
   
 -- elab "MLIR_statement" : tactic => do
 --   evalTactic <| ← `(
@@ -112,13 +119,21 @@ elab "MLIR" : tactic => do
 --     )
 --   )
 
-elab "MLIR_states_simple" : tactic => do
+elab "MLIR_decide_updates" : tactic => do
   evalTactic <| ← `(tactic|
     simp only [
-      Map.update, ite_true, Option.get!_of_some, ite_false, true_and, Option.getD_some,
+      Map.update, getElem!, ite_true, Option.get!_of_some, ite_false, true_and, Option.getD_some,
       State.updateFelts, Map.fromList_cons, Map.fromList_nil, State.update_val', 
-      le_refl, List.find?, List.mem_cons, ge_iff_le, tsub_eq_zero_of_le
+      le_refl, List.find?, List.mem_cons, ge_iff_le, tsub_eq_zero_of_le,
+      List.cons.injEq, and_imp, forall_apply_eq_imp_iff', forall_eq',
+      Nat.succ_ne_self, IsEmpty.forall_iff, implies_true, forall_const, Nat.succ.injEq
     ])
+  evalTactic <| ← `(tactic| simp only [Map.update_def.symm])
+
+elab "MLIR_states_updates" : tactic => do
+  evalTactic <| ← `(
+    tactic| (MLIR_states_new; MLIR_decide_updates)
+  )
 
 end tactics
 

@@ -25,11 +25,15 @@ section Map.Instances
 
 variable {α β : Type} [DecidableEq α]
 
+-- Todo: Membership in terms of GetElem
 -- k ∈ m
 instance : Membership α (Map α β) := ⟨λ k m => (m k).isSome⟩
 
 -- m[k]
 instance : GetElem (Map α β) α (Option β) (λ _ _ => True) := ⟨λ m k _ => m k⟩
+
+-- macro_rules
+-- | `(tactic| get_elem_tactic_trivial) => `(tactic| simp only)
 
 end Map.Instances
 

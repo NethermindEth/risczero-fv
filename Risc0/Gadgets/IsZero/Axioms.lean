@@ -216,15 +216,7 @@ lemma is0_constraints_per_partes_initial {input} :
 -- ****************************** WEAKEST PRE - Part₀ ******************************
 
 def part₀_state (st : State) : State := 
-  (st["1"] ←ₛ some (Lit.Val 1))["x"] ←ₛ
-    if 0 ≤ (st["1"] ←ₛ some (Lit.Val 1)).cycle ∧
-      { name := "input" } ∈ (st["1"] ←ₛ some (Lit.Val 1)).vars ∧
-      0 < Map.get! (st["1"] ←ₛ some (Lit.Val 1)).bufferWidths { name := "input" } ∧
-      Option.isSome (Buffer.get! (Map.get! (st["1"] ←ₛ some (Lit.Val 1)).buffers { name := "input" })
-                    ((st["1"] ←ₛ some (Lit.Val 1)).cycle - Back.toNat 0, 0)) = true
-    then some (Lit.Val (Option.get! (Buffer.get! (Map.get! (st["1"] ←ₛ some (Lit.Val 1)).buffers
-              { name := "input" }) ((st["1"] ←ₛ some (Lit.Val 1)).cycle - Back.toNat 0, 0))))
-    else none
+  (State.updateFelts st { name := "1" } 1)["x"] ←ₛ getImpl st { name := "input" } 0 0
 
 def part₀_state_update (st : State) : State :=
   Γ (part₀_state st) ⟦is0_witness₁; is0_witness₂; is0_witness₃; is0_witness₄; is0_witness₅⟧
@@ -276,13 +268,7 @@ lemma part₁_updates_opaque {st : State} :
   simp [part₀_state_update, part₁_updates]
 
 def part₂_state (st : State) : State :=
-  st["arg1[0]"] ←ₛ 
-    if 0 ≤ st.cycle ∧
-      { name := "output" } ∈ st.vars ∧
-      0 < Map.get! st.bufferWidths { name := "output" } ∧
-      Option.isSome (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 0)) = true 
-    then some (Lit.Val (Option.get! (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 0))))
-    else none
+  st["arg1[0]"] ←ₛ getImpl st { name := "output" } 0 0
 
 def part₂_state_update (st : State) : State :=
   Γ (part₂_state st) ⟦is0_witness₃; is0_witness₄; is0_witness₅⟧
@@ -376,14 +362,9 @@ lemma part₄_updates_opaque {st : State} :
 -- ****************************** WEAKEST PRE - Part₅ ******************************
 
 def part₅_state_update (st : State) : State :=
-  if Option.get! st.felts[({ name := "1 - arg1[0]" } : FeltVar)]! = 0 then st
-  else st["arg1[1]"] ←ₛ
-  if 0 ≤ st.cycle ∧
-     { name := "output" } ∈ st.vars ∧
-     1 < Map.get! st.bufferWidths { name := "output" } ∧
-     Option.isSome (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1)) = true
-  then some (Lit.Val (Option.get! (Buffer.get! (Map.get! st.buffers { name := "output" }) (st.cycle - Back.toNat 0, 1))))
-  else none
+  if Option.get! st.felts[({ name := "1 - arg1[0]" } : FeltVar)]! = 0
+  then st
+  else st["arg1[1]"] ←ₛ getImpl st { name := "output" } 0 1
 
 def part₅_updates {y₁ y₂ : Option Felt} (st : State) :
   (MLIR.runProgram is0_witness₅ st).lastOutput = [y₁, y₂] ↔
@@ -398,20 +379,6 @@ lemma part₅_updates_opaque {st : State} :
   (part₅_state_update (part₄_state st)).lastOutput = [y₁, y₂] := by
   simp [part₄_state_update, part₅_updates]
 
--- lemma is0_witness_closed_form_WAGH! {x : Felt} {y₁ y₂ : Option Felt} :
---   is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
---   unfold is0_witness_initial MLIR.runProgram is0_witness_prog is0_witness_initial_state is0_initial_state
---   MLIR_statement; simp
---   MLIR_statement; simp
-  
---   MLIR_statement
---   MLIR_statement
-  
-  
-
-  
-
-
 lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
   is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
   unfold is0_witness_initial MLIR.runProgram; simp only [is0_witness_per_partes]
@@ -425,83 +392,40 @@ lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
   unfold is0_witness_initial_state is0_initial_state
 
   unfold part₀_state
-  simp [State.updateFelts, Map.get!, Option.get!, Buffer.get!]
+  MLIR_states_updates
 
   unfold part₁_state
-  simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set
-  ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
-  
+  MLIR_states_updates
+
   unfold part₂_state
-  simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set
-  ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
-  
+  MLIR_states_updates
+
   unfold part₃_state
-  simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set, Map.mem_def
-  ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
-  
+  MLIR_states_updates
+
   unfold part₄_state
-  simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set
-  ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_states_updates
 
   unfold part₅_state_update
-  simp [
-    State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-    State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set
-  ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_states_updates
 
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  simp only [
+    State.felts_if, State.buffers_if, State.bufferWidths_if,
+    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
+    State.constraints_if, State.props_if
+  ] <;> try rfl
+  
+  MLIR_decide_updates
+  simp
 
-  rw [State.felts_if] <;> try rfl
-  simp [State.felts]
-  MLIR_states_simple; simp only [Map.update_def.symm]
-
-  rw [State.buffers_if] <;> try rfl
-  simp [State.buffers]
-  MLIR_states_simple; simp only [Map.update_def.symm]
-
-  rw [State.bufferWidths_if] <;> try rfl
-  simp [State.bufferWidths]
-  MLIR_states_simple; simp only [Map.update_def.symm]
-
-  rw [State.cycle_if] <;> try rfl
-  simp [State.cycle]
-  MLIR_states_simple; simp only [Map.update_def.symm]
-
-  rw [State.isFailed_if] <;> try rfl
-  simp [State.isFailed]
-  MLIR_states_simple; simp only [Map.update_def.symm]
-
-  rw [State.props_if] <;> try rfl
-  simp [State.props]
-  MLIR_states_simple; simp only [Map.update_def.symm]
-
-  rw [State.vars_if] <;> try rfl
-  simp [State.vars]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  unfold getElem instGetElemMapOptionTrue
+  simp
+  MLIR_decide_updates
 
   simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
-  
-  rw [State.buffers_if] <;> try rfl
-  simp [State.buffers]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+
+  simp only [State.buffers_if] <;> try rfl
+  MLIR_decide_updates
 
   simp [List.getLast]
 

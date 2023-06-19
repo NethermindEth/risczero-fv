@@ -34,7 +34,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   unfold part₁_state
   simp [
@@ -42,7 +42,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   unfold part₂_state
   simp [
@@ -50,7 +50,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   unfold part₃_state
   simp [
@@ -58,7 +58,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   unfold part₄_state
   simp [
@@ -66,7 +66,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   unfold part₅_state
   simp [
@@ -74,7 +74,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   unfold part₆_state
   simp [
@@ -82,7 +82,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   unfold part₇_state
   simp [
@@ -90,7 +90,7 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   unfold part₈_state
   simp [
@@ -98,43 +98,43 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
     State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set
   ]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   rw [State.felts_if] <;> try rfl
   simp [h_pre, State.felts]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   rw [State.buffers_if] <;> try rfl
   simp [h_pre, State.buffers]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   rw [State.bufferWidths_if] <;> try rfl
   simp [h_pre, State.bufferWidths]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   rw [State.cycle_if] <;> try rfl
   simp [h_pre, State.cycle]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   rw [State.isFailed_if] <;> try rfl
   simp [h_pre, State.isFailed]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   rw [State.props_if] <;> try rfl
   simp [h_pre, State.props]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   rw [State.vars_if] <;> try rfl
   simp [h_pre, State.vars]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   simp [h_pre, State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
   
   rw [State.buffers_if] <;> try rfl
   simp [h_pre, State.buffers]
-  MLIR_states_simple; simp only [Map.update_def.symm]
+  MLIR_decide_updates; simp only [Map.update_def.symm]
 
   simp [h_pre, List.getLast]
 
