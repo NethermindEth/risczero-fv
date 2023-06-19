@@ -129,7 +129,11 @@ elab "MLIR_decide_updates" : tactic => do
       le_refl, List.find?, List.mem_cons, ge_iff_le, tsub_eq_zero_of_le,
       List.cons.injEq, and_imp, forall_apply_eq_imp_iff', forall_eq',
       Nat.succ_ne_self, IsEmpty.forall_iff, implies_true, forall_const, Nat.succ.injEq,
-      getElem, instGetElemMapOptionTrue
+      getElem, instGetElemMapOptionTrue, State.updateFelts_buffers, State.updateFelts_bufferWidths,
+      State.updateFelts_constraints, State.updateFelts_cycle, State.updateFelts_isFailed,
+      State.updateFelts_props, State.updateFelts_vars, State.updateFelts_felts, State.updateProps_buffers,
+      State.updateProps_bufferWidths, State.updateProps_constraints, State.updateProps_cycle,
+      State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props
     ])
   evalTactic <| ← `(tactic| simp only [Map.update_def.symm])
 
