@@ -112,14 +112,17 @@ def witness_prog_full : MLIRProgram :=
   "outputSum - 1" ←ₐ .Sub ⟨"outputSum"⟩ ⟨"1"⟩;
   ?₀ ⟨"outputSum - 1"⟩
 
-def witness_prog_0_setup (n : ℕ) : MLIRProgram :=
+def witness_prog_0_setup_recursive (n : ℕ) : MLIRProgram :=
  -- %0 = cirgen.const 2
   (match n with
   | Nat.succ n => 
       toString (Nat.succ n) ←ₐ .Const (Nat.succ n); 
-      witness_prog_0_setup n
-  | Nat.zero => "0" ←ₐ .Const 0);
+      witness_prog_0_setup_recursive n
+  | Nat.zero => "0" ←ₐ .Const 0)
    -- %3 = cirgen.get %arg0[0] back 0 : <1, constant>
+
+def witness_prog_0_setup (n : ℕ) : MLIRProgram :=
+  witness_prog_0_setup_recursive n;
   "input" ←ₐ .Get ⟨"input"⟩ 0 0
 
 
@@ -186,6 +189,54 @@ def witness (input : Felt) : BufferAtTime :=
   witness_prog_full.run (initial_witness_state input)
   |>.buffers.get! ⟨"output"⟩
   |>.last!
+
+def constraints_prog_0_setup_recursive (n : ℕ) : MLIRProgram :=
+  (match n with
+  | Nat.succ n => 
+      witness_prog_0_setup_recursive n;
+      toString (Nat.succ n) ←ₐ .Const (Nat.succ n)
+  | Nat.zero => "0" ←ₐ .Const 0)
+
+def constraints_prog_0_setup (n : ℕ) : MLIRProgram :=
+  constraints_prog_0_setup_recursive n;
+  "true"      ←ₐ ⊤;
+  "input" ←ₐ .Get ⟨"input"⟩ 0 0
+
+def constraints_prog_1_projection (n : ℕ) : MLIRProgram :=
+  match n with
+  | (Nat.succ Nat.zero) => "output[1]" ←ₐ .Get ⟨"output"⟩ 0 1 
+  | Nat.succ n => 
+      "output[" ++ toString n.succ ++ "]" ←ₐ .Get ⟨"output"⟩ 0 n.succ;
+      "output[" ++ toString n.succ ++ "] * " ++ toString n.succ ←ₐ .Mul ⟨"output[" ++ toString n.succ ++ "]"⟩ ⟨toString n.succ⟩;
+      "sum" ++ toString n.succ ←ₐ .Add ⟨"output[" ++ toString n ++ "]"⟩ ⟨"output[" ++ toString n.succ ++ "] * " ++ toString n.succ⟩;
+      constraints_prog_1_projection n
+  | Nat.zero => "RIP" ←ₐ .Const 42
+
+def constraints_prog_3_sum_equals_input (n : ℕ) : MLIRProgram :=
+  "sum" ++ toString n ++ " - input" ←ₐ .Sub ⟨"sum" ++ toString n⟩ ⟨"input"⟩;
+  "andEqzSumInput" ←ₐ ⟨"true"⟩ &₀ ⟨"sum" ++ toString n ++ " - input"⟩ 
+
+def constraints_prog_4_output0_le_1_and_sum (n : ℕ) : MLIRProgram :=
+   -- %9 = cirgen.get %arg1[0] back 0 : <3, mutable>
+  match n with
+  | Nat.succ n => 
+    -- %10 = cirgen.sub %1 : <default>, %9 : <default>
+    "1 - output[" ++ toString n.succ ++ "]" ←ₐ .Sub ⟨"1"⟩ ⟨"output[" ++ toString n.succ ++ "]"⟩;
+    -- %11 = cirgen.mul %9 : <default>, %10 : <default>
+    "output[" ++ toString n.succ ++ "] <= 1" ←ₐ .Mul ⟨"output[" ++ toString n.succ ++ "]"⟩ ⟨"1 - Output[" ++ toString n.succ ++ "]"⟩;
+    -- cirgen.eqz %11 : <default>
+    "andEqzNonZero[" ++ toString n.succ ++ "]" ←ₐ ⟨"andEqzNonZero[" ++ toString n ++ "]"⟩ &₀ ⟨"output[" ++ toString n.succ ++ "] <= 1"⟩;
+    constraints_prog_4_output0_le_1_and_sum n
+  | Nat.zero => 
+    "output_sum[0]" ←ₐ .Get ⟨"output"⟩ 0 0;
+    -- %10 = cirgen.sub %1 : <default>, %9 : <default>
+    "1 - output[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"output[0]"⟩;
+    -- %11 = cirgen.mul %9 : <default>, %10 : <default>
+    "output[0] <= 1" ←ₐ .Mul ⟨"output[0]"⟩ ⟨"1 - output[0]"⟩;
+    -- cirgen.eqz %11 : <default>
+    "andEqzNonZero[0]" ←ₐ ⟨"andEqzSumInput"⟩ &₀ ⟨"output[" ++ toString n.succ ++ "] <= 1"⟩
+
+
 
 lemma constraints_closed_form {input : Felt} {output: BufferAtTime} :
   constraints input output ↔ (
