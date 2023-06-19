@@ -238,12 +238,13 @@ def constraints_prog_4_output0_le_1_and_sum (n : ℕ) : MLIRProgram :=
 
 
 
+def kronecker (i : ℕ) (j : ℕ) : ℕ := if i = j then 1 else 0
+
+def ith_hot (n : ℕ) (i : ℕ) : BufferAtTime :=
+  ((List.range n).tail.map (kronecker i)).map some
+
 lemma constraints_closed_form {input : Felt} {output: BufferAtTime} :
-  constraints input output ↔ (
-    input = 0 ∧ output = [1,0,0].map some ∨
-    input = 1 ∧ output = [0,1,0].map some ∨
-    input = 2 ∧ output = [0,0,1].map some
-  ) := by
+  constraints input output ↔ ∃ (i : ℕ), i <= n → input = i ∧  output = ith_hot n i := by
   sorry
 
 lemma witness_closed_form {input : Felt} {output : BufferAtTime} :
