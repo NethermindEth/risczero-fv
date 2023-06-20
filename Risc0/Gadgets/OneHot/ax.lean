@@ -134,7 +134,7 @@ def witness_prog_1_nondet_inner (n : ℕ) : MLIR IsNondet.InNondet :=
     | Nat.succ n =>
       witness_prog_1_nondet_inner n;
       "input - " ++ (toString (Nat.succ n)) ←ₐ .Sub ⟨"input"⟩ ⟨toString (Nat.succ n)⟩;
-      "input == " ++ (toString (Nat.succ n)) ←ₐ ??₀⟨"input"⟩;
+      "input == " ++ (toString (Nat.succ n)) ←ₐ ??₀⟨"input - " ++ (toString (Nat.succ n))⟩;
       ⟨"output"⟩[Nat.succ n] ←ᵢ ⟨"input == " ++ (toString (Nat.succ n))⟩
     | Nat.zero =>     
       "input == 0" ←ₐ ??₀⟨"input"⟩;
@@ -194,6 +194,9 @@ def part₀_state_rec {n : ℕ} (st : State) : State :=
 def part₀_state {n : ℕ} (st : State) : State := 
   (@part₀_state_rec n st)["input"] ←ₛ getImpl st { name := "input" } 0 0
 
+def part₀_state_rec_update {n : ℕ} (st : State) (progr: MLIRProgram) : State :=
+  Γ (@part₀_state_rec n st) ⟦progr⟧
+
 def part₀_state_update {n : ℕ} (st : State) (progr: MLIRProgram) : State :=
   Γ (@part₀_state n st) ⟦ progr⟧
 
@@ -205,19 +208,22 @@ def part₀_state_update {n : ℕ} (st : State) (progr: MLIRProgram) : State :=
 --   MLIR
 
 lemma part₀_updates {n : ℕ} {y₁ y₂ : Option Felt} (st : State) (progr: MLIRProgram) :
-  (MLIR.runProgram (witness_prog_0_setup n; witness_prog_1nondet n) st).lastOutput = [y₁, y₂] ↔
-  (@part₀_state_update n st).lastOutput = [y₁, y₂] := by
-  simp only [part₀_state, part₀_state_update, MLIR.runProgram]
-  generalize eq : (witness_prog_1nondet n) = prog
-  revert prog
-  unfold witness_prog_0_setup witness_prog_0_setup_recursive
+  (MLIR.runProgram (witness_prog_0_setup_recursive n; progr) st) =
+  (@part₀_state_rec_update n st progr) := by
+  revert st progr
+  simp only [part₀_state, part₀_state_rec_update, MLIR.runProgram]
+  unfold witness_prog_0_setup_recursive
   induction' n with n ih
-  · simp
+  · intros st progr
+    simp
     simp only [part₀_state_rec]
     MLIR
-  · simp only [part₀_state_rec]
-    intros prog eq
-    specialize (ih prog)
+  · intros st progr
+    simp only [part₀_state_rec]
+    simp only [Nat.cast_succ] at ih
+    MLIR 
+    unfold witness_prog_0_setup_recursive
+
 
     
   MLIR
