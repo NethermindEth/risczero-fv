@@ -281,3 +281,5 @@ TSWLatexianTemp*
 !/lake-packages/manifest.json
 /lean_packages/*
 !/lean_packages/manifest.json
+
+.vscode/*
