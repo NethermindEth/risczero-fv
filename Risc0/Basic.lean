@@ -558,20 +558,37 @@ lemma getImpl_def : getImpl st buf back offset =
                     then Option.some <| Lit.Val (Buffer.back st buf back offset).get!
                     else .none := rfl
 
+def invImpl (st : State) (x : FeltVar) : Felt :=
+  if st.felts[x]!.get! = 0 then 0 else st.felts[x].get!⁻¹
+
+lemma invImpl_def : invImpl st x = if st.felts[x].get! = 0 then 0 else st.felts[x].get!⁻¹ := rfl
+
+def addImpl (st : State) (lhs rhs : FeltVar) : Option Lit :=
+  .some <| .Val <| st.felts[lhs].get! + st.felts[rhs].get!
+
+lemma addImpl_def :
+  addImpl st lhs rhs = .some (.Val (st.felts[lhs].get! + st.felts[rhs].get!)) := rfl
+
+def iszImpl (st : State) (x : FeltVar) : Felt :=
+  if st.felts[x].get! = 0 then 1 else 0
+
+lemma iszImpl_def :
+  iszImpl st x = if st.felts[x].get! = 0 then 1 else 0 := rfl
+
 -- Evaluate a pure functional circuit.
 def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
   match op with
     -- Constants
     | Const const => .some <| .Val const
     -- Arith
-    | Add lhs rhs => .some <| .Val <| st.felts[lhs].get! + st.felts[rhs].get!
+    | Add lhs rhs => addImpl st lhs rhs
     | Sub lhs rhs => .some <| .Val <| st.felts[lhs].get! - st.felts[rhs].get!
     | Neg lhs     => .some <| .Val <| 0                  - st.felts[lhs].get!
     | Mul lhs rhs => .some <| .Val <| st.felts[lhs].get! * st.felts[rhs].get!
     | Pow lhs rhs => .some <| .Val <| st.felts[lhs].get! ^ rhs
-    | Inv x => .some <| .Val <| if st.felts[x]!.get! = 0 then 0 else st.felts[x]!.get!⁻¹
+    | Inv x       => .some <| .Val <| invImpl st x
     -- Logic
-    | Isz x => .some <| .Val <| if st.felts[x]!.get! = 0 then 1 else 0
+    | Isz x => .some <| .Val <| iszImpl st x
     -- Constraints
     | AndEqz c val           => .some <| .Constraint <| st.props[c].get! ∧ st.felts[val].get! = 0
     | AndCond old cond inner =>
@@ -626,28 +643,28 @@ lemma eval_getBuffer : Γ st ⟦@Get α buf back offset⟧ₑ =
   else .none := rfl
 
 @[simp]
-lemma eval_sub : Γ st ⟦@Sub α x y⟧ₑ = .some (.Val ((st.felts x).get! - (st.felts y).get!)) := rfl
+lemma eval_sub : Γ st ⟦@Sub α x y⟧ₑ = .some (.Val (st.felts[x].get! - st.felts[y].get!)) := rfl
 
 @[simp]
-lemma eval_mul : Γ st ⟦@Mul α x y⟧ₑ = .some (.Val ((st.felts x).get! * (st.felts y).get!)) := rfl
+lemma eval_mul : Γ st ⟦@Mul α x y⟧ₑ = .some (.Val (st.felts[x].get! * st.felts[y].get!)) := rfl
 
 @[simp]
-lemma eval_isz : Γ st ⟦??₀x⟧ₑ = .some (.Val (if (st.felts x).get! = 0 then 1 else 0)) := rfl
+lemma eval_isz : Γ st ⟦??₀x⟧ₑ = .some (.Val (if st.felts[x].get! = 0 then 1 else 0)) := rfl
 
 @[simp]
-lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .some (.Val (if st.felts[x]!.get! = 0 then 0 else st.felts[x]!.get!⁻¹)) := rfl
+lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .some (.Val (if st.felts[x].get! = 0 then 0 else st.felts[x].get!⁻¹)) := rfl
 
 @[simp]
 lemma eval_andEqz : Γ st ⟦@AndEqz α c x⟧ₑ =
-                    .some (.Constraint ((st.props c).get! ∧ (st.felts x).get! = 0)) := rfl
+                    .some (.Constraint (st.props[c].get! ∧ st.felts[x].get! = 0)) := rfl
 
 @[simp]
 lemma eval_andCond :
   Γ st ⟦@AndCond α old cnd inner⟧ₑ =
-    .some (.Constraint ((st.props old).get! ∧
-                       if (st.felts cnd).get! = 0
+    .some (.Constraint (st.props[old].get! ∧
+                       if st.felts[cnd].get! = 0
                        then _root_.True
-                       else (st.props inner).get!)) := rfl
+                       else st.props[inner].get!)) := rfl
 
 end Op
 
