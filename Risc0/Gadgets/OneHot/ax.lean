@@ -186,18 +186,18 @@ def witness_prog_4_final_constraints (n : ℕ) : MLIRProgram :=
   --     cirgen.eqz %18 : <default>
   ?₀ ⟨"outputSum - 1"⟩
 
-def part₀_state_rec {n : ℕ} (st : State) : State :=
+def part₀_state_rec (n : ℕ) (st : State) : State :=
   match n with
   | Nat.succ n => State.updateFelts (@part₀_state_rec n st) { name := toString (Nat.succ n)} (Nat.succ n)
   | Nat.zero => State.updateFelts st { name := "0"} Nat.zero
 
-def part₀_state {n : ℕ} (st : State) : State := 
+def part₀_state (n : ℕ) (st : State) : State := 
   (@part₀_state_rec n st)["input"] ←ₛ getImpl st { name := "input" } 0 0
 
-def part₀_state_rec_update {n : ℕ} (st : State) (progr: MLIRProgram) : State :=
+def part₀_state_rec_update (n : ℕ) (st : State) (progr: MLIRProgram) : State :=
   Γ (@part₀_state_rec n st) ⟦progr⟧
 
-def part₀_state_update {n : ℕ} (st : State) (progr: MLIRProgram) : State :=
+def part₀_state_update (n : ℕ) (st : State) (progr: MLIRProgram) : State :=
   Γ (@part₀_state n st) ⟦ progr⟧
 
 -- lemma part₀_updates {y₁ y₂ : Option Felt} (st : State) :
@@ -207,27 +207,61 @@ def part₀_state_update {n : ℕ} (st : State) (progr: MLIRProgram) : State :=
 --   unfold is0_witness₀
 --   MLIR
 
-lemma part₀_updates {n : ℕ} {y₁ y₂ : Option Felt} (st : State) (progr: MLIRProgram) :
-  (MLIR.runProgram (witness_prog_0_setup_recursive n; progr) st) =
-  (@part₀_state_rec_update n st progr) := by
-  revert st progr
+lemma toStringInj {n m : ℕ} : toString n = toString m → n = m := by sorry
+
+lemma part₀_state_rec_comm (n m : ℕ) {x : Felt} (h : n < m) : part₀_state_rec n (st[felts][{ name := toString m }] ← x) =
+  part₀_state_rec n st[felts][{ name := toString m }] ← x := by
+  revert st x m
+  induction' n with n ih
+  · intros st m x h
+    simp only [Nat.zero_eq]
+    unfold part₀_state_rec
+    simp only [Nat.zero_eq, Nat.cast_zero]
+    unfold State.updateFelts
+    simp only [State.mk.injEq, and_self, and_true, true_and]
+    rw [Map.update_neq_comm]
+    simp
+    cases m
+    aesop
+    sorry
+  · intros st m x h
+    unfold part₀_state_rec
+    simp only [Nat.cast_succ]
+    rw [@ih st]
+    rw [State.updateFelts_neq_comm]
+    simp
+    intro contr
+    have hcontr : m = Nat.succ n := by
+      {
+        apply toStringInj
+        exact contr
+      }
+    aesop
+    apply Nat.lt_of_succ_lt
+    exact h 
+
+lemma part₀_updates {n : ℕ} (st : State) :
+  (MLIR.runProgram (witness_prog_0_setup_recursive n) st) =
+  part₀_state_rec n st := by
+  revert st
   simp only [part₀_state, part₀_state_rec_update, MLIR.runProgram]
   unfold witness_prog_0_setup_recursive
   induction' n with n ih
-  · intros st progr
+  · intros st
     simp
     simp only [part₀_state_rec]
     MLIR
-  · intros st progr
+    rfl
+  · intros st
     simp only [part₀_state_rec]
     simp only [Nat.cast_succ] at ih
-    MLIR 
+    MLIR
     unfold witness_prog_0_setup_recursive
-
-
-    
-  MLIR
-  rfl
+    specialize (ih (st[felts][{ name := toString (Nat.succ n) }] ← ↑n + 1))
+    simp
+    rw [ih]
+    rw [part₀_state_rec_comm]
+    aesop
 
 def witness (input : Felt) : BufferAtTime :=
   witness_prog_full.run (initial_witness_state input)
