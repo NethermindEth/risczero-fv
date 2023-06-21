@@ -179,7 +179,7 @@ def witness_prog_4_output0_le_1_and_sum (n : ℕ) : MLIRProgram :=
     ?₀ ⟨"output[0] <= 1"⟩
 
 
-def witness_prog_4_final_constraints (n : ℕ) : MLIRProgram :=
+def witness_prog_5_final_constraints (n : ℕ) : MLIRProgram :=
    -- %17 = cirgen.add %14 : <default>, %5 : <default>
    -- %18 = cirgen.sub %17 : <default>, %1 : <default>
   "outputSum - 1" ←ₐ .Sub ⟨"output_sum[" ++ toString n ++ "]"⟩ ⟨"1"⟩;
@@ -240,7 +240,7 @@ lemma part₀_state_rec_comm (n m : ℕ) {x : Felt} (h : n < m) : part₀_state_
     apply Nat.lt_of_succ_lt
     exact h 
 
-lemma part₀_updates {n : ℕ} (st : State) :
+lemma part₀_updates' {n : ℕ} (st : State) :
   (MLIR.runProgram (witness_prog_0_setup_recursive n) st) =
   part₀_state_rec n st := by
   revert st
@@ -262,6 +262,29 @@ lemma part₀_updates {n : ℕ} (st : State) :
     rw [ih]
     rw [part₀_state_rec_comm]
     aesop
+
+lemma getImpl_safe : getImpl (Γ st ⟦witness_prog_0_setup_recursive n⟧) { name := "input" } 0 0 = getImpl st { name := "input" } 0 0 := by
+  revert st
+  induction' n with n ih
+  · intros st
+    unfold witness_prog_0_setup_recursive
+    simp [getImpl, isGetValid]
+    MLIR_states
+  · intros st
+    unfold witness_prog_0_setup_recursive
+    MLIR
+    rw [ih]
+    simp [getImpl, isGetValid]
+    MLIR_states
+
+lemma part₀_updates {output : BufferAtTime} {n : ℕ} (st : State) :
+  (MLIR.runProgram (witness_prog_0_setup n; witness_prog_1nondet n; witness_prog_2_projection n; witness_prog_3_sum_equals_input n; witness_prog_4_output0_le_1_and_sum n; witness_prog_5_final_constraints n) st).lastOutput = output ↔
+  (part₀_state_update n st (witness_prog_1nondet n; witness_prog_2_projection n; witness_prog_3_sum_equals_input n; witness_prog_4_output0_le_1_and_sum n; witness_prog_5_final_constraints n)).lastOutput = output := by
+  simp only [part₀_state, part₀_state_update, MLIR.runProgram]
+  generalize eq : (witness_prog_1nondet n; witness_prog_2_projection n; witness_prog_3_sum_equals_input n; witness_prog_4_output0_le_1_and_sum n; witness_prog_5_final_constraints n) = progr
+  unfold witness_prog_0_setup
+  MLIR
+  rw [←@part₀_updates' n st, getImpl_safe]
 
 def witness (input : Felt) : BufferAtTime :=
   witness_prog_full.run (initial_witness_state input)
