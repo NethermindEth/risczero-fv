@@ -87,9 +87,6 @@ lemma isFailed_monotonic : ∀ state : State, state.isFailed → (Γ state ⟦pr
   case Sequence α α₁ prog₁ prog₂ h₁ h₂ =>
     simp [run_seq_def, h₁, h₂, h_failed]
   all_goals simp [MLIR.run, State.update, h_failed]
-  case Assign => aesop
-  case If => aesop
-  case Nondet => aesop
   case Set =>
     unfold State.set! State.setBufferElementImpl
     rewrite [h_failed]
@@ -98,6 +95,59 @@ lemma isFailed_monotonic : ∀ state : State, state.isFailed → (Γ state ⟦pr
     unfold State.setGlobal! State.setBufferElementImpl
     rewrite [h_failed]
     aesop
+  all_goals aesop
+
+-- REVIEW does this require classical logic to get from isFailed_monotonic
+lemma isFailed_monotonic' : ∀ state : State, (Γ state ⟦program⟧).isFailed = false → state.isFailed = false := by
+  induction program
+  all_goals intros state h_noFail
+  all_goals simp [MLIR.run, State.update, h_noFail] at *
+  case Set =>
+    unfold State.set! State.setBufferElementImpl at h_noFail
+    aesop
+  case SetGlobal =>
+    unfold State.setGlobal! State.setBufferElementImpl at h_noFail
+    aesop
+  all_goals aesop
+
+open Op in
+def allGetsValid {α} (st: State) (program: MLIR α) : Prop :=
+  match program with
+    | Assign _ op => match op with
+      | Get buf back offset  => isGetValid st buf back offset
+      | _                    => True --TODO add getGlobal case
+    | If x p         => st.felts[x]!.get! ≠ 0 → allGetsValid st p
+    | Nondet block   => allGetsValid st block
+    | Sequence p₁ p₂ => allGetsValid st p₁ ∧ allGetsValid (Γ st ⟦p₁⟧) p₂
+    | _              => True
+
+lemma allGetsValid_of_not_isFailed : ∀ st : State, ¬(Γ st ⟦program⟧).isFailed → allGetsValid st program := by
+  induction program with
+    | Assign name op =>
+      simp [allGetsValid]
+      intros st h_noFail
+      cases op with
+        | Get buf back offset =>
+          simp [MLIR.run, Op.eval, getImpl, State.update] at *
+          aesop
+        | _ => aesop
+    | If x p h                 => simp [h, MLIR.run, allGetsValid]; aesop
+    | Nondet block h           => simp [h, MLIR.run, allGetsValid]; aesop
+    | Eqz x                    => simp [allGetsValid]
+    | Fail                     => simp [allGetsValid]
+    | Set buf offset val       => simp [allGetsValid]
+    | SetGlobal buf offset val => simp [allGetsValid]
+    | Sequence p₁ p₂ h₁ h₂ =>
+      intros state h_noFail
+      simp [allGetsValid]
+      apply And.intro
+      all_goals simp only [Bool.not_eq_true] at *
+      case Sequence.left =>
+        have h_noFail₁: (Γ state ⟦p₁⟧).isFailed = false := isFailed_monotonic' (Γ state ⟦p₁⟧) h_noFail
+        simp [h₁, h_noFail₁]
+      case Sequence.right =>
+        simp [MLIR.run] at h_noFail
+        exact h₂ (Γ state ⟦p₁⟧) h_noFail
 
 end MLIR
 
