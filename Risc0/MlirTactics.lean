@@ -48,7 +48,7 @@ elab "MLIR_states" : tactic => do
 
 elab "MLIR_states_new" : tactic => do
   evalTactic <| ← `(tactic| simp [
-    getImpl, isGetValid, Buffer.back, Option.get!,
+    getImpl, isGetValid, State.get_back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
     State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
@@ -103,8 +103,14 @@ elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
   )
-  evalTactic <| ← `(tactic| try simp? [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+  evalTactic <| ← `(tactic| try simp [State.get_back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
   
+elab "MLIR?" : tactic => do
+  evalTactic <| ← `(
+    tactic| repeat MLIR_statement
+  )
+  evalTactic <| ← `(tactic| try simp? [State.get_back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+
 -- elab "MLIR_statement" : tactic => do
 --   evalTactic <| ← `(
 --     tactic| (

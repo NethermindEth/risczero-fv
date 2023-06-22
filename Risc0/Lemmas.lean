@@ -5,6 +5,9 @@ import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.LibrarySearch
 
 import Risc0.Basic
+import Risc0.Buffer
+import Risc0.State
+import Risc0.Mlir
 
 namespace Risc0
 
@@ -57,7 +60,7 @@ lemma run_if {x : FeltVar} :
 --                                    aesop
 
 lemma run_eqz {x : FeltVar} :
-  Γ st ⟦@MLIR.Eqz α x⟧ = withEqZero st.felts[x]!.get! st := rfl
+  Γ st ⟦@MLIR.Eqz α x⟧ = st.withEqZero st.felts[x]!.get! := rfl
 
 -- lemma run_valid_get {st: State} {name: String} {x y: Option Lit} {back offset : ℕ} 
 --   (h_cycle: back ≤ st.cycle) (h_vars: ⟨name⟩ ∈ st.vars)

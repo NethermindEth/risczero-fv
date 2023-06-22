@@ -1,4 +1,5 @@
 import Risc0.Basic
+import Risc0.Mlir
 
 namespace Risc0
 
