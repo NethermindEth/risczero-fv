@@ -81,6 +81,24 @@ lemma seq_assoc : Γ state ⟦p₁; (p₂; p₃)⟧ = Γ state ⟦(p₁; p₂); 
 lemma nondet_blocks_split : Γ state ⟦nondet (s₁; s₂)⟧ = Γ state ⟦nondet s₁; nondet s₂⟧ := by
   simp [run_nondet, run_seq_def]
 
+lemma isFailed_monotonic : ∀ state : State, state.isFailed → (Γ state ⟦program⟧).isFailed := by
+  induction program
+  all_goals intros state h_failed
+  case Sequence α α₁ prog₁ prog₂ h₁ h₂ =>
+    simp [run_seq_def, h₁, h₂, h_failed]
+  all_goals simp [MLIR.run, State.update, h_failed]
+  case Assign => aesop
+  case If => aesop
+  case Nondet => aesop
+  case Set =>
+    unfold State.set! State.setBufferElementImpl
+    rewrite [h_failed]
+    aesop
+  case SetGlobal =>
+    unfold State.setGlobal! State.setBufferElementImpl
+    rewrite [h_failed]
+    aesop
+
 end MLIR
 
 end WithMLIR 
