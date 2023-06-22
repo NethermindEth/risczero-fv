@@ -32,7 +32,7 @@ def full : MLIRProgram :=
   "if other cond" ←ₐ guard ⟨"1 - out[0]"⟩ & ⟨"if out[0] then eqz x"⟩ with ⟨"other cond"⟩
 
 def getReturn (st: State) : Prop :=
-  st.constraintsInVar ⟨"if other cond"⟩
+  st.constraintsInVar ⟨"if other cond"⟩ ∧ ¬st.isFailed
 
 def run (st: State) : Prop :=
   getReturn (full.runProgram st)
