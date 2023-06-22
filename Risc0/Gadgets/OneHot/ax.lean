@@ -1,5 +1,6 @@
 import Mathlib.Data.Nat.Prime
 import Mathlib.Data.Vector
+import Mathlib.Data.String.Lemmas
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.FieldSimp
@@ -221,9 +222,13 @@ lemma part₀_state_rec_comm (n m : ℕ) {x : Felt} (h : n < m) : part₀_state_
     simp only [State.mk.injEq, and_self, and_true, true_and]
     rw [Map.update_neq_comm]
     simp
-    cases m
+    rcases m with _ | m 
     aesop
-    sorry
+    have h_eq : "0" = toString Nat.zero := by simp
+    rw [h_eq]
+    intro contr
+    have h_eq : Nat.succ m = Nat.zero := by exact (toStringInj contr)
+    aesop
   · intros st m x h
     unfold part₀_state_rec
     simp only [Nat.cast_succ]
@@ -265,13 +270,12 @@ lemma part₀_updates' {n : ℕ} (st : State) :
 
 lemma getImpl_safe : getImpl (Γ st ⟦witness_prog_0_setup_recursive n⟧) { name := "input" } 0 0 = getImpl st { name := "input" } 0 0 := by
   revert st
+  unfold witness_prog_0_setup_recursive
   induction' n with n ih
   · intros st
-    unfold witness_prog_0_setup_recursive
     simp [getImpl, isGetValid]
     MLIR_states
   · intros st
-    unfold witness_prog_0_setup_recursive
     MLIR
     rw [ih]
     simp [getImpl, isGetValid]
@@ -280,6 +284,136 @@ lemma getImpl_safe : getImpl (Γ st ⟦witness_prog_0_setup_recursive n⟧) { na
 lemma part₀_updates {output : BufferAtTime} {n : ℕ} (st : State) :
   (MLIR.runProgram (witness_prog_0_setup n; witness_prog_1nondet n; witness_prog_2_projection n; witness_prog_3_sum_equals_input n; witness_prog_4_output0_le_1_and_sum n; witness_prog_5_final_constraints n) st).lastOutput = output ↔
   (part₀_state_update n st (witness_prog_1nondet n; witness_prog_2_projection n; witness_prog_3_sum_equals_input n; witness_prog_4_output0_le_1_and_sum n; witness_prog_5_final_constraints n)).lastOutput = output := by
+  simp only [part₀_state, part₀_state_update, MLIR.runProgram]
+  generalize eq : (witness_prog_1nondet n; witness_prog_2_projection n; witness_prog_3_sum_equals_input n; witness_prog_4_output0_le_1_and_sum n; witness_prog_5_final_constraints n) = progr
+  unfold witness_prog_0_setup
+  MLIR
+  rw [←@part₀_updates' n st, getImpl_safe]
+
+-- def witness_prog_1_nondet_inner (n : ℕ) : MLIR IsNondet.InNondet :=
+--    -- cirgen.nondet {
+--      --   %19 = cirgen.isz %3 : <default>
+--     match n with
+--     | Nat.succ n =>
+--       witness_prog_1_nondet_inner n;
+--       "input - " ++ (toString (Nat.succ n)) ←ₐ .Sub ⟨"input"⟩ ⟨toString (Nat.succ n)⟩;
+--       "input == " ++ (toString (Nat.succ n)) ←ₐ ??₀⟨"input - " ++ (toString (Nat.succ n))⟩;
+--       ⟨"output"⟩[Nat.succ n] ←ᵢ ⟨"input == " ++ (toString (Nat.succ n))⟩
+--     | Nat.zero =>     
+--       "input == 0" ←ₐ ??₀⟨"input"⟩;
+--       --   cirgen.set %arg1 : <3, mutable>[0] = %19 : <default>
+--       ⟨"output"⟩[0] ←ᵢ ⟨"input == 0"⟩
+
+def part₁_state (n : ℕ) (st : State) : State :=
+  match n with
+  | Nat.succ n => State.set! ((@part₁_state n st[felts][⟨"input - " ++ toString (Nat.succ n)⟩] ← (st.felts ⟨"input"⟩).get! - (st.felts ⟨toString n.succ⟩).get!)[felts][⟨"input == " ++ (toString (Nat.succ n))⟩] ← (if (st.felts ⟨"input"⟩).get! = Nat.succ n then 1 else 0)) ⟨"output"⟩ n.succ (if (st.felts ⟨"input"⟩).get! = Nat.succ n then 1 else 0)
+  | Nat.zero => State.set! (st[felts][⟨"input == 0"⟩] ← if (st.felts ⟨"input"⟩).get! = 0 then 1 else 0) ⟨"output"⟩ 0 (if (st.felts ⟨"input"⟩).get! = 0 then 1 else 0)
+
+def part₁_state_update (n : ℕ) (st : State) (progr: MLIRProgram) : State :=
+  Γ (@part₁_state n st) ⟦progr⟧
+
+lemma input_toString {n : ℕ} : ¬"input - " ++ toString n = "input" := by
+  intros contr
+  have h : ("input - " ++ toString n).length = "input".length := by rw [contr]
+  rw [String.length_append] at h
+  simp [String.length] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  aesop
+  
+lemma input_toString' {n : ℕ} : ¬"input == " ++ toString n = "input" := by
+  intros contr
+  have h : ("input == " ++ toString n).length = "input".length := by rw [contr]
+  rw [String.length_append] at h
+  simp [String.length] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  rw [Nat.succ_add] at h
+  aesop
+
+lemma part₁_doesnt_touch_input {n : ℕ} {st : State} : State.felts (part₁_state n st) { name := "input" } = State.felts st { name := "input" } := by
+  revert st
+  induction' n with n ih
+  · intros st
+    unfold part₁_state
+    simp
+    rw [←@Map.getElem_def _ _ (st.felts[{ name := "input == 0" }] ←ₘ if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0), Map.update_get_next]
+    rfl
+    aesop
+  · intros st
+    unfold part₁_state
+    simp
+    rw [←@Map.getElem_def _ _ (((part₁_state n st).felts[{ name := "input - " ++ toString (Nat.succ n) }] ←ₘ
+        Option.get! (State.felts st { name := "input" }) -
+          Option.get!
+            (State.felts st { name := toString (Nat.succ n) }))[{ name := "input == " ++ toString (Nat.succ n) }] ←ₘ
+      if Option.get! (State.felts st { name := "input" }) = ↑n + 1 then 1 else 0), Map.update_get_next, Map.update_get_next]
+    specialize (@ih st)
+    rw [Map.getElem_def, ih]
+    simp
+    exact input_toString
+    simp
+    exact input_toString'
+
+lemma part₁_doesnt_touch_n_succ {n : ℕ} {st : State} : State.felts (part₁_state n st) { name := toString n.succ } = State.felts st { name := toString n.succ } := by 
+  
+  -- revert st
+  -- induction' n with n ih
+  -- · intros st
+  --   unfold part₁_state
+  --   simp
+  --   rw [←@Map.getElem_def _ _ (st.felts[{ name := "input == 0" }] ←ₘ if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0), Map.update_get_next]
+  --   rfl
+  --   aesop
+  -- · intros st
+  --   unfold part₁_state
+  --   simp
+  --   rw [←@Map.getElem_def _ _ (((part₁_state n st).felts[{ name := "input - " ++ toString (Nat.succ n) }] ←ₘ
+  --       Option.get! (State.felts st { name := "input" }) -
+  --         Option.get!
+  --           (State.felts st { name := toString (Nat.succ n) }))[{ name := "input == " ++ toString (Nat.succ n) }] ←ₘ
+  --     if Option.get! (State.felts st { name := "input" }) = ↑n + 1 then 1 else 0), Map.update_get_next, Map.update_get_next]
+  --   specialize (@ih st)
+  --   rw [Map.getElem_def, ih]
+  --   simp
+  --   exact input_toString
+  --   simp
+  --   exact input_toString'
+
+lemma part₁_updates' {n : ℕ} (st : State) :
+  (MLIR.run (witness_prog_1_nondet_inner n) st) = part₁_state n st := by
+  revert st
+  induction' n with n ih
+  · unfold witness_prog_1_nondet_inner
+    intros st
+    MLIR
+    rfl
+  · intros st
+    unfold part₁_state witness_prog_1_nondet_inner
+    simp
+    MLIR
+    rw [ih, part₁_doesnt_touch_input]
+    simp
+
+    by_cases 
+    rw [←ih]
+    simp only [Nat.cast_succ]
+    simp [State.set!]
+    simp [State.setBufferElementImpl]
+    
+
+
+
+lemma part₁_updates {output : BufferAtTime} {n : ℕ} (st : State) :
+  (MLIR.runProgram (witness_prog_1nondet n; witness_prog_2_projection n; witness_prog_3_sum_equals_input n; witness_prog_4_output0_le_1_and_sum n; witness_prog_5_final_constraints n) st).lastOutput = output ↔
+  (part₀_state_update n st (witness_prog_2_projection n; witness_prog_3_sum_equals_input n; witness_prog_4_output0_le_1_and_sum n; witness_prog_5_final_constraints n)).lastOutput = output := by
   simp only [part₀_state, part₀_state_update, MLIR.runProgram]
   generalize eq : (witness_prog_1nondet n; witness_prog_2_projection n; witness_prog_3_sum_equals_input n; witness_prog_4_output0_le_1_and_sum n; witness_prog_5_final_constraints n) = progr
   unfold witness_prog_0_setup
