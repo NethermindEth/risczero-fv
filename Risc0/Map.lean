@@ -82,8 +82,16 @@ lemma empty_get : (@Map.empty α β)[k] = none := by rfl
 lemma update_get_skip (h : k ≠ k') (h₁ : m[k] = some v) :
   (m[k'] ←ₘ v')[k] = some v := by simp [update, h, getElem_def, getElem_def ▸ h₁]
 
+-- shouldn't be necessary but it gets simp to work
+lemma update_get_skip' (h : k ≠ k') (h₁ : m[k] = some v) :
+  (m[k'] ←ₘ v') k = some v := by simp [update, h, getElem_def, getElem_def ▸ h₁]
+
 lemma update_get_next (h : k ≠ k') :
   (m[k] ←ₘ v)[k'] = m[k'] := by simp [update, getElem_def, h.symm]
+
+-- shouldn't be necessary but it gets simp to work
+lemma update_get_next' (h : k ≠ k') :
+  (m[k] ←ₘ v) k' = m[k'] := by simp [update, getElem_def, h.symm]
 
 -- Membership lemmas.
 lemma mem_def : (x ∈ m) = m[x].isSome := rfl
