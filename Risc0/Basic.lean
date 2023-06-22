@@ -703,8 +703,7 @@ lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val 
   aesop
 
 def State.setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
-  let width := st.bufferWidths[bufferVar].get!
-  st.setBufferElementImpl bufferVar (Buffer.Idx.from1D offset width) val
+  st.setBufferElementImpl bufferVar (Buffer.Idx.from1D offset st.bufferWidths[bufferVar].get!) val
 
 -- Step through the entirety of a `MLIR` MLIR program from initial state
 -- `state`, yielding the post-execution state and possibly a constraint

@@ -31,9 +31,9 @@ theorem constraints_if_witness
   repeat split; all_goals simp [*] at *; try intros; simp [*] at *
   aesop
 
-theorem spec_of_constraints {x} {y₁ y₂: Option Felt}
+theorem spec_of_constraints {st} {x} {y₁ y₂: Option Felt}
   (hy₁ : y₁.isSome) (hy₂: y₂.isSome) :
-  Constraints.Code.run (Constraints.WP.start_state x ([y₁, y₂])) → (
+  Constraints.WP.start_state st x y₁ y₂ → Constraints.Code.run st → (
     x = 0 ∧ y₁ = some 1 ∨
     x ≠ 0 ∧ y₁ = some 0 ∧ y₂ = x⁻¹
   ) := by
