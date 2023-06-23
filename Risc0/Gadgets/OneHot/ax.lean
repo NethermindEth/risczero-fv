@@ -151,7 +151,7 @@ def witness_prog_2_projection (n : ℕ) : MLIRProgram :=
       witness_prog_2_projection n;
       "output[" ++ toString n.succ ++ "]" ←ₐ .Get ⟨"output"⟩ 0 n.succ;
       "output[" ++ toString n.succ ++ "] * " ++ toString n.succ ←ₐ .Mul ⟨"output[" ++ toString n.succ ++ "]"⟩ ⟨toString n.succ⟩;
-      "sum" ++ toString n.succ ←ₐ .Add ⟨"output[" ++ toString n ++ "]"⟩ ⟨"output[" ++ toString n.succ ++ "] * " ++ toString n.succ⟩
+      "sum" ++ toString n.succ ←ₐ .Add ⟨"sum" ++ toString n⟩ ⟨"output[" ++ toString n.succ ++ "] * " ++ toString n.succ⟩
   | Nat.zero => "RIP" ←ₐ .Const 42
 
 def witness_prog_3_sum_equals_input (n : ℕ) : MLIRProgram :=
@@ -291,20 +291,6 @@ lemma part₀_updates {output : BufferAtTime} {n : ℕ} (st : State) :
   MLIR
   rw [←@part₀_updates' n st, getImpl_safe]
 
--- def witness_prog_1_nondet_inner (n : ℕ) : MLIR IsNondet.InNondet :=
---    -- cirgen.nondet {
---      --   %19 = cirgen.isz %3 : <default>
---     match n with
---     | Nat.succ n =>
---       witness_prog_1_nondet_inner n;
---       "input - " ++ (toString (Nat.succ n)) ←ₐ .Sub ⟨"input"⟩ ⟨toString (Nat.succ n)⟩;
---       "input == " ++ (toString (Nat.succ n)) ←ₐ ??₀⟨"input - " ++ (toString (Nat.succ n))⟩;
---       ⟨"output"⟩[Nat.succ n] ←ᵢ ⟨"input == " ++ (toString (Nat.succ n))⟩
---     | Nat.zero =>     
---       "input == 0" ←ₐ ??₀⟨"input"⟩;
---       --   cirgen.set %arg1 : <3, mutable>[0] = %19 : <default>
---       ⟨"output"⟩[0] ←ᵢ ⟨"input == 0"⟩
-
 def part₁_state (n : ℕ) (st : State) : State :=
   match n with
   | Nat.succ n => State.set! ((@part₁_state n st[felts][⟨"input - " ++ toString (Nat.succ n)⟩] ← (st.felts ⟨"input"⟩).get! - (st.felts ⟨toString n.succ⟩).get!)[felts][⟨"input == " ++ (toString (Nat.succ n))⟩] ← (if (st.felts ⟨"input"⟩).get! - (State.felts st ⟨toString (Nat.succ n)⟩).get! = 0 then 1 else 0)) ⟨"output"⟩ n.succ (if (st.felts ⟨"input"⟩).get! - (State.felts st ⟨toString (Nat.succ n)⟩).get! = 0 then 1 else 0)
@@ -427,7 +413,67 @@ lemma part₁_updates {output : BufferAtTime} {n : ℕ} (st : State) :
   simp only [witness_prog_1nondet]
   MLIR
   rw [@part₁_updates' n st]
-  
+
+-- def witness_prog_2_projection (n : ℕ) : MLIRProgram :=
+--   match n with
+--   | (Nat.succ Nat.zero) => "output[1]" ←ₐ .Get ⟨"output"⟩ 0 1 
+--   | Nat.succ n => 
+--       witness_prog_2_projection n;
+--       "output[" ++ toString n.succ ++ "]" ←ₐ .Get ⟨"output"⟩ 0 n.succ;
+--       "output[" ++ toString n.succ ++ "] * " ++ toString n.succ ←ₐ .Mul ⟨"output[" ++ toString n.succ ++ "]"⟩ ⟨toString n.succ⟩;
+--       "sum" ++ toString n.succ ←ₐ .Add ⟨"sum" ++ toString n⟩ ⟨"output[" ++ toString n.succ ++ "] * " ++ toString n.succ⟩
+--   | Nat.zero => "RIP" ←ₐ .Const 42
+
+
+def part₂_state (n : ℕ) (st : State) : State :=
+  match n with
+  | Nat.succ Nat.zero => st["output[1]"] ←ₛ getImpl st ⟨"output"⟩ 0 1
+  | Nat.succ n => let st' := part₂_state n st
+      ((st'["output[" ++ toString n.succ ++ "]"] ←ₛ getImpl st ⟨"output"⟩ 0 n.succ)[felts][⟨"output[" ++ toString n.succ ++ "] * " ++ toString n.succ⟩] ← ((Buffer.back st ⟨"output"⟩ 0 n.succ).get! * (st.felts ⟨toString n.succ⟩).get!))[felts][⟨"sum" ++ toString n.succ⟩] ← ((st'.felts ⟨"sum" ++ toString n⟩).get! + ((Buffer.back st ⟨"output"⟩ 0 n.succ).get! * (st.felts ⟨toString n.succ⟩).get!)) 
+  | Nat.zero => st[felts][⟨"RIP"⟩] ← 42
+
+def part₂_state_update (n : ℕ) (st : State) (progr: MLIRProgram) : State :=
+  Γ (@part₂_state n st) ⟦progr⟧
+
+lemma output_isnt_touched {m n : ℕ} : getImpl (Γ st ⟦witness_prog_2_projection m⟧) { name := "output" } 0 n = getImpl st { name := "output" } 0 n := by
+  revert n
+  induction' m with m ih
+  · simp [witness_prog_2_projection]
+    
+
+lemma part₂_updates' {n : ℕ} (st : State) :
+  (MLIR.runProgram (witness_prog_2_projection n) st) = part₂_state n st := by
+  revert st
+  induction' n with n ih
+  · unfold part₂_state witness_prog_2_projection
+    intros st
+    MLIR
+    rfl
+  · intros st
+    rcases n with _ | n
+    unfold witness_prog_2_projection part₂_state
+    simp 
+    rfl
+    unfold witness_prog_2_projection part₂_state
+    simp
+    MLIR
+    rw [←ih]
+
+    -- specialize (ih st)
+    -- rw [←ih]
+    -- simp
+    -- MLIR_states
+    -- generalize eq : (witness_prog_2_projection (Nat.succ n)) = prog
+    -- unfold witness_prog_2_projection at eq
+    -- simp [Op.eval]
+
+    -- simp at eq
+    -- MLIR
+    -- simp
+    -- rcases n with _ | n
+    -- simp
+    -- unfold part₂_state
+
 
 def witness (input : Felt) : BufferAtTime :=
   witness_prog_full.run (initial_witness_state input)
