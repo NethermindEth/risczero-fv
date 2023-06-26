@@ -103,6 +103,12 @@ elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
   )
+  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+
+elab "MLIR?" : tactic => do
+  evalTactic <| ← `(
+    tactic| repeat MLIR_statement
+  )
   evalTactic <| ← `(tactic| try simp? [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
   
 -- elab "MLIR_statement" : tactic => do

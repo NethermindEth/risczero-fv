@@ -78,6 +78,26 @@ lemma run_eqz {x : FeltVar} :
 
 lemma seq_assoc : Γ state ⟦p₁; (p₂; p₃)⟧ = Γ state ⟦(p₁; p₂); p₃⟧ := by simp [run_seq_def]
 
+lemma seq_step_eq (h: ∀ st : State, Γ st ⟦p₂⟧ = Γ st ⟦p₃⟧):
+  Γ state ⟦p₁; p₂⟧ = Γ state ⟦p₁; p₃⟧ := by
+  simp [*, MLIR.run_seq_def]
+
+lemma nested_seq_step_eq (h: ∀ st : State, Γ st ⟦p₂; p₃⟧ = Γ st ⟦p₄⟧):
+  Γ state ⟦(p₁; p₂); p₃⟧ = Γ state ⟦p₁; p₄⟧ :=
+  seq_assoc.symm ▸ seq_step_eq h
+
+lemma nondet_seq_step_eq (h: ∀ st: State, Γ st ⟦nondet s₂; s₃⟧ = Γ st ⟦nondet s₄; s₅⟧) :
+  Γ state ⟦nondet (s₁; s₂); s₃⟧ = Γ state ⟦nondet (s₁; s₄); s₅⟧ := by
+  aesop
+
+lemma nondet_step_eq (h: ∀ st: State, Γ st ⟦s₂⟧ = Γ st ⟦nondet s₃; s₄⟧) :
+  Γ state ⟦nondet s₁; s₂⟧ = Γ state ⟦nondet (s₁; s₃); s₄⟧ := by
+  aesop
+
+lemma nondet_end_step_eq (h: ∀ st: State, Γ st ⟦s₂; s₃⟧ = Γ st ⟦s₄⟧) :
+  Γ state ⟦(nondet s₁; s₂); s₃⟧ = Γ state ⟦nondet s₁; s₄⟧ := by
+  aesop
+
 lemma nondet_blocks_split : Γ state ⟦nondet (s₁; s₂)⟧ = Γ state ⟦nondet s₁; nondet s₂⟧ := by
   simp [run_nondet, run_seq_def]
 
