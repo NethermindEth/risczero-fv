@@ -6,6 +6,7 @@ import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.LibrarySearch
+import Mathlib.Data.Bitvec.Basic
 
 import Risc0.Map
 import Risc0.Wheels
@@ -478,6 +479,7 @@ inductive Op : IsNondet → Type where
   | Neg : FeltVar           → Op x
   | Mul : FeltVar → FeltVar → Op x
   | Pow : FeltVar → ℕ       → Op x
+  | BitAnd : FeltVar → FeltVar → Op x
   | Inv : FeltVar           → Op InNondet
   -- Logic
   | Isz : FeltVar → Op InNondet
@@ -569,6 +571,7 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
     | Neg lhs     => .some <| .Val <| 0                  - st.felts[lhs].get!
     | Mul lhs rhs => .some <| .Val <| st.felts[lhs].get! * st.felts[rhs].get!
     | Pow lhs rhs => .some <| .Val <| st.felts[lhs].get! ^ rhs
+    | BitAnd lhs rhs => .some <| .Val <| ↑(Bitvec.and (Bitvec.ofNat 256 (st.felts lhs).get!.val) (Bitvec.ofNat 256 (st.felts rhs).get!.val)).toNat
     | Inv x => .some <| .Val <| if st.felts[x]!.get! = 0 then 0 else st.felts[x]!.get!⁻¹
     -- Logic
     | Isz x => .some <| .Val <| if st.felts[x]!.get! = 0 then 1 else 0
@@ -643,6 +646,11 @@ lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .some (.Val (if st.felts[x]!.get! = 0 th
 @[simp]
 lemma eval_andEqz : Γ st ⟦@AndEqz α c x⟧ₑ =
                     .some (.Constraint ((st.props c).get! ∧ (st.felts x).get! = 0)) := rfl
+
+@[simp]
+lemma eval_bitAnd :
+  Γ st ⟦@BitAnd α x y⟧ₑ =
+    (.some <| .Val <| ↑(Bitvec.and (Bitvec.ofNat 256 (st.felts x).get!.val) (Bitvec.ofNat 256 (st.felts y).get!.val)).toNat) := rfl
 
 @[simp]
 lemma eval_andCond :
