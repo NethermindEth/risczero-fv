@@ -9,27 +9,15 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₃ on st
 def part₃_state (st: State) : State := 
-  (State.updateFelts
-          (State.updateFelts st { name := "x * out[1]" }
-            (Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" })))
-          { name := "x * out[1] - 1" }
-          (Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" }) -
-            Option.get!
-              (State.felts
-                (State.updateFelts st { name := "x * out[1]" }
-                  (Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" })))
-                { name := "1" })))["other cond"] ←ₛ
-        some
-          (Lit.Constraint
-            (Option.get! (State.props st { name := "true" }) ∧
-              Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" }) -
-                  Option.get!
-                    (State.felts
-                      (State.updateFelts st { name := "x * out[1]" }
-                        (Option.get! (State.felts st { name := "x" }) *
-                          Option.get! (State.felts st { name := "out[1]" })))
-                      { name := "1" }) =
-                0))
+  (((st[felts][{ name := "x * out[1]" }] ←
+            Option.get! (State.felts st { name := "x" }) *
+              Option.get! (State.felts st { name := "out[1]" }))[felts][{ name := "x * out[1] - 1" }] ←
+          Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" }) -
+            Option.get! (State.felts st { name := "1" }))[props][{ name := "other cond" }] ←
+        (Option.get! (State.props st { name := "true" }) ∧
+          Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" }) -
+              Option.get! (State.felts st { name := "1" }) =
+            0))
 
 -- Run the whole program by using part₃_state rather than Code.part₃
 def part₃_state_update (st: State): State :=

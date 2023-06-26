@@ -157,6 +157,7 @@ import Risc0.Gadgets.ComputeDecode.Constraints.WeakestPresPart13
 import Risc0.Gadgets.ComputeDecode.Constraints.WeakestPresPart14
 import Risc0.Gadgets.ComputeDecode.Constraints.WeakestPresPart15
 import Risc0.Gadgets.ComputeDecode.Constraints.WeakestPresPart16
+import Risc0.Gadgets.ComputeDecode.Constraints.WeakestPreFull
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart0
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart1
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart2

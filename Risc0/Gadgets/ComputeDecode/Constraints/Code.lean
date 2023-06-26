@@ -72,7 +72,7 @@ def full : MLIRProgram :=
   "%63" ←ₐ .Sub ⟨"%7"⟩ ⟨"%62"⟩;
   "%64" ←ₐ ⟨"%58"⟩ &₀ ⟨"%63"⟩
 def getReturn (st: State) : Prop :=
-  st.props[(⟨"%64"⟩: PropVar)].get!
+  st.constraintsInVar ⟨"%64"⟩
 def run (st: State) : Prop :=
   getReturn (full.runProgram st)
 def part0 : MLIRProgram :=
