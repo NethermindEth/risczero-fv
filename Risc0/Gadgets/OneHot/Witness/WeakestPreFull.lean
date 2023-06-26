@@ -72,7 +72,9 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
   ) := by
   rewrite [part₀_wp]
   rewrite [part₁_updates_opaque]
-  rewrite [part₂_updates_opaque]
+  rewrite [part₂₀_updates_opaque]
+  rewrite [part₂₁_updates_opaque]
+  rewrite [part₂₂_updates_opaque]
   rewrite [part₃_updates_opaque]
   rewrite [part₄_updates_opaque]
   rewrite [part₅_updates_opaque]
@@ -96,11 +98,17 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
   -- -- simp only [forall_true_left, ge_iff_le]
   -- -- simp
 
-  unfold part₂_state
+  unfold part₂₀_state
   simp only [State.updateFelts_felts, Map.update_get!, Option.get!_of_some]
   MLIR_states_updates
   -- -- 
   -- -- subst eq
+
+  unfold part₂₁_state
+  MLIR_states_updates
+
+  unfold part₂₂_state
+  MLIR_states_updates
 
   unfold part₃_state
   -- simp [zero_le, ge_iff_le, forall_true_left, true_and, Map.getElem_def, Buffer.Idx.time, Buffer.Idx.data, Back.toNat]

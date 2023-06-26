@@ -37,14 +37,14 @@ def part₁_state (st: State) : State :=
 
 -- Run the program from part₁ onwards by using part₁_state rather than Code.part₁
 def part₁_state_update (st: State): State :=
-  Γ (part₁_state st) ⟦Code.part₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈⟧
+  Γ (part₁_state st) ⟦Code.part₂₀; Code.part₂₁; Code.part₂₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈⟧
 
 -- Prove that substituting part₁_state for Code.part₁ produces the same result
 lemma part₁_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
-  (MLIR.runProgram (Code.part₁; Code.part₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
+  (MLIR.runProgram (Code.part₁; Code.part₂₀; Code.part₂₁; Code.part₂₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) st).lastOutput = [y₁, y₂, y₃] ↔
   (part₁_state_update st).lastOutput = [y₁, y₂, y₃] := by
   unfold MLIR.runProgram; simp only
-  generalize eq : (Code.part₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) = prog
+  generalize eq : (Code.part₂₀; Code.part₂₁; Code.part₂₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) = prog
   unfold Code.part₁
   MLIR
   rewrite [←eq]

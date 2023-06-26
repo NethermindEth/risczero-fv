@@ -30,8 +30,8 @@ lemma part₃_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
   rfl
 
 lemma part₃_updates_opaque {st : State} : 
-  (part₂_state_update st).lastOutput = [y₁, y₂, y₃] ↔
-  (part₃_state_update (part₂_state st)).lastOutput = [y₁, y₂, y₃] := by
-  simp [part₂_state_update, part₃_wp]
+  (part₂₂_state_update st).lastOutput = [y₁, y₂, y₃] ↔
+  (part₃_state_update (part₂₂_state st)).lastOutput = [y₁, y₂, y₃] := by
+  simp [part₂₂_state_update, part₃_wp]
 
 end Risc0.OneHot.Witness.WP

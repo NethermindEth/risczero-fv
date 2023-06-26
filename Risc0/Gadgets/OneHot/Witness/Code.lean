@@ -156,13 +156,13 @@ def part₈ : MLIRProgram :=
   ?₀ ⟨"outputSum - 1"⟩
 
 abbrev parts_combined : MLIRProgram :=
-  part₀; part₁; part₂; part₃; part₄; part₅; part₆; part₇; part₈
+  part₀; part₁; part₂₀; part₂₁; part₂₂; part₃; part₄; part₅; part₆; part₇; part₈
 
 lemma parts_combine {st: State} :
   Γ st ⟦full⟧ =
   Γ st ⟦parts_combined⟧ := by
   unfold full parts_combined
-    part₀ part₁ part₂ part₃ part₄ part₅ part₆ part₇ part₈
+    part₀ part₁ part₂₀ part₂₁ part₂₂ part₃ part₄ part₅ part₆ part₇ part₈
   simp [MLIR.seq_assoc, MLIR.run_seq_def, MLIR.nondet_blocks_split]
 
 end Risc0.OneHot.Witness.Code
