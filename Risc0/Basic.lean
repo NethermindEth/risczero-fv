@@ -22,8 +22,10 @@ inductive VarType := | FeltTag | PropTag | BufferTag deriving DecidableEq
 
 open VarType
 
+abbrev Name := ℕ 
+
 structure Variable (tag : VarType) :=
-  name : String
+  name : Name 
 deriving DecidableEq
 
 abbrev BufferVar := Variable BufferTag
@@ -120,8 +122,8 @@ structure State where
   -- Valid variables for buffers.
   vars         : List BufferVar
 
-abbrev Input := "input"
-abbrev Output := "output"
+abbrev Input := 0
+abbrev Output := 1
 
 namespace State
 
@@ -141,14 +143,14 @@ def empty : State :=
     isFailed := false,
   }
 
-def addBuffer (name: String) (buffer: Buffer): State :=
+def addBuffer (name: Name) (buffer: Buffer): State :=
   { st with
     buffers := st.buffers[⟨name⟩] ←ₘ buffer,
     bufferWidths := st.bufferWidths[⟨name⟩] ←ₘ buffer.last!.length,
     vars := ⟨name⟩ :: st.vars
   }
 
-def hasFelts (felts: List (String × Felt)) : Prop :=
+def hasFelts (felts: List (Name × Felt)) : Prop :=
   match felts with
   | [] => True
   | (name, value) :: fs =>
@@ -234,7 +236,7 @@ lemma valid_init' : (init m n input output hIn hOut).WellFormed where
 
 lemma valid_init : (init_default m n).WellFormed := valid_init'
 
-def update (state : State) (name : String) (x : Option Lit) : State :=
+def update (state : State) (name : Name) (x : Option Lit) : State :=
   match x with
     | .none => {state with isFailed := true}
     | .some lit =>
@@ -357,22 +359,22 @@ lemma updateProps_vars : (updateProps st name x).vars = st.vars := by simp [upda
 lemma updateProps_props : (updateProps st name x).props = st.props[name] ←ₘ x := by simp [updateProps]
 
 -- @[simp]
-lemma update_val {state : State} {name : String} {x : Felt} :
+lemma update_val {state : State} {name : Name} {x : Felt} :
   update state name (.some (.Val x)) = { state with felts := state.felts[⟨name⟩] ←ₘ x } := rfl
 
-lemma update_constr {state : State} {name : String} {x : Prop} :
+lemma update_constr {state : State} {name : Name} {x : Prop} :
   update state name (.some (.Constraint x)) = { state with props := state.props[⟨name⟩] ←ₘ x } := rfl
 
 @[simp]
-lemma update_val' {state : State} {name : String} {x : Felt} :
+lemma update_val' {state : State} {name : Name} {x : Felt} :
   update state name (.some (.Val x)) = state.updateFelts ⟨name⟩ x := rfl
 
 @[simp]
-lemma update_constr' {state : State} {name : String} {x : Prop} :
+lemma update_constr' {state : State} {name : Name} {x : Prop} :
   update state name (.some (.Constraint x)) = state.updateProps ⟨name⟩ x := rfl
 
 -- @[simp]
-lemma update_constraint {state : State} {name : String} {c : Prop} :
+lemma update_constraint {state : State} {name : Name} {c : Prop} :
   update state name (.some (.Constraint c)) = { state with props := state.props.update ⟨name⟩ c } := rfl
 
 @[simp]
@@ -658,7 +660,7 @@ end Op
 
 inductive MLIR : IsNondet → Type where
   -- Meta
-  | Assign    : String        → Op x   → MLIR x
+  | Assign    : Name        → Op x   → MLIR x
   | Eqz       : FeltVar                → MLIR x
   | If        : FeltVar       → MLIR x → MLIR x
   | Nondet    : MLIR InNondet          → MLIR NotInNondet

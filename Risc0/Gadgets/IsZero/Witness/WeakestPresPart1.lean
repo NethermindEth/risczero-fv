@@ -9,12 +9,15 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₁ on st
 def part₁_state (st: State) : State :=
+  let x := 1
+  let isZeroBit := 2
+  let invVal := 3
   State.set! (State.updateFelts (State.set! (State.updateFelts st
-    { name := "isZeroBit" }
-    (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0)) { name := "output" } 0
-    (if Option.get! (State.felts st { name := "x" }) = 0 then 1 else 0)) { name := "invVal" }
-    (if Option.get! st.felts[({ name := "x" } : FeltVar)]! = 0 then 0 else (Option.get! st.felts[({ name := "x" } : FeltVar)]!)⁻¹)) { name := "output" } 1
-    (if Option.get! st.felts[({ name := "x" } : FeltVar)]! = 0 then 0 else (Option.get! st.felts[({ name := "x" } : FeltVar)]!)⁻¹)
+    { name := isZeroBit }
+    (if Option.get! (State.felts st { name := x }) = 0 then 1 else 0)) { name := Output } 0
+    (if Option.get! (State.felts st { name := x }) = 0 then 1 else 0)) { name := invVal }
+    (if Option.get! st.felts[({ name := x } : FeltVar)]! = 0 then 0 else (Option.get! st.felts[({ name := x } : FeltVar)]!)⁻¹)) { name := Output } 1
+    (if Option.get! st.felts[({ name := x } : FeltVar)]! = 0 then 0 else (Option.get! st.felts[({ name := x } : FeltVar)]!)⁻¹)
 
 -- Run the program from part₁ onwards by using part₁_state rather than Code.part₁
 def part₁_state_update (st: State): State :=

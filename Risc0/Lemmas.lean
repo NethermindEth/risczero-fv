@@ -10,7 +10,7 @@ namespace Risc0
 
 section WithMLIR 
 
-variable {α : IsNondet} {st : State} {name : String}
+variable {α : IsNondet} {st : State} {name : Name}
 
 open MLIRNotation IsNondet
 open Risc0.VarType

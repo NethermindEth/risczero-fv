@@ -9,20 +9,24 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₁ on st
 def part₁_state (st: State) : State := 
-  ((st["x"] ←ₛ getImpl st { name := "input" } 0 0)["out[0]"] ←ₛ
-          getImpl (st["x"] ←ₛ getImpl st { name := "input" } 0 0) { name := "output" } 0 0)["andEqz x"] ←ₛ
+  let true_ := 2
+  let x := 3
+  let out0 := 4
+  let andEqzX := 5
+  ((st[x] ←ₛ getImpl st { name := Input } 0 0)[out0] ←ₛ
+          getImpl (st[x] ←ₛ getImpl st { name := Input } 0 0) { name := Output } 0 0)[andEqzX] ←ₛ
         some
           (Lit.Constraint
             (Option.get!
                 (State.props
-                  ((st["x"] ←ₛ getImpl st { name := "input" } 0 0)["out[0]"] ←ₛ
-                    getImpl (st["x"] ←ₛ getImpl st { name := "input" } 0 0) { name := "output" } 0 0)
-                  { name := "true" }) ∧
+                  ((st[x] ←ₛ getImpl st { name := Input } 0 0)[out0] ←ₛ
+                    getImpl (st[x] ←ₛ getImpl st { name := Input } 0 0) { name := Output} 0 0)
+                  { name := true_ }) ∧
               Option.get!
                   (State.felts
-                    ((st["x"] ←ₛ getImpl st { name := "input" } 0 0)["out[0]"] ←ₛ
-                      getImpl (st["x"] ←ₛ getImpl st { name := "input" } 0 0) { name := "output" } 0 0)
-                    { name := "x" }) =
+                    ((st[x] ←ₛ getImpl st { name := Input } 0 0)[out0] ←ₛ
+                      getImpl (st[x] ←ₛ getImpl st { name := Input } 0 0) { name := Output } 0 0)
+                    { name := x }) =
                 0))
 
 -- Run the whole program by using part₁_state rather than Code.part₁

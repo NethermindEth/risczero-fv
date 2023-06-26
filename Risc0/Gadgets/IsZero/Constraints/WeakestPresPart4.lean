@@ -9,12 +9,16 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₄ on st
 def part₄_state (st: State) : State := 
-st["if other cond"] ←ₛ
-  some
-    (Lit.Constraint
-      (Option.get! (State.props st { name := "if out[0] then eqz x" }) ∧
-        if Option.get! (State.felts st { name := "1 - out[0]" }) = 0 then True
-        else Option.get! (State.props st { name := "other cond" })))
+  let ifOut0ThenEqzX := 6
+  let oneMinusOut0 := 7
+  let otherCond := 11
+  let ifOtherCond := 12
+  st[ifOtherCond] ←ₛ
+    some
+      (Lit.Constraint
+        (Option.get! (State.props st { name := ifOut0ThenEqzX }) ∧
+          if Option.get! (State.felts st { name := oneMinusOut0 }) = 0 then True
+          else Option.get! (State.props st { name := otherCond })))
 
 -- Prove that substituting part₄_state for Code.part₆ produces the same result
 lemma part₄_wp {st : State} :

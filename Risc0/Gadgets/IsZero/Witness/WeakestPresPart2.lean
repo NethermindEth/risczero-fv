@@ -9,7 +9,8 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₂ on st
 def part₂_state (st: State) : State :=
-  st["arg1[0]"] ←ₛ getImpl st { name := "output" } 0 0
+  let arg10 := 4
+  st[arg10] ←ₛ getImpl st { name := Output } 0 0
 
 -- Run the program from part₂ onwards by using part₂_state rather than Code.part₂
 def part₂_state_update (st: State): State :=

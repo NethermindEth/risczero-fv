@@ -8,13 +8,13 @@ import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart4
 namespace Risc0.IsZero.Constraints.WP
 
 def start_state (input : Felt) (output : BufferAtTime) : State :=
-  { buffers := Map.fromList [(⟨"input"⟩, [[.some input]]), (⟨"output"⟩, [output])]
-  , bufferWidths := Map.fromList [(⟨"input"⟩, 1), (⟨"output"⟩, 2)]
+  { buffers := Map.fromList [(⟨Input⟩, [[.some input]]), (⟨Output⟩, [output])]
+  , bufferWidths := Map.fromList [(⟨Input⟩, 1), (⟨Output⟩, 2)]
   , constraints := []
   , cycle := 0
   , felts := Map.empty
   , props := Map.empty
-  , vars := [⟨"input"⟩, ⟨"output"⟩]
+  , vars := [⟨Input⟩, ⟨Output⟩]
   , isFailed := false
   }
 

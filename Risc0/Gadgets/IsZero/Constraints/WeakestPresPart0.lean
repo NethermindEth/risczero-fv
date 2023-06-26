@@ -8,7 +8,10 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₀ on st
 def part₀_state (st : State) : State :=
-  ((st["1"] ←ₛ some (Lit.Val 1))["0"] ←ₛ some (Lit.Val 0))["true"] ←ₛ some (Lit.Constraint True)
+  let one := 0
+  let zero := 1
+  let true_ := 2
+  ((st[one] ←ₛ some (Lit.Val 1))[zero] ←ₛ some (Lit.Val 0))[true_] ←ₛ some (Lit.Constraint True)
 
 -- Run the whole program by using part₀_state rather than Code.part₀
 def part₀_state_update (st : State) : State :=

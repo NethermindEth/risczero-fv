@@ -9,13 +9,13 @@ import Risc0.Gadgets.IsZero.Witness.WeakestPresPart5
 namespace Risc0.IsZero.Witness.WP
 
 def start_state (input: Felt) : State :=
-  { buffers := Map.fromList [(⟨"input"⟩, [[.some input]]), (⟨"output"⟩, [[none, none]])]
-  , bufferWidths := Map.fromList [(⟨"input"⟩, 1), (⟨"output"⟩, 2)]
+  { buffers := Map.fromList [(⟨Input⟩, [[.some input]]), (⟨Output⟩, [[none, none]])]
+  , bufferWidths := Map.fromList [(⟨Input⟩, 1), (⟨Output⟩, 2)]
   , constraints := []
   , cycle := 0
   , felts := Map.empty
   , props := Map.empty
-  , vars := [⟨"input"⟩, ⟨"output"⟩]
+  , vars := [⟨Input⟩, ⟨Output⟩]
   , isFailed := false
   }
 

@@ -9,16 +9,23 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₂ on st
 def part₂_state (st: State) : State := 
+  let one := 0
+  let true_ := 2
+  let out0 := 4
+  let andEqzX := 5
+  let ifOut0ThenEqzX := 6
+  let oneMinusOut0 := 7
+  let out1 := 8
   (State.updateFelts
-  (st["if out[0] then eqz x"] ←ₛ
+  (st[ifOut0ThenEqzX] ←ₛ
     some
       (Lit.Constraint
-        (Option.get! (State.props st { name := "true" }) ∧
-          if Option.get! (State.felts st { name := "out[0]" }) = 0 then True
-          else Option.get! (State.props st { name := "andEqz x" }))))
-  { name := "1 - out[0]" }
-  (Option.get! (State.felts st { name := "1" }) -
-   Option.get! (State.felts st { name := "out[0]" })))["out[1]"] ←ₛ getImpl st { name := "output" } 0 1
+        (Option.get! (State.props st { name := true_ }) ∧
+          if Option.get! (State.felts st { name := out0 }) = 0 then True
+          else Option.get! (State.props st { name := andEqzX }))))
+  { name := oneMinusOut0 }
+  (Option.get! (State.felts st { name := one }) -
+   Option.get! (State.felts st { name := out0 })))[out1] ←ₛ getImpl st { name := Output } 0 1
 
 -- Run the whole program by using part₂_state rather than Code.part₂
 def part₂_state_update (st: State): State :=

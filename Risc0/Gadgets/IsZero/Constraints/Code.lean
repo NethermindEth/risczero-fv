@@ -6,70 +6,108 @@ namespace Risc0.IsZero.Constraints.Code
 open MLIRNotation
 
 def full : MLIRProgram :=
-  "1"         ←ₐ C 1; 
-  "0"         ←ₐ C 0;
+  let one := 0
+  let zero := 1
+  let true_ := 2
+  let x := 3
+  let out0 := 4
+  let andEqzX := 5
+  let ifOut0ThenEqzX := 6
+  let oneMinusOut0 := 7
+  let out1 := 8
+  let xTimesOut1 := 9
+  let xTimesOut1Minus1 := 10
+  let otherCond := 11
+  let ifOtherCond := 12
+  one         ←ₐ C 1; 
+  zero         ←ₐ C 0;
   -- %1 = cirgen.true
-  "true"      ←ₐ ⊤;  
+  true_      ←ₐ ⊤;  
   -- %2 = cirgen.get %arg0[0] back 0 : <1, constant>
-  "x"         ←ₐ .Get ⟨"input"⟩ 0 0;
+  x         ←ₐ .Get ⟨Input⟩ 0 0;
   -- %3 = cirgen.get %arg1[0] back 0 : <2, mutable>
-  "out[0]"    ←ₐ .Get ⟨"output"⟩ 0 0;
+  out0    ←ₐ .Get ⟨Output⟩ 0 0;
   -- %4 = cirgen.and_eqz %1, %2 : <default>
-  "andEqz x"  ←ₐ ⟨"true"⟩ &₀ ⟨"x"⟩;
+  andEqzX  ←ₐ ⟨true_⟩ &₀ ⟨x⟩;
   -- %5 = cirgen.and_cond %1, %3 : <default>, %4
-  "if out[0] then eqz x" ←ₐ guard ⟨"out[0]"⟩ & ⟨"true"⟩ with ⟨"andEqz x"⟩;
+  ifOut0ThenEqzX ←ₐ guard ⟨out0⟩ & ⟨true_⟩ with ⟨andEqzX⟩;
   -- %6 = cirgen.sub %0 : <default>, %3 : <default>
-  "1 - out[0]" ←ₐ Op.Sub ⟨"1"⟩ ⟨"out[0]"⟩;
+  oneMinusOut0 ←ₐ Op.Sub ⟨one⟩ ⟨out0⟩;
   -- %7 = cirgen.get %arg1[1] back 0 : <2, mutable>
-  "out[1]"         ←ₐ .Get ⟨"output"⟩ 0 1;
+  out1         ←ₐ .Get ⟨Output⟩ 0 1;
   -- %8 = cirgen.mul %2 : <default>, %7 : <default>
-  "x * out[1]"     ←ₐ Op.Mul ⟨"x"⟩ ⟨"out[1]"⟩; 
+  xTimesOut1     ←ₐ Op.Mul ⟨x⟩ ⟨out1⟩; 
   -- %9 = cirgen.sub %8 : <default>, %0 : <default>
-  "x * out[1] - 1" ←ₐ Op.Sub ⟨"x * out[1]"⟩ ⟨"1"⟩;
+  xTimesOut1Minus1 ←ₐ Op.Sub ⟨xTimesOut1⟩ ⟨one⟩;
   -- %10 = cirgen.and_eqz %1, %9 : <default>
-  "other cond" ←ₐ ⟨"true"⟩ &₀ ⟨"x * out[1] - 1"⟩; 
+  otherCond ←ₐ ⟨true_⟩ &₀ ⟨xTimesOut1Minus1⟩; 
   -- %11 = cirgen.and_cond %5, %6 : <default>, %10
-  "if other cond" ←ₐ guard ⟨"1 - out[0]"⟩ & ⟨"if out[0] then eqz x"⟩ with ⟨"other cond"⟩
+  ifOtherCond ←ₐ guard ⟨oneMinusOut0⟩ & ⟨ifOut0ThenEqzX⟩ with ⟨otherCond⟩
 
 def getReturn (st: State) : Prop :=
-  st.constraintsInVar ⟨"if other cond"⟩
+  let ifOtherCond := 12 
+  st.constraintsInVar ⟨ifOtherCond⟩
 
 def run (st: State) : Prop :=
   getReturn (full.runProgram st)
 
 def part₀ : MLIRProgram :=
-  "1"         ←ₐ C 1; 
-  "0"         ←ₐ C 0;
+  let one := 0
+  let zero := 1
+  let true_ := 2
+  one         ←ₐ C 1; 
+  zero         ←ₐ C 0;
   -- %1 = cirgen.true
-  "true"      ←ₐ ⊤ 
+  true_      ←ₐ ⊤
 
 def part₁ : MLIRProgram :=
+  let true_ := 2
+  let x := 3
+  let out0 := 4
+  let andEqzX := 5
   -- %2 = cirgen.get %arg0[0] back 0 : <1, constant>
-  "x"         ←ₐ .Get ⟨"input"⟩ 0 0;
+  x         ←ₐ .Get ⟨Input⟩ 0 0;
   -- %3 = cirgen.get %arg1[0] back 0 : <2, mutable>
-  "out[0]"    ←ₐ .Get ⟨"output"⟩ 0 0;
+  out0    ←ₐ .Get ⟨Output⟩ 0 0;
   -- %4 = cirgen.and_eqz %1, %2 : <default>
-  "andEqz x"  ←ₐ ⟨"true"⟩ &₀ ⟨"x"⟩
+  andEqzX  ←ₐ ⟨true_⟩ &₀ ⟨x⟩
 
 def part₂ : MLIRProgram :=
-  -- %5 = cirgen.and_cond %1, %3 : <default>, %4
-  "if out[0] then eqz x" ←ₐ guard ⟨"out[0]"⟩ & ⟨"true"⟩ with ⟨"andEqz x"⟩;  
+  let one := 0
+  let true_ := 2
+  let out0 := 4
+  let andEqzX := 5
+  let ifOut0ThenEqzX := 6
+  let oneMinusOut0 := 7
+  let out1 := 8
+  ifOut0ThenEqzX ←ₐ guard ⟨out0⟩ & ⟨true_⟩ with ⟨andEqzX⟩;
   -- %6 = cirgen.sub %0 : <default>, %3 : <default>
-  "1 - out[0]" ←ₐ Op.Sub ⟨"1"⟩ ⟨"out[0]"⟩;
+  oneMinusOut0 ←ₐ Op.Sub ⟨one⟩ ⟨out0⟩;
   -- %7 = cirgen.get %arg1[1] back 0 : <2, mutable>
-  "out[1]"         ←ₐ .Get ⟨"output"⟩ 0 1
+  out1         ←ₐ .Get ⟨Output⟩ 0 1
 
 def part₃ : MLIRProgram :=
+  let one := 0
+  let true_ := 2
+  let x := 3
+  let out1 := 8
+  let xTimesOut1 := 9
+  let xTimesOut1Minus1 := 10
+  let otherCond := 11
   -- %8 = cirgen.mul %2 : <default>, %7 : <default>
-  "x * out[1]"     ←ₐ Op.Mul ⟨"x"⟩ ⟨"out[1]"⟩; 
+  xTimesOut1     ←ₐ Op.Mul ⟨x⟩ ⟨out1⟩; 
   -- %9 = cirgen.sub %8 : <default>, %0 : <default>
-  "x * out[1] - 1" ←ₐ Op.Sub ⟨"x * out[1]"⟩ ⟨"1"⟩;
+  xTimesOut1Minus1 ←ₐ Op.Sub ⟨xTimesOut1⟩ ⟨one⟩;
   -- %10 = cirgen.and_eqz %1, %9 : <default>
-  "other cond" ←ₐ ⟨"true"⟩ &₀ ⟨"x * out[1] - 1"⟩
+  otherCond ←ₐ ⟨true_⟩ &₀ ⟨xTimesOut1Minus1⟩
 
 def part₄ : MLIRProgram :=
+  let ifOut0ThenEqzX := 6
+  let oneMinusOut0 := 7
+  let otherCond := 11
+  let ifOtherCond := 12
   -- %11 = cirgen.and_cond %5, %6 : <default>, %10
-  "if other cond" ←ₐ guard ⟨"1 - out[0]"⟩ & ⟨"if out[0] then eqz x"⟩ with ⟨"other cond"⟩
+  ifOtherCond ←ₐ guard ⟨oneMinusOut0⟩ & ⟨ifOut0ThenEqzX⟩ with ⟨otherCond⟩
 
 abbrev parts_combined : MLIRProgram :=
   part₀; part₁; part₂; part₃; part₄

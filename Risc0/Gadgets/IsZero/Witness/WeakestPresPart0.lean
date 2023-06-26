@@ -8,7 +8,9 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₀ on st
 def part₀_state (st: State) : State :=
-  (State.updateFelts st { name := "1" } 1)["x"] ←ₛ getImpl st { name := "input" } 0 0
+  let one := 0
+  let x := 1
+  (State.updateFelts st { name := one } 1)[x] ←ₛ getImpl st { name := Input } 0 0
 
 -- Run the whole program by using part₀_state rather than Code.part₀
 def part₀_state_update (st: State): State :=

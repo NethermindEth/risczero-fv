@@ -9,9 +9,11 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₃ on st
 def part₃_state (st: State) : State :=
-  if Option.get! st.felts[({ name := "arg1[0]" } : FeltVar)]! = 0
+  let x := 1
+  let arg10 := 4
+  if Option.get! st.felts[({ name := arg10 } : FeltVar)]! = 0
   then st
-  else withEqZero (Option.get! st.felts[({ name := "x" } : FeltVar)]!) st
+  else withEqZero (Option.get! st.felts[({ name := x } : FeltVar)]!) st
 
 -- Run the program from part₃ onwards by using part₃_state rather than Code.part₃
 def part₃_state_update (st: State): State :=

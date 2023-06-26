@@ -9,26 +9,33 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₃ on st
 def part₃_state (st: State) : State := 
+  let one := 0
+  let true_ := 2
+  let x := 3
+  let out1 := 8
+  let xTimesOut1 := 9
+  let xTimesOut1Minus1 := 10
+  let otherCond := 11
   (State.updateFelts
-          (State.updateFelts st { name := "x * out[1]" }
-            (Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" })))
-          { name := "x * out[1] - 1" }
-          (Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" }) -
+          (State.updateFelts st { name := xTimesOut1 }
+            (Option.get! (State.felts st { name := x }) * Option.get! (State.felts st { name := out1 })))
+          { name := xTimesOut1Minus1 }
+          (Option.get! (State.felts st { name := x }) * Option.get! (State.felts st { name := out1 }) -
             Option.get!
               (State.felts
-                (State.updateFelts st { name := "x * out[1]" }
-                  (Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" })))
-                { name := "1" })))["other cond"] ←ₛ
+                (State.updateFelts st { name := xTimesOut1 }
+                  (Option.get! (State.felts st { name := x }) * Option.get! (State.felts st { name := out1 })))
+                { name := one })))[otherCond] ←ₛ
         some
           (Lit.Constraint
-            (Option.get! (State.props st { name := "true" }) ∧
-              Option.get! (State.felts st { name := "x" }) * Option.get! (State.felts st { name := "out[1]" }) -
+            (Option.get! (State.props st { name := true_ }) ∧
+              Option.get! (State.felts st { name := x }) * Option.get! (State.felts st { name := out1 }) -
                   Option.get!
                     (State.felts
-                      (State.updateFelts st { name := "x * out[1]" }
-                        (Option.get! (State.felts st { name := "x" }) *
-                          Option.get! (State.felts st { name := "out[1]" })))
-                      { name := "1" }) =
+                      (State.updateFelts st { name := xTimesOut1 }
+                        (Option.get! (State.felts st { name := x }) *
+                          Option.get! (State.felts st { name := out1 })))
+                      { name := one }) =
                 0))
 
 -- Run the whole program by using part₃_state rather than Code.part₃

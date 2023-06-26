@@ -8,10 +8,12 @@ namespace Risc0.IsZero.Witness.WP
 open MLIRNotation
 
 -- The state obtained by running Code.part₅ on st
-def part₅_state (st: State) : State := 
-  if Option.get! st.felts[({ name := "1 - arg1[0]" } : FeltVar)]! = 0
+def part₅_state (st: State) : State :=
+  let oneMinusArg10 := 5
+  let arg11 := 6
+  if Option.get! st.felts[({ name := oneMinusArg10 } : FeltVar)]! = 0
   then st
-  else st["arg1[1]"] ←ₛ getImpl st { name := "output" } 0 1
+  else st[arg11] ←ₛ getImpl st { name := Output } 0 1
 
 -- Prove that substituting part₅_state for Code.part₅ produces the same result
 lemma part₅_wp {st : State} {y₁ y₂ : Option Felt} :

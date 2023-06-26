@@ -9,9 +9,12 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₄ on st
 def part₄_state (st: State) : State := 
-  st["1 - arg1[0]"] ←ₛ some (Lit.Val
-    (Option.get! (State.felts st { name := "1" }) -
-     Option.get! (State.felts st { name := "arg1[0]" })))
+  let one := 0
+  let arg10 := 4
+  let oneMinusArg10 := 5
+  st[oneMinusArg10] ←ₛ some (Lit.Val
+    (Option.get! (State.felts st { name := one }) -
+     Option.get! (State.felts st { name := arg10 })))
 
 -- Run the program from part₄ onwards by using part₄_state rather than Code.part₄
 def part₄_state_update (st: State): State :=
