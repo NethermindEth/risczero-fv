@@ -85,6 +85,9 @@ lemma update_get_skip (h : k ≠ k') (h₁ : m[k] = some v) :
 lemma update_get_next (h : k ≠ k') :
   (m[k] ←ₘ v)[k'] = m[k'] := by simp [update, getElem_def, h.symm]
 
+lemma update_get_next' (h : k ≠ k') :
+  (m[k] ←ₘ v) k' = m k' := by simp [update, getElem_def, h.symm]
+
 -- Membership lemmas.
 lemma mem_def : (x ∈ m) = m[x].isSome := rfl
 

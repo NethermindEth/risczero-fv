@@ -99,6 +99,22 @@ elab "MLIR_statement" : tactic => do
     )
   )
 
+elab "MLIR_single" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      repeat (
+        first
+        | rewrite [MLIR.run_ass_def]
+        | rewrite [MLIR.run_set_def]
+        | rewrite [MLIR.run_if]
+        | rewrite [MLIR.run_nondet]
+        | rewrite [MLIR.run_eqz]
+      )
+      simp_op
+    )
+  )
+  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
