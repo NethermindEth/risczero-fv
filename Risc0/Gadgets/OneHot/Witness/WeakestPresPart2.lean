@@ -42,4 +42,18 @@ lemma part₂_updates_opaque {st : State} :
   (part₂_state_update (part₁_state st)).lastOutput = [y₁, y₂, y₃] := by
   simp [part₁_state_update, part₂_wp]
 
+lemma part₂__state (st : State) : State := (State.set! st { name := "output" } 1 (Option.get! (st.felts {name := "input == 1" })))
+        
+def part₂__state_update (st: State) : State :=
+  Γ (part₂__state st) ⟦Code.part₂₁; Code.part₂₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈⟧
+
+lemma part₂₀_wp {st : State} {y₁ y₂ y₃ : Option Felt} :
+  (MLIR.runProgram (Code.part₂₀; Code.part₂₁; Code.part₂₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) st).lastOutput = [y₁, y₂, y₃] ↔ _ := by
+  unfold MLIR.runProgram; simp only
+  generalize eq : (Code.part₂₁; Code.part₂₂; Code.part₃; Code.part₄; Code.part₅; Code.part₆; Code.part₇; Code.part₈) = prog
+  unfold Code.part₂₀
+  MLIR
+  rewrite [←eq]
+  rfl
+
 end Risc0.OneHot.Witness.WP

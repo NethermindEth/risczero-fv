@@ -69,6 +69,26 @@ def part₁ : MLIRProgram :=
      -- }
   )
 
+def part₂₀ : MLIRProgram :=
+  nondet (
+     --   cirgen.set %arg1 : <3, mutable>[1] = %21 : <default>
+    ⟨"output"⟩[1] ←ᵢ ⟨"input == 1"⟩
+  )
+
+def part₂₁ : MLIRProgram :=
+  nondet (
+    "input - 2" ←ₐ .Sub ⟨"input"⟩ ⟨"2"⟩;
+     --   %23 = cirgen.isz %22 : <default>
+    "input == 2" ←ₐ ??₀⟨"input - 2"⟩
+  )
+
+def part₂₂ : MLIRProgram :=
+  nondet (
+    ⟨"output"⟩[2] ←ᵢ ⟨"input == 2"⟩
+  )
+
+
+
 def part₂ : MLIRProgram :=
    -- cirgen.nondet {
   nondet (

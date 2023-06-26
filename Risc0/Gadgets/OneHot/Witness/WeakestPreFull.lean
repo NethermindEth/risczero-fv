@@ -89,9 +89,9 @@ lemma closed_form {st: State} {input: Felt} {output₀ output₁ output₂ : Opt
   MLIR_states_updates
   simp [zero_le, ge_iff_le, forall_true_left, true_and, Map.getElem_def, Buffer.Idx.time, Buffer.Idx.data, Back.toNat]
 
-  by_cases eq: input = 0
-  subst eq
-  simp only [ite_true, zero_sub, ite_false]
+  -- by_cases eq: input = 0
+  -- subst eq
+  -- simp only [ite_true, zero_sub, ite_false]
 
   -- -- simp only [forall_true_left, ge_iff_le]
   -- -- simp

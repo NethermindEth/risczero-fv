@@ -149,6 +149,9 @@ lemma allGetsValid_of_not_isFailed : ∀ st : State, ¬(Γ st ⟦program⟧).isF
         simp [MLIR.run] at h_noFail
         exact h₂ (Γ state ⟦p₁⟧) h_noFail
 
+lemma nondet_seq_is_nondet_nondet {st : State} {p₀ p₁ : MLIR IsNondet.InNondet} :
+  MLIR.run (MLIR.Nondet (MLIR.Sequence p₀ p₁)) st = MLIR.run (MLIR.Sequence (MLIR.Nondet p₀) (MLIR.Nondet p₁)) st := by rfl
+
 end MLIR
 
 end WithMLIR 
