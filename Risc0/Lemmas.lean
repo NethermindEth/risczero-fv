@@ -83,10 +83,8 @@ lemma seq_step_eq (h: ∀ st : State, Γ st ⟦p₂⟧ = Γ st ⟦p₃⟧):
   simp [*, MLIR.run_seq_def]
 
 lemma nested_seq_step_eq (h: ∀ st : State, Γ st ⟦p₂; p₃⟧ = Γ st ⟦p₄⟧):
-  Γ state ⟦(p₁; p₂); p₃⟧ = Γ state ⟦p₁; p₄⟧ := by
-  rewrite [←seq_assoc]
-  apply seq_step_eq
-  exact h
+  Γ state ⟦(p₁; p₂); p₃⟧ = Γ state ⟦p₁; p₄⟧ :=
+  seq_assoc.symm ▸ seq_step_eq h
 
 lemma nondet_seq_step_eq (h: ∀ st: State, Γ st ⟦nondet s₂; s₃⟧ = Γ st ⟦nondet s₄; s₅⟧) :
   Γ state ⟦nondet (s₁; s₂); s₃⟧ = Γ state ⟦nondet (s₁; s₄); s₅⟧ := by
