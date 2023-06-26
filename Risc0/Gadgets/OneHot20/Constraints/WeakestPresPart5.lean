@@ -10,29 +10,11 @@ open MLIRNotation
 -- The state obtained by running Code.part5 on st
 def part5_state (st: State) : State := 
   
-        ((((st["%20"] ←ₛ getImpl st { name := "code" } 0 0)["%21"] ←ₛ
-              getImpl (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "data" } 0 1)["%22"] ←ₛ
-            getImpl
-              ((st["%20"] ←ₛ getImpl st { name := "code" } 0 0)["%21"] ←ₛ
-                getImpl (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "data" } 0 1)
-              { name := "data" } 0 2)[felts][{ name := "%23" }] ←
-          Option.get!
-              (State.felts
-                (((st["%20"] ←ₛ getImpl st { name := "code" } 0 0)["%21"] ←ₛ
-                    getImpl (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "data" } 0 1)["%22"] ←ₛ
-                  getImpl
-                    ((st["%20"] ←ₛ getImpl st { name := "code" } 0 0)["%21"] ←ₛ
-                      getImpl (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "data" } 0 1)
-                    { name := "data" } 0 2)
-                { name := "%22" }) *
+        ((((st["%20"] ←ₛ getImpl st { name := "code" } 0 0)["%21"] ←ₛ getImpl st { name := "data" } 0 1)["%22"] ←ₛ
+            getImpl st { name := "data" } 0 2)[felts][{ name := "%23" }] ←
+          Option.get! (State.felts (st["%22"] ←ₛ getImpl st { name := "data" } 0 2) { name := "%22" }) *
             Option.get!
-              (State.felts
-                (((st["%20"] ←ₛ getImpl st { name := "code" } 0 0)["%21"] ←ₛ
-                    getImpl (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "data" } 0 1)["%22"] ←ₛ
-                  getImpl
-                    ((st["%20"] ←ₛ getImpl st { name := "code" } 0 0)["%21"] ←ₛ
-                      getImpl (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "data" } 0 1)
-                    { name := "data" } 0 2)
+              (State.felts st
                 {
                   name :=
                     "%1" })) 

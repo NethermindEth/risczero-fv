@@ -19,21 +19,9 @@ def part5_state (st: State) : State :=
               (if Option.get! (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "%20" }) = 0 then
                 1
               else 0)[felts][{ name := "%139" }] ←
-            Option.get!
-                (((st["%20"] ←ₛ getImpl st { name := "code" } 0 0).felts[{ name := "%138" }] ←ₘ
-                    if
-                        Option.get! (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "%20" }) =
-                          0 then
-                      1
-                    else 0)
-                  { name := "%20" }) -
+            Option.get! (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "%20" }) -
               Option.get!
-                (((st["%20"] ←ₛ getImpl st { name := "code" } 0 0).felts[{ name := "%138" }] ←ₘ
-                    if
-                        Option.get! (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "%20" }) =
-                          0 then
-                      1
-                    else 0)
+                (State.felts st
                   {
                     name :=
                       "%18" })) 

@@ -9,9 +9,8 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₁ on st
 def part₁_state (st: State) : State :=
-  ((st["output[1]"] ←ₛ getImpl st { name := "output" } 0 1)["output[2]"] ←ₛ
-        getImpl (st["output[1]"] ←ₛ getImpl st { name := "output" } 0 1) { name := "output" } 0
-          2)
+  (st["output[1]"] ←ₛ getImpl st { name := "output" } 0 1)["output[2]"] ←ₛ
+        getImpl st { name := "output" } 0 2
 
 -- Run the whole program by using part₁_state rather than Code.part₁
 def part₁_state_update (st: State): State :=

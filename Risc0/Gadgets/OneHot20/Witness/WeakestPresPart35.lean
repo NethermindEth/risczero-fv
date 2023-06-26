@@ -11,18 +11,12 @@ open MLIRNotation
 def part35_state (st: State) : State :=
   
           (withEqZero
-            (Option.get!
-                ((st.felts[{ name := "%80" }] ←ₘ
-                    Option.get! (State.felts st { name := "%18" }) - Option.get! (State.felts st { name := "%21" }))
-                  { name := "%21" }) *
+            (Option.get! (State.felts st { name := "%21" }) *
               (Option.get! (State.felts st { name := "%18" }) - Option.get! (State.felts st { name := "%21" })))
             ((withEqZero (Option.get! st.felts[({ name := "%79" }: FeltVar)]!) st[felts][{ name := "%80" }] ←
                 Option.get! (State.felts st { name := "%18" }) -
                   Option.get! (State.felts st { name := "%21" }))[felts][{ name := "%81" }] ←
-              Option.get!
-                  ((st.felts[{ name := "%80" }] ←ₘ
-                      Option.get! (State.felts st { name := "%18" }) - Option.get! (State.felts st { name := "%21" }))
-                    { name := "%21" }) *
+              Option.get! (State.felts st { name := "%21" }) *
                 (Option.get! (State.felts st { name := "%18" }) -
                   Option.get!
                     (State.felts st

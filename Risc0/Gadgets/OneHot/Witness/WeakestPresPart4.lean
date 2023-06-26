@@ -9,61 +9,19 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₄ on st
 def part₄_state (st: State) : State :=
-  { buffers := st.buffers, bufferWidths := st.bufferWidths,
-          constraints :=
-            (Option.get!
-                      ((st.felts[{ name := "output[2] * 2" }] ←ₘ
-                          Option.get! (State.felts st { name := "output[2]" }) *
-                            Option.get! (State.felts st { name := "2" }))
-                        { name := "output[1]" }) +
-                    Option.get! (State.felts st { name := "output[2]" }) *
-                      Option.get! (State.felts st { name := "2" }) -
-                  Option.get!
-                    (((st.felts[{ name := "output[2] * 2" }] ←ₘ
-                          Option.get! (State.felts st { name := "output[2]" }) *
-                            Option.get! (State.felts st { name := "2" }))[{ name := "2*output[2]+output[1]" }] ←ₘ
-                        Option.get!
-                            ((st.felts[{ name := "output[2] * 2" }] ←ₘ
-                                Option.get! (State.felts st { name := "output[2]" }) *
-                                  Option.get! (State.felts st { name := "2" }))
-                              { name := "output[1]" }) +
-                          Option.get! (State.felts st { name := "output[2]" }) *
-                            Option.get! (State.felts st { name := "2" }))
-                      { name := "input" }) =
-                0) ::
-              st.constraints,
-          cycle := st.cycle,
-          felts :=
-            ((st.felts[{ name := "output[2] * 2" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[2]" }) *
-                    Option.get! (State.felts st { name := "2" }))[{ name := "2*output[2]+output[1]" }] ←ₘ
-                Option.get!
-                    ((st.felts[{ name := "output[2] * 2" }] ←ₘ
-                        Option.get! (State.felts st { name := "output[2]" }) *
-                          Option.get! (State.felts st { name := "2" }))
-                      { name := "output[1]" }) +
-                  Option.get! (State.felts st { name := "output[2]" }) *
-                    Option.get! (State.felts st { name := "2" }))[{ name := "2*output[2]+output[1] - input" }] ←ₘ
-              Option.get!
-                    ((st.felts[{ name := "output[2] * 2" }] ←ₘ
-                        Option.get! (State.felts st { name := "output[2]" }) *
-                          Option.get! (State.felts st { name := "2" }))
-                      { name := "output[1]" }) +
-                  Option.get! (State.felts st { name := "output[2]" }) * Option.get! (State.felts st { name := "2" }) -
-                Option.get!
-                  (((st.felts[{ name := "output[2] * 2" }] ←ₘ
-                        Option.get! (State.felts st { name := "output[2]" }) *
-                          Option.get! (State.felts st { name := "2" }))[{ name := "2*output[2]+output[1]" }] ←ₘ
-                      Option.get!
-                          ((st.felts[{ name := "output[2] * 2" }] ←ₘ
-                              Option.get! (State.felts st { name := "output[2]" }) *
-                                Option.get! (State.felts st { name := "2" }))
-                            { name := "output[1]" }) +
-                        Option.get! (State.felts st { name := "output[2]" }) *
-                          Option.get! (State.felts st { name := "2" }))
-                    { name := "input" }),
-          isFailed := st.isFailed, props := st.props,
-          vars := st.vars }
+  (withEqZero
+          (Option.get! (State.felts st { name := "output[1]" }) +
+              Option.get! (State.felts st { name := "output[2]" }) * Option.get! (State.felts st { name := "2" }) -
+            Option.get! (State.felts st { name := "input" }))
+          (((st[felts][{ name := "output[2] * 2" }] ←
+                Option.get! (State.felts st { name := "output[2]" }) *
+                  Option.get! (State.felts st { name := "2" }))[felts][{ name := "2*output[2]+output[1]" }] ←
+              Option.get! (State.felts st { name := "output[1]" }) +
+                Option.get! (State.felts st { name := "output[2]" }) *
+                  Option.get! (State.felts st { name := "2" }))[felts][{ name := "2*output[2]+output[1] - input" }] ←
+            Option.get! (State.felts st { name := "output[1]" }) +
+                Option.get! (State.felts st { name := "output[2]" }) * Option.get! (State.felts st { name := "2" }) -
+              Option.get! (State.felts st { name := "input" })))
 
 -- Run the program from part₄ onwards by using part₄_state rather than Code.part₄
 def part₄_state_update (st: State): State :=

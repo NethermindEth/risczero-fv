@@ -25,25 +25,9 @@ def part14_state (st: State) : State :=
                     0 then
                 1
               else 0)[felts][{ name := "%163" }] ←
-            Option.get!
-                (((st.felts[{ name := "%161" }] ←ₘ
-                      Option.get! (State.felts st { name := "%20" }) -
-                        Option.get! (State.felts st { name := "%7" }))[{ name := "%162" }] ←ₘ
-                    if
-                        Option.get! (State.felts st { name := "%20" }) - Option.get! (State.felts st { name := "%7" }) =
-                          0 then
-                      1
-                    else 0)
-                  { name := "%20" }) -
+            Option.get! (State.felts st { name := "%20" }) -
               Option.get!
-                (((st.felts[{ name := "%161" }] ←ₘ
-                      Option.get! (State.felts st { name := "%20" }) -
-                        Option.get! (State.felts st { name := "%7" }))[{ name := "%162" }] ←ₘ
-                    if
-                        Option.get! (State.felts st { name := "%20" }) - Option.get! (State.felts st { name := "%7" }) =
-                          0 then
-                      1
-                    else 0)
+                (State.felts st
                   {
                     name :=
                       "%6" })) 

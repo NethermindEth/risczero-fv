@@ -9,29 +9,15 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₆ on st
 def part₆_state (st: State) : State :=
-  { buffers := st.buffers, bufferWidths := st.bufferWidths,
-          constraints :=
-            (Option.get!
-                    ((st.felts[{ name := "1 - Output[1]" }] ←ₘ
-                        Option.get! (State.felts st { name := "1" }) -
-                          Option.get! (State.felts st { name := "output[1]" }))
-                      { name := "output[1]" }) =
-                  0 ∨
-                Option.get! (State.felts st { name := "1" }) - Option.get! (State.felts st { name := "output[1]" }) =
-                  0) ::
-              st.constraints,
-          cycle := st.cycle,
-          felts :=
-            (st.felts[{ name := "1 - Output[1]" }] ←ₘ
-                Option.get! (State.felts st { name := "1" }) -
-                  Option.get! (State.felts st { name := "output[1]" }))[{ name := "output[1] <= 1" }] ←ₘ
-              Option.get!
-                  ((st.felts[{ name := "1 - Output[1]" }] ←ₘ
-                      Option.get! (State.felts st { name := "1" }) -
-                        Option.get! (State.felts st { name := "output[1]" }))
-                    { name := "output[1]" }) *
-                (Option.get! (State.felts st { name := "1" }) - Option.get! (State.felts st { name := "output[1]" })),
-          isFailed := st.isFailed, props := st.props, vars := st.vars }
+  (withEqZero
+          (Option.get! (State.felts st { name := "output[1]" }) *
+            (Option.get! (State.felts st { name := "1" }) - Option.get! (State.felts st { name := "output[1]" })))
+          ((st[felts][{ name := "1 - Output[1]" }] ←
+              Option.get! (State.felts st { name := "1" }) -
+                Option.get! (State.felts st { name := "output[1]" }))[felts][{ name := "output[1] <= 1" }] ←
+            Option.get! (State.felts st { name := "output[1]" }) *
+              (Option.get! (State.felts st { name := "1" }) -
+                Option.get! (State.felts st { name := "output[1]" }))))
 
 -- Run the program from part₆ onwards by using part₆_state rather than Code.part₆
 def part₆_state_update (st: State): State :=

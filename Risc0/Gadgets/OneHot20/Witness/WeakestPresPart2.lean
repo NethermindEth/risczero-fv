@@ -9,9 +9,10 @@ open MLIRNotation
 
 -- The state obtained by running Code.part2 on st
 def part2_state (st: State) : State :=
-  ((((st[felts][{ name := "%8" }] ← 11)[felts][{ name := "%9" }] ← 10)[felts][{ name := "%10" }] ←
-            9)[felts][{ name := "%11" }] ←
-          8)
+  
+          ((((st[felts][{ name := "%8" }] ← 11)[felts][{ name := "%9" }] ← 10)[felts][{ name := "%10" }] ←
+              9)[felts][{ name := "%11" }] ←
+            8) 
 
 -- Run the program from part2 onwards by using part2_state rather than Code.part2
 def part2_state_update (st: State): State :=

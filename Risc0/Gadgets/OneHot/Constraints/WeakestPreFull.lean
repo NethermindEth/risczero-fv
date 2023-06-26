@@ -9,108 +9,53 @@ import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart6
 
 namespace Risc0.OneHot.Constraints.WP
 
-lemma closed_form {st: State} : Code.run st ↔ sorry := by
-  sorry
-  -- rewrite [part₀_wp]
-  -- rewrite [part₁_updates_opaque]
-  -- rewrite [part₂_updates_opaque]
-  -- rewrite [part₃_updates_opaque]
-  -- rewrite [part₄_updates_opaque]
-  -- rewrite [part₅_updates_opaque]
-  -- rewrite [part₆_updates_opaque]
+def start_state (input : Felt) (output : BufferAtTime) : State :=
+  { buffers := Map.fromList [(⟨"input"⟩, [[.some input]]), (⟨"output"⟩, [output])]
+  , bufferWidths := Map.fromList [(⟨"input"⟩, 1), (⟨"output"⟩, 3)]
+  , constraints := []
+  , cycle := 0
+  , felts := Map.empty
+  , props := Map.empty
+  , vars := [⟨"input"⟩, ⟨"output"⟩]
+  , isFailed := false
+  }
 
-  -- unfold part₀_state
-  -- simp [
-  --   State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-  --   State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-  --   Option.isEqSome, List.set
-  -- ]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
+lemma closed_form {x: Felt} {y₁ y₂ y₃ : Felt} : Code.run (start_state x ([some y₁, some y₂, some y₃])) ↔
+    ((y₂ + y₃ * 2 - x = 0 ∧ (y₁ = 0 ∨ 1 - y₁ = 0)) ∧ (y₂ = 0 ∨ 1 - y₂ = 0)) ∧ y₁ + y₂ + y₃ - 1 = 0 := by
+  rw [part₀_wp]
+  rw [part₁_updates_opaque]
+  rw [part₂_updates_opaque]
+  rw [part₃_updates_opaque]
+  rw [part₄_updates_opaque]
+  rw [part₅_updates_opaque]
+  rw [part₆_updates_opaque]
 
-  -- unfold part₁_state
-  -- simp [
-  --   State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-  --   State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-  --   Option.isEqSome, List.set
-  -- ]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
+  generalize eq : (((y₂ + y₃ * 2 - x = 0 ∧ (y₁ = 0 ∨ 1 - y₁ = 0)) ∧ (y₂ = 0 ∨ 1 - y₂ = 0)) ∧ y₁ + y₂ + y₃ - 1 = 0) = rhs
 
-  -- unfold part₂_state
-  -- simp [
-  --   State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-  --   State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-  --   Option.isEqSome, List.set
-  -- ]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
+  unfold start_state
 
-  -- unfold part₃_state
-  -- simp [
-  --   State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-  --   State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-  --   Option.isEqSome, List.set
-  -- ]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
+  unfold part₀_state
+  MLIR_states_updates
 
-  -- unfold part₄_state
-  -- simp [
-  --   State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-  --   State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-  --   Option.isEqSome, List.set
-  -- ]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- unfold part₅_state
-  -- simp [
-  --   State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-  --   State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-  --   Option.isEqSome, List.set
-  -- ]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- unfold part₆_state_update part₆_state
-  -- simp [
-  --   State.updateFelts, Map.get!, Option.get!, Buffer.get!,
-  --   State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-  --   Option.isEqSome, List.set
-  -- ]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- rw [State.felts_if] <;> try rfl
-  -- simp [State.felts]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- rw [State.buffers_if] <;> try rfl
-  -- simp [State.buffers]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- rw [State.bufferWidths_if] <;> try rfl
-  -- simp [State.bufferWidths]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- rw [State.cycle_if] <;> try rfl
-  -- simp [State.cycle]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- rw [State.isFailed_if] <;> try rfl
-  -- simp [State.isFailed]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- rw [State.props_if] <;> try rfl
-  -- simp [State.props]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- rw [State.vars_if] <;> try rfl
-  -- simp [State.vars]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
-
-  -- simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
+  unfold part₁_state
+  MLIR_states_updates
   
-  -- rw [State.buffers_if] <;> try rfl
-  -- simp [State.buffers]
-  -- MLIR_states_simple; simp only [Map.update_def.symm]
+  unfold part₂_state
+  MLIR_states_updates
 
-  -- simp [List.getLast]
+  unfold part₃_state
+  MLIR_states_updates
+
+  unfold part₄_state
+  MLIR_states_updates
+
+  unfold part₅_state
+  MLIR_states_updates
+
+  unfold part₆_state
+  MLIR_states_updates
+
+  simp only [Code.getReturn, State.constraintsInVar, State.updateProps_props_get_wobbly, Option.getD_some]
+  rw [←eq]
 
 end Risc0.OneHot.Constraints.WP

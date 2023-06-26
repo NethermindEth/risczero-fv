@@ -9,7 +9,7 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₃ on st
 def part₃_state (st: State) : State :=
-  ((((st[felts][{ name := "2*output[2]+output[1]-input" }] ←
+  (((st[felts][{ name := "2*output[2]+output[1]-input" }] ←
               Option.get! (State.felts st { name := "2*output[2]+output[1]" }) -
                 Option.get!
                   (State.felts st { name := "input" }))[props][{ name := "andEqz 2*output[2]+output[1]-input" }] ←
@@ -18,18 +18,7 @@ def part₃_state (st: State) : State :=
                   Option.get! (State.felts st { name := "input" }) =
                 0))["output[0]"] ←ₛ
           getImpl st { name := "output" } 0 0)[felts][{ name := "1-Output[0]" }] ←
-        Option.get!
-            (State.felts
-              (((st[felts][{ name := "2*output[2]+output[1]-input" }] ←
-                    Option.get! (State.felts st { name := "2*output[2]+output[1]" }) -
-                      Option.get!
-                        (State.felts st { name := "input" }))[props][{ name := "andEqz 2*output[2]+output[1]-input" }] ←
-                  (Option.get! (State.props st { name := "true" }) ∧
-                    Option.get! (State.felts st { name := "2*output[2]+output[1]" }) -
-                        Option.get! (State.felts st { name := "input" }) =
-                      0))["output[0]"] ←ₛ
-                getImpl st { name := "output" } 0 0)
-              { name := "1" }) -
+        Option.get! (State.felts st { name := "1" }) -
           Option.get!
             (State.felts
               (((st[felts][{ name := "2*output[2]+output[1]-input" }] ←
@@ -41,7 +30,7 @@ def part₃_state (st: State) : State :=
                         Option.get! (State.felts st { name := "input" }) =
                       0))["output[0]"] ←ₛ
                 getImpl st { name := "output" } 0 0)
-              { name := "output[0]" }))
+              { name := "output[0]" })
 
 -- Run the whole program by using part₃_state rather than Code.part₃
 def part₃_state_update (st: State): State :=

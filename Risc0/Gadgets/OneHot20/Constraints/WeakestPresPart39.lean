@@ -16,16 +16,10 @@ def part39_state (st: State) : State :=
             Option.get! (State.felts st { name := "%153" }) +
               Option.get! (State.felts st { name := "%73" }))[felts][{ name := "%158" }] ←
           Option.get! (State.felts st { name := "%153" }) + Option.get! (State.felts st { name := "%73" }) -
-            Option.get!
-              ((st.felts[{ name := "%157" }] ←ₘ
-                  Option.get! (State.felts st { name := "%153" }) + Option.get! (State.felts st { name := "%73" }))
-                { name := "%0" }))[props][{ name := "%159" }] ←
+            Option.get! (State.felts st { name := "%0" }))[props][{ name := "%159" }] ←
         ((Option.get! (State.props st { name := "%152" }) ∧ Option.get! (State.felts st { name := "%155" }) = 0) ∧
           Option.get! (State.felts st { name := "%153" }) + Option.get! (State.felts st { name := "%73" }) -
-              Option.get!
-                ((st.felts[{ name := "%157" }] ←ₘ
-                    Option.get! (State.felts st { name := "%153" }) + Option.get! (State.felts st { name := "%73" }))
-                  { name := "%0" }) =
+              Option.get! (State.felts st { name := "%0" }) =
             0)) 
 
 -- Prove that substituting part39_state for Code.part39 produces the same result

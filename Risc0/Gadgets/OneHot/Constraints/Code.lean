@@ -59,7 +59,7 @@ def full : MLIRProgram :=
   -- state'.props.get! ⟨"andEqz outputSum-1"⟩
 
 def getReturn (st: State) : Prop :=
-  st.props[(⟨"andEqz outputSum-1"⟩: PropVar)].get!
+  st.constraintsInVar ⟨"andEqz outputSum-1"⟩
 
 def run (st: State) : Prop :=
   getReturn (full.runProgram st)
