@@ -9,27 +9,15 @@ open MLIRNotation
 
 -- The state obtained by running Code.part18 on st
 def part18_state (st: State) : State :=
-  
-          ((State.set!
-                (st[felts][{ name := "%105" }] ←
-                  ↑(Bitvec.toNat
-                      (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%20" }))))
-                        (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%0" })))))))
-                { name := "data" } 17
+  (((State.set!
+              (st[felts][{ name := "%105" }] ←
                 ↑(Bitvec.toNat
                     (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%20" }))))
-                      (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%0" }))))))["%24"] ←ₛ
-              getImpl
-                (State.set!
-                  (st[felts][{ name := "%105" }] ←
-                    ↑(Bitvec.toNat
-                        (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%20" }))))
-                          (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%0" })))))))
-                  { name := "data" } 17
-                  ↑(Bitvec.toNat
-                      (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%20" }))))
-                        (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%0" })))))))
-                { name := "data" } 0 13)["%25"] ←ₛ
+                      (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%0" })))))))
+              { name := "data" } 17
+              ↑(Bitvec.toNat
+                  (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%20" }))))
+                    (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%0" })))))))["%24"] ←ₛ
             getImpl
               (State.set!
                 (st[felts][{ name := "%105" }] ←
@@ -40,8 +28,19 @@ def part18_state (st: State) : State :=
                 ↑(Bitvec.toNat
                     (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%20" }))))
                       (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%0" })))))))
-              { name := "data" } 0
-              0) 
+              { name := "data" } 0 13)["%25"] ←ₛ
+          getImpl
+            (State.set!
+              (st[felts][{ name := "%105" }] ←
+                ↑(Bitvec.toNat
+                    (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%20" }))))
+                      (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%0" })))))))
+              { name := "data" } 17
+              ↑(Bitvec.toNat
+                  (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%20" }))))
+                    (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%0" })))))))
+            { name := "data" } 0
+            0)
 
 -- Run the program from part18 onwards by using part18_state rather than Code.part18
 def part18_state_update (st: State): State :=
