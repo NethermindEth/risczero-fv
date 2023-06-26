@@ -9,45 +9,31 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₅ on st
 def part₅_state (st: State) : State :=
-  { buffers := (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).buffers,
-          bufferWidths := (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).bufferWidths,
-          constraints :=
-            (Option.get!
-                    (((st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).felts[{ name := "1 - Output[0]" }] ←ₘ
-                        Option.get!
-                            (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
-                          Option.get!
-                            (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0)
-                              { name := "output[0]" }))
-                      { name := "output[0]" }) =
-                  0 ∨
-                Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
+  (withEqZero
+          (Option.get!
+              (((st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).felts[{ name := "1 - Output[0]" }] ←ₘ
+                  Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
                     Option.get!
-                      (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" }) =
-                  0) ::
-              (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).constraints,
-          cycle := (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).cycle,
-          felts :=
-            ((st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).felts[{ name := "1 - Output[0]" }] ←ₘ
-                Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
-                  Option.get!
-                    (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0)
-                      { name := "output[0]" }))[{ name := "output[0] <= 1" }] ←ₘ
+                      (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" }))
+                { name := "output[0]" }) *
+            (Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
               Option.get!
-                  (((st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).felts[{ name := "1 - Output[0]" }] ←ₘ
+                (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" })))
+          (((st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0)[felts][{ name := "1 - Output[0]" }] ←
+              Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
+                Option.get!
+                  (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0)
+                    { name := "output[0]" }))[felts][{ name := "output[0] <= 1" }] ←
+            Option.get!
+                (((st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).felts[{ name := "1 - Output[0]" }] ←ₘ
+                    Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
                       Option.get!
-                          (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
-                        Option.get!
-                          (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0)
-                            { name := "output[0]" }))
-                    { name := "output[0]" }) *
-                (Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
-                  Option.get!
-                    (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" })),
-          isFailed := (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).isFailed,
-          props := (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).props,
-          vars :=
-            (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).vars }
+                        (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" }))
+                  { name := "output[0]" }) *
+              (Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
+                Option.get!
+                  (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0)
+                    { name := "output[0]" }))))
 
 -- Run the program from part₅ onwards by using part₅_state rather than Code.part₅
 def part₅_state_update (st: State): State :=

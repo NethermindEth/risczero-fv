@@ -410,7 +410,7 @@ end State
 
 instance : Inhabited State := ⟨State.init_default 42 42⟩
 
-notation:61 st "[" n:61 "]" " ←ₛ " x:49 => State.update st n x
+notation:61 st:max "[" n:61 "]" " ←ₛ " x:49 => State.update st n x
 
 namespace State
 
@@ -685,7 +685,6 @@ abbrev MLIRProgram := MLIR NotInNondet
 abbrev withEqZero (x : Felt) (st : State) : State :=
   {st with constraints := (x = 0) :: st.constraints}
 
-@[simp]
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
 
 def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer.Idx) (val : Felt) : State :=
