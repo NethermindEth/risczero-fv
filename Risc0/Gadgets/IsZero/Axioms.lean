@@ -380,7 +380,7 @@ lemma part₅_updates_opaque {st : State} :
   simp [part₄_state_update, part₅_updates]
 
 lemma is0_witness_closed_form {x : Felt} {y₁ y₂ : Option Felt} :
-  is0_witness_initial x = [y₁, y₂] ↔ (.some (if x = 0 then 1 else 0)) = y₁ ∧ (if x = 0 then 0 else x⁻¹) = y₂ := by
+  is0_witness_initial x = [y₁, y₂] ↔ some (if x = 0 then 1 else 0) = y₁ ∧ some (if x = 0 then 0 else x⁻¹) = y₂ := by
   unfold is0_witness_initial MLIR.runProgram; simp only [is0_witness_per_partes]
   rewrite [part₀_updates]
   rewrite [part₁_updates_opaque]
