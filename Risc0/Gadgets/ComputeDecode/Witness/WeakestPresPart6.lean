@@ -9,31 +9,7 @@ open MLIRNotation
 
 -- The state obtained by running Code.part6 on st
 def part6_state (st: State) : State :=
-  
-          (State.set!
-              ((st[felts][{ name := "%74" }] ←
-                  ↑(Bitvec.toNat
-                      (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%23" }))))
-                        (Bitvec.ofNat 256
-                          (ZMod.val (Option.get! (State.felts st { name := "%19" })))))))[felts][{ name := "%75" }] ←
-                ↑(Bitvec.toNat
-                      (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%23" }))))
-                        (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%19" })))))) *
-                  Option.get! (State.felts st { name := "%18" }))
-              { name := "data" } 10
-              (↑(Bitvec.toNat
-                    (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%23" }))))
-                      (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%19" })))))) *
-                Option.get! (State.felts st { name := "%18" }))[felts][{ name := "%76" }] ←
-            ↑(Bitvec.toNat
-                (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%23" }))))
-                  (Bitvec.ofNat 256
-                    (ZMod.val
-                      (Option.get!
-                        (State.felts st
-                          {
-                            name :=
-                              "%17" }))))))) 
+  sorry
 
 -- Run the program from part6 onwards by using part6_state rather than Code.part6
 def part6_state_update (st: State): State :=

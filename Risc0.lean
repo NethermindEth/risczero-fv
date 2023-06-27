@@ -175,3 +175,16 @@ import Risc0.Gadgets.OneHot20.Witness.WeakestPresPart51
 import Risc0.Gadgets.OneHot20.Witness.WeakestPresPart52
 import Risc0.Gadgets.OneHot20.Witness.WeakestPresPart53
 import Risc0.Gadgets.OneHot20.Witness.WeakestPresPart54
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart19
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart20
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart21
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart22
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart23
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart24
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart25
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart26
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart27
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart28
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart29
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart30
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart31

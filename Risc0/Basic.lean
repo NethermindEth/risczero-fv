@@ -613,6 +613,9 @@ lemma getImpl_skip_get_update:
     have h: ∃ x, lit = Lit.Val x := getImpl_val_of_some eq
     aesop
 
+def feltBitAnd (x y: Felt) : Felt :=
+  ↑(Bitvec.and (Bitvec.ofNat 256 x.val) (Bitvec.ofNat 256 y.val)).toNat
+
 
 -- Evaluate a pure functional circuit.
 def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
@@ -625,7 +628,7 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
     | Neg lhs     => .some <| .Val <| 0                  - st.felts[lhs].get!
     | Mul lhs rhs => .some <| .Val <| st.felts[lhs].get! * st.felts[rhs].get!
     | Pow lhs rhs => .some <| .Val <| st.felts[lhs].get! ^ rhs
-    | BitAnd lhs rhs => .some <| .Val <| ↑(Bitvec.and (Bitvec.ofNat 256 (st.felts lhs).get!.val) (Bitvec.ofNat 256 (st.felts rhs).get!.val)).toNat
+    | BitAnd lhs rhs => .some <| .Val <| feltBitAnd st.felts[lhs].get! st.felts[rhs].get!
     | Inv x => .some <| .Val <| if st.felts[x]!.get! = 0 then 0 else st.felts[x]!.get!⁻¹
     -- Logic
     | Isz x => .some <| .Val <| if st.felts[x]!.get! = 0 then 1 else 0
