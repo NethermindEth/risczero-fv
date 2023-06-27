@@ -78,7 +78,8 @@ import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart15
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart16
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart17
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart18
-
+import Risc0.Gadgets.OneHot20.Constraints.Code
+import Risc0.Gadgets.OneHot20.Witness.Code
 import Risc0.Gadgets.OneHot20.Constraints.WeakestPresPart0
 import Risc0.Gadgets.OneHot20.Constraints.WeakestPresPart1
 import Risc0.Gadgets.OneHot20.Constraints.WeakestPresPart2
