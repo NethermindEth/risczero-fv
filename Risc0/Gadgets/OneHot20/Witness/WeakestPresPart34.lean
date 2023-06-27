@@ -10,63 +10,40 @@ open MLIRNotation
 -- The state obtained by running Code.part34 on st
 def part34_state (st: State) : State :=
   
-          ((({ buffers := st.buffers, bufferWidths := st.bufferWidths,
-                  constraints := (Option.get! st.felts[({ name := "%76" }: FeltVar)]! = 0) :: st.constraints, cycle := st.cycle,
-                  felts := st.felts, isFailed := st.isFailed, props := st.props, vars := st.vars }["%77"] ←ₛ
+          ((((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                 getImpl st { name := "data" } 0 0)[felts][{ name := "%78" }] ←
               Option.get!
                   (State.felts
-                    ({ buffers := st.buffers, bufferWidths := st.bufferWidths,
-                        constraints := (Option.get! st.felts[({ name := "%76" }: FeltVar)]! = 0) :: st.constraints,
-                        cycle := st.cycle, felts := st.felts, isFailed := st.isFailed, props := st.props,
-                        vars := st.vars }["%77"] ←ₛ
+                    ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                       getImpl st { name := "data" } 0 0)
                     { name := "%18" }) -
                 Option.get!
                   (State.felts
-                    ({ buffers := st.buffers, bufferWidths := st.bufferWidths,
-                        constraints := (Option.get! st.felts[({ name := "%76" }: FeltVar)]! = 0) :: st.constraints,
-                        cycle := st.cycle, felts := st.felts, isFailed := st.isFailed, props := st.props,
-                        vars := st.vars }["%77"] ←ₛ
+                    ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                       getImpl st { name := "data" } 0 0)
                     { name := "%77" }))[felts][{ name := "%79" }] ←
             Option.get!
-                ((({ buffers := st.buffers, bufferWidths := st.bufferWidths,
-                          constraints := (Option.get! st.felts[({ name := "%76" }: FeltVar)]! = 0) :: st.constraints,
-                          cycle := st.cycle, felts := st.felts, isFailed := st.isFailed, props := st.props,
-                          vars := st.vars }["%77"] ←ₛ
+                ((((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                         getImpl st { name := "data" } 0 0).felts[{ name := "%78" }] ←ₘ
                     Option.get!
                         (State.felts
-                          ({ buffers := st.buffers, bufferWidths := st.bufferWidths,
-                              constraints := (Option.get! st.felts[({ name := "%76" }: FeltVar)]! = 0) :: st.constraints,
-                              cycle := st.cycle, felts := st.felts, isFailed := st.isFailed, props := st.props,
-                              vars := st.vars }["%77"] ←ₛ
+                          ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                             getImpl st { name := "data" } 0 0)
                           { name := "%18" }) -
                       Option.get!
                         (State.felts
-                          ({ buffers := st.buffers, bufferWidths := st.bufferWidths,
-                              constraints := (Option.get! st.felts[({ name := "%76" }: FeltVar)]! = 0) :: st.constraints,
-                              cycle := st.cycle, felts := st.felts, isFailed := st.isFailed, props := st.props,
-                              vars := st.vars }["%77"] ←ₛ
+                          ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                             getImpl st { name := "data" } 0 0)
                           { name := "%77" }))
                   { name := "%77" }) *
               (Option.get!
                   (State.felts
-                    ({ buffers := st.buffers, bufferWidths := st.bufferWidths,
-                        constraints := (Option.get! st.felts[({ name := "%76" }: FeltVar)]! = 0) :: st.constraints,
-                        cycle := st.cycle, felts := st.felts, isFailed := st.isFailed, props := st.props,
-                        vars := st.vars }["%77"] ←ₛ
+                    ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                       getImpl st { name := "data" } 0 0)
                     { name := "%18" }) -
                 Option.get!
                   (State.felts
-                    ({ buffers := st.buffers, bufferWidths := st.bufferWidths,
-                        constraints := (Option.get! st.felts[({ name := "%76" }: FeltVar)]! = 0) :: st.constraints,
-                        cycle := st.cycle, felts := st.felts, isFailed := st.isFailed, props := st.props,
-                        vars := st.vars }["%77"] ←ₛ
+                    ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                       getImpl st { name := "data" } 0 0)
                     {
                       name :=
