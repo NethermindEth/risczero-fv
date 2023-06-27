@@ -335,8 +335,7 @@ lemma updateFelts_felts : (updateFelts st name x).felts = st.felts[name] ←ₘ 
 
 @[simp]
 lemma updateFelts_felts_get_next (h: name ≠ name') : (updateFelts st name x).felts name' = st.felts name' := by
-  simp [updateFelts]
-  exact Map.update_get_next' h
+  simp [updateFelts, Map.update_get_next', h]
 
 @[simp]
 lemma updateProps_buffers : (updateProps st name x).buffers = st.buffers := by simp [updateProps]
@@ -382,7 +381,7 @@ lemma update_constraint {state : State} {name : String} {c : Prop} :
   update state name (.some (.Constraint c)) = { state with props := state.props.update ⟨name⟩ c } := rfl
 
 @[simp]
-lemma update_skip_felts (h: name' ≠ name) :
+lemma update_felts_get_next (h: name' ≠ name) :
   (State.felts
     (update st name' x)
     { name }) =
