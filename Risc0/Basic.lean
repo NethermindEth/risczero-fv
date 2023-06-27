@@ -271,6 +271,13 @@ lemma updateFelts_felts_get {st : State} {name : FeltVar} {x : Felt} :
   (updateFelts st name x).felts[name]! = some x := by
   simp [updateFelts, Map.update_def, Map.getElem_def, getElem!]
 
+lemma updateFelts_neq_comm {st : State} {name name' : FeltVar} {v v' : Felt}
+  (h : name ≠ name') : (updateFelts (updateFelts st name v) name' v') = (updateFelts (updateFelts st name' v') name v) := by
+  unfold updateFelts
+  simp
+  rw [Map.update_neq_comm]
+  exact h
+
 @[simp]
 lemma updateProps_props_get {st : State} {name : PropVar} {x : Prop} :
   (updateProps st name x).props[name]! = some x := by
