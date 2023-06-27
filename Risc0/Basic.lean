@@ -707,7 +707,7 @@ lemma eval_andEqz : Γ st ⟦@AndEqz α c x⟧ₑ =
 @[simp]
 lemma eval_bitAnd :
   Γ st ⟦@BitAnd α x y⟧ₑ =
-    (.some <| .Val <| ↑(Bitvec.and (Bitvec.ofNat 256 (st.felts x).get!.val) (Bitvec.ofNat 256 (st.felts y).get!.val)).toNat) := rfl
+    (.some <| .Val <| feltBitAnd (st.felts x).get! (st.felts y).get!) := rfl
 
 @[simp]
 lemma eval_andCond :

@@ -9,25 +9,16 @@ open MLIRNotation
 
 -- The state obtained by running Code.part7 on st
 def part7_state (st: State) : State :=
-  
-          ((State.set!
-                (st[felts][{ name := "%77" }] ←
-                  Option.get! (State.felts st { name := "%76" }) * Option.get! (State.felts st { name := "%16" }))
-                { name := "data" } 1
-                (Option.get! (State.felts st { name := "%76" }) *
-                  Option.get! (State.felts st { name := "%16" }))[felts][{ name := "%78" }] ←
-              ↑(Bitvec.toNat
-                  (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%23" }))))
-                    (Bitvec.ofNat 256
-                      (ZMod.val (Option.get! (State.felts st { name := "%15" })))))))[felts][{ name := "%79" }] ←
-            ↑(Bitvec.toNat
-                  (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%23" }))))
-                    (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%15" })))))) *
-              Option.get!
-                (State.felts st
-                  {
-                    name :=
-                      "%14" })) 
+  (State.set!
+              (st[felts][{ name := "%77" }] ←
+                Option.get! (State.felts st { name := "%76" }) * Option.get! (State.felts st { name := "%16" }))
+              { name := "data" } 1
+              (Option.get! (State.felts st { name := "%76" }) *
+                Option.get! (State.felts st { name := "%16" }))[felts][{ name := "%78" }] ←
+            feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+              (Option.get! (State.felts st { name := "%15" })))[felts][{ name := "%79" }] ←
+          feltBitAnd (Option.get! (State.felts st { name := "%23" })) (Option.get! (State.felts st { name := "%15" })) *
+            Option.get! (State.felts st { name := "%14" })
 
 -- Run the program from part7 onwards by using part7_state rather than Code.part7
 def part7_state_update (st: State): State :=

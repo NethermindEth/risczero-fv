@@ -1,3 +1,4 @@
+import Risc0.Basic
 import Risc0.Gadgets.ComputeDecode.Witness.Code
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart0
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart1
@@ -45,6 +46,15 @@ def start_state (input : BufferAtTime) : State :=
   , isFailed := false
   }
 
+open Lean Elab Tactic in
+elab "MLIR_witness_updates" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      MLIR_states_new
+      simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
+  )
 
 lemma closed_form {x₀ x₁ x₂ x₃: Felt} {y₀ y₁ y₂ y₃ y₄ y₅ y₆ y₇ y₈ y₉ y₁₀ y₁₁ y₁₂ y₁₃ y₁₄ y₁₅ y₁₆ y₁₇ : Option Felt} :
   Code.run (start_state [x₀, x₁, x₂, x₃]) = [y₀, y₁, y₂, y₃, y₄, y₅, y₆, y₇, y₈, y₉, y₁₀, y₁₁, y₁₂, y₁₃, y₁₄, y₁₅, y₁₆, y₁₇ ] ↔ sorry := by
@@ -78,13 +88,16 @@ lemma closed_form {x₀ x₁ x₂ x₃: Felt} {y₀ y₁ y₂ y₃ y₄ y₅ y�
   unfold part6_state
   MLIR_states_updates
 
-  rewrite [part8_updates_opaque]
-  unfold part7_state
-  MLIR_states_updates
 
-  rewrite [part9_updates_opaque]
-  unfold part8_state
-  MLIR_states_updates
+  generalize h_none : [none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none] = nones
+
+  -- rewrite [part8_updates_opaque]
+  -- unfold part7_state
+  -- MLIR_witness_updates
+
+  -- rewrite [part9_updates_opaque]
+  -- unfold part8_state
+  -- MLIR_witness_updates
 
   -- rewrite [part₃_updates_opaque]
   -- rewrite [part₄_updates_opaque]
@@ -93,22 +106,22 @@ lemma closed_form {x₀ x₁ x₂ x₃: Felt} {y₀ y₁ y₂ y₃ y₄ y₅ y�
 
 
   -- unfold part₁_state
-  -- MLIR_states_updates
+  -- MLIR_witness_updates
 
   -- unfold part₂_state
-  -- MLIR_states_updates
+  -- MLIR_witness_updates
 
   -- unfold part₃_state
-  -- MLIR_states_updates
+  -- MLIR_witness_updates
 
   -- unfold part₄_state
-  -- MLIR_states_updates
+  -- MLIR_witness_updates
 
   -- unfold part₅_state
-  -- MLIR_states_updates
+  -- MLIR_witness_updates
 
   -- simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
-  -- MLIR_states_updates
+  -- MLIR_witness_updates
   -- simp [List.getLast]
 
 end Risc0.ComputeDecode.Witness.WP

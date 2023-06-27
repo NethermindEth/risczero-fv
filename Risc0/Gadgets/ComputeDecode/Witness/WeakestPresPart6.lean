@@ -9,7 +9,19 @@ open MLIRNotation
 
 -- The state obtained by running Code.part6 on st
 def part6_state (st: State) : State :=
-  sorry
+  State.set!
+            ((st[felts][{ name := "%74" }] ←
+                feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+                  (Option.get! (State.felts st { name := "%19" })))[felts][{ name := "%75" }] ←
+              feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+                  (Option.get! (State.felts st { name := "%19" })) *
+                Option.get! (State.felts st { name := "%18" }))
+            { name := "data" } 10
+            (feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+                (Option.get! (State.felts st { name := "%19" })) *
+              Option.get! (State.felts st { name := "%18" }))[felts][{ name := "%76" }] ←
+          feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+            (Option.get! (State.felts st { name := "%17" }))
 
 -- Run the program from part6 onwards by using part6_state rather than Code.part6
 def part6_state_update (st: State): State :=

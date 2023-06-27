@@ -161,7 +161,11 @@ elab "MLIR_decide_updates" : tactic => do
 
 elab "MLIR_states_updates" : tactic => do
   evalTactic <| ← `(
-    tactic| (MLIR_states_new; MLIR_decide_updates)
+    tactic| (
+      MLIR_states_new
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
   )
 
 end tactics

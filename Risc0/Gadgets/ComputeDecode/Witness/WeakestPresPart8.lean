@@ -9,26 +9,17 @@ open MLIRNotation
 
 -- The state obtained by running Code.part8 on st
 def part8_state (st: State) : State :=
-  
-          (State.set!
-            ((State.set! st { name := "data" } 9 (Option.get! st.felts[({ name := "%79" }: FeltVar)]!)[felts][{ name := "%80" }] ←
-                ↑(Bitvec.toNat
-                    (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%23" }))))
-                      (Bitvec.ofNat 256
-                        (ZMod.val (Option.get! (State.felts st { name := "%13" })))))))[felts][{ name := "%81" }] ←
-              ↑(Bitvec.toNat
-                    (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%23" }))))
-                      (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%13" })))))) *
-                Option.get! (State.felts st { name := "%12" }))
-            { name := "data" } 8
-            (↑(Bitvec.toNat
-                  (Bitvec.and (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%23" }))))
-                    (Bitvec.ofNat 256 (ZMod.val (Option.get! (State.felts st { name := "%13" })))))) *
-              Option.get!
-                (State.felts st
-                  {
-                    name :=
-                      "%12" }))) 
+  State.set!
+          ((State.set! st { name := "data" } 9 (Option.get! st.felts[({ name := "%79" }:FeltVar)]!)[felts][{ name := "%80" }] ←
+              feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+                (Option.get! (State.felts st { name := "%13" })))[felts][{ name := "%81" }] ←
+            feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+                (Option.get! (State.felts st { name := "%13" })) *
+              Option.get! (State.felts st { name := "%12" }))
+          { name := "data" } 8
+          (feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+              (Option.get! (State.felts st { name := "%13" })) *
+            Option.get! (State.felts st { name := "%12" }))
 
 -- Run the program from part8 onwards by using part8_state rather than Code.part8
 def part8_state_update (st: State): State :=
