@@ -143,9 +143,15 @@ lemma not_mem_iff_none : k ∉ m ↔ m[k] = none := by
 
 -- Drop lemmas
 lemma drop_drop : (m.drop k).drop k = m.drop k := by unfold drop; aesop
+
 lemma update_drop : (m[k] ←ₘ v).drop k = m.drop k := 
-  by unfold drop update; aesop 
-lemma update_drop_swap (h : k ≠ k') : (m[k] ←ₘ v).drop k' = (m.drop k')[k] ←ₘ v := sorry
+  by unfold drop update; aesop
+
+lemma update_drop_swap (h : k ≠ k') : (m[k] ←ₘ v).drop k' = (m.drop k')[k] ←ₘ v := by
+  unfold drop update
+  funext y
+  aesop
+
 lemma drop_base : empty.drop k = (@empty α β) := by
   unfold drop empty; aesop 
 

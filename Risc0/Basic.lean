@@ -345,10 +345,10 @@ lemma updateFelts_vars : (updateFelts st name x).vars = st.vars := by simp [upda
 -- @[simp]
 lemma updateFelts_felts : (updateFelts st name x).felts = st.felts[name] ←ₘ x := by simp [updateFelts]
 
-@[simp]
-lemma updateFelts_felts_get_next (h: name ≠ name') : (updateFelts st name x).felts name' = st.felts name' := by
-  simp [updateFelts]
-  exact Map.update_get_next' h
+-- @[simp]
+-- lemma updateFelts_felts_get_next (h: name ≠ name') : (updateFelts st name x).felts name' = st.felts name' := by
+--   simp [updateFelts]
+--   exact Map.update_get_next' h
 
 @[simp]
 lemma updateProps_buffers : (updateProps st name x).buffers = st.buffers := by simp [updateProps]
