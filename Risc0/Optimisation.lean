@@ -199,6 +199,18 @@ lemma get_past_set_buf_nondet (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf):
   State.buffers (Γ st ⟦nondet (buf'[index] ←ᵢ val); x ←ₐ .Get buf back offset; nondet s₁; s₂⟧) := by
   MLIR
   generalize eq: getImpl st buf back offset = get
+  rcases get with _ | ⟨x | x | x⟩
+  simp
+  · 
+    simp [State.update, State.set!, State.setBufferElementImpl]
+    simp
+    unfold getImpl at eq
+    rw [ite_eq_iff] at eq
+    rcases eq with eq | ⟨eq, _⟩; try tauto
+    
+    simp [State.update]
+    
+
   cases get with
     | none => sorry
     | some lit1 => sorry

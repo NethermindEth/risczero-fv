@@ -766,6 +766,15 @@ lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val 
   unfold set! setBufferElementImpl
   aesop
 
+lemma isGetValid_skip_set (h : buf ≠ buf') : 
+  isGetValid (State.set! st buf' index x) buf back offset ↔ isGetValid st buf back offset := by
+    apply Iff.intro; intro h
+    · 
+
+
+lemma getImpl_skip_set (h : buf ≠ buf') : getImpl (State.set! st buf' index x) buf back offset = getImpl st buf back offset := by
+  unfold getImpl  
+
 def State.setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
   let width := st.bufferWidths[bufferVar].get!
   st.setBufferElementImpl bufferVar (Buffer.Idx.from1D offset width) val
