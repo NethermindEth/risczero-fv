@@ -15,6 +15,9 @@ def empty : Map α β := λ _ => none
 def update (m : Map α β) (k : α) (v : β) : Map α β :=
   λ x => if x = k then some v else m x
 
+def drop (m : Map α β) (k : α) : Map α β :=
+  λ x => if x = k then none else m x
+
 end Map
 
 end Map
@@ -120,6 +123,11 @@ lemma mem_unroll_assignment : k ∈ m[k'] ←ₘ v ↔ (k = k' ∨ k ∈ m) := b
 
 lemma not_mem_iff_none : k ∉ m ↔ m[k] = none := by
   rw [mem_def]; rw [getElem_def] at *; aesop; rwa [Option.isNone_iff_eq_none] at a
+
+-- Drop lemmas
+lemma drop_drop : (m.drop k).drop k = m.drop k := by unfold drop; aesop
+
+-- lemma update_drop : (m[k] ←ₘ v).drop k = m := by
 
 end Map
 
