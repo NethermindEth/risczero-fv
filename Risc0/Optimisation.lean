@@ -99,6 +99,20 @@ lemma const_past_set_nondet_single (h: ⟨a⟩ ≠ d) :
   simp [State.set!, State.setBufferElementImpl]
   aesop
 
+lemma get_past_const (h: x ≠ y) :
+  State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; y ←ₐ C c; rest⟧) =
+  State.buffers (Γ st ⟦y ←ₐ C c; x ←ₐ .Get buf back offset; rest⟧) := by
+  MLIR
+  generalize eq: getImpl st buf back offset = get
+  cases get with
+    | none => aesop
+    | some lit =>
+      have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
+      aesop
+      rewrite [updateFelts_neq_comm]
+      rfl
+      simp [h]
+
 lemma get_past_add (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
   State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; y ←ₐ .Add l r; rest⟧) =
   State.buffers (Γ st ⟦y ←ₐ .Add l r; x ←ₐ .Get buf back offset; rest⟧) := by
@@ -116,6 +130,20 @@ lemma get_past_add (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
 lemma get_past_bitAnd_nondet (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
   State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; nondet(y ←ₐ .BitAnd l r; s₁); s₂⟧) =
   State.buffers (Γ st ⟦nondet (y ←ₐ .BitAnd l r); x ←ₐ .Get buf back offset; nondet s₁; s₂⟧) := by
+  MLIR
+  generalize eq: getImpl st buf back offset = get
+  cases get with
+    | none => aesop
+    | some lit =>
+      have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
+      aesop
+      rewrite [updateFelts_neq_comm]
+      rfl
+      simp [h]
+
+lemma get_past_bitAnd_nondet_single (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
+  State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; nondet(y ←ₐ .BitAnd l r); s₂⟧) =
+  State.buffers (Γ st ⟦nondet (y ←ₐ .BitAnd l r); x ←ₐ .Get buf back offset; s₂⟧) := by
   MLIR
   generalize eq: getImpl st buf back offset = get
   cases get with
@@ -197,6 +225,15 @@ lemma get_past_get_offset (h: offset ≠ offset') (h': x ≠ y) :
 lemma get_past_set_buf_nondet (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf):
   State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; nondet(buf'[index] ←ᵢ val; s₁); s₂⟧) =
   State.buffers (Γ st ⟦nondet (buf'[index] ←ᵢ val); x ←ₐ .Get buf back offset; nondet s₁; s₂⟧) := by
+  MLIR
+  generalize eq: getImpl st buf back offset = get
+  cases get with
+    | none => sorry
+    | some lit1 => sorry
+
+lemma get_past_set_buf_nondet_single (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf):
+  State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; nondet(buf'[index] ←ᵢ val); s₂⟧) =
+  State.buffers (Γ st ⟦nondet (buf'[index] ←ᵢ val); x ←ₐ .Get buf back offset; s₂⟧) := by
   MLIR
   generalize eq: getImpl st buf back offset = get
   cases get with
