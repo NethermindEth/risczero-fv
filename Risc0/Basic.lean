@@ -253,6 +253,9 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
 def updateFelts (state : State) (name : FeltVar) (x : Felt) : State :=
   { state with felts := state.felts[name] ←ₘ x }
 
+def dropFelts (st : State) (name : FeltVar) : State :=
+  { st with felts := st.felts.drop name }
+
 notation:61 st "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
 
 def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
@@ -262,6 +265,9 @@ notation:61 st "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
 
 lemma updateFelts_def : 
   updateFelts st k v = { st with felts := st.felts[k] ←ₘ v } := rfl
+
+lemma dropFelts_def :
+  dropFelts st k = { st with felts := st.felts.drop k } := rfl
 
 lemma updateProps_def :
   updateProps st k v = { st with props := st.props[k] ←ₘ v } := rfl
@@ -667,6 +673,7 @@ end Op
 inductive MLIR : IsNondet → Type where
   -- Meta
   | Assign    : String        → Op x   → MLIR x
+  | DropFelt  : FeltVar                → MLIR x
   | Eqz       : FeltVar                → MLIR x
   | If        : FeltVar       → MLIR x → MLIR x
   | Nondet    : MLIR InNondet          → MLIR NotInNondet
@@ -681,6 +688,7 @@ namespace MLIRNotation
 
 scoped infix   :51                    "←ₐ "                      => MLIR.Assign
 scoped prefix  :52                    "?₀"                       => MLIR.Eqz
+scoped prefix  :52                    "dropfelt"                 => MLIR.DropFelt
 scoped notation:51                    "guard " c " then " x:51   => MLIR.If c x
 scoped prefix  :max                   "nondet"                   => MLIR.Nondet
 scoped infixr  :50                    "; "                       => MLIR.Sequence
@@ -720,6 +728,7 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
   match program with
     -- Meta
     | Assign name op => st[name] ←ₛ Γ st ⟦op⟧ₑ
+    | DropFelt k     => .dropFelts st k
     | Eqz x          => withEqZero st.felts[x]!.get! st
     | If x program   => if st.felts[x]!.get! = 0 then st else program.run st
     | Nondet block   => block.run st

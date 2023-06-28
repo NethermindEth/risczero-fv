@@ -15,6 +15,9 @@ def empty : Map α β := λ _ => none
 def update (m : Map α β) (k : α) (v : β) : Map α β :=
   λ x => if x = k then some v else m x
 
+def drop (m : Map α β) (k : α) : Map α β :=
+  λ x => if x = k then none else m x
+
 end Map
 
 end Map
