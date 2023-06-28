@@ -14,24 +14,9 @@ def part9_state (st: State) : State :=
                 (st[felts][{ name := "%148" }] ← if Option.get! (State.felts st { name := "%147" }) = 0 then 1 else 0)
                 { name := "data" } 5
                 (if Option.get! (State.felts st { name := "%147" }) = 0 then 1 else 0)[felts][{ name := "%149" }] ←
-              Option.get!
-                  ((st.felts[{ name := "%148" }] ←ₘ
-                      if Option.get! (State.felts st { name := "%147" }) = 0 then 1 else 0)
-                    { name := "%20" }) -
-                Option.get!
-                  ((st.felts[{ name := "%148" }] ←ₘ
-                      if Option.get! (State.felts st { name := "%147" }) = 0 then 1 else 0)
-                    { name := "%13" }))[felts][{ name := "%150" }] ←
-            if
-                Option.get!
-                      ((st.felts[{ name := "%148" }] ←ₘ
-                          if Option.get! (State.felts st { name := "%147" }) = 0 then 1 else 0)
-                        { name := "%20" }) -
-                    Option.get!
-                      ((st.felts[{ name := "%148" }] ←ₘ
-                          if Option.get! (State.felts st { name := "%147" }) = 0 then 1 else 0)
-                        { name := "%13" }) =
-                  0 then
+              Option.get! (State.felts st { name := "%20" }) -
+                Option.get! (State.felts st { name := "%13" }))[felts][{ name := "%150" }] ←
+            if Option.get! (State.felts st { name := "%20" }) - Option.get! (State.felts st { name := "%13" }) = 0 then
               1
             else
               0) 

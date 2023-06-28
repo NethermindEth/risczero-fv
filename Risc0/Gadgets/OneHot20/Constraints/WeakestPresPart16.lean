@@ -12,17 +12,11 @@ def part16_state (st: State) : State :=
   
         ((((st["%64"] ←ₛ getImpl st { name := "data" } 0 16)[felts][{ name := "%65" }] ←
               Option.get! (State.felts (st["%64"] ←ₛ getImpl st { name := "data" } 0 16) { name := "%64" }) *
-                Option.get!
-                  (State.felts (st["%64"] ←ₛ getImpl st { name := "data" } 0 16)
-                    { name := "%15" }))[felts][{ name := "%66" }] ←
-            Option.get!
-                (((st["%64"] ←ₛ getImpl st { name := "data" } 0 16).felts[{ name := "%65" }] ←ₘ
-                    Option.get! (State.felts (st["%64"] ←ₛ getImpl st { name := "data" } 0 16) { name := "%64" }) *
-                      Option.get! (State.felts (st["%64"] ←ₛ getImpl st { name := "data" } 0 16) { name := "%15" }))
-                  { name := "%63" }) +
+                Option.get! (State.felts st { name := "%15" }))[felts][{ name := "%66" }] ←
+            Option.get! (State.felts st { name := "%63" }) +
               Option.get! (State.felts (st["%64"] ←ₛ getImpl st { name := "data" } 0 16) { name := "%64" }) *
-                Option.get! (State.felts (st["%64"] ←ₛ getImpl st { name := "data" } 0 16) { name := "%15" }))["%67"] ←ₛ
-          getImpl (st["%64"] ←ₛ getImpl st { name := "data" } 0 16) { name := "data" } 0
+                Option.get! (State.felts st { name := "%15" }))["%67"] ←ₛ
+          getImpl st { name := "data" } 0
             17) 
 
 -- Run the whole program by using part16_state rather than Code.part16

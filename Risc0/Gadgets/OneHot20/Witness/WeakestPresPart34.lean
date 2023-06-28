@@ -12,35 +12,18 @@ def part34_state (st: State) : State :=
   
           ((((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                 getImpl st { name := "data" } 0 0)[felts][{ name := "%78" }] ←
-              Option.get!
-                  (State.felts
-                    ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
-                      getImpl st { name := "data" } 0 0)
-                    { name := "%18" }) -
+              Option.get! (State.felts st { name := "%18" }) -
                 Option.get!
                   (State.felts
                     ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
                       getImpl st { name := "data" } 0 0)
                     { name := "%77" }))[felts][{ name := "%79" }] ←
             Option.get!
-                ((((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
-                        getImpl st { name := "data" } 0 0).felts[{ name := "%78" }] ←ₘ
-                    Option.get!
-                        (State.felts
-                          ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
-                            getImpl st { name := "data" } 0 0)
-                          { name := "%18" }) -
-                      Option.get!
-                        (State.felts
-                          ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
-                            getImpl st { name := "data" } 0 0)
-                          { name := "%77" }))
+                (State.felts
+                  ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
+                    getImpl st { name := "data" } 0 0)
                   { name := "%77" }) *
-              (Option.get!
-                  (State.felts
-                    ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ
-                      getImpl st { name := "data" } 0 0)
-                    { name := "%18" }) -
+              (Option.get! (State.felts st { name := "%18" }) -
                 Option.get!
                   (State.felts
                     ((withEqZero (Option.get! st.felts[({ name := "%76" }: FeltVar)]!) st)["%77"] ←ₛ

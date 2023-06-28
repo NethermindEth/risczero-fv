@@ -11,62 +11,17 @@ open MLIRNotation
 def part42_state (st: State) : State :=
   
           (withEqZero
-            (Option.get!
-                (((st.felts[{ name := "%100" }] ←ₘ
-                      Option.get! (State.felts st { name := "%97" }) +
-                        Option.get! (State.felts st { name := "%37" }))[{ name := "%101" }] ←ₘ
-                    Option.get!
-                        ((st.felts[{ name := "%100" }] ←ₘ
-                            Option.get! (State.felts st { name := "%97" }) +
-                              Option.get! (State.felts st { name := "%37" }))
-                          { name := "%18" }) -
-                      Option.get!
-                        ((st.felts[{ name := "%100" }] ←ₘ
-                            Option.get! (State.felts st { name := "%97" }) +
-                              Option.get! (State.felts st { name := "%37" }))
-                          { name := "%40" }))
-                  { name := "%40" }) *
-              (Option.get!
-                  ((st.felts[{ name := "%100" }] ←ₘ
-                      Option.get! (State.felts st { name := "%97" }) + Option.get! (State.felts st { name := "%37" }))
-                    { name := "%18" }) -
-                Option.get!
-                  ((st.felts[{ name := "%100" }] ←ₘ
-                      Option.get! (State.felts st { name := "%97" }) + Option.get! (State.felts st { name := "%37" }))
-                    { name := "%40" })))
+            (Option.get! (State.felts st { name := "%40" }) *
+              (Option.get! (State.felts st { name := "%18" }) - Option.get! (State.felts st { name := "%40" })))
             (((st[felts][{ name := "%100" }] ←
                   Option.get! (State.felts st { name := "%97" }) +
                     Option.get! (State.felts st { name := "%37" }))[felts][{ name := "%101" }] ←
-                Option.get!
-                    ((st.felts[{ name := "%100" }] ←ₘ
-                        Option.get! (State.felts st { name := "%97" }) + Option.get! (State.felts st { name := "%37" }))
-                      { name := "%18" }) -
+                Option.get! (State.felts st { name := "%18" }) -
+                  Option.get! (State.felts st { name := "%40" }))[felts][{ name := "%102" }] ←
+              Option.get! (State.felts st { name := "%40" }) *
+                (Option.get! (State.felts st { name := "%18" }) -
                   Option.get!
-                    ((st.felts[{ name := "%100" }] ←ₘ
-                        Option.get! (State.felts st { name := "%97" }) + Option.get! (State.felts st { name := "%37" }))
-                      { name := "%40" }))[felts][{ name := "%102" }] ←
-              Option.get!
-                  (((st.felts[{ name := "%100" }] ←ₘ
-                        Option.get! (State.felts st { name := "%97" }) +
-                          Option.get! (State.felts st { name := "%37" }))[{ name := "%101" }] ←ₘ
-                      Option.get!
-                          ((st.felts[{ name := "%100" }] ←ₘ
-                              Option.get! (State.felts st { name := "%97" }) +
-                                Option.get! (State.felts st { name := "%37" }))
-                            { name := "%18" }) -
-                        Option.get!
-                          ((st.felts[{ name := "%100" }] ←ₘ
-                              Option.get! (State.felts st { name := "%97" }) +
-                                Option.get! (State.felts st { name := "%37" }))
-                            { name := "%40" }))
-                    { name := "%40" }) *
-                (Option.get!
-                    ((st.felts[{ name := "%100" }] ←ₘ
-                        Option.get! (State.felts st { name := "%97" }) + Option.get! (State.felts st { name := "%37" }))
-                      { name := "%18" }) -
-                  Option.get!
-                    ((st.felts[{ name := "%100" }] ←ₘ
-                        Option.get! (State.felts st { name := "%97" }) + Option.get! (State.felts st { name := "%37" }))
+                    (State.felts st
                       {
                         name :=
                           "%40" })))) 

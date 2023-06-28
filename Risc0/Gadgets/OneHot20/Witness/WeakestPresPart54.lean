@@ -12,18 +12,12 @@ def part54_state (st: State) : State :=
   
         (withEqZero
           (Option.get! (State.felts st { name := "%133" }) + Option.get! (State.felts st { name := "%73" }) -
-            Option.get!
-              ((st.felts[{ name := "%136" }] ←ₘ
-                  Option.get! (State.felts st { name := "%133" }) + Option.get! (State.felts st { name := "%73" }))
-                { name := "%18" }))
+            Option.get! (State.felts st { name := "%18" }))
           ((st[felts][{ name := "%136" }] ←
               Option.get! (State.felts st { name := "%133" }) +
                 Option.get! (State.felts st { name := "%73" }))[felts][{ name := "%137" }] ←
             Option.get! (State.felts st { name := "%133" }) + Option.get! (State.felts st { name := "%73" }) -
-              Option.get!
-                ((st.felts[{ name := "%136" }] ←ₘ
-                    Option.get! (State.felts st { name := "%133" }) + Option.get! (State.felts st { name := "%73" }))
-                  { name := "%18" }))) 
+              Option.get! (State.felts st { name := "%18" }))) 
 
 -- Prove that substituting part54_state for Code.part54 produces the same result
 lemma part54_wp {st : State} {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 : Option Felt} :

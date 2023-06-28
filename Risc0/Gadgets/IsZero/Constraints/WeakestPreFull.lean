@@ -45,7 +45,7 @@ lemma closed_form {x: Felt} {y₁ y₂ : Felt} : Code.run (start_state x ([some 
   unfold part₄_state
   MLIR_states_updates
 
-  simp [Code.getReturn, State.constraintsInVar, State.constraints]
+  simp only [Code.getReturn, State.constraintsInVar, State.updateProps_props_get_wobbly, Option.getD_some]
   rw [←eq]
 
 end Risc0.IsZero.Constraints.WP

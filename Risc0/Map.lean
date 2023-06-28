@@ -73,6 +73,20 @@ lemma fromList_nil : fromList ([] : List (α × β)) = Map.empty := rfl
 lemma fromList_cons {l : List (α × β)} :
   fromList ((k, v) :: l) = (Map.fromList l)[k] ←ₘ v := rfl
 
+lemma update_neq_comm (h : k ≠ k') : ((m[k] ←ₘ v)[k'] ←ₘ v') = ((m[k'] ←ₘ v')[k] ←ₘ v) := by
+  simp [update]
+  funext x
+  by_cases eq: x = k
+  subst eq
+  simp
+  aesop
+  simp only
+  by_cases eq': x = k'
+  subst eq'
+  simp only [ite_true]
+  aesop
+  aesop
+
 @[simp]
 lemma update_get : (m[k] ←ₘ v)[k] = v := by simp [update, getElem_def]
 
@@ -87,6 +101,9 @@ lemma update_get_skip (h : k ≠ k') (h₁ : m[k] = some v) :
 
 lemma update_get_next (h : k ≠ k') :
   (m[k] ←ₘ v)[k'] = m[k'] := by simp [update, getElem_def, h.symm]
+
+lemma update_get_next' (h : k ≠ k') :
+  (m[k] ←ₘ v) k' = m k' := by simp [update, getElem_def, h.symm]
 
 -- Membership lemmas.
 lemma mem_def : (x ∈ m) = m[x].isSome := rfl

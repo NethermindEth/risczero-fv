@@ -16,36 +16,12 @@ def part20_state (st: State) : State :=
               (Option.get! (State.props st { name := "%77" }) ∧
                 (Option.get! (State.felts st { name := "%78" }) = 0 ∨
                   Option.get! (State.felts st { name := "%79" }) = 0)))[felts][{ name := "%82" }] ←
-            Option.get!
-                ((st.felts[{ name := "%80" }] ←ₘ
-                    Option.get! (State.felts st { name := "%78" }) * Option.get! (State.felts st { name := "%79" }))
-                  { name := "%0" }) -
+            Option.get! (State.felts st { name := "%0" }) -
+              Option.get! (State.felts st { name := "%21" }))[felts][{ name := "%83" }] ←
+          Option.get! (State.felts st { name := "%21" }) *
+            (Option.get! (State.felts st { name := "%0" }) -
               Option.get!
-                ((st.felts[{ name := "%80" }] ←ₘ
-                    Option.get! (State.felts st { name := "%78" }) * Option.get! (State.felts st { name := "%79" }))
-                  { name := "%21" }))[felts][{ name := "%83" }] ←
-          Option.get!
-              (((st.felts[{ name := "%80" }] ←ₘ
-                    Option.get! (State.felts st { name := "%78" }) *
-                      Option.get! (State.felts st { name := "%79" }))[{ name := "%82" }] ←ₘ
-                  Option.get!
-                      ((st.felts[{ name := "%80" }] ←ₘ
-                          Option.get! (State.felts st { name := "%78" }) *
-                            Option.get! (State.felts st { name := "%79" }))
-                        { name := "%0" }) -
-                    Option.get!
-                      ((st.felts[{ name := "%80" }] ←ₘ
-                          Option.get! (State.felts st { name := "%78" }) *
-                            Option.get! (State.felts st { name := "%79" }))
-                        { name := "%21" }))
-                { name := "%21" }) *
-            (Option.get!
-                ((st.felts[{ name := "%80" }] ←ₘ
-                    Option.get! (State.felts st { name := "%78" }) * Option.get! (State.felts st { name := "%79" }))
-                  { name := "%0" }) -
-              Option.get!
-                ((st.felts[{ name := "%80" }] ←ₘ
-                    Option.get! (State.felts st { name := "%78" }) * Option.get! (State.felts st { name := "%79" }))
+                (State.felts st
                   {
                     name :=
                       "%21" }))) 
