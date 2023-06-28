@@ -256,6 +256,12 @@ def updateFelts (state : State) (name : FeltVar) (x : Felt) : State :=
 def dropFelts (st : State) (name : FeltVar) : State :=
   { st with felts := st.felts.drop name }
 
+@[simp] lemma drop_update_same (st : State) (name : FeltVar) (x : Felt) : 
+  dropFelts (updateFelts st name x) name = dropFelts st name := sorry
+
+@[simp] lemma drop_update_swap (st : State) (name name' : FeltVar) (x : Felt) (h : name ≠ name') :
+  dropFelts (updateFelts st name x) name' = updateFelts (dropFelts st name') name x := sorry
+
 notation:61 st "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
 
 def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
