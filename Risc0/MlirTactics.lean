@@ -28,7 +28,7 @@ elab "MLIR_old" : tactic => do
     tactic| repeat ( first |
       rw [MLIR.run_ass_def] | rw [MLIR.run_set_output] | rw [MLIR.run_if] |
       rw [MLIR.run_nondet] | rw [MLIR.run_eqz] |
-      rw [MLIR.run_seq_def] 
+      rw [MLIR.run_seq_def]
       all_goals try rfl
       simp_op
     )
@@ -94,6 +94,7 @@ elab "MLIR_statement" : tactic => do
         | rewrite [MLIR.run_if]
         | rewrite [MLIR.run_nondet]
         | rewrite [MLIR.run_eqz]
+        | rewrite [MLIR.run_dropfelt]
       )
       simp_op
     )

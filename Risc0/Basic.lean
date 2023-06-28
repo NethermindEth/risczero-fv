@@ -256,21 +256,23 @@ def updateFelts (state : State) (name : FeltVar) (x : Felt) : State :=
 def dropFelts (st : State) (name : FeltVar) : State :=
   { st with felts := st.felts.drop name }
 
-@[simp] lemma drop_update_same (st : State) (name : FeltVar) (x : Felt) : 
+@[simp]
+lemma drop_update_same {st : State} {name : FeltVar} {x : Felt} : 
   dropFelts (updateFelts st name x) name = dropFelts st name := by
   simp [dropFelts, updateFelts]
 
-@[simp] lemma drop_update_swap (st : State) (name name' : FeltVar) (x : Felt) (h : name ≠ name') :
+@[simp]
+lemma drop_update_swap {st : State} {name name' : FeltVar} {x : Felt} (h : name ≠ name') :
   dropFelts (updateFelts st name x) name' = updateFelts (dropFelts st name') name x := by
   simp [dropFelts, updateFelts]
   exact Map.update_drop_swap h
 
-notation:61 st "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
+notation:61 st:max "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
 
 def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
   { state with props := state.props[name] ←ₘ x }
 
-notation:61 st "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
+notation:61 st:max "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
 
 lemma updateFelts_def : 
   updateFelts st k v = { st with felts := st.felts[k] ←ₘ v } := rfl
@@ -754,7 +756,7 @@ namespace MLIRNotation
 
 scoped infix   :51                    "←ₐ "                      => MLIR.Assign
 scoped prefix  :52                    "?₀"                       => MLIR.Eqz
-scoped prefix  :52                    "dropfelt"                 => MLIR.DropFelt
+scoped prefix  :52                    "dropfelt "                 => MLIR.DropFelt
 scoped notation:51                    "guard " c " then " x:51   => MLIR.If c x
 scoped prefix  :max                   "nondet"                   => MLIR.Nondet
 scoped infixr  :50                    "; "                       => MLIR.Sequence
@@ -809,5 +811,7 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
 abbrev MLIR.runProgram (program : MLIRProgram) := program.run
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run p st
+
+open MLIRNotation
 
 end Risc0
