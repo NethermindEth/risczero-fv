@@ -9,30 +9,14 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₁ on st
 def part₁_state (st: State) : State :=
-  ((State.set!
+  (((State.set!
               (st[felts][{ name := "input == 0" }] ←
                 if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
               { name := "output" } 0
-              (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)[felts][{ name := "input - 1" }] ←
-            Option.get!
-                ((st.felts[{ name := "input == 0" }] ←ₘ
-                    if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
-                  { name := "input" }) -
-              Option.get!
-                ((st.felts[{ name := "input == 0" }] ←ₘ
-                    if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
-                  { name := "1" }))[felts][{ name := "input == 1" }] ←
-          if
-              Option.get!
-                    ((st.felts[{ name := "input == 0" }] ←ₘ
-                        if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
-                      { name := "input" }) -
-                  Option.get!
-                    ((st.felts[{ name := "input == 0" }] ←ₘ
-                        if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0)
-                      { name := "1" }) =
-                0 then
-            1
+              (if Option.get! (State.felts st { name := "input" }) = 0 then 1 else 0))[felts][{ name := "input - 1" }] ←
+            Option.get! (State.felts st { name := "input" }) -
+              Option.get! (State.felts st { name := "1" }))[felts][{ name := "input == 1" }] ←
+          if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "1" }) = 0 then 1
           else 0)
 
 -- Run the program from part₁ onwards by using part₁_state rather than Code.part₁
