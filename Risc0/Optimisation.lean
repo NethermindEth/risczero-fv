@@ -176,7 +176,7 @@ section get
         | none => aesop
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          aesops
+          aesop
           rewrite [updateFelts_neq_comm]
           rfl
           simp [h]
@@ -311,7 +311,7 @@ section pow
     Γ st ⟦name ←ₐ .Pow lhs n; @MLIR.DropFelt α ⟨name'⟩⟧ =
     Γ st ⟦@MLIR.DropFelt α ⟨name'⟩; name ←ₐ .Pow lhs n⟧ := by
       MLIR
-      simp [State.drop_update_swap, h, State.get_dropFelts_of_ne h₁]
+      simp [State.drop_update_swap, h, State.get_dropFelts_of_ne' h₁]
 end pow
 
 section sub
