@@ -781,6 +781,16 @@ lemma State.set!_bufferWidths {st : State} {bufferVar : BufferVar} {offset : ℕ
 lemma State.set!_buffers {st : State} {buf buf' : BufferVar} :
   buf ∈ (State.set! st buf' index x).vars → (buf ∈ st.vars ∨ buf = buf') := by unfold set! setBufferElementImpl; intro h; try aesop
 
+lemma State.set!_buffers''' {index : ℕ} {x : Felt} {st : State} {buf buf' : BufferVar} :
+  buf ∈ st.vars → buf ∈ (State.set! st buf' index x).vars := by unfold set! setBufferElementImpl; intro h; try aesop
+
+lemma State.set!_buffers₄ {index : ℕ} {x : Felt} {buf buf' : BufferVar} (h : buf ≠ buf') : (State.set! st buf' index x).buffers[buf] = st.buffers[buf] := by
+  unfold set! setBufferElementImpl
+  aesop
+  simp [Map.getElem_def]
+  rw [Map.update_get_next']
+  tauto
+
 @[simp]
 lemma State.set!_vars {st : State} {bufferVar : BufferVar} {offset : ℕ} {val : Felt} :
   (State.set! st bufferVar offset val).vars = st.vars := by
@@ -796,44 +806,57 @@ lemma State.set!_buffers' {st : State} {buf buf' : BufferVar} :
   rw [Map.getElem_def, Map.update_get_next' (Ne.symm (Ne.intro eq))] at a
   exact a
 
-lemma State.set!_buffers'' {st : State} {buf buf' : BufferVar} :
-  Option.isSome (Buffer.back st buf back offset) = true → Option.isSome (Buffer.back (State.set! st buf' index x) buf back offset) = true := by
-  unfold Buffer.back Buffer.get! Buffer.Idx.data Buffer.Idx.time set! setBufferElementImpl
-  simp
-  intro h
-  aesop
-  by_cases eq : buf = buf'
-  · aesop
-    unfold Buffer.set? at heq
-    aesop
-    simp [Buffer.Idx.time, Buffer.Idx.data, Buffer.getBufferAtTime!] at *
-    aesop
-  · aesop
-    by_cases eq : buf = buf'
-    sorry
+-- lemma State.set!_buffers'' {st : State} {buf buf' : BufferVar} :
+--   Option.isSome (Buffer.back st buf back offset) = true → Option.isSome (Buffer.back (State.set! st buf' index x) buf back offset) = true := by
+--   unfold Buffer.back Buffer.get! Buffer.Idx.data Buffer.Idx.time set! setBufferElementImpl
+--   simp
+--   intro h
+--   aesop
+--   by_cases eq : buf = buf'
+--   · subst eq
+--     rw [Map.update_get]
+--     simp
+--     aesop
+--     simp [Buffer.set?] at *
+--     aesop
+--   · aesop
+--     by_cases eq : buf = buf'
+--     sorry
+
+lemma Buffer.back_set! {back : Back} (h : buf ≠ buf') : (Buffer.back (State.set! st buf' index x) buf back offset) = (Buffer.back st buf back offset) := by
+  simp [Buffer.back, Buffer.get!, Buffer.Idx.time, Buffer.Idx.data]
+  rw [State.set!_buffers₄ h]
 
 lemma isGetValid_skip_set (h : buf ≠ buf') : 
   isGetValid (State.set! st buf' index x) buf back offset ↔ isGetValid st buf back offset := by
     unfold isGetValid
-    apply Iff.intro; intro h
-    · simp at h
-      rcases h with ⟨h₁, h₂, h₃, h₄⟩
-      have h'' := State.set!_buffers h₂
-      aesop
+    apply Iff.intro
+    · intro h_lhs
+      simp at h_lhs
+      rcases h_lhs with ⟨h₁, h₂, h₃, h₄⟩
       rcases (State.set!_buffers' h₄) with h' | h'
       aesop
       aesop
-    · simp
-      intro h₁ h₂ h₃ h₄
-      simp
-      aesop
-      sorry
-
-
+    · intro h_rhs
+      simp at h_rhs
+      rcases h_rhs with ⟨h₁, h₂, h₃, h₄⟩
+      rw [Buffer.back_set! h]
+      aesop    
 
 lemma getImpl_skip_set (h : buf ≠ buf') : getImpl (State.set! st buf' index x) buf back offset = getImpl st buf back offset := by
   unfold getImpl 
-  sorry 
+  by_cases eq : isGetValid (State.set! st buf' index x) buf back offset
+  · rw [isGetValid_skip_set h] at eq
+    rw [Buffer.back_set! h]
+    aesop
+    rw [isGetValid_skip_set h] at a
+    tauto
+  · rw [isGetValid_skip_set h] at eq
+    rw [Buffer.back_set! h]
+    aesop
+    rw [isGetValid_skip_set h] at a
+    tauto
+
 
 def State.setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
   let width := st.bufferWidths[bufferVar].get!
