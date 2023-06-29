@@ -151,6 +151,11 @@ section drop
     funext z
     aesop
 
+  lemma drop_past_nondet :
+    Γ st ⟦dropfelt y; nondet(prog)⟧ =
+    Γ st ⟦nondet(dropfelt y; prog)⟧ := by
+    MLIR
+
 end drop
 
 section get
