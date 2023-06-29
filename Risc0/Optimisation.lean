@@ -150,7 +150,7 @@ lemma get_past_bitAnd_nondet_single (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x�
     | none => aesop
     | some lit =>
       have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-      aesop
+      aesops
       rewrite [updateFelts_neq_comm]
       rfl
       simp [h]
