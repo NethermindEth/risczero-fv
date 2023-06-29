@@ -194,26 +194,43 @@ lemma get_past_get_offset (h: offset ≠ offset') (h': x ≠ y) :
           rfl
           simp [h']
 
+lemma get_past_set_buf_aux {s₁ : MLIR α} {val : FeltVar} (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf) : 
+        (State.set! (st[x] ←ₛ getImpl st buf back offset) buf' index
+          (Option.get! (st[x] ←ₛ getImpl st buf back offset).felts[val]!)) = ((State.set! st buf' index (Option.get! st.felts[val]!))[x] ←ₛ
+          getImpl (State.set! st buf' index (Option.get! st.felts[val]!)) buf back offset) := by
+    have heq : (st[x] ←ₛ getImpl st buf back offset).felts[val]! = st.felts[val]! := by
+      generalize eq: getImpl st buf back offset = get
+      simp [State.update] 
+      rcases get with _ | x; try simp
+      rcases (getImpl_val_of_some eq) with ⟨_, hh⟩
+      simp [hh, getElem!, Map.update_get_next h]
+    rw [heq, getImpl_skip_set (Ne.symm h')]
+    generalize eq: getImpl st buf back offset = get 
+    simp [State.update]
+    rcases get with _ | x
+    · unfold State.set! State.setBufferElementImpl
+      aesop
+    · have h₁: ∃ y, x = Lit.Val y := getImpl_val_of_some eq
+      rcases h₁ with ⟨y, h₁⟩
+      subst h₁
+      simp
+      unfold State.set! State.setBufferElementImpl
+      aesop
+
 lemma get_past_set_buf_nondet (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf):
   State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; nondet(buf'[index] ←ᵢ val; s₁); s₂⟧) =
   State.buffers (Γ st ⟦nondet (buf'[index] ←ᵢ val); x ←ₐ .Get buf back offset; nondet s₁; s₂⟧) := by
   MLIR
-  generalize eq: getImpl st buf back offset = get
-  rcases get with _ | ⟨x | x | x⟩
   simp
-  · 
-    simp [State.update, State.set!, State.setBufferElementImpl]
-    simp
-    unfold getImpl at eq
-    rw [ite_eq_iff] at eq
-    rcases eq with eq | ⟨eq, _⟩; try tauto
-    
-    simp [State.update]
-    
-
-  cases get with
-    | none => sorry
-    | some lit1 => sorry
+  rw [@get_past_set_buf_aux _ _ _ _ _ _ _ _ s₁ _ h h']
+  rw [State.set!_buffers (Ne.symm h')]
+  rw [getImpl_skip_set (Ne.symm h')]
+  rw [←Buffer.back_def]
+  by_cases h_valid : isGetValid st buf back offset
+  · unfold isGetValid at h_valid
+    unfold getImpl isGetValid
+    aesop
+  · aesop
 
 lemma combine_nondets : Γ (Γ st ⟦nondet p₁⟧) ⟦nondet p₂; p₃⟧ = Γ st ⟦nondet (p₁; p₂); p₃⟧ := rfl
 
