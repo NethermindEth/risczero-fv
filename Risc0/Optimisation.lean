@@ -121,6 +121,36 @@ end const
 
 section drop
 
+  lemma drop_past_eqz_single (h : x ≠ y) :
+    State.buffers (Γ st ⟦dropfelt y; @MLIR.Eqz IsNondet.NotInNondet x⟧) =
+    State.buffers (Γ st ⟦@MLIR.Eqz IsNondet.NotInNondet x; dropfelt y⟧) := by
+    MLIR
+    simp [State.dropFelts, Map.drop]
+
+  lemma drop_past_set (h : y ≠ val) :
+    Γ st ⟦dropfelt y; .Set buf offset val⟧ =
+    Γ st ⟦.Set buf offset val; dropfelt y⟧ := by
+      MLIR; simp only [getElem!, dite_true, ne_eq]
+      rw [State.get_dropFelts_of_ne h]
+      unfold State.dropFelts Map.drop
+      simp only [
+        State.set!_felts, State.set!, State.setBufferElementImpl, Buffer.set?,
+        Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data
+      ]
+      aesop
+
+  lemma drop_past_if (h : y ≠ c) (h₁ : y ∉ st.felts) :
+    Γ st ⟦dropfelt y; guard c then prog⟧ =
+    Γ st ⟦guard c then (dropfelt y; prog)⟧ := by
+    MLIR
+    simp [getElem!, State.get_dropFelts_of_ne h]
+    aesop; aesop
+    rw [Map.not_mem_iff_none, Map.getElem_def] at h₁
+    unfold State.dropFelts Map.drop
+    congr
+    funext z
+    aesop
+
 end drop
 
 section get
