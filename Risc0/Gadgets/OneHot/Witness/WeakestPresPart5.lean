@@ -10,27 +10,17 @@ open MLIRNotation
 -- The state obtained by running Code.part₅ on st
 def part₅_state (st: State) : State :=
   (withEqZero
-          (Option.get!
-              (((st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).felts[{ name := "1 - Output[0]" }] ←ₘ
-                  Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
-                    Option.get!
-                      (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" }))
-                { name := "output[0]" }) *
-            (Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
+          (Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" }) *
+            (Option.get! (State.felts st { name := "1" }) -
               Option.get!
                 (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" })))
           (((st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0)[felts][{ name := "1 - Output[0]" }] ←
-              Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
+              Option.get! (State.felts st { name := "1" }) -
                 Option.get!
                   (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0)
                     { name := "output[0]" }))[felts][{ name := "output[0] <= 1" }] ←
-            Option.get!
-                (((st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0).felts[{ name := "1 - Output[0]" }] ←ₘ
-                    Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
-                      Option.get!
-                        (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" }))
-                  { name := "output[0]" }) *
-              (Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "1" }) -
+            Option.get! (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0) { name := "output[0]" }) *
+              (Option.get! (State.felts st { name := "1" }) -
                 Option.get!
                   (State.felts (st["output[0]"] ←ₛ getImpl st { name := "output" } 0 0)
                     { name := "output[0]" }))))

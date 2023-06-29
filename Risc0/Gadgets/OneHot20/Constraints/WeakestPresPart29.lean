@@ -15,36 +15,12 @@ def part29_state (st: State) : State :=
                   Option.get! (State.felts st { name := "%115" }) = 0))[felts][{ name := "%117" }] ←
               Option.get! (State.felts st { name := "%113" }) +
                 Option.get! (State.felts st { name := "%43" }))[felts][{ name := "%118" }] ←
-            Option.get!
-                ((st.felts[{ name := "%117" }] ←ₘ
-                    Option.get! (State.felts st { name := "%113" }) + Option.get! (State.felts st { name := "%43" }))
-                  { name := "%0" }) -
+            Option.get! (State.felts st { name := "%0" }) -
+              Option.get! (State.felts st { name := "%46" }))[felts][{ name := "%119" }] ←
+          Option.get! (State.felts st { name := "%46" }) *
+            (Option.get! (State.felts st { name := "%0" }) -
               Option.get!
-                ((st.felts[{ name := "%117" }] ←ₘ
-                    Option.get! (State.felts st { name := "%113" }) + Option.get! (State.felts st { name := "%43" }))
-                  { name := "%46" }))[felts][{ name := "%119" }] ←
-          Option.get!
-              (((st.felts[{ name := "%117" }] ←ₘ
-                    Option.get! (State.felts st { name := "%113" }) +
-                      Option.get! (State.felts st { name := "%43" }))[{ name := "%118" }] ←ₘ
-                  Option.get!
-                      ((st.felts[{ name := "%117" }] ←ₘ
-                          Option.get! (State.felts st { name := "%113" }) +
-                            Option.get! (State.felts st { name := "%43" }))
-                        { name := "%0" }) -
-                    Option.get!
-                      ((st.felts[{ name := "%117" }] ←ₘ
-                          Option.get! (State.felts st { name := "%113" }) +
-                            Option.get! (State.felts st { name := "%43" }))
-                        { name := "%46" }))
-                { name := "%46" }) *
-            (Option.get!
-                ((st.felts[{ name := "%117" }] ←ₘ
-                    Option.get! (State.felts st { name := "%113" }) + Option.get! (State.felts st { name := "%43" }))
-                  { name := "%0" }) -
-              Option.get!
-                ((st.felts[{ name := "%117" }] ←ₘ
-                    Option.get! (State.felts st { name := "%113" }) + Option.get! (State.felts st { name := "%43" }))
+                (State.felts st
                   {
                     name :=
                       "%46" }))) 

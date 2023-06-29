@@ -28,7 +28,7 @@ elab "MLIR_old" : tactic => do
     tactic| repeat ( first |
       rw [MLIR.run_ass_def] | rw [MLIR.run_set_output] | rw [MLIR.run_if] |
       rw [MLIR.run_nondet] | rw [MLIR.run_eqz] |
-      rw [MLIR.run_seq_def] 
+      rw [MLIR.run_seq_def]
       all_goals try rfl
       simp_op
     )
@@ -94,10 +94,27 @@ elab "MLIR_statement" : tactic => do
         | rewrite [MLIR.run_if]
         | rewrite [MLIR.run_nondet]
         | rewrite [MLIR.run_eqz]
+        | rewrite [MLIR.run_dropfelt]
       )
       simp_op
     )
   )
+
+elab "MLIR_single" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      repeat (
+        first
+        | rewrite [MLIR.run_ass_def]
+        | rewrite [MLIR.run_set_def]
+        | rewrite [MLIR.run_if]
+        | rewrite [MLIR.run_nondet]
+        | rewrite [MLIR.run_eqz]
+      )
+      simp_op
+    )
+  )
+  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
 
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
@@ -145,7 +162,11 @@ elab "MLIR_decide_updates" : tactic => do
 
 elab "MLIR_states_updates" : tactic => do
   evalTactic <| ← `(
-    tactic| (MLIR_states_new; MLIR_decide_updates)
+    tactic| (
+      MLIR_states_new
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
   )
 
 end tactics

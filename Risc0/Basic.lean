@@ -253,15 +253,32 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
 def updateFelts (state : State) (name : FeltVar) (x : Felt) : State :=
   { state with felts := state.felts[name] ←ₘ x }
 
-notation:61 st "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
+def dropFelts (st : State) (name : FeltVar) : State :=
+  { st with felts := st.felts.drop name }
+
+@[simp]
+lemma drop_update_same {st : State} {name : FeltVar} {x : Felt} : 
+  dropFelts (updateFelts st name x) name = dropFelts st name := by
+  simp [dropFelts, updateFelts]
+
+@[simp]
+lemma drop_update_swap {st : State} {name name' : FeltVar} {x : Felt} (h : name ≠ name') :
+  dropFelts (updateFelts st name x) name' = updateFelts (dropFelts st name') name x := by
+  simp [dropFelts, updateFelts]
+  exact Map.update_drop_swap h
+
+notation:61 st:max "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
 
 def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
   { state with props := state.props[name] ←ₘ x }
 
-notation:61 st "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
+notation:61 st:max "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
 
 lemma updateFelts_def : 
   updateFelts st k v = { st with felts := st.felts[k] ←ₘ v } := rfl
+
+lemma dropFelts_def :
+  dropFelts st k = { st with felts := st.felts.drop k } := rfl
 
 lemma updateProps_def :
   updateProps st k v = { st with props := st.props[k] ←ₘ v } := rfl
@@ -330,8 +347,13 @@ lemma updateFelts_props : (updateFelts st name x).props = st.props := by simp [u
 @[simp]
 lemma updateFelts_vars : (updateFelts st name x).vars = st.vars := by simp [updateFelts]
 
-@[simp]
+-- @[simp]
 lemma updateFelts_felts : (updateFelts st name x).felts = st.felts[name] ←ₘ x := by simp [updateFelts]
+
+-- @[simp]
+-- lemma updateFelts_felts_get_next (h: name ≠ name') : (updateFelts st name x).felts name' = st.felts name' := by
+--   simp [updateFelts]
+--   exact Map.update_get_next' h
 
 @[simp]
 lemma updateProps_buffers : (updateProps st name x).buffers = st.buffers := by simp [updateProps]
@@ -354,7 +376,7 @@ lemma updateProps_felts : (updateProps st name x).felts = st.felts := by simp [u
 @[simp]
 lemma updateProps_vars : (updateProps st name x).vars = st.vars := by simp [updateProps]
 
-@[simp]
+-- @[simp]
 lemma updateProps_props : (updateProps st name x).props = st.props[name] ←ₘ x := by simp [updateProps]
 
 -- @[simp]
@@ -375,6 +397,28 @@ lemma update_constr' {state : State} {name : String} {x : Prop} :
 -- @[simp]
 lemma update_constraint {state : State} {name : String} {c : Prop} :
   update state name (.some (.Constraint c)) = { state with props := state.props.update ⟨name⟩ c } := rfl
+
+@[simp]
+lemma update_skip_felts (h: name' ≠ name) :
+  (State.felts
+    (update st name' x)
+    { name }) =
+  (State.felts st { name }) := by
+    simp only [State.update]
+    aesop
+    simp [State.update, ←Map.getElem_def, Map.update_get_next, h]
+
+@[simp]
+lemma update_skip_nested_felts (h: name' ≠ name) :
+  (State.felts
+    (update ( update st name' x) name y)
+    { name }) =
+  (State.felts
+    (update st name y)
+    { name }) := by
+  simp [h, State.update]
+  aesop
+  all_goals simp [h, ←Map.getElem_def, Map.update_get_next]
 
 @[simp]
 lemma if_constraints {state₁ state₂ : State} {x : Felt} :
@@ -522,6 +566,14 @@ end MLIRNotation
 
 instance : Inhabited Felt := ⟨-42⟩
 
+-- Naughty
+@[simp]
+lemma State.get_dropFelts_of_ne {st : State} {x : FeltVar} (h : name ≠ x) :
+  Option.get! (st.dropFelts name).felts[x] = Option.get! st.felts[x] := by
+  unfold State.dropFelts Map.drop
+  rw [Map.getElem_def]
+  aesop
+
 def BufferAtTime.slice (buf : BufferAtTime) (offset size : ℕ) : BufferAtTime :=
   buf.drop offset |>.take size
 
@@ -560,6 +612,36 @@ lemma getImpl_def : getImpl st buf back offset =
                     then Option.some <| Lit.Val (Buffer.back st buf back offset).get!
                     else .none := rfl
 
+--Review: should any of these be simps?
+lemma getImpl_none_or_val : getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := by
+  simp [getImpl]
+  aesop
+
+lemma getImpl_val_of_some : getImpl st buf back offset = some lit → ∃ x, lit = .Val x := by
+  have h: getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := getImpl_none_or_val
+  aesop
+
+lemma getImpl_skip_none_update : getImpl (st[name] ←ₛ .none) buf back offset = getImpl st buf back offset := by
+  simp [State.update, getImpl, isGetValid, Buffer.back]
+
+lemma getImpl_skip_val_update : getImpl (st[name] ←ₛ .some (.Val x)) buf back offset = getImpl st buf back offset := by
+  simp [State.update, getImpl, isGetValid, Buffer.back]
+
+@[simp]
+lemma getImpl_skip_get_update:
+  getImpl (st[name] ←ₛ getImpl st' buf' back' offset') buf back offset =
+  getImpl st buf back offset := by
+  generalize eq: getImpl st' buf' back' offset' = x
+  cases x with
+   | none => exact getImpl_skip_none_update
+   | some lit =>
+    have h: ∃ x, lit = Lit.Val x := getImpl_val_of_some eq
+    aesop
+
+def feltBitAnd (x y: Felt) : Felt :=
+  ↑(Bitvec.and (Bitvec.ofNat 256 x.val) (Bitvec.ofNat 256 y.val)).toNat
+
+
 -- Evaluate a pure functional circuit.
 def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
   match op with
@@ -571,7 +653,7 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
     | Neg lhs     => .some <| .Val <| 0                  - st.felts[lhs].get!
     | Mul lhs rhs => .some <| .Val <| st.felts[lhs].get! * st.felts[rhs].get!
     | Pow lhs rhs => .some <| .Val <| st.felts[lhs].get! ^ rhs
-    | BitAnd lhs rhs => .some <| .Val <| ↑(Bitvec.and (Bitvec.ofNat 256 (st.felts lhs).get!.val) (Bitvec.ofNat 256 (st.felts rhs).get!.val)).toNat
+    | BitAnd lhs rhs => .some <| .Val <| feltBitAnd st.felts[lhs].get! st.felts[rhs].get!
     | Inv x => .some <| .Val <| if st.felts[x]!.get! = 0 then 0 else st.felts[x]!.get!⁻¹
     -- Logic
     | Isz x => .some <| .Val <| if st.felts[x]!.get! = 0 then 1 else 0
@@ -635,22 +717,28 @@ lemma eval_add : Γ st ⟦@Add α x y⟧ₑ = .some (.Val ((st.felts x).get! + (
 lemma eval_sub : Γ st ⟦@Sub α x y⟧ₑ = .some (.Val ((st.felts x).get! - (st.felts y).get!)) := rfl
 
 @[simp]
+lemma eval_neg : Γ st ⟦@Neg α x⟧ₑ = .some (.Val (0 - (st.felts x).get!)) := rfl
+
+@[simp]
 lemma eval_mul : Γ st ⟦@Mul α x y⟧ₑ = .some (.Val ((st.felts x).get! * (st.felts y).get!)) := rfl
 
 @[simp]
 lemma eval_isz : Γ st ⟦??₀x⟧ₑ = .some (.Val (if (st.felts x).get! = 0 then 1 else 0)) := rfl
 
 @[simp]
-lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .some (.Val (if st.felts[x]!.get! = 0 then 0 else st.felts[x]!.get!⁻¹)) := rfl
+lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .some (.Val (if st.felts[x].get! = 0 then 0 else st.felts[x].get!⁻¹)) := rfl
 
 @[simp]
 lemma eval_andEqz : Γ st ⟦@AndEqz α c x⟧ₑ =
                     .some (.Constraint ((st.props c).get! ∧ (st.felts x).get! = 0)) := rfl
 
 @[simp]
+lemma eval_pow : Γ st ⟦@Pow α x n⟧ₑ = .some (.Val (st.felts[x].get! ^ n)) := rfl
+
+@[simp]
 lemma eval_bitAnd :
   Γ st ⟦@BitAnd α x y⟧ₑ =
-    (.some <| .Val <| ↑(Bitvec.and (Bitvec.ofNat 256 (st.felts x).get!.val) (Bitvec.ofNat 256 (st.felts y).get!.val)).toNat) := rfl
+    (.some <| .Val <| feltBitAnd (st.felts[x]).get! (st.felts[y]).get!) := rfl
 
 @[simp]
 lemma eval_andCond :
@@ -667,6 +755,7 @@ end Op
 inductive MLIR : IsNondet → Type where
   -- Meta
   | Assign    : String        → Op x   → MLIR x
+  | DropFelt  : FeltVar                → MLIR x
   | Eqz       : FeltVar                → MLIR x
   | If        : FeltVar       → MLIR x → MLIR x
   | Nondet    : MLIR InNondet          → MLIR NotInNondet
@@ -681,6 +770,7 @@ namespace MLIRNotation
 
 scoped infix   :51                    "←ₐ "                      => MLIR.Assign
 scoped prefix  :52                    "?₀"                       => MLIR.Eqz
+scoped prefix  :52                    "dropfelt "                 => MLIR.DropFelt
 scoped notation:51                    "guard " c " then " x:51   => MLIR.If c x
 scoped prefix  :max                   "nondet"                   => MLIR.Nondet
 scoped infixr  :50                    "; "                       => MLIR.Sequence
@@ -720,6 +810,7 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
   match program with
     -- Meta
     | Assign name op => st[name] ←ₛ Γ st ⟦op⟧ₑ
+    | DropFelt k     => .dropFelts st k
     | Eqz x          => withEqZero st.felts[x]!.get! st
     | If x program   => if st.felts[x]!.get! = 0 then st else program.run st
     | Nondet block   => block.run st
@@ -734,5 +825,7 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
 abbrev MLIR.runProgram (program : MLIRProgram) := program.run
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run p st
+
+open MLIRNotation
 
 end Risc0

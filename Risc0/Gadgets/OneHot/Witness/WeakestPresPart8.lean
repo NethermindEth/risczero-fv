@@ -9,30 +9,16 @@ open MLIRNotation
 
 -- The state obtained by running Code.part₈ on st
 def part₈_state (st: State) : State :=
-  { buffers := st.buffers, bufferWidths := st.bufferWidths,
-        constraints :=
-          (Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                  Option.get! (State.felts st { name := "output[2]" }) -
-                Option.get!
-                  ((st.felts[{ name := "outputSum" }] ←ₘ
-                      Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                        Option.get! (State.felts st { name := "output[2]" }))
-                    { name := "1" }) =
-              0) ::
-            st.constraints,
-        cycle := st.cycle,
-        felts :=
-          (st.felts[{ name := "outputSum" }] ←ₘ
-              Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                Option.get! (State.felts st { name := "output[2]" }))[{ name := "outputSum - 1" }] ←ₘ
+  (withEqZero
+        (Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
+            Option.get! (State.felts st { name := "output[2]" }) -
+          Option.get! (State.felts st { name := "1" }))
+        ((st[felts][{ name := "outputSum" }] ←
             Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                Option.get! (State.felts st { name := "output[2]" }) -
-              Option.get!
-                ((st.felts[{ name := "outputSum" }] ←ₘ
-                    Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
-                      Option.get! (State.felts st { name := "output[2]" }))
-                  { name := "1" }),
-        isFailed := st.isFailed, props := st.props, vars := st.vars }
+              Option.get! (State.felts st { name := "output[2]" }))[felts][{ name := "outputSum - 1" }] ←
+          Option.get! (State.felts st { name := "output[0]AddOutput[1]" }) +
+              Option.get! (State.felts st { name := "output[2]" }) -
+            Option.get! (State.felts st { name := "1" })))
 
 -- Prove that substituting part₈_state for Code.part₈ produces the same result
 lemma part₈_wp {st : State} {y₁ y₂ y₃ : Option Felt} :

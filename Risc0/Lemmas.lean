@@ -59,6 +59,9 @@ lemma run_if {x : FeltVar} :
 lemma run_eqz {x : FeltVar} :
   Γ st ⟦@MLIR.Eqz α x⟧ = withEqZero st.felts[x]!.get! st := rfl
 
+lemma run_dropfelt {x : FeltVar} :
+  Γ st ⟦@MLIR.DropFelt α x⟧ = .dropFelts st x := rfl
+
 -- lemma run_valid_get {st: State} {name: String} {x y: Option Lit} {back offset : ℕ} 
 --   (h_cycle: back ≤ st.cycle) (h_vars: ⟨name⟩ ∈ st.vars)
 --   (h_offset: offset < st.bufferWidths.get! ⟨name⟩)

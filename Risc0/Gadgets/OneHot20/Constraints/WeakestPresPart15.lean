@@ -21,33 +21,8 @@ def part15_state (st: State) : State :=
                         Option.get! (State.felts st { name := "%59" }))["%61"] ←ₛ
                     getImpl st { name := "data" } 0 15)
                   { name := "%61" }) *
-              Option.get!
-                (State.felts
-                  ((st[felts][{ name := "%60" }] ←
-                      Option.get! (State.felts st { name := "%57" }) +
-                        Option.get! (State.felts st { name := "%59" }))["%61"] ←ₛ
-                    getImpl st { name := "data" } 0 15)
-                  { name := "%14" }))[felts][{ name := "%63" }] ←
-          Option.get!
-              ((((st[felts][{ name := "%60" }] ←
-                        Option.get! (State.felts st { name := "%57" }) +
-                          Option.get! (State.felts st { name := "%59" }))["%61"] ←ₛ
-                      getImpl st { name := "data" } 0 15).felts[{ name := "%62" }] ←ₘ
-                  Option.get!
-                      (State.felts
-                        ((st[felts][{ name := "%60" }] ←
-                            Option.get! (State.felts st { name := "%57" }) +
-                              Option.get! (State.felts st { name := "%59" }))["%61"] ←ₛ
-                          getImpl st { name := "data" } 0 15)
-                        { name := "%61" }) *
-                    Option.get!
-                      (State.felts
-                        ((st[felts][{ name := "%60" }] ←
-                            Option.get! (State.felts st { name := "%57" }) +
-                              Option.get! (State.felts st { name := "%59" }))["%61"] ←ₛ
-                          getImpl st { name := "data" } 0 15)
-                        { name := "%14" }))
-                { name := "%60" }) +
+              Option.get! (State.felts st { name := "%14" }))[felts][{ name := "%63" }] ←
+          Option.get! (State.felts st { name := "%57" }) + Option.get! (State.felts st { name := "%59" }) +
             Option.get!
                 (State.felts
                   ((st[felts][{ name := "%60" }] ←
@@ -56,11 +31,7 @@ def part15_state (st: State) : State :=
                     getImpl st { name := "data" } 0 15)
                   { name := "%61" }) *
               Option.get!
-                (State.felts
-                  ((st[felts][{ name := "%60" }] ←
-                      Option.get! (State.felts st { name := "%57" }) +
-                        Option.get! (State.felts st { name := "%59" }))["%61"] ←ₛ
-                    getImpl st { name := "data" } 0 15)
+                (State.felts st
                   {
                     name :=
                       "%14" })) 

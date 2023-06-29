@@ -11,42 +11,13 @@ open MLIRNotation
 def part20_state (st: State) : State :=
   
           ((((st["%21"] ←ₛ getImpl st { name := "data" } 0 1)["%22"] ←ₛ
-                getImpl (st["%21"] ←ₛ getImpl st { name := "data" } 0 1) { name := "data" } 0
-                  2)[felts][{ name := "%23" }] ←
-              Option.get!
-                  (State.felts
-                    ((st["%21"] ←ₛ getImpl st { name := "data" } 0 1)["%22"] ←ₛ
-                      getImpl (st["%21"] ←ₛ getImpl st { name := "data" } 0 1) { name := "data" } 0 2)
-                    { name := "%22" }) *
+                getImpl st { name := "data" } 0 2)[felts][{ name := "%23" }] ←
+              Option.get! (State.felts (st["%22"] ←ₛ getImpl st { name := "data" } 0 2) { name := "%22" }) *
+                Option.get! (State.felts st { name := "%17" }))[felts][{ name := "%24" }] ←
+            Option.get! (State.felts (st["%21"] ←ₛ getImpl st { name := "data" } 0 1) { name := "%21" }) +
+              Option.get! (State.felts (st["%22"] ←ₛ getImpl st { name := "data" } 0 2) { name := "%22" }) *
                 Option.get!
-                  (State.felts
-                    ((st["%21"] ←ₛ getImpl st { name := "data" } 0 1)["%22"] ←ₛ
-                      getImpl (st["%21"] ←ₛ getImpl st { name := "data" } 0 1) { name := "data" } 0 2)
-                    { name := "%17" }))[felts][{ name := "%24" }] ←
-            Option.get!
-                ((((st["%21"] ←ₛ getImpl st { name := "data" } 0 1)["%22"] ←ₛ
-                        getImpl (st["%21"] ←ₛ getImpl st { name := "data" } 0 1) { name := "data" } 0
-                          2).felts[{ name := "%23" }] ←ₘ
-                    Option.get!
-                        (State.felts
-                          ((st["%21"] ←ₛ getImpl st { name := "data" } 0 1)["%22"] ←ₛ
-                            getImpl (st["%21"] ←ₛ getImpl st { name := "data" } 0 1) { name := "data" } 0 2)
-                          { name := "%22" }) *
-                      Option.get!
-                        (State.felts
-                          ((st["%21"] ←ₛ getImpl st { name := "data" } 0 1)["%22"] ←ₛ
-                            getImpl (st["%21"] ←ₛ getImpl st { name := "data" } 0 1) { name := "data" } 0 2)
-                          { name := "%17" }))
-                  { name := "%21" }) +
-              Option.get!
-                  (State.felts
-                    ((st["%21"] ←ₛ getImpl st { name := "data" } 0 1)["%22"] ←ₛ
-                      getImpl (st["%21"] ←ₛ getImpl st { name := "data" } 0 1) { name := "data" } 0 2)
-                    { name := "%22" }) *
-                Option.get!
-                  (State.felts
-                    ((st["%21"] ←ₛ getImpl st { name := "data" } 0 1)["%22"] ←ₛ
-                      getImpl (st["%21"] ←ₛ getImpl st { name := "data" } 0 1) { name := "data" } 0 2)
+                  (State.felts st
                     {
                       name :=
                         "%17" })) 

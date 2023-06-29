@@ -17,16 +17,7 @@ def part19_state (st: State) : State :=
                 Option.get! (State.felts st { name := "%75" }) - Option.get! (State.felts st { name := "%20" }) =
                   0))["%78"] ←ₛ
             getImpl st { name := "data" } 0 0)[felts][{ name := "%79" }] ←
-          Option.get!
-              (State.felts
-                (((st[felts][{ name := "%76" }] ←
-                      Option.get! (State.felts st { name := "%75" }) -
-                        Option.get! (State.felts st { name := "%20" }))[props][{ name := "%77" }] ←
-                    (Option.get! (State.props st { name := "%19" }) ∧
-                      Option.get! (State.felts st { name := "%75" }) - Option.get! (State.felts st { name := "%20" }) =
-                        0))["%78"] ←ₛ
-                  getImpl st { name := "data" } 0 0)
-                { name := "%0" }) -
+          Option.get! (State.felts st { name := "%0" }) -
             Option.get!
               (State.felts
                 (((st[felts][{ name := "%76" }] ←
