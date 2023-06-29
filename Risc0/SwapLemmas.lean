@@ -102,4 +102,16 @@ lemma drop_assign_inv_swap
   MLIR
   simp [State.drop_update_swap, h, State.get_dropFelts_of_ne h₁]
 
+lemma drop_assign_isz_swap
+  {x : FeltVar}
+  {α : IsNondet} {name name' : String}
+  (h : name ≠ name')
+  (h₁ : ⟨name'⟩ ≠ x) :
+  Γ st ⟦name ←ₐ .Isz x; dropfelt ⟨name'⟩⟧ =
+  Γ st ⟦dropfelt ⟨name'⟩; name ←ₐ .Isz x⟧ := by
+  MLIR
+  simp [State.drop_update_swap, h]
+  unfold State.dropFelts Map.drop State.updateFelts
+  aesop
+
 end Risc0
