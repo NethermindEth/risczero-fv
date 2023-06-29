@@ -121,24 +121,28 @@ end const
 
 section drop
 
+  lemma drop_past_add (h : name ≠ name') (h₁ : ⟨name'⟩ ≠ lhs) (h₂ : ⟨name'⟩ ≠ rhs) :
+    State.buffers (Γ st ⟦@MLIR.DropFelt α ⟨name'⟩; name ←ₐ .Add lhs rhs; rest⟧) =
+    State.buffers (Γ st ⟦name ←ₐ .Add lhs rhs; @MLIR.DropFelt α ⟨name'⟩; rest⟧) := by
+      MLIR
+      simp [State.drop_update_swap, h]
+      unfold State.dropFelts Map.drop State.updateFelts
+      aesop
+
+  lemma drop_past_get (h: ⟨x⟩ ≠ y) :
+    State.buffers (Γ st ⟦dropfelt y; x ←ₐ .Get buf back offset; rest⟧) =
+    State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; dropfelt y; rest⟧) := by
+      MLIR
+      generalize eq: getImpl st buf back offset = get
+      cases get with
+        | none => aesop
+        | some lit =>
+          have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
+          aesop
+
 end drop
 
 section get
-
-  lemma get_past_const (h: x ≠ y) :
-  State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; y ←ₐ C c; rest⟧) =
-  State.buffers (Γ st ⟦y ←ₐ C c; x ←ₐ .Get buf back offset; rest⟧) := by
-    MLIR
-    generalize eq: getImpl st buf back offset = get
-    cases get with
-      | none => aesop
-      | some lit =>
-        have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-        aesop
-        rewrite [updateFelts_neq_comm]
-        rfl
-        simp [h]
-
   lemma get_past_add (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
     State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; y ←ₐ .Add l r; rest⟧) =
     State.buffers (Γ st ⟦y ←ₐ .Add l r; x ←ₐ .Get buf back offset; rest⟧) := by
@@ -181,6 +185,30 @@ section get
           rfl
           simp [h]
 
+  lemma get_past_const (h: x ≠ y) :
+  State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; y ←ₐ C c; rest⟧) =
+  State.buffers (Γ st ⟦y ←ₐ C c; x ←ₐ .Get buf back offset; rest⟧) := by
+    MLIR
+    generalize eq: getImpl st buf back offset = get
+    cases get with
+      | none => aesop
+      | some lit =>
+        have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
+        aesop
+        rewrite [updateFelts_neq_comm]
+        rfl
+        simp [h]
+
+  lemma get_past_drop (h: ⟨x⟩ ≠ y) :
+  State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; dropfelt y; rest⟧) =
+  State.buffers (Γ st ⟦dropfelt y; x ←ₐ .Get buf back offset; rest⟧) := by
+    MLIR
+    generalize eq: getImpl st buf back offset = get
+    cases get with
+      | none => aesop
+      | some lit =>
+        have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
+        aesop
 
   lemma get_past_mul (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
     State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; y ←ₐ .Mul l r; rest⟧) =
