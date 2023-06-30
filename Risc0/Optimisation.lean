@@ -121,17 +121,47 @@ end const
 
 section drop
 
-  lemma drop_past_add (h : name ≠ name') (h₁ : ⟨name'⟩ ≠ lhs) (h₂ : ⟨name'⟩ ≠ rhs) :
-    State.buffers (Γ st ⟦@MLIR.DropFelt α ⟨name'⟩; name ←ₐ .Add lhs rhs; rest⟧) =
-    State.buffers (Γ st ⟦name ←ₐ .Add lhs rhs; @MLIR.DropFelt α ⟨name'⟩; rest⟧) := by
+  lemma drop_past_add (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
+    (Γ st ⟦@MLIR.DropFelt α y; x ←ₐ .Add lhs rhs⟧) =
+    (Γ st ⟦x ←ₐ .Add lhs rhs; @MLIR.DropFelt α y⟧) := by
       MLIR
       simp [State.drop_update_swap, h]
       unfold State.dropFelts Map.drop State.updateFelts
       aesop
+  lemma drop_past_add_single (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
+    State.buffers (Γ st ⟦@MLIR.DropFelt α y; x ←ₐ .Add lhs rhs⟧) =
+    State.buffers (Γ st ⟦x ←ₐ .Add lhs rhs; @MLIR.DropFelt α y⟧) := by
+      MLIR
+      simp [State.drop_update_swap, h]
+
+  lemma drop_past_bitAnd_nondet (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y):
+    Γ st ⟦dropfelt y; nondet (x ←ₐ .BitAnd lhs rhs)⟧ =
+    Γ st ⟦nondet(x ←ₐ .BitAnd lhs rhs); dropfelt y⟧ := by
+      sorry
+      -- MLIR
+      -- simp [State.drop_update_swap, h, feltBitAnd, State.get_dropFelts_of_ne h₁.symm]
+      -- aesop
+
+  lemma drop_past_const (h : ⟨x⟩ ≠ y) :
+    Γ st ⟦@MLIR.DropFelt α y; x ←ₐ C c⟧ =
+    Γ st ⟦x ←ₐ C c; @MLIR.DropFelt α y⟧ := by
+      MLIR
+      simp [State.drop_update_swap, h]
+
+  lemma drop_past_eqz (h : x ≠ y) :
+    (Γ st ⟦dropfelt y; @MLIR.Eqz IsNondet.NotInNondet x⟧) =
+    (Γ st ⟦@MLIR.Eqz IsNondet.NotInNondet x; dropfelt y⟧) := by
+      MLIR
+      simp [State.dropFelts, Map.drop]
+
+  lemma drop_past_eqz_single (h : x ≠ y) :
+    State.buffers (Γ st ⟦dropfelt y; @MLIR.Eqz IsNondet.NotInNondet x⟧) =
+    State.buffers (Γ st ⟦@MLIR.Eqz IsNondet.NotInNondet x; dropfelt y⟧) := by
+      sorry
 
   lemma drop_past_get (h: ⟨x⟩ ≠ y) :
-    State.buffers (Γ st ⟦dropfelt y; x ←ₐ .Get buf back offset; rest⟧) =
-    State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; dropfelt y; rest⟧) := by
+    (Γ st ⟦@MLIR.DropFelt α y; x ←ₐ .Get buf back offset⟧) =
+    (Γ st ⟦x ←ₐ .Get buf back offset; @MLIR.DropFelt α y⟧) := by
       MLIR
       generalize eq: getImpl st buf back offset = get
       cases get with
@@ -139,6 +169,73 @@ section drop
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
           aesop
+  
+  lemma drop_past_get_single (h: ⟨x⟩ ≠ y) :
+    State.buffers (Γ st ⟦@MLIR.DropFelt α y; x ←ₐ .Get buf back offset⟧) =
+    State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; @MLIR.DropFelt α y⟧) := by
+      MLIR
+      generalize eq: getImpl st buf back offset = get
+      cases get with
+        | none => aesop
+        | some lit =>
+          have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
+          aesop
+
+  lemma drop_past_mul (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
+    (Γ st ⟦@MLIR.DropFelt α y; x ←ₐ .Mul lhs rhs⟧) =
+    (Γ st ⟦x ←ₐ .Mul lhs rhs; @MLIR.DropFelt α y⟧) := by
+      MLIR
+      simp [State.drop_update_swap, h]
+      unfold State.dropFelts Map.drop State.updateFelts
+      aesop
+  
+  lemma drop_past_mul_nondet (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
+    Γ st ⟦dropfelt y; nondet (x ←ₐ .Mul lhs rhs)⟧ =
+    Γ st ⟦nondet (x ←ₐ .Mul lhs rhs); dropfelt y⟧ := by
+      MLIR
+      simp [State.drop_update_swap, h]
+      unfold State.dropFelts Map.drop State.updateFelts
+      aesop
+
+  lemma drop_past_mul_single (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y):
+    Γ st ⟦@MLIR.DropFelt α y; x ←ₐ .Mul lhs rhs⟧ =
+    Γ st ⟦x ←ₐ .Mul lhs rhs; @MLIR.DropFelt α y⟧ := by
+      MLIR
+      simp [State.drop_update_swap, h]
+      unfold State.dropFelts Map.drop State.updateFelts
+      aesop
+  
+  lemma drop_past_set (h : y ≠ val) :
+    Γ st ⟦dropfelt y; .Set buf offset val⟧ =
+    Γ st ⟦.Set buf offset val; dropfelt y⟧ := by
+      MLIR; simp only [getElem!, dite_true, ne_eq]
+      rw [State.get_dropFelts_of_ne h]
+      unfold State.dropFelts Map.drop
+      simp only [
+        State.set!_felts, State.set!, State.setBufferElementImpl, Buffer.set?,
+        Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data
+      ]
+      aesop
+  
+  lemma drop_past_set_nondet (h : val ≠ y) :
+    Γ st ⟦dropfelt y; nondet (.Set buf offset val)⟧ =
+    Γ st ⟦nondet( .Set buf offset val); dropfelt y⟧ := by
+      MLIR; simp only [getElem!, dite_true, ne_eq]
+      rw [State.get_dropFelts_of_ne h.symm]
+      unfold State.dropFelts Map.drop
+      simp only [
+        State.set!_felts, State.set!, State.setBufferElementImpl, Buffer.set?,
+        Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data
+      ]
+      aesop
+
+  lemma drop_past_sub (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
+    (Γ st ⟦@MLIR.DropFelt α y; x ←ₐ .Sub lhs rhs⟧) =
+    (Γ st ⟦x ←ₐ .Sub lhs rhs; @MLIR.DropFelt α y⟧) := by
+      MLIR
+      simp [State.drop_update_swap, h]
+      unfold State.dropFelts Map.drop State.updateFelts
+      aesop
 
 end drop
 
@@ -363,8 +460,87 @@ end true
 
 lemma combine_nondets : Γ (Γ st ⟦nondet p₁⟧) ⟦nondet p₂; p₃⟧ = Γ st ⟦nondet (p₁; p₂); p₃⟧ := rfl
 
+lemma split_nondet_seq : Γ st ⟦nondet (s₁; s₂)⟧ = Γ st ⟦nondet s₁; nondet s₂⟧ := by rfl
+
+lemma step_det : Γ st ⟦(s₁; s₂); s₃⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂; s₃⟧ := by
+  aesop
+
 lemma step_nondet : Γ st ⟦nondet (s₁; s₂); s₃⟧ = Γ (Γ st ⟦nondet s₁⟧) ⟦nondet s₂; s₃⟧ := by
   aesop
+
+section drop_sequencing
+lemma drop_sequencing_dddd :
+  Γ st ⟦s₁; s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_nddd :
+  Γ st ⟦nondet s₁; s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_dndd :
+  Γ st ⟦s₁; nondet s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_nndd :
+  Γ st ⟦nondet (s₁; s₂); s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_ddnd :
+  Γ st ⟦s₁; s₂; nondet s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_ndnd :
+  Γ st ⟦nondet s₁; s₂; nondet s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_dnnd :
+  Γ st ⟦s₁; nondet (s₂; s₃); s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_nnnd :
+  Γ st ⟦nondet (s₁; s₂; s₃); s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_dddn :
+  Γ st ⟦s₁; s₂; s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_nddn :
+  Γ st ⟦nondet s₁; s₂; s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_dndn :
+  Γ st ⟦s₁; nondet s₂; s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_nndn :
+  Γ st ⟦nondet (s₁; s₂); s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_ddnn :
+  Γ st ⟦s₁; s₂; nondet (s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_ndnn :
+  Γ st ⟦nondet s₁; s₂; nondet (s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_dnnn :
+  Γ st ⟦s₁; nondet (s₂; s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_nnnn :
+  Γ st ⟦nondet (s₁; s₂; s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
+  by aesop
+
+lemma drop_sequencing_dd:
+  Γ st ⟦@MLIR.DropFelt .NotInNondet x; s₁⟧ = Γ (Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧) ⟦s₁⟧ :=
+  by aesop
+
+lemma drop_sequencing_dn:
+  Γ st ⟦@MLIR.DropFelt .NotInNondet x; nondet s₁⟧ = Γ (Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧) ⟦s₁⟧ :=
+  by aesop
+end drop_sequencing
 
 end Reordering
 
