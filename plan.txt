@@ -1,0 +1,20 @@
+Code.lean
+    -def Code.full
+    -def Code.getReturn
+    -def Code.run
+CodeReordered.lean
+    -def Code.optX - Code.full with x instructions reordered
+    -def Code.opt_full - Code.full with all instructions in their optimised order
+CodeReorderedProofs.lean
+    -lemma Code.optimised_behaviourX
+    -lemma Code.optimised_behaviour_full - getReturn (full.runProgram st) = getReturn (opt_full.runProgram st)
+CodeParts.lean
+    -def Code.partN - the nth subsection of the reordered code
+    -def Code.parts_combined - all the parts in sequence
+    -lemma Code.parts_combine - running Code.parts_combined is equivalent to running Code.opt_full
+CodeDrops.lean
+    -lemma Code.drop_past_partN - a drop before partN can be moved after it if it doesn't clash // currently in CodeParts.lean
+    -lemma Code.behaviour_with_drops - drops interspersed amongst the parts are equivalent to all being at the end // currently in CodeParts.lean
+    -lemma Code.getReturn_ignores_drops - getReturn on all the parts followed by all the drops is equivalent to getReturn on just all the parts // currently in CodeParts.lean
+WeakestPresPartX.lean
+    -def partX_state

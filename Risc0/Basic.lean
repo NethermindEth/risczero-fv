@@ -256,6 +256,11 @@ def updateFelts (state : State) (name : FeltVar) (x : Felt) : State :=
 def dropFelts (st : State) (name : FeltVar) : State :=
   { st with felts := st.felts.drop name }
 
+lemma dropFelts_get_buffers :
+  (dropFelts st name).buffers = st.buffers := by
+  unfold dropFelts
+  rfl
+
 @[simp]
 lemma drop_update_same {st : State} {name : FeltVar} {x : Felt} : 
   dropFelts (updateFelts st name x) name = dropFelts st name := by

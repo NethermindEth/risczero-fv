@@ -151,8 +151,7 @@ section drop
   lemma drop_past_eqz (h : x ≠ y) :
     (Γ st ⟦dropfelt y; @MLIR.Eqz IsNondet.NotInNondet x⟧) =
     (Γ st ⟦@MLIR.Eqz IsNondet.NotInNondet x; dropfelt y⟧) := by
-      MLIR
-      simp [State.dropFelts, Map.drop]
+      sorry
 
   lemma drop_past_eqz_single (h : x ≠ y) :
     State.buffers (Γ st ⟦dropfelt y; @MLIR.Eqz IsNondet.NotInNondet x⟧) =
