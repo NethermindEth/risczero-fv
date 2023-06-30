@@ -252,13 +252,10 @@ section get
         (State.set! (st[x] ←ₛ getImpl st buf back offset) buf' index
           (Option.get! (st[x] ←ₛ getImpl st buf back offset).felts[val]!)) = ((State.set! st buf' index (Option.get! st.felts[val]!))[x] ←ₛ
           getImpl (State.set! st buf' index (Option.get! st.felts[val]!)) buf back offset) := by
-    have heq : (st[x] ←ₛ getImpl st buf back offset).felts[val]! = st.felts[val]! := by
-      generalize eq: getImpl st buf back offset = get
-      simp [State.update] 
-      rcases get with _ | x; try simp
-      rcases (getImpl_val_of_some eq) with ⟨_, hh⟩
-      simp [hh, getElem!, Map.update_get_next h]
-    rw [heq, getImpl_skip_set (Ne.symm h')]
+    simp [getElem!, Map.getElem_def]
+    rw [State.update_skip_felts _ (Ne.symm (by aesop)), 
+        ←@Map.getElem_def _ _ (State.felts st),
+        getImpl_skip_set (Ne.symm h')]
     generalize eq: getImpl st buf back offset = get 
     simp [State.update]
     rcases get with _ | x
