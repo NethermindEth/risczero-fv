@@ -248,7 +248,7 @@ section get
               rfl
               simp [h']
 
-  lemma get_past_set_buf_aux {s₁ : MLIR α} {val : FeltVar} (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf) : 
+  lemma get_past_set_buf_aux {val : FeltVar} (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf) : 
         (State.set! (st[x] ←ₛ getImpl st buf back offset) buf' index
           (Option.get! (st[x] ←ₛ getImpl st buf back offset).felts[val]!)) = ((State.set! st buf' index (Option.get! st.felts[val]!))[x] ←ₛ
           getImpl (State.set! st buf' index (Option.get! st.felts[val]!)) buf back offset) := by
@@ -275,31 +275,27 @@ section get
     State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; nondet(buf'[index] ←ᵢ val; s₁); s₂⟧) =
     State.buffers (Γ st ⟦nondet (buf'[index] ←ᵢ val); x ←ₐ .Get buf back offset; nondet s₁; s₂⟧) := by
     MLIR
-    simp
-    rw [@get_past_set_buf_aux _ _ _ _ _ _ _ _ s₁ _ h h']
-    rw [State.set!_buffers (Ne.symm h')]
-    rw [getImpl_skip_set (Ne.symm h')]
-    rw [←Buffer.back_def]
-    by_cases h_valid : isGetValid st buf back offset
-    · unfold isGetValid at h_valid
-      unfold getImpl isGetValid
-      aesop
-    · aesop
+    rw [
+      get_past_set_buf_aux h h',
+      State.set!_buffers (Ne.symm h'),
+      getImpl_skip_set (Ne.symm h'),
+      ←Buffer.back_def
+    ]
+    unfold getImpl isGetValid
+    aesop
 
   lemma get_past_set_buf_nondet_single (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf):
     State.buffers (Γ st ⟦x ←ₐ .Get buf back offset; nondet(buf'[index] ←ᵢ val); s₂⟧) =
     State.buffers (Γ st ⟦nondet (buf'[index] ←ᵢ val); x ←ₐ .Get buf back offset; s₂⟧) := by
-      MLIR
-      simp
-      rw [@get_past_set_buf_aux _ _ _ _ _ _ _ _ s₂ _ h h']
-      rw [State.set!_buffers (Ne.symm h')]
-      rw [getImpl_skip_set (Ne.symm h')]
-      rw [←Buffer.back_def]
-      by_cases h_valid : isGetValid st buf back offset
-      · unfold isGetValid at h_valid
-        unfold getImpl isGetValid
-        aesop
-      · aesop
+    MLIR
+    rw [
+      get_past_set_buf_aux h h',
+      State.set!_buffers (Ne.symm h'),
+      getImpl_skip_set (Ne.symm h'),
+      ←Buffer.back_def
+    ]
+    unfold getImpl isGetValid
+    aesop
 
 end get
 

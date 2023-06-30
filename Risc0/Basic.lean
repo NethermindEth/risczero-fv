@@ -839,26 +839,12 @@ lemma Buffer.back_set! {back : Back} (h : buf ≠ buf') : (Buffer.back (State.se
 lemma isGetValid_skip_set (h : buf ≠ buf') : 
   isGetValid (State.set! st buf' index x) buf back offset ↔ isGetValid st buf back offset := by
     unfold isGetValid
-    apply Iff.intro
-    · intro h'
-      simp at h'
-      rcases h' with ⟨h₁, h₂, h₃, h₄⟩
-      aesop
-    · intro h'
-      simp at h'
-      rcases h' with ⟨h₁, h₂, h₃, h₄⟩
-      aesop    
+    aesop  
 
 lemma getImpl_skip_set (h : buf ≠ buf') : getImpl (State.set! st buf' index x) buf back offset = getImpl st buf back offset := by
   unfold getImpl 
   by_cases eq : isGetValid (State.set! st buf' index x) buf back offset
-  · rw [isGetValid_skip_set h] at eq
-    rw [Buffer.back_set! h]
-    aesop
-  · rw [isGetValid_skip_set h] at eq
-    rw [Buffer.back_set! h]
-    aesop
-
+  aesop
 
 def State.setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
   let width := st.bufferWidths[bufferVar].get!
