@@ -843,7 +843,7 @@ lemma isGetValid_skip_set (h : buf ≠ buf') :
 
 lemma getImpl_skip_set (h : buf ≠ buf') : getImpl (State.set! st buf' index x) buf back offset = getImpl st buf back offset := by
   unfold getImpl 
-  by_cases eq : isGetValid (State.set! st buf' index x) buf back offset
+  by_cases eq : isGetValid (State.set! st buf' index x) buf back offset <;>
   aesop
 
 def State.setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=

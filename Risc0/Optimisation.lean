@@ -156,6 +156,14 @@ section drop
     Γ st ⟦nondet(dropfelt y; prog)⟧ := by
     MLIR
 
+lemma drop_past_eqz (h : x ≠ y) :
+  Γ st ⟦dropfelt y; @MLIR.Eqz IsNondet.NotInNondet x⟧ =
+  Γ st ⟦@MLIR.Eqz IsNondet.NotInNondet x; dropfelt y⟧ := by
+    MLIR
+    simp [getElem!, State.dropFelts, Map.drop, h]
+    rw [Map.getElem_def]
+    aesop
+    
 end drop
 
 section get
