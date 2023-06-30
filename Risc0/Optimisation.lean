@@ -157,7 +157,8 @@ section drop
   lemma drop_past_eqz_single (h : x ≠ y) :
     State.buffers (Γ st ⟦dropfelt y; @MLIR.Eqz IsNondet.NotInNondet x⟧) =
     State.buffers (Γ st ⟦@MLIR.Eqz IsNondet.NotInNondet x; dropfelt y⟧) := by
-      sorry
+    MLIR
+    simp [State.dropFelts, Map.drop]
 
   lemma drop_past_get (h: ⟨x⟩ ≠ y) :
     (Γ st ⟦@MLIR.DropFelt α y; x ←ₐ .Get buf back offset⟧) =
@@ -180,6 +181,18 @@ section drop
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
           aesop
+  
+  lemma drop_past_if (h : y ≠ c) (h₁ : y ∉ st.felts) :
+    Γ st ⟦dropfelt y; guard c then prog⟧ =
+    Γ st ⟦guard c then (dropfelt y; prog)⟧ := by
+    MLIR
+    simp [getElem!, State.get_dropFelts_of_ne h]
+    aesop; aesop
+    rw [Map.not_mem_iff_none, Map.getElem_def] at h₁
+    unfold State.dropFelts Map.drop
+    congr
+    funext z
+    aesop
 
   lemma drop_past_mul (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
     (Γ st ⟦@MLIR.DropFelt α y; x ←ₐ .Mul lhs rhs⟧) =
@@ -236,6 +249,11 @@ section drop
       simp [State.drop_update_swap, h]
       unfold State.dropFelts Map.drop State.updateFelts
       aesop
+
+  lemma drop_past_nondet :
+    Γ st ⟦dropfelt y; nondet(prog)⟧ =
+    Γ st ⟦nondet(dropfelt y; prog)⟧ := by
+    MLIR
 
 end drop
 

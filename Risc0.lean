@@ -5,6 +5,7 @@ import Risc0.Map
 import Risc0.Wheels
 import Risc0.MlirTactics
 import Risc0.SwapLemmas
+
 -- import Risc0.Gadgets.IsZero.Constraints.Code
 -- import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart0
 -- import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart1
@@ -21,6 +22,7 @@ import Risc0.SwapLemmas
 -- import Risc0.Gadgets.IsZero.Witness.WeakestPresPart5
 -- import Risc0.Gadgets.IsZero.Witness.WeakestPreFull
 -- import Risc0.Gadgets.IsZero.Proofs
+
 -- import Risc0.Gadgets.OneHot.Witness.Code
 -- import Risc0.Gadgets.OneHot.Witness.WeakestPresPart0
 -- import Risc0.Gadgets.OneHot.Witness.WeakestPresPart1
@@ -41,6 +43,7 @@ import Risc0.SwapLemmas
 -- import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart5
 -- import Risc0.Gadgets.OneHot.Constraints.WeakestPresPart6
 -- import Risc0.Gadgets.OneHot.Constraints.WeakestPreFull
+
 import Risc0.Gadgets.ComputeDecode.Witness.Code
 import Risc0.Gadgets.ComputeDecode.Witness.CodeReordered
 import Risc0.Gadgets.ComputeDecode.Witness.CodeParts
@@ -82,6 +85,7 @@ import Risc0.Gadgets.ComputeDecode.Witness.CodeParts
 -- import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart16
 -- import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart17
 -- import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart18
+
 -- import Risc0.Gadgets.OneHot20.Constraints.Code
 -- import Risc0.Gadgets.OneHot20.Witness.Code
 -- import Risc0.Gadgets.OneHot20.Constraints.WeakestPresPart0
