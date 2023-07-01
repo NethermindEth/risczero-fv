@@ -40,7 +40,7 @@ lemma part1_wp {st : State} {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y
 
 lemma part1_updates_opaque {st : State} : 
   Code.getReturn (part0_state_update st) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] ↔
-  Code.getReturn (part1_state_update (part0_state st)) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] := by
+  Code.getReturn (part1_state_update (part0_drops (part0_state st))) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] := by
   simp [part0_state_update, part1_wp]
 
 end Risc0.ComputeDecode.Witness.WP

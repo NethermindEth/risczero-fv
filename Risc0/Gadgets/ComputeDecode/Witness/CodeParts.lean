@@ -41,8 +41,8 @@ abbrev parts_combined : MLIRProgram :=
   part0; part1; part2; part3; part4; part5; part6; part7; part8; part9; part10; part11; part12; part13; part14; part15; part16; part17; part18; part19; part20; part21; part22; part23; part24; part25; part26; part27; part28; part29; part30; part31
 lemma parts_combine {st: State} :
   Γ st ⟦parts_combined⟧ =
-  Γ st ⟦opt32⟧ := by
-  unfold opt32 parts_combined
+  Γ st ⟦opt_full⟧ := by
+  unfold opt_full parts_combined
   unfold part0
   rewrite [MLIR.part_assoc_ddnd]
   apply MLIR.seq_step_eq

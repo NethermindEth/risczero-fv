@@ -367,4 +367,5 @@ lemma optimised_behaviour32 :
     simp only
 
 def opt_full : MLIRProgram := opt32
+lemma opt_full_def : opt_full = opt32 := rfl
 end Risc0.ComputeDecode.Witness.Code
