@@ -108,6 +108,23 @@ lemma nondet_end_step_eq (h: ∀ st: State, Γ st ⟦s₂; s₃⟧ = Γ st ⟦s�
 lemma nondet_blocks_split : Γ state ⟦nondet (s₁; s₂)⟧ = Γ state ⟦nondet s₁; nondet s₂⟧ := by
   simp [run_nondet, run_seq_def]
 
+lemma part_assoc_dddd: Γ state ⟦(p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; p₄; p₅⟧ := by aesop
+lemma part_assoc_nddd: Γ state ⟦(nondet p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; p₄; p₅⟧ := by aesop
+lemma part_assoc_dndd: Γ state ⟦(p₁; nondet p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; p₄; p₅⟧ := by aesop
+lemma part_assoc_nndd: Γ state ⟦(nondet (p₁; p₂); p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; p₄; p₅⟧ := by aesop
+lemma part_assoc_ddnd: Γ state ⟦(p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; p₄; p₅⟧ := by aesop
+lemma part_assoc_ndnd: Γ state ⟦(nondet p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; p₄; p₅⟧ := by aesop
+lemma part_assoc_dnnd: Γ state ⟦(p₁; nondet (p₂; p₃); p₄); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by aesop
+lemma part_assoc_nnnd: Γ state ⟦(nondet (p₁; p₂; p₃); p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by aesop
+lemma part_assoc_dddn: Γ state ⟦(p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; nondet p₄; p₅⟧ := by aesop
+lemma part_assoc_nddn: Γ state ⟦(nondet p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; nondet p₄; p₅⟧ := by aesop
+lemma part_assoc_dndn: Γ state ⟦(p₁; nondet p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; nondet p₄; p₅⟧ := by aesop
+lemma part_assoc_nndn: Γ state ⟦(nondet (p₁; p₂); p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; nondet p₄; p₅⟧ := by aesop
+lemma part_assoc_ddnn: Γ state ⟦(p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
+lemma part_assoc_ndnn: Γ state ⟦(nondet p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
+lemma part_assoc_dnnn: Γ state ⟦(p₁; nondet (p₂; p₃; p₄)); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
+lemma part_assoc_nnnn: Γ state ⟦(nondet (p₁; p₂; p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
+
 end MLIR
 
 end WithMLIR 

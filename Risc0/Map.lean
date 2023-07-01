@@ -158,6 +158,16 @@ lemma update_drop_swap (h : k ≠ k') : (m[k] ←ₘ v).drop k' = (m.drop k')[k]
 lemma drop_base : empty.drop k = (@empty α β) := by
   unfold drop empty; aesop 
 
+lemma drop_of_update :
+  (m[k] ←ₘ v) = (m.drop k)[k] ←ₘ v := by
+  unfold update drop
+  aesop
+
+lemma drop_of_updates :
+  ((m[k] ←ₘ v)[k'] ←ₘ v') =
+  ((m[k] ←ₘ v).drop k')[k'] ←ₘ v' := by
+  rw [←drop_of_update]
+
 end Map
 
 end Map
