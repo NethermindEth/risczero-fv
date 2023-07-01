@@ -94,37 +94,245 @@ lemma use_opt_full {x₀ x₁ x₂ x₃: Felt} :
   rewrite [←Code.getReturn_ignores_drops]
   rw [←Code.behaviour_with_drops]
 
-lemma closed_form {x₀ x₁ x₂ x₃: Felt} {y₀ y₁ y₂ y₃ y₄ y₅ y₆ y₇ y₈ y₉ y₁₀ y₁₁ y₁₂ y₁₃ y₁₄ y₁₅ y₁₆ y₁₇ : Option Felt} :
-  Code.run (start_state [x₀, x₁, x₂, x₃]) = [y₀, y₁, y₂, y₃, y₄, y₅, y₆, y₇, y₈, y₉, y₁₀, y₁₁, y₁₂, y₁₃, y₁₄, y₁₅, y₁₆, y₁₇ ] ↔ sorry := by
+-- lemma closed_form {x₀ x₁ x₂ x₃: Felt} {y₀ y₁ y₂ y₃ y₄ y₅ y₆ y₇ y₈ y₉ y₁₀ y₁₁ y₁₂ y₁₃ y₁₄ y₁₅ y₁₆ y₁₇ : Option Felt} :
+--   Code.run (start_state [x₀, x₁, x₂, x₃]) = [y₀, y₁, y₂, y₃, y₄, y₅, y₆, y₇, y₈, y₉, y₁₀, y₁₁, y₁₂, y₁₃, y₁₄, y₁₅, y₁₆, y₁₇ ] ↔ sorry := by
+
+lemma closed_form_part0 {x₀ x₁ x₂ x₃: Felt} {y₀ y₁ y₂ y₃ y₄ y₅ y₆ y₇ y₈ y₉ y₁₀ y₁₁ y₁₂ y₁₃ y₁₄ y₁₅ y₁₆ y₁₇ : Option Felt} :
+    Code.run (start_state [x₀, x₁, x₂, x₃]) = [y₀, y₁, y₂, y₃, y₄, y₅, y₆, y₇, y₈, y₉, y₁₀, y₁₁, y₁₂, y₁₃, y₁₄, y₁₅, y₁₆, y₁₇] ↔
+    Code.getReturn
+      (part1_state_update
+        (((({
+                  buffers :=
+                    ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
+                        [[none, none, none, none, none, none, none, none, none, none, none, none, none, none, none,
+                            none, none, none]])[{ name := "in" }] ←ₘ
+                      [[some x₀, some x₁, some x₂, some x₃]],
+                  bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 18)[{ name := "in" }] ←ₘ 4,
+                  constraints := [], cycle := 0, felts := Map.empty, isFailed := false, props := Map.empty,
+                  vars := [{ name := "in" }, { name := "data" }] }[felts][{ name := "%19" }] ←
+                128)[felts][{ name := "%23" }] ←
+              x₃)[felts][{ name := "%74" }] ←
+            feltBitAnd x₃ 128)[felts][{ name := "%18" }] ←
+          1997537281)) =
+    [y₀, y₁, y₂, y₃, y₄, y₅, y₆, y₇, y₈, y₉, y₁₀, y₁₁, y₁₂, y₁₃, y₁₄, y₁₅, y₁₆, y₁₇] := by
     rewrite [use_opt_full]
     
---   rewrite [part0_wp]
---   rewrite [part1_updates_opaque]
---   unfold start_state part0_state
---   MLIR_states_updates
---   unfold part0_drops
---   -- no drops
---   -- no sets
+    rewrite [part0_wp]
+    rewrite [part1_updates_opaque]
+    unfold start_state part0_state
+    MLIR_states_updates
+    unfold part0_drops
+    -- no drops
+    -- no sets
+    rfl
 
---   rewrite [part2_updates_opaque]
---   unfold part1_state
---   MLIR_states_updates
---   unfold part1_drops
---   simp [State.dropFelts]
---   MLIR_states_updates
---   simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
---   rewrite [Map.drop_of_updates]
---   simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+lemma closed_form_part1 {x₀ x₁ x₂ x₃: Felt} {y₀ y₁ y₂ y₃ y₄ y₅ y₆ y₇ y₈ y₉ y₁₀ y₁₁ y₁₂ y₁₃ y₁₄ y₁₅ y₁₆ y₁₇ : Option Felt} :
+    Code.getReturn
+      (part1_state_update
+        (((({
+                  buffers :=
+                    ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
+                        [[none, none, none, none, none, none, none, none, none, none, none, none, none, none, none,
+                            none, none, none]])[{ name := "in" }] ←ₘ
+                      [[some x₀, some x₁, some x₂, some x₃]],
+                  bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 18)[{ name := "in" }] ←ₘ 4,
+                  constraints := [], cycle := 0, felts := Map.empty, isFailed := false, props := Map.empty,
+                  vars := [{ name := "in" }, { name := "data" }] }[felts][{ name := "%19" }] ←
+                128)[felts][{ name := "%23" }] ←
+              x₃)[felts][{ name := "%74" }] ←
+            feltBitAnd x₃ 128)[felts][{ name := "%18" }] ←
+          1997537281)) =
+    [y₀, y₁, y₂, y₃, y₄, y₅, y₆, y₇, y₈, y₉, y₁₀, y₁₁, y₁₂, y₁₃, y₁₄, y₁₅, y₁₆, y₁₇] ↔
+    Code.getReturn
+      (part2_state_update
+        {
+          buffers :=
+            (Map.empty[{ name := "in" }] ←ₘ [[some x₀, some x₁, some x₂, some x₃]])[{ name := "data" }] ←ₘ
+              [[none, none, none, none, none, none, none, none, none, none, some (feltBitAnd x₃ 128 * 1997537281), none,
+                  none, none, none, none, none, none]],
+          bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 18)[{ name := "in" }] ←ₘ 4, constraints := [],
+          cycle := 0,
+          felts :=
+            ((((Map.empty[{ name := "%19" }] ←ₘ 128)[{ name := "%23" }] ←ₘ x₃)[{ name := "%18" }] ←ₘ
+                  1997537281)[{ name := "%17" }] ←ₘ
+                96)[{ name := "%76" }] ←ₘ
+              feltBitAnd x₃ 96,
+          isFailed := false, props := Map.empty, vars := [{ name := "in" }, { name := "data" }] }) =
+    [y₀, y₁, y₂, y₃, y₄, y₅, y₆, y₇, y₈, y₉, y₁₀, y₁₁, y₁₂, y₁₃, y₁₄, y₁₅, y₁₆, y₁₇] := by
+      rewrite [part2_updates_opaque]
+      unfold part1_state
+      MLIR_states_updates
+      unfold part1_drops
+      simp [State.dropFelts]
+      MLIR_states_updates
+      simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+      rewrite [Map.drop_of_updates]
+      simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
 
---   rewrite [part3_updates_opaque]
---   unfold part2_state
---   MLIR_states_updates
---   unfold part2_drops
---   simp [State.dropFelts]
---   MLIR_states_updates
---   simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
---   rewrite [Map.drop_of_updates]
---   simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- rewrite [part3_updates_opaque]
+    -- unfold part2_state
+    -- MLIR_states_updates
+    -- unfold part2_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part4_updates_opaque]
+    -- unfold part3_state
+    -- MLIR_states_updates
+    -- unfold part3_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part5_updates_opaque]
+    -- unfold part4_state
+    -- MLIR_states_updates
+    -- unfold part4_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+
+    -- rewrite [part6_updates_opaque]
+    -- unfold part5_state
+    -- MLIR_states_updates
+    -- unfold part5_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part7_updates_opaque]
+    -- unfold part6_state
+    -- MLIR_states_updates
+    -- unfold part6_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part8_updates_opaque]
+    -- unfold part7_state
+    -- MLIR_states_updates
+    -- unfold part7_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part9_updates_opaque]
+    -- unfold part8_state
+    -- MLIR_states_updates
+    -- unfold part8_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates, Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part10_updates_opaque]
+    -- unfold part9_state
+    -- MLIR_states_updates
+    -- unfold part9_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part11_updates_opaque]
+    -- unfold part10_state
+    -- MLIR_states_updates
+    -- unfold part10_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part12_updates_opaque]
+    -- unfold part11_state
+    -- MLIR_states_updates
+    -- unfold part11_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part13_updates_opaque]
+    -- unfold part12_state
+    -- MLIR_states_updates
+    -- unfold part12_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part14_updates_opaque]
+    -- unfold part13_state
+    -- MLIR_states_updates
+    -- unfold part13_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part15_updates_opaque]
+    -- unfold part14_state
+    -- MLIR_states_updates
+    -- unfold part14_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part16_updates_opaque]
+    -- unfold part15_state
+    -- MLIR_states_updates
+    -- unfold part15_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+    -- rewrite [part17_updates_opaque]
+    -- unfold part16_state
+    -- MLIR_states_updates
+    -- unfold part16_drops
+    -- simp [State.dropFelts]
+    -- MLIR_states_updates
+    -- simp only [ne_eq, Map.update_drop_swap, Map.update_drop, Map.drop_base]
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
+
+-- def part17 : MLIRProgram :=   2
+-- def part18 : MLIRProgram :=   0
+-- def part19 : MLIRProgram :=   0
+-- def part20 : MLIRProgram :=   0
+-- def part21 : MLIRProgram :=   0
+-- def part22 : MLIRProgram :=   0
+-- def part23 : MLIRProgram :=   0
+-- def part24 : MLIRProgram :=   0
+-- def part25 : MLIRProgram :=   0
+-- def part26 : MLIRProgram :=   0
+-- def part27 : MLIRProgram :=   0
+-- def part28 : MLIRProgram :=   0
+-- def part29 : MLIRProgram :=   0
+-- def part30 : MLIRProgram :=   0
+-- def part31 : MLIRProgram :=   0
   
 
 --   -- Code.run (start_state [x₀, x₁, x₂, x₃]) = [y₀, y₁, y₂, y₃, y₄, y₅, y₆, y₇, y₈, y₉, y₁₀, y₁₁, y₁₂, y₁₃, y₁₄, y₁₅, y₁₆, y₁₇ ] ↔ sorry := by

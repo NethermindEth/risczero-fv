@@ -44,3 +44,4 @@ import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart28
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart29
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart30
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart31
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPreFull
