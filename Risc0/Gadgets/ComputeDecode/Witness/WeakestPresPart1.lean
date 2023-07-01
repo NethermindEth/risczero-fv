@@ -9,17 +9,18 @@ open MLIRNotation
 
 -- The state obtained by running Code.part1 on st
 def part1_state (st: State) : State :=
-  (((State.set!
-                  (st[felts][{ name := "%75" }] ←
-                    Option.get! (State.felts st { name := "%74" }) * Option.get! (State.felts st { name := "%18" }))
-                  { name := "data" } 10
-                  (Option.get! (State.felts st { name := "%74" }) *
-                    Option.get! (State.felts st { name := "%18" })))[felts][{ name := "%17" }] ←
-                96)[felts][{ name := "%76" }] ←
-              feltBitAnd (Option.get! (State.felts st { name := "%23" })) 96)
+  
+          (((State.set!
+                (st[felts][{ name := "%75" }] ←
+                  Option.get! (State.felts st { name := "%74" }) * Option.get! (State.felts st { name := "%18" }))
+                { name := "data" } 10
+                (Option.get! (State.felts st { name := "%74" }) *
+                  Option.get! (State.felts st { name := "%18" })))[felts][{ name := "%17" }] ←
+              96)[felts][{ name := "%76" }] ←
+            feltBitAnd (Option.get! (State.felts st { name := "%23" })) 96) 
 
 def part1_drops (st: State) : State :=
-  State.dropFelts (State.dropFelts st ⟨"%74"⟩) ⟨"%75"⟩
+  State.dropFelts (State.dropFelts (st) ⟨"%74"⟩) ⟨"%75"⟩
 
 -- Run the program from part1 onwards by using part1_state rather than Code.part1
 def part1_state_update (st: State): State :=
@@ -34,7 +35,7 @@ lemma part1_wp {st : State} {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y
   unfold Code.part1
   MLIR
   rewrite [←eq]
-  rewrite [MLIR.run_seq_def, MLIR.run_dropfelt, MLIR.run_seq_def, MLIR.run_dropfelt]
+  rewrite [MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt]
   unfold part1_state_update part1_drops part1_state
   rfl
 

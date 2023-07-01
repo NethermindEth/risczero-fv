@@ -9,15 +9,16 @@ open MLIRNotation
 
 -- The state obtained by running Code.part2 on st
 def part2_state (st: State) : State :=
-  (State.set!
-            ((st[felts][{ name := "%16" }] ← 1950351361)[felts][{ name := "%77" }] ←
-              Option.get! (State.felts st { name := "%76" }) * 1950351361)
-            { name := "data" } 1
-            (Option.get! (State.felts st { name := "%76" }) * 1950351361))[felts][{ name := "%15" }] ←
-          16
+  
+          ((State.set!
+              ((st[felts][{ name := "%16" }] ← 1950351361)[felts][{ name := "%77" }] ←
+                Option.get! (State.felts st { name := "%76" }) * 1950351361)
+              { name := "data" } 1
+              (Option.get! (State.felts st { name := "%76" }) * 1950351361))[felts][{ name := "%15" }] ←
+            16) 
 
 def part2_drops (st: State) : State :=
-  State.dropFelts (State.dropFelts st ⟨"%76"⟩) ⟨"%77"⟩
+  State.dropFelts (State.dropFelts (st) ⟨"%76"⟩) ⟨"%77"⟩
 
 -- Run the program from part2 onwards by using part2_state rather than Code.part2
 def part2_state_update (st: State): State :=
@@ -32,7 +33,7 @@ lemma part2_wp {st : State} {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y
   unfold Code.part2
   MLIR
   rewrite [←eq]
-  rewrite [MLIR.run_seq_def, MLIR.run_dropfelt, MLIR.run_seq_def, MLIR.run_dropfelt]
+  rewrite [MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt]
   unfold part2_state_update part2_drops part2_state
   rfl
 

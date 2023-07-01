@@ -9,21 +9,22 @@ open MLIRNotation
 
 -- The state obtained by running Code.part3 on st
 def part3_state (st: State) : State :=
-  State.set!
-    (((st[felts][{ name := "%78" }] ←
-          feltBitAnd (Option.get! (State.felts st { name := "%23" }))
-            (Option.get! (State.felts st { name := "%15" })))[felts][{ name := "%14" }] ←
-        1887436801)[felts][{ name := "%79" }] ←
-      feltBitAnd (Option.get! (State.felts st { name := "%23" }))
-          (Option.get! (State.felts st { name := "%15" })) *
-        1887436801)
-    { name := "data" } 9
-    (feltBitAnd (Option.get! (State.felts st { name := "%23" }))
-        (Option.get! (State.felts st { name := "%15" })) *
-      1887436801)
+  
+          (State.set!
+            (((st[felts][{ name := "%78" }] ←
+                  feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+                    (Option.get! (State.felts st { name := "%15" })))[felts][{ name := "%14" }] ←
+                1887436801)[felts][{ name := "%79" }] ←
+              feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+                  (Option.get! (State.felts st { name := "%15" })) *
+                1887436801)
+            { name := "data" } 9
+            (feltBitAnd (Option.get! (State.felts st { name := "%23" }))
+                (Option.get! (State.felts st { name := "%15" })) *
+              1887436801)) 
 
 def part3_drops (st: State) : State :=
-  State.dropFelts (State.dropFelts st ⟨"%78"⟩) ⟨"%79"⟩
+  State.dropFelts (State.dropFelts (st) ⟨"%78"⟩) ⟨"%79"⟩
 
 -- Run the program from part3 onwards by using part3_state rather than Code.part3
 def part3_state_update (st: State): State :=
@@ -38,7 +39,7 @@ lemma part3_wp {st : State} {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y
   unfold Code.part3
   MLIR
   rewrite [←eq]
-  rewrite [MLIR.run_seq_def, MLIR.run_dropfelt, MLIR.run_seq_def, MLIR.run_dropfelt]
+  rewrite [MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt]
   unfold part3_state_update part3_drops part3_state
   rfl
 
