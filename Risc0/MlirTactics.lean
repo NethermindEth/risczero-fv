@@ -156,7 +156,9 @@ elab "MLIR_decide_updates" : tactic => do
       State.updateFelts_constraints, State.updateFelts_cycle, State.updateFelts_isFailed,
       State.updateFelts_props, State.updateFelts_vars, State.updateFelts_felts, State.updateProps_buffers,
       State.updateProps_bufferWidths, State.updateProps_constraints, State.updateProps_cycle,
-      State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props
+      State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props,
+      State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars,
+      withEqZero_buffers, withEqZero_bufferWidths, withEqZero_constraints, withEqZero_cycle, withEqZero_felts, withEqZero_isFailed, withEqZero_props, withEqZero_vars
     ])
   evalTactic <| ← `(tactic| simp only [Map.update_def.symm])
 

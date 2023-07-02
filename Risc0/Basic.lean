@@ -256,8 +256,43 @@ def updateFelts (state : State) (name : FeltVar) (x : Felt) : State :=
 def dropFelts (st : State) (name : FeltVar) : State :=
   { st with felts := st.felts.drop name }
 
-lemma dropFelts_get_buffers :
+lemma dropFelts_buffers :
   (dropFelts st name).buffers = st.buffers := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_bufferWidths :
+  (dropFelts st name).bufferWidths = st.bufferWidths := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_constraints :
+  (dropFelts st name).constraints = st.constraints := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_cycle :
+  (dropFelts st name).cycle = st.cycle := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_felts :
+  (dropFelts st name).felts = st.felts.drop name := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_isFailed :
+  (dropFelts st name).isFailed = st.isFailed := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_props :
+  (dropFelts st name).props = st.props := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_vars :
+  (dropFelts st name).vars = st.vars := by
   unfold dropFelts
   rfl
 
@@ -795,6 +830,42 @@ abbrev withEqZero (x : Felt) (st : State) : State :=
   {st with constraints := (x = 0) :: st.constraints}
 
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
+
+lemma withEqZero_updateFelts :
+  withEqZero y (State.updateFelts st name x) = State.updateFelts (withEqZero y st) name x := by
+  aesop
+
+lemma withEqZero_buffers :
+  (withEqZero x st).buffers = st.buffers := by
+  aesop
+
+lemma withEqZero_bufferWidths :
+  (withEqZero x st).bufferWidths = st.bufferWidths := by
+  aesop
+
+lemma withEqZero_constraints :
+  (withEqZero x st).constraints = (x = 0) :: st.constraints := by
+  aesop
+
+lemma withEqZero_cycle :
+  (withEqZero x st).cycle = st.cycle := by
+  aesop
+
+lemma withEqZero_felts :
+  (withEqZero x st).felts = st.felts := by
+  aesop
+
+lemma withEqZero_isFailed :
+  (withEqZero x st).isFailed = st.isFailed := by
+  aesop
+
+lemma withEqZero_props :
+  (withEqZero x st).props = st.props := by
+  aesop
+
+lemma withEqZero_vars :
+  (withEqZero x st).vars = st.vars := by
+  aesop
 
 def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer.Idx) (val : Felt) : State :=
   match (st.buffers[bufferVar].get!).set? idx val with

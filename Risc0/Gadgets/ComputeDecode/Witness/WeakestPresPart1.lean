@@ -44,4 +44,40 @@ lemma part1_updates_opaque {st : State} :
   Code.getReturn (part1_state_update (part0_drops (part0_state st))) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] := by
   simp [part0_state_update, part1_wp]
 
+lemma part1_cumulative_wp {x0 x1 x2 x3: Felt} :
+  Code.run (start_state [x0,x1,x2,x3]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17] ↔
+  Code.getReturn
+        (part1_state_update
+          (((({
+                    buffers :=
+                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
+                          [[none, none, none, none, none, none, none, none, none, none, none, none, none, none, none,
+                              none, none, none]])[{ name := "in" }] ←ₘ
+                        [[some x0, some x1, some x2, some x3]],
+                    bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 18)[{ name := "in" }] ←ₘ 4,
+                    constraints := [], cycle := 0, felts := Map.empty, isFailed := false, props := Map.empty,
+                    vars := [{ name := "in" }, { name := "data" }] }[felts][{ name := "%19" }] ←
+                  128)[felts][{ name := "%23" }] ←
+                x3)[felts][{ name := "%74" }] ←
+              feltBitAnd x3 128)[felts][{ name := "%18" }] ←
+            1997537281)) =
+      [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17]  := by
+    rewrite [part0_cumulative_wp]
+    rewrite [part1_updates_opaque]
+    unfold part0_state
+    MLIR_states_updates
+    -- 0 withEqZeros
+    -- simp only [withEqZero_updateFelts]
+    -- simp only [withEqZero_def]
+    unfold part0_drops
+    -- 0 drops
+    -- simp only [State.drop_update_swap, State.drop_update_same]
+    -- rewrite [State.dropFelts]
+    -- simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- 0 sets
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    rfl
+
 end Risc0.ComputeDecode.Witness.WP

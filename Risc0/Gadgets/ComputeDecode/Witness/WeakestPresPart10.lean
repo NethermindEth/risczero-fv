@@ -48,4 +48,46 @@ lemma part10_updates_opaque {st : State} :
   Code.getReturn (part10_state_update (part9_drops (part9_state st))) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] := by
   simp [part9_state_update, part10_wp]
 
+lemma part10_cumulative_wp {x0 x1 x2 x3: Felt} :
+  Code.run (start_state [x0,x1,x2,x3]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17] ↔
+  Code.getReturn
+        (part10_state_update
+          ({
+              buffers :=
+                (Map.empty[{ name := "in" }] ←ₘ [[some x0, some x1, some x2, some x3]])[{ name := "data" }] ←ₘ
+                  [[some (feltBitAnd x3 6 * 1006632961), some (feltBitAnd x3 96 * 1950351361),
+                      some (feltBitAnd x2 96 * 1950351361), none, none, none, none, none,
+                      some (feltBitAnd x3 8 * 1761607681), some (feltBitAnd x3 16 * 1887436801),
+                      some (feltBitAnd x3 128 * 1997537281), some (feltBitAnd x2 16 * 1887436801),
+                      some (feltBitAnd x2 128 * 1997537281), some (feltBitAnd x3 1), none, none, none, none]],
+              bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 18)[{ name := "in" }] ←ₘ 4,
+              constraints := [], cycle := 0,
+              felts :=
+                ((((((Map.empty[{ name := "%19" }] ←ₘ 128)[{ name := "%23" }] ←ₘ x3)[{ name := "%18" }] ←ₘ
+                          1997537281)[{ name := "%15" }] ←ₘ
+                        16)[{ name := "%14" }] ←ₘ
+                      1887436801)[{ name := "%13" }] ←ₘ
+                    8)[{ name := "%22" }] ←ₘ
+                  x2,
+              isFailed := false, props := Map.empty,
+              vars := [{ name := "in" }, { name := "data" }] }[felts][{ name := "%6" }] ←
+            12)) =
+      [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17]  := by
+    rewrite [part9_cumulative_wp]
+    rewrite [part10_updates_opaque]
+    unfold part9_state
+    MLIR_states_updates
+    -- 0 withEqZeros
+    -- simp only [withEqZero_updateFelts]
+    -- simp only [withEqZero_def]
+    unfold part9_drops
+    -- 2 drops
+    simp only [State.drop_update_swap, State.drop_update_same]
+    rewrite [State.dropFelts]
+    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- 1 set
+    rewrite [Map.drop_of_updates]
+    simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
 end Risc0.ComputeDecode.Witness.WP

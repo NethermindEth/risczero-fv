@@ -32,7 +32,33 @@ lemma part0_wp {st : State} {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y
   unfold Code.part0
   MLIR
   unfold part0_state_update part0_state part0_drops
+  
   rewrite [←eq]
   rfl
+
+lemma part0_cumulative_wp :
+  Code.run (start_state [x0,x1,x2,x3]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17] ↔
+  Code.getReturn
+        (part0_state_update
+          {
+            buffers :=
+              Map.fromList
+                [({ name := "in" }, [[x0, x1, x2, x3]]),
+                  ({ name := "data" },
+                    [[none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none,
+                        none, none]])],
+            bufferWidths := Map.fromList [({ name := "in" }, 4), ({ name := "data" }, 18)], constraints := [],
+            cycle := 0, felts := Map.empty, isFailed := false, props := Map.empty,
+            vars := [{ name := "in" }, { name := "data" }] }) =
+      [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17]  := by
+    unfold Code.run start_state
+    rewrite [Code.optimised_behaviour_full]
+    unfold MLIR.runProgram
+    rewrite [←Code.parts_combine]
+    unfold Code.parts_combined
+    rewrite [←Code.getReturn_ignores_drops]
+    rewrite [←Code.behaviour_with_drops]
+    rewrite [part0_wp]
+    rfl
 
 end Risc0.ComputeDecode.Witness.WP

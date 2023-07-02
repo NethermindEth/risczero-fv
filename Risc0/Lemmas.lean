@@ -81,7 +81,7 @@ lemma run_dropfelt {x : FeltVar} :
 
 lemma run_dropFelts_get_buffers :
   (Γ st ⟦@MLIR.DropFelt α x⟧).buffers = st.buffers := by
-  simp [MLIR.run, State.dropFelts_get_buffers]
+  simp [MLIR.run, State.dropFelts_buffers]
 
 lemma seq_assoc : Γ state ⟦p₁; (p₂; p₃)⟧ = Γ state ⟦(p₁; p₂); p₃⟧ := by simp [run_seq_def]
 

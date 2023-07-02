@@ -141,4 +141,17 @@ def getReturn (st: State) : BufferAtTime :=
 def run (st: State) : BufferAtTime :=
   getReturn (full.runProgram st)
 
-end Risc0.ComputeDecode.Witness.Code
+end Code
+
+def start_state (input : BufferAtTime) : State :=
+  { buffers := Map.fromList [(⟨"in"⟩, [input]), (⟨"data"⟩, [[none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none]])]
+  , bufferWidths := Map.fromList [(⟨"in"⟩, 4), (⟨"data"⟩, 18)] --input width 128?
+  , constraints := []
+  , cycle := 0
+  , felts := Map.empty
+  , props := Map.empty
+  , vars := [⟨"in"⟩, ⟨"data"⟩]
+  , isFailed := false
+  }
+
+end Risc0.ComputeDecode.Witness

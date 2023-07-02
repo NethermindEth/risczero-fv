@@ -43,4 +43,61 @@ lemma part24_updates_opaque {st : State} :
   Code.getReturn (part24_state_update (part23_drops (part23_state st))) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] := by
   simp [part23_state_update, part24_wp]
 
+lemma part24_cumulative_wp {x0 x1 x2 x3: Felt} :
+  Code.run (start_state [x0,x1,x2,x3]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17] ↔
+  Code.getReturn
+        (part24_state_update
+          (({
+                buffers :=
+                  ((fun x => Map.empty x)[{ name := "in" }] ←ₘ
+                      [[some x0, some x1, some x2, some x3]])[{ name := "data" }] ←ₘ
+                    [[some (feltBitAnd x3 6 * 1006632961), some (feltBitAnd x3 96 * 1950351361),
+                        some (feltBitAnd x2 96 * 1950351361), some (feltBitAnd x2 3),
+                        some (feltBitAnd x2 12 * 1509949441), some (feltBitAnd x1 48 * 1887436801),
+                        some (feltBitAnd x1 3), some (feltBitAnd x1 12 * 1509949441),
+                        some (feltBitAnd x3 8 * 1761607681), some (feltBitAnd x3 16 * 1887436801),
+                        some (feltBitAnd x3 128 * 1997537281), some (feltBitAnd x2 16 * 1887436801),
+                        some (feltBitAnd x2 128 * 1997537281), some (feltBitAnd x3 1),
+                        some (feltBitAnd x1 128 * 1997537281), some (feltBitAnd x1 64 * 1981808641),
+                        some (feltBitAnd x0 128 * 1997537281), some (feltBitAnd x0 127)]],
+                bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 18)[{ name := "in" }] ←ₘ 4,
+                constraints :=
+                  [x3 -
+                        ((feltBitAnd x3 128 * 1997537281 * 64 +
+                              (feltBitAnd x3 96 * 1950351361 * 16 + feltBitAnd x3 16 * 1887436801 * 8 +
+                                  feltBitAnd x3 8 * 1761607681 * 4 +
+                                feltBitAnd x3 6 * 1006632961)) *
+                            2 +
+                          feltBitAnd x3 1) =
+                      0],
+                cycle := 0,
+                felts :=
+                  ((((((Map.empty[{ name := "%19" }] ←ₘ 128)[{ name := "%15" }] ←ₘ 16)[{ name := "%13" }] ←ₘ
+                            8)[{ name := "%22" }] ←ₘ
+                          x2)[{ name := "%21" }] ←ₘ
+                        x1)[{ name := "%20" }] ←ₘ
+                      x0)[{ name := "%7" }] ←ₘ
+                    4,
+                isFailed := false, props := Map.empty,
+                vars := [{ name := "in" }, { name := "data" }] }[felts][{ name := "%43" }] ←
+              feltBitAnd x2 12 * 1509949441 * 4)[felts][{ name := "%46" }] ←
+            feltBitAnd x2 96 * 1950351361 * 2)) =
+      [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17]  := by
+    rewrite [part23_cumulative_wp]
+    rewrite [part24_updates_opaque]
+    unfold part23_state
+    MLIR_states_updates
+    -- 0 withEqZeros
+    -- rewrite [withEqZero_def]
+    -- MLIR_states_updates
+    unfold part23_drops
+    -- 3 drops
+    simp only [State.drop_update_swap, State.drop_update_same]
+    rewrite [State.dropFelts]
+    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- 0 sets
+    -- rewrite [Map.drop_of_updates]
+    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+
 end Risc0.ComputeDecode.Witness.WP

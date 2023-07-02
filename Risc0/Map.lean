@@ -93,6 +93,9 @@ lemma update_get : (m[k] ←ₘ v)[k] = v := by simp [update, getElem_def]
 @[simp]
 lemma update_get! : (m[k] ←ₘ v)[k]! = v := by simp [update, getElem!, getElem_def]
 
+-- TODO: see if we can get rid of this
+lemma update_get_wobbly : (m[k] ←ₘ v) k  = v := by simp [Map.update]
+
 @[simp]
 lemma empty_get : (@Map.empty α β)[k] = none := by rfl
 
@@ -142,6 +145,8 @@ lemma not_mem_iff_none : k ∉ m ↔ m[k] = none := by
   rw [mem_def]; rw [getElem_def] at *; aesop; rwa [Option.isNone_iff_eq_none] at a
 
 -- Drop lemmas
+lemma drop_get (h: k ≠ k') : (m.drop k) k' = m k' := by unfold drop; aesop
+
 @[simp]
 lemma drop_drop : (m.drop k).drop k = m.drop k := by unfold drop; aesop
 
