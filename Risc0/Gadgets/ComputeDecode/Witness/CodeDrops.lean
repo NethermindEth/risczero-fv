@@ -13,10 +13,7 @@ lemma drop_past_part1 (h0: ⟨"%74"⟩ ≠ x) (h1: ⟨"%18"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part1
     rewrite [drop_sequencing_nndn]
-    rewrite[←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial),drop_past_const (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_nndn]
     rewrite [h_rhs]
     unfold part1
@@ -30,9 +27,7 @@ lemma drop_past_part2 (h0: ⟨"%16"⟩ ≠ x) (h1: ⟨"%76"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part2
     rewrite [drop_sequencing_dnnd]
-    rewrite[←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_const (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial),drop_past_const (by trivial)]
     rewrite [←drop_sequencing_dnnd]
     rewrite [h_rhs]
     unfold part2
@@ -46,10 +41,7 @@ lemma drop_past_part3 (h0: ⟨"%23"⟩ ≠ x) (h1: ⟨"%15"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part3
     rewrite [drop_sequencing_ndnn]
-    rewrite[←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_const (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial)]
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part3
@@ -63,9 +55,7 @@ lemma drop_past_part4 (h0: ⟨"%13"⟩ ≠ x) (h1: ⟨"%23"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part4
     rewrite [drop_sequencing_dndn]
-    rewrite[←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_const (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_const (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_dndn]
     rewrite [h_rhs]
     unfold part4
@@ -79,9 +69,7 @@ lemma drop_past_part5 (h0: ⟨"%81"⟩ ≠ x) (h1: ⟨"%10"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part5
     rewrite [drop_sequencing_ndnd]
-    rewrite[←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_set (by trivial),drop_past_const (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_const (by trivial)]
     rewrite [←drop_sequencing_ndnd]
     rewrite [h_rhs]
     unfold part5
@@ -95,10 +83,7 @@ lemma drop_past_part6 (h0: ⟨"%82"⟩ ≠ x) (h1: ⟨"%9"⟩ ≠ x) (h2: ⟨"%8
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part6
     rewrite [drop_sequencing_nndn]
-    rewrite[←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial),drop_past_const (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_nndn]
     rewrite [h_rhs]
     unfold part6
@@ -112,10 +97,7 @@ lemma drop_past_part7 (h0: ⟨"%84"⟩ ≠ x) (h1: ⟨"%22"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part7
     rewrite [drop_sequencing_ndnn]
-    rewrite[←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_set (by trivial),drop_past_get (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part7
@@ -129,11 +111,7 @@ lemma drop_past_part8 (h0: ⟨"%86"⟩ ≠ x) (h1: ⟨"%22"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part8
     rewrite [drop_sequencing_nnnn]
-    rewrite[←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_set (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial)]
     rewrite [←drop_sequencing_nnnn]
     rewrite [h_rhs]
     unfold part8
@@ -147,10 +125,7 @@ lemma drop_past_part9 (h0: ⟨"%22"⟩ ≠ x) (h1: ⟨"%15"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part9
     rewrite [drop_sequencing_nnnd]
-    rewrite[←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial),drop_past_const (by trivial)]
     rewrite [←drop_sequencing_nnnd]
     rewrite [h_rhs]
     unfold part9
@@ -164,10 +139,7 @@ lemma drop_past_part10 (h0: ⟨"%22"⟩ ≠ x) (h1: ⟨"%6"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part10
     rewrite [drop_sequencing_ndnn]
-    rewrite[←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_const (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial)]
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part10
@@ -181,9 +153,7 @@ lemma drop_past_part11 (h0: ⟨"%4"⟩ ≠ x) (h1: ⟨"%22"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part11
     rewrite [drop_sequencing_dnnd]
-    rewrite[←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_const (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_set (by trivial),drop_past_get (by trivial)]
     rewrite [←drop_sequencing_dnnd]
     rewrite [h_rhs]
     unfold part11
@@ -197,10 +167,7 @@ lemma drop_past_part12 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%19"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part12
     rewrite [drop_sequencing_nnnd]
-    rewrite[←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial),drop_past_const (by trivial)]
     rewrite [←drop_sequencing_nnnd]
     rewrite [h_rhs]
     unfold part12
@@ -214,10 +181,7 @@ lemma drop_past_part13 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%3"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part13
     rewrite [drop_sequencing_ndnn]
-    rewrite[←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_const (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial)]
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part13
@@ -231,10 +195,7 @@ lemma drop_past_part14 (h0: ⟨"%1"⟩ ≠ x) (h1: ⟨"%21"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part14
     rewrite [drop_sequencing_dnnn]
-    rewrite[←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_const (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial)]
     rewrite [←drop_sequencing_dnnn]
     rewrite [h_rhs]
     unfold part14
@@ -248,11 +209,7 @@ lemma drop_past_part15 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%6"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part15
     rewrite [drop_sequencing_nnnn]
-    rewrite[←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_set (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_nnnn]
     rewrite [h_rhs]
     unfold part15
@@ -266,10 +223,7 @@ lemma drop_past_part16 (h0: ⟨"%102"⟩ ≠ x) (h1: ⟨"%20"⟩ ≠ x) (h2: ⟨
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part16
     rewrite [drop_sequencing_ndnn]
-    rewrite[←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_mul_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_set (by trivial),drop_past_get (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part16
@@ -283,10 +237,7 @@ lemma drop_past_part17 (h0: ⟨"%104"⟩ ≠ x) (h1: ⟨"%0"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part17
     rewrite [drop_sequencing_ndnn]
-    rewrite[←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_bitAnd_nondet (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dn,drop_past_set_nondet (by trivial),MLIR.run_seq_def]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
-    rewrite [MLIR.run_nondet]
+    rewrite[drop_past_set (by trivial),drop_past_const (by trivial),drop_past_bitAnd (by trivial) (by trivial) (by trivial),drop_past_set (by trivial)]
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part17
@@ -300,7 +251,7 @@ lemma drop_past_part18 (h0: ⟨"%7"⟩ ≠ x) (h1: ⟨"%26"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part18
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_const (by trivial),drop_past_get (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_get (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part18
@@ -314,7 +265,7 @@ lemma drop_past_part19 (h0: ⟨"%28"⟩ ≠ x) (h1: ⟨"%13"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part19
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_get (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_add (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part19
@@ -328,7 +279,7 @@ lemma drop_past_part20 (h0: ⟨"%32"⟩ ≠ x) (h1: ⟨"%27"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part20
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_add (by trivial) (by trivial) (by trivial),drop_past_get (by trivial),drop_past_add (by trivial) (by trivial) (by trivial),drop_past_get (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part20
@@ -342,7 +293,7 @@ lemma drop_past_part21 (h0: ⟨"%35"⟩ ≠ x) (h1: ⟨"%3"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part21
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_const (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_add (by trivial) (by trivial) (by trivial),drop_past_const (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part21
@@ -356,7 +307,7 @@ lemma drop_past_part22 (h0: ⟨"%24"⟩ ≠ x) (h1: ⟨"%38"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part22
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_sub (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_eqz (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_get (by trivial),drop_past_add (by trivial) (by trivial) (by trivial),drop_past_sub (by trivial) (by trivial) (by trivial),drop_past_eqz (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part22
@@ -370,7 +321,7 @@ lemma drop_past_part23 (h0: ⟨"%42"⟩ ≠ x) (h1: ⟨"%7"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part23
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_get (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_get (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part23
@@ -384,7 +335,7 @@ lemma drop_past_part24 (h0: ⟨"%47"⟩ ≠ x) (h1: ⟨"%13"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part24
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_get (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_add (by trivial) (by trivial) (by trivial),drop_past_get (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part24
@@ -398,7 +349,7 @@ lemma drop_past_part25 (h0: ⟨"%49"⟩ ≠ x) (h1: ⟨"%44"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part25
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_add (by trivial) (by trivial) (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_add (by trivial) (by trivial) (by trivial),drop_past_get (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part25
@@ -412,7 +363,7 @@ lemma drop_past_part26 (h0: ⟨"%52"⟩ ≠ x) (h1: ⟨"%41"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part26
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_sub (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_eqz (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_add (by trivial) (by trivial) (by trivial),drop_past_sub (by trivial) (by trivial) (by trivial),drop_past_eqz (by trivial),drop_past_get (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part26
@@ -426,7 +377,7 @@ lemma drop_past_part27 (h0: ⟨"%56"⟩ ≠ x) (h1: ⟨"%7"⟩ ≠ x) (h2: ⟨"%
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part27
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_get (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_get (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part27
@@ -440,7 +391,7 @@ lemma drop_past_part28 (h0: ⟨"%60"⟩ ≠ x) (h1: ⟨"%58"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part28
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_add (by trivial) (by trivial) (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial),drop_past_get (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part28
@@ -454,7 +405,7 @@ lemma drop_past_part29 (h0: ⟨"%64"⟩ ≠ x) (h1: ⟨"%62"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part29
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_add (by trivial) (by trivial) (by trivial),drop_past_add (by trivial) (by trivial) (by trivial),drop_past_get (by trivial),drop_past_add (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part29
@@ -468,7 +419,7 @@ lemma drop_past_part30 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%67"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part30
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_sub (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_eqz (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_mul (by trivial) (by trivial) (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_sub (by trivial) (by trivial) (by trivial),drop_past_eqz (by trivial),drop_past_get (by trivial),drop_past_mul (by trivial) (by trivial) (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part30
@@ -482,7 +433,7 @@ lemma drop_past_part31 (h0: ⟨"%69"⟩ ≠ x) (h1: ⟨"%71"⟩ ≠ x) (h2: ⟨"
     rewrite [MLIR.run_seq_def, MLIR.run_seq_def]
     unfold part31
     rewrite [drop_sequencing_dddd]
-    rewrite[←drop_sequencing_dd,drop_past_get (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_add (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_sub (by trivial) (by trivial) (by trivial),MLIR.run_seq_def,←drop_sequencing_dd,drop_past_eqz (by trivial),MLIR.run_seq_def]
+    rewrite[drop_past_get (by trivial),drop_past_add (by trivial) (by trivial) (by trivial),drop_past_sub (by trivial) (by trivial) (by trivial),drop_past_eqz (by trivial)]
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part31
@@ -2134,6 +2085,6 @@ lemma behaviour_with_drops :
 lemma getReturn_ignores_drops :
   getReturn (Γ st ⟦part0;part1;part2;part3;part4;part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧) =
   getReturn (Γ st ⟦part0;part1;part2;part3;part4;part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31⟧) := by
-    simp [getReturn, MLIR.run_seq_def, MLIR.run_dropFelts_get_buffers]
+    simp [getReturn, MLIR.run_seq_def, State.constraintsInVar, MLIR.run_dropfelt, State.dropFelts_buffers, State.dropFelts_props]
 
 end Risc0.ComputeDecode.Witness.Code

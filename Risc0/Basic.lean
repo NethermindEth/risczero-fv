@@ -816,7 +816,7 @@ namespace MLIRNotation
 
 scoped infix   :51                    "←ₐ "                      => MLIR.Assign
 scoped prefix  :52                    "?₀"                       => MLIR.Eqz
-scoped prefix  :52                    "dropfelt "                 => MLIR.DropFelt
+scoped prefix  :52                    "dropfelt "                => MLIR.DropFelt
 scoped notation:51                    "guard " c " then " x:51   => MLIR.If c x
 scoped prefix  :max                   "nondet"                   => MLIR.Nondet
 scoped infixr  :50                    "; "                       => MLIR.Sequence
