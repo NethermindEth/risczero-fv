@@ -44,7 +44,21 @@ lemma part1_updates_opaque {st : State} :
 
 lemma part1_cumulative_wp {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17: Felt} :
   Code.run (start_state [x0,x1,x2,x3] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17])) ↔
-  sorry := by
+  Code.getReturn
+      (part1_state_update
+        ((({
+                buffers :=
+                  ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
+                      [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8, some y9,
+                          some y10, some y11, some y12, some y13, some y14, some y15, some y16,
+                          some y17]])[{ name := "in" }] ←ₘ
+                    [[some x0, some x1, some x2, some x3]],
+                bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 18)[{ name := "in" }] ←ₘ 4,
+                constraints := [], cycle := 0, felts := Map.empty, isFailed := false, props := Map.empty,
+                vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
+              True)[felts][{ name := "%4" }] ←
+            4)[felts][{ name := "%14" }] ←
+          y8 * 4))  := by
     rewrite [part0_cumulative_wp]
     rewrite [part1_updates_opaque]
     unfold part0_state
@@ -54,11 +68,10 @@ lemma part1_cumulative_wp {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12
     -- MLIR_states_updates
     unfold part0_drops
     -- 1 drop
-    simp only [State.drop_update_swap, State.drop_update_same]
+    simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
     rewrite [State.dropFelts]
     simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
     simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
-    simp only [State.buffers]
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]

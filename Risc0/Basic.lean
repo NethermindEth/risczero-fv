@@ -301,16 +301,22 @@ lemma drop_update_same {st : State} {name : FeltVar} {x : Felt} :
   dropFelts (updateFelts st name x) name = dropFelts st name := by
   simp [dropFelts, updateFelts]
 
+-- TODO rename
 @[simp]
 lemma drop_update_swap {st : State} {name name' : FeltVar} {x : Felt} (h : name ≠ name') :
   dropFelts (updateFelts st name x) name' = updateFelts (dropFelts st name') name x := by
   simp [dropFelts, updateFelts]
   exact Map.update_drop_swap h
 
+
 notation:61 st:max "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
 
 def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
   { state with props := state.props[name] ←ₘ x }
+
+lemma drop_updateProps_swap :
+  dropFelts (updateProps st name x) name' = updateProps (dropFelts st name') name x :=
+  sorry
 
 notation:61 st:max "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
 
