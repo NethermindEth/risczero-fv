@@ -86,7 +86,9 @@ elab "MLIR_states_new" : tactic => do
 elab "MLIR_statement" : tactic => do
   evalTactic <| ← `(
     tactic| (
-      rewrite [MLIR.run_seq_def]
+      first 
+      | rewrite [MLIR.run_nondet_seq_def]
+      | rewrite [MLIR.run_seq_def]
       repeat (
         first
         | rewrite [MLIR.run_ass_def]
@@ -120,7 +122,7 @@ elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
   )
-  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+  evalTactic <| ← `(tactic| try simp [getImpl_skip_set_offset, Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
 
 elab "MLIR?" : tactic => do
   evalTactic <| ← `(
@@ -158,7 +160,8 @@ elab "MLIR_decide_updates" : tactic => do
       State.updateProps_bufferWidths, State.updateProps_constraints, State.updateProps_cycle,
       State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props,
       State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars,
-      withEqZero_buffers, withEqZero_bufferWidths, withEqZero_constraints, withEqZero_cycle, withEqZero_felts, withEqZero_isFailed, withEqZero_props, withEqZero_vars
+      withEqZero_buffers, withEqZero_bufferWidths, withEqZero_constraints, withEqZero_cycle, withEqZero_felts, withEqZero_isFailed, withEqZero_props, withEqZero_vars,
+      getImpl_skip_set_offset
     ])
   evalTactic <| ← `(tactic| simp only [Map.update_def.symm])
 

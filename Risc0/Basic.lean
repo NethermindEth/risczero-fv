@@ -881,6 +881,11 @@ def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer
 def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
   st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
 
+lemma getImpl_skip_set_offset (h: offset ≠ offset'):
+  getImpl (State.set! st buf offset val) buf back offset' =
+  getImpl st buf back offset' := by
+    sorry
+
 @[simp]
 lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val : Felt} :
   (State.set! st bufferVar offset val).felts = st.felts := by

@@ -134,6 +134,11 @@ section const
     Γ (Γ st ⟦@MLIR.DropFelt β ⟨name'⟩⟧) ⟦@MLIR.Assign α name (Op.Const x)⟧ := by
       simp [MLIR.run_ass_def, MLIR.run_dropfelt]
       aesop
+  
+  lemma const_past_eqz (h : ⟨name⟩ ≠ y):
+    Γ (Γ st ⟦@MLIR.Assign α name (Op.Const x)⟧) ⟦@MLIR.Eqz β y⟧ =
+    Γ (Γ st ⟦@MLIR.Eqz β y⟧) ⟦@MLIR.Assign α name (Op.Const x)⟧ := by
+      simp [MLIR.run_ass_def, MLIR.run_eqz, withEqZero_updateFelts, *]
 
   lemma const_past_get (h: x ≠ y):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Const c₁)⟧) ⟦@MLIR.Assign β y (Op.Get buf back offset)⟧ =
@@ -141,6 +146,13 @@ section const
       simp [MLIR.run_ass_def]
       aesop
       rewrite [updateFelts_neq_comm] <;> simp [*]
+
+  lemma const_past_isz (h: name ≠ name') (h': ⟨name⟩ ≠ y):
+    Γ (Γ st ⟦@MLIR.Assign α name (Op.Const x)⟧) ⟦MLIR.Assign name' (Op.Isz y)⟧ =
+    Γ (Γ st ⟦MLIR.Assign name' (Op.Isz y)⟧) ⟦@MLIR.Assign α name (Op.Const x)⟧ := by
+      simp [MLIR.run_ass_def, State.updateFelts, Map.update_get_next', *]
+      rw [Map.update_neq_comm]
+      simp [h]
 
   lemma const_past_mul (h: a ≠ b) (h': ⟨a⟩ ≠ c) (h'': ⟨a⟩ ≠ d):
     Γ (Γ st ⟦@MLIR.Assign α a (Op.Const x)⟧) ⟦@MLIR.Assign β b (Op.Mul c d)⟧ =
@@ -200,6 +212,17 @@ section drop
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.Get buf back offset)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β x (Op.Get buf back offset)⟧) ⟦@MLIR.DropFelt α y⟧ := by
       simp [MLIR.run_dropfelt, MLIR.run_ass_def]
+      sorry
+
+  lemma drop_past_isz (h: ⟨name⟩ ≠ y) (h': x ≠ y):
+    Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦MLIR.Assign name (Op.Isz x)⟧ =
+    Γ (Γ st ⟦MLIR.Assign name (Op.Isz x)⟧) ⟦@MLIR.DropFelt α y⟧ := by
+      simp [
+        MLIR.run_dropfelt, MLIR.run_ass_def, State.updateFelts, Map.update_get_next', *,
+        State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle,
+        State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars, State.dropFelts,
+        Map.update_drop_swap, Map.drop_get
+      ]
       sorry
   
   -- lemma drop_past_if (h : y ≠ x) (h₁ : Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦prog⟧ = Γ (Γ st ⟦prog⟧) ⟦@MLIR.DropFelt α y⟧) :
@@ -469,32 +492,60 @@ lemma drop_sequencing_nnnn :
   Γ st ⟦nondet (s₁; s₂; s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
   by aesop
 
-lemma drop_sequencing_ddd:
-  Γ st ⟦@MLIR.DropFelt .NotInNondet x; s₁; s₂⟧ = Γ (Γ (Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧) ⟦s₁⟧) ⟦s₂⟧ :=
+lemma drop_sequencing_ddd :
+  Γ st ⟦s₁; s₂; s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
   by aesop
 
-lemma drop_sequencing_dnd:
-  Γ st ⟦@MLIR.DropFelt .NotInNondet x; nondet s₁; s₂⟧ = Γ (Γ (Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧) ⟦s₁⟧) ⟦s₂⟧ :=
+lemma drop_sequencing_ndd :
+  Γ st ⟦nondet s₁; s₂; s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
   by aesop
 
-lemma drop_sequencing_ddn:
-  Γ st ⟦@MLIR.DropFelt .NotInNondet x; s₁; nondet s₂⟧ = Γ (Γ (Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧) ⟦s₁⟧) ⟦s₂⟧ :=
+lemma drop_sequencing_dnd :
+  Γ st ⟦s₁; nondet s₂; s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
   by aesop
 
-lemma drop_sequencing_dnn:
-  Γ st ⟦@MLIR.DropFelt .NotInNondet x; nondet (s₁; s₂)⟧ = Γ (Γ (Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧) ⟦s₁⟧) ⟦s₂⟧ :=
+lemma drop_sequencing_nnd :
+  Γ st ⟦nondet (s₁; s₂); s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
   by aesop
 
-lemma drop_sequencing_dd:
-  Γ st ⟦@MLIR.DropFelt .NotInNondet x; s₁⟧ = Γ (Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧) ⟦s₁⟧ :=
+lemma drop_sequencing_ddn :
+  Γ st ⟦s₁; s₂; nondet s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
   by aesop
 
-lemma drop_sequencing_dn:
-  Γ st ⟦@MLIR.DropFelt .NotInNondet x; nondet s₁⟧ = Γ (Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧) ⟦s₁⟧ :=
+lemma drop_sequencing_ndn :
+  Γ st ⟦nondet s₁; s₂; nondet s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
   by aesop
 
-lemma drop_sequencing_d:
-  Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧ = Γ st ⟦@MLIR.DropFelt .NotInNondet x⟧ := rfl
+lemma drop_sequencing_dnn :
+  Γ st ⟦s₁; nondet (s₂; s₃)⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
+  by aesop
+
+lemma drop_sequencing_nnn :
+  Γ st ⟦nondet (s₁; s₂; s₃)⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
+  by aesop
+
+lemma drop_sequencing_dd :
+  Γ st ⟦s₁; s₂⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
+  by aesop
+
+lemma drop_sequencing_nd :
+  Γ st ⟦nondet s₁; s₂⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
+  by aesop
+
+lemma drop_sequencing_dn :
+  Γ st ⟦s₁; nondet s₂⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
+  by aesop
+
+lemma drop_sequencing_nn :
+  Γ st ⟦nondet (s₁; s₂)⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
+  by aesop
+
+lemma drop_sequencing_d :
+  Γ st ⟦s₁⟧ = Γ st ⟦s₁⟧ := rfl
+
+lemma drop_sequencing_n :
+  Γ st ⟦nondet (s₁)⟧ = Γ st ⟦s₁⟧ := rfl
+
 
 -- TODO general tactic for unrolling N statements regardless of det/nondet like this would be nice
 -- alternatively, process out nondet blocks up front
