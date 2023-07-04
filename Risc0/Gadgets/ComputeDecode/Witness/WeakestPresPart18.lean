@@ -72,10 +72,10 @@ lemma part18_cumulative_wp {x0 x1 x2 x3: Felt} :
     rewrite [part17_cumulative_wp]
     rewrite [part18_updates_opaque]
     unfold part17_state
-    MLIR_states_updates
+    MLIR_states_updates'
     -- 0 withEqZeros
     -- rewrite [withEqZero_def]
-    -- MLIR_states_updates
+    -- MLIR_states_updates'
     unfold part17_drops
     -- 3 drops
     simp only [State.drop_update_swap, State.drop_update_same]

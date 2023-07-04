@@ -97,6 +97,9 @@ lemma update_get! : (m[k] ←ₘ v)[k]! = v := by simp [update, getElem!, getEle
 lemma update_get_wobbly : (m[k] ←ₘ v) k  = v := by simp [Map.update]
 
 @[simp]
+lemma update_get_wobbly_simp : (m[k] ←ₘ v) k  = v := by simp [Map.update]
+
+@[simp]
 lemma empty_get : (@Map.empty α β)[k] = none := by rfl
 
 lemma update_get_skip (h : k ≠ k') (h₁ : m[k] = some v) :
@@ -106,6 +109,10 @@ lemma update_get_next (h : k ≠ k') :
   (m[k] ←ₘ v)[k'] = m[k'] := by simp [update, getElem_def, h.symm]
 
 lemma update_get_next' (h : k ≠ k') :
+  (m[k] ←ₘ v) k' = m k' := by simp [update, getElem_def, h.symm]
+
+@[simp]
+lemma update_get_next_simp (h : k ≠ k') :
   (m[k] ←ₘ v) k' = m k' := by simp [update, getElem_def, h.symm]
 
 -- Membership lemmas.

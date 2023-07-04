@@ -452,7 +452,6 @@ lemma update_skip_felts (h: name' ≠ name) :
   (State.felts st { name }) := by
     simp only [State.update]
     aesop
-    simp [State.update, ←Map.getElem_def, Map.update_get_next, h]
 
 @[simp]
 lemma update_skip_nested_felts (h: name' ≠ name) :

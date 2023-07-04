@@ -536,10 +536,10 @@ lemma part39_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
     rewrite [part38_cumulative_wp]
     rewrite [part39_updates_opaque]
     unfold part38_state
-    MLIR_states_updates
+    MLIR_states_updates'
     -- 0 withEqZeros
     -- rewrite [withEqZero_def]
-    -- MLIR_states_updates
+    -- MLIR_states_updates'
     unfold part38_drops
     -- 4 drops
     simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
@@ -588,10 +588,10 @@ lemma closed_form {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 
     rewrite [part39_cumulative_wp]
     unfold part39_state_update
     unfold part39_state
-    MLIR_states_updates
+    MLIR_states_updates'
     -- 0 withEqZeros
     -- rewrite [withEqZero_def]
-    -- MLIR_states_updates
+    -- MLIR_states_updates'
     unfold part39_drops
     -- 29 drops
     simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]

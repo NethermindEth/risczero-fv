@@ -69,10 +69,10 @@ lemma part12_cumulative_wp {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y1
     rewrite [part11_cumulative_wp]
     rewrite [part12_updates_opaque]
     unfold part11_state
-    MLIR_states_updates
+    MLIR_states_updates'
     -- 0 withEqZeros
     -- rewrite [withEqZero_def]
-    -- MLIR_states_updates
+    -- MLIR_states_updates'
     unfold part11_drops
     -- 6 drops
     simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]

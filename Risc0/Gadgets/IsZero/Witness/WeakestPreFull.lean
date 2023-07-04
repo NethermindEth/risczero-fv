@@ -32,25 +32,25 @@ lemma closed_form {x : Felt} {y₁ y₂ : Option Felt} :
   unfold start_state
 
   unfold part₀_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₁_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₂_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₃_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₄_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₅_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   simp [State.lastOutput, Option.get!, List.getLast!, List.getLast, State.buffers]
-  MLIR_states_updates
+  MLIR_states_updates'
   simp [List.getLast]
 
 end Risc0.IsZero.Witness.WP

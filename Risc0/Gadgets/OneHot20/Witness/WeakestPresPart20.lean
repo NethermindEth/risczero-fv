@@ -34,14 +34,54 @@ lemma part20_updates_opaque {st : State} :
 
 lemma part20_cumulative_wp {x0: Felt} :
   Code.run (start_state [x0]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19] ↔
-  sorry := by
+  Code.getReturn
+      (part20_state_update
+        ({
+            buffers :=
+              (Map.empty[{ name := "code" }] ←ₘ [[some x0]])[{ name := "data" }] ←ₘ
+                [[some (if x0 = 0 then 1 else 0), some (if x0 - 1 = 0 then 1 else 0),
+                    some (if x0 - 2 = 0 then 1 else 0), some (if x0 - 3 = 0 then 1 else 0),
+                    some (if x0 - 4 = 0 then 1 else 0), some (if x0 - 5 = 0 then 1 else 0),
+                    some (if x0 - 6 = 0 then 1 else 0), some (if x0 - 7 = 0 then 1 else 0),
+                    some (if x0 - 8 = 0 then 1 else 0), some (if x0 - 9 = 0 then 1 else 0),
+                    some (if x0 - 10 = 0 then 1 else 0), some (if x0 - 11 = 0 then 1 else 0),
+                    some (if x0 - 12 = 0 then 1 else 0), some (if x0 - 13 = 0 then 1 else 0),
+                    some (if x0 - 14 = 0 then 1 else 0), some (if x0 - 15 = 0 then 1 else 0),
+                    some (if x0 - 16 = 0 then 1 else 0), some (if x0 - 17 = 0 then 1 else 0),
+                    some (if x0 - 18 = 0 then 1 else 0), some (if x0 - 19 = 0 then 1 else 0)]],
+            bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 20)[{ name := "code" }] ←ₘ 1,
+            constraints := [], cycle := 0,
+            felts :=
+              (((((((((((((((((((Map.empty[{ name := "%20" }] ←ₘ x0)[{ name := "%18" }] ←ₘ 1)[{ name := "%17" }] ←ₘ
+                                                  2)[{ name := "%16" }] ←ₘ
+                                                3)[{ name := "%15" }] ←ₘ
+                                              4)[{ name := "%14" }] ←ₘ
+                                            5)[{ name := "%13" }] ←ₘ
+                                          6)[{ name := "%12" }] ←ₘ
+                                        7)[{ name := "%11" }] ←ₘ
+                                      8)[{ name := "%10" }] ←ₘ
+                                    9)[{ name := "%9" }] ←ₘ
+                                  10)[{ name := "%8" }] ←ₘ
+                                11)[{ name := "%7" }] ←ₘ
+                              12)[{ name := "%6" }] ←ₘ
+                            13)[{ name := "%5" }] ←ₘ
+                          14)[{ name := "%4" }] ←ₘ
+                        15)[{ name := "%3" }] ←ₘ
+                      16)[{ name := "%2" }] ←ₘ
+                    17)[{ name := "%1" }] ←ₘ
+                  18)[{ name := "%0" }] ←ₘ
+                19,
+            isFailed := false, props := Map.empty,
+            vars := [{ name := "code" }, { name := "data" }] }[felts][{ name := "%22" }] ←
+          if x0 - 2 = 0 then 1 else 0)) =
+    [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19] := by
     rewrite [part19_cumulative_wp]
     rewrite [part20_updates_opaque]
     unfold part19_state
     MLIR_states_updates
     -- 0 withEqZeros
     -- rewrite [withEqZero_def]
-    -- MLIR_states_updates
+    -- MLIR_states_updates'
     unfold part19_drops
     -- 2 drops
     simp only [State.drop_update_swap, State.drop_update_same]
@@ -51,6 +91,5 @@ lemma part20_cumulative_wp {x0: Felt} :
     -- 1 set
     rewrite [Map.drop_of_updates]
     simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
-    rfl
 
 end Risc0.OneHot20.Witness.WP

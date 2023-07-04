@@ -35,25 +35,25 @@ lemma closed_form {x: Felt} {y₁ y₂ y₃ : Felt} : Code.run (start_state x ([
   unfold start_state
 
   unfold part₀_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₁_state
-  MLIR_states_updates
+  MLIR_states_updates'
   
   unfold part₂_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₃_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₄_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₅_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   unfold part₆_state
-  MLIR_states_updates
+  MLIR_states_updates'
 
   simp only [Code.getReturn, State.constraintsInVar, State.updateProps_props_get_wobbly, Option.getD_some]
   rw [←eq]

@@ -55,6 +55,39 @@ elab "MLIR_states_new" : tactic => do
     State.constraints_if, State.props_if
   ])
 
+elab "MLIR_states_new?" : tactic => do
+  evalTactic <| ← `(tactic| simp? [
+    getImpl, isGetValid, Buffer.back, Option.get!,
+    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
+    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
+    State.constraints_if, State.props_if
+  ])
+
+elab "MLIR_states_new'" : tactic => do
+  evalTactic <| ← `(tactic| simp only [
+    getImpl, isGetValid, Buffer.back, Option.get!,
+    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
+    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
+    State.constraints_if, State.props_if, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
+    Option.get!, Buffer.back, Buffer.get!, List.get!, Option.isSome_some, and_true, true_and, ne_eq,
+    State.updateFelts_props, State.updateProps_props_get_wobbly,
+    State.updateFelts_felts_get_wobbly, mul_eq_zero, State.updateFelts_felts_get_next, State.updateProps_felts
+  ])
+
+elab "MLIR_states_new'?" : tactic => do
+  evalTactic <| ← `(tactic| simp? only [
+    getImpl, isGetValid, Buffer.back, Option.get!,
+    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
+    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
+    State.constraints_if, State.props_if, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
+    Option.get!, Buffer.back, Buffer.get!, List.get!, Option.isSome_some, and_true, true_and, ne_eq,
+    State.updateFelts_props, State.updateProps_props_get_wobbly,
+    State.updateFelts_felts_get_wobbly, mul_eq_zero, State.updateFelts_felts_get_next, State.updateProps_felts
+  ])
+
 -- private lemma run_set_enforce_aux {st : State} (h : val ∈ st.felts) :
 --   Γ st ⟦buf[offset] ←ᵢ val⟧ = st.set! buf offset (st.felts[val].get h) := by
 --   simp [State.update, MLIR.run]
@@ -165,10 +198,59 @@ elab "MLIR_decide_updates" : tactic => do
     ])
   evalTactic <| ← `(tactic| simp only [Map.update_def.symm])
 
-elab "MLIR_states_updates" : tactic => do
+lemma getImpl_get_of_isGetValid {x : BufferVar} {st : State} (h : isGetValid st x m n) :
+  getImpl st x m n = some (Lit.Val (Option.get! (Buffer.back st x m n))) := by
+  simp [getImpl, h]
+
+elab "MLIR_states_updates_hack" : tactic => do
   evalTactic <| ← `(
     tactic| (
       MLIR_states_new
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
+  )
+
+open Lean Elab Tactic in
+elab "simplify_get_hack" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      rewrite [getImpl_get_of_isGetValid]; swap; unfold isGetValid; MLIR_states_updates_hack
+    )
+  )
+
+elab "MLIR_states_updates" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      simplify_get_hack
+      MLIR_states_new
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
+  )
+
+elab "MLIR_states_updates?" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      MLIR_states_new?
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
+  )
+
+elab "MLIR_states_updates'" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      MLIR_states_new'
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
+  )
+
+elab "MLIR_states_updates'?" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      MLIR_states_new'?
       -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
       MLIR_decide_updates
     )
