@@ -1,9 +1,9 @@
 import Risc0.Basic
 import Risc0.MlirTactics
-import Risc0.Gadgets.ComputeDecode.Witness.Code
-import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart21
+import Risc0.Gadgets.OneHot20.Witness.Code
+import Risc0.Gadgets.OneHot20.Witness.WeakestPresPart21
 
-namespace Risc0.ComputeDecode.Witness.WP
+namespace Risc0.OneHot20.Witness.WP
 
 open MLIRNotation
 
@@ -88,10 +88,10 @@ lemma part22_cumulative_wp {x0 x1 x2 x3: Felt} :
     rewrite [part21_cumulative_wp]
     rewrite [part22_updates_opaque]
     unfold part21_state
-    MLIR_states_updates'
+    MLIR_states_updates
     -- 0 withEqZeros
     -- rewrite [withEqZero_def]
-    -- MLIR_states_updates'
+    -- MLIR_states_updates
     unfold part21_drops
     -- 5 drops
     simp only [State.drop_update_swap, State.drop_update_same]
@@ -102,4 +102,4 @@ lemma part22_cumulative_wp {x0 x1 x2 x3: Felt} :
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
 
-end Risc0.ComputeDecode.Witness.WP
+end Risc0.OneHot20.Witness.WP

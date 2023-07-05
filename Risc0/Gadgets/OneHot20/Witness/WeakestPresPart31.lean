@@ -1,9 +1,9 @@
 import Risc0.Basic
 import Risc0.MlirTactics
-import Risc0.Gadgets.ComputeDecode.Witness.Code
-import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart30
+import Risc0.Gadgets.OneHot20.Witness.Code
+import Risc0.Gadgets.OneHot20.Witness.WeakestPresPart30
 
-namespace Risc0.ComputeDecode.Witness.WP
+namespace Risc0.OneHot20.Witness.WP
 
 open MLIRNotation
 
@@ -96,10 +96,10 @@ lemma part31_cumulative_wp {x0 x1 x2 x3: Felt} :
     rewrite [part30_cumulative_wp]
     rewrite [part31_updates_opaque]
     unfold part30_state
-    MLIR_states_updates'
+    MLIR_states_updates
     -- 1 withEqZero
     rewrite [withEqZero_def]
-    MLIR_states_updates'
+    MLIR_states_updates
     unfold part30_drops
     -- 5 drops
     simp only [State.drop_update_swap, State.drop_update_same]
@@ -132,10 +132,10 @@ lemma closed_form {x0 x1 x2 x3: Felt} :
     rewrite [part31_cumulative_wp]
     unfold part31_state_update
     unfold part31_state
-    MLIR_states_updates'
+    MLIR_states_updates
     -- 1 withEqZero
     rewrite [withEqZero_def]
-    MLIR_states_updates'
+    MLIR_states_updates
     unfold part31_drops
     -- 5 drops
     simp only [State.drop_update_swap, State.drop_update_same]
@@ -148,4 +148,4 @@ lemma closed_form {x0 x1 x2 x3: Felt} :
     unfold Code.getReturn
     simp only
     simp [Map.update_get_wobbly, List.getLast!]
-end Risc0.ComputeDecode.Witness.WP
+end Risc0.OneHot20.Witness.WP

@@ -215,7 +215,7 @@ open Lean Elab Tactic in
 elab "simplify_get_hack" : tactic => do
   evalTactic <| ← `(
     tactic| (
-      rewrite [getImpl_get_of_isGetValid]; swap; unfold isGetValid; MLIR_states_updates_hack
+      try (rewrite [getImpl_get_of_isGetValid]; swap; unfold isGetValid; MLIR_states_updates_hack)
     )
   )
 
