@@ -10,98 +10,136 @@ open MLIRNotation
 -- The state obtained by running Code.part31 on st
 def part31_state (st: State) : State :=
   
-          (withEqZero
-            (Option.get! (State.felts st { name := "%20" }) -
-              (Option.get! (State.felts st { name := "%71" }) +
-                Option.get! (State.felts (st["%69"] ←ₛ getImpl st { name := "data" } 0 17) { name := "%69" })))
-            (((st["%69"] ←ₛ getImpl st { name := "data" } 0 17)[felts][{ name := "%72" }] ←
-                Option.get! (State.felts st { name := "%71" }) +
-                  Option.get!
-                    (State.felts (st["%69"] ←ₛ getImpl st { name := "data" } 0 17)
-                      { name := "%69" }))[felts][{ name := "%73" }] ←
-              Option.get! (State.felts st { name := "%20" }) -
-                (Option.get! (State.felts st { name := "%71" }) +
-                  Option.get!
-                    (State.felts (st["%69"] ←ₛ getImpl st { name := "data" } 0 17) { name := "%69" })))) 
+          ((((st[felts][{ name := "%66" }] ←
+                  Option.get! (State.felts st { name := "%63" }) +
+                    Option.get! (State.felts st { name := "%65" }))["%67"] ←ₛ
+                getImpl st { name := "data" } 0 17)[felts][{ name := "%68" }] ←
+              Option.get!
+                  (State.felts
+                    ((st[felts][{ name := "%66" }] ←
+                        Option.get! (State.felts st { name := "%63" }) +
+                          Option.get! (State.felts st { name := "%65" }))["%67"] ←ₛ
+                      getImpl st { name := "data" } 0 17)
+                    { name := "%67" }) *
+                Option.get! (State.felts st { name := "%2" }))[felts][{ name := "%69" }] ←
+            Option.get! (State.felts st { name := "%63" }) + Option.get! (State.felts st { name := "%65" }) +
+              Option.get!
+                  (State.felts
+                    ((st[felts][{ name := "%66" }] ←
+                        Option.get! (State.felts st { name := "%63" }) +
+                          Option.get! (State.felts st { name := "%65" }))["%67"] ←ₛ
+                      getImpl st { name := "data" } 0 17)
+                    { name := "%67" }) *
+                Option.get! (State.felts st { name := "%2" })) 
 
 def part31_drops (st: State) : State :=
-  State.dropFelts (State.dropFelts (State.dropFelts (State.dropFelts (State.dropFelts (st) ⟨"%20"⟩) ⟨"%71"⟩) ⟨"%69"⟩) ⟨"%72"⟩) ⟨"%73"⟩
+  State.dropFelts (State.dropFelts (State.dropFelts (State.dropFelts (State.dropFelts (st) ⟨"%2"⟩) ⟨"%63"⟩) ⟨"%65"⟩) ⟨"%66"⟩) ⟨"%68"⟩
 
 -- Run the program from part31 onwards by using part31_state rather than Code.part31
 def part31_state_update (st: State): State :=
-  part31_drops (part31_state st)
+  Γ (part31_drops (part31_state st)) ⟦Code.part32;dropfelt ⟨"%1"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%71"⟩;Code.part33;dropfelt ⟨"%20"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;Code.part34;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;Code.part35;dropfelt ⟨"%21"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%81"⟩;Code.part36;dropfelt ⟨"%22"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%84"⟩;Code.part37;dropfelt ⟨"%25"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;Code.part38;dropfelt ⟨"%28"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;Code.part39;dropfelt ⟨"%31"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;Code.part40;dropfelt ⟨"%34"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;Code.part41;dropfelt ⟨"%37"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;Code.part42;dropfelt ⟨"%40"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%102"⟩;Code.part43;dropfelt ⟨"%43"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%105"⟩;Code.part44;dropfelt ⟨"%46"⟩;dropfelt ⟨"%106"⟩;dropfelt ⟨"%107"⟩;dropfelt ⟨"%108"⟩;Code.part45;dropfelt ⟨"%49"⟩;dropfelt ⟨"%109"⟩;dropfelt ⟨"%110"⟩;dropfelt ⟨"%111"⟩;Code.part46;dropfelt ⟨"%52"⟩;dropfelt ⟨"%112"⟩;dropfelt ⟨"%113"⟩;dropfelt ⟨"%114"⟩;Code.part47;dropfelt ⟨"%55"⟩;dropfelt ⟨"%115"⟩;dropfelt ⟨"%116"⟩;dropfelt ⟨"%117"⟩;Code.part48;dropfelt ⟨"%58"⟩;dropfelt ⟨"%118"⟩;dropfelt ⟨"%119"⟩;dropfelt ⟨"%120"⟩;Code.part49;dropfelt ⟨"%61"⟩;dropfelt ⟨"%121"⟩;dropfelt ⟨"%122"⟩;dropfelt ⟨"%123"⟩;Code.part50;dropfelt ⟨"%64"⟩;dropfelt ⟨"%124"⟩;dropfelt ⟨"%125"⟩;dropfelt ⟨"%126"⟩;Code.part51;dropfelt ⟨"%67"⟩;dropfelt ⟨"%127"⟩;dropfelt ⟨"%128"⟩;dropfelt ⟨"%129"⟩;Code.part52;dropfelt ⟨"%70"⟩;dropfelt ⟨"%130"⟩;dropfelt ⟨"%131"⟩;dropfelt ⟨"%132"⟩;Code.part53;dropfelt ⟨"%73"⟩;dropfelt ⟨"%133"⟩;dropfelt ⟨"%134"⟩;dropfelt ⟨"%135"⟩;Code.part54;dropfelt ⟨"%18"⟩;dropfelt ⟨"%136"⟩;dropfelt ⟨"%137"⟩;dropfelt ⟨"%19"⟩⟧
 
 -- Prove that substituting part31_state for Code.part31 produces the same result
-lemma part31_wp {st : State} {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 : Option Felt} :
-  Code.getReturn (MLIR.runProgram (Code.part31;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩) st) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] ↔
-  Code.getReturn (part31_state_update st) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] := by
+lemma part31_wp {st : State} {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19 : Option Felt} :
+  Code.getReturn (MLIR.runProgram (Code.part31;dropfelt ⟨"%2"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%68"⟩;Code.part32;dropfelt ⟨"%1"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%71"⟩;Code.part33;dropfelt ⟨"%20"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;Code.part34;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;Code.part35;dropfelt ⟨"%21"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%81"⟩;Code.part36;dropfelt ⟨"%22"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%84"⟩;Code.part37;dropfelt ⟨"%25"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;Code.part38;dropfelt ⟨"%28"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;Code.part39;dropfelt ⟨"%31"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;Code.part40;dropfelt ⟨"%34"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;Code.part41;dropfelt ⟨"%37"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;Code.part42;dropfelt ⟨"%40"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%102"⟩;Code.part43;dropfelt ⟨"%43"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%105"⟩;Code.part44;dropfelt ⟨"%46"⟩;dropfelt ⟨"%106"⟩;dropfelt ⟨"%107"⟩;dropfelt ⟨"%108"⟩;Code.part45;dropfelt ⟨"%49"⟩;dropfelt ⟨"%109"⟩;dropfelt ⟨"%110"⟩;dropfelt ⟨"%111"⟩;Code.part46;dropfelt ⟨"%52"⟩;dropfelt ⟨"%112"⟩;dropfelt ⟨"%113"⟩;dropfelt ⟨"%114"⟩;Code.part47;dropfelt ⟨"%55"⟩;dropfelt ⟨"%115"⟩;dropfelt ⟨"%116"⟩;dropfelt ⟨"%117"⟩;Code.part48;dropfelt ⟨"%58"⟩;dropfelt ⟨"%118"⟩;dropfelt ⟨"%119"⟩;dropfelt ⟨"%120"⟩;Code.part49;dropfelt ⟨"%61"⟩;dropfelt ⟨"%121"⟩;dropfelt ⟨"%122"⟩;dropfelt ⟨"%123"⟩;Code.part50;dropfelt ⟨"%64"⟩;dropfelt ⟨"%124"⟩;dropfelt ⟨"%125"⟩;dropfelt ⟨"%126"⟩;Code.part51;dropfelt ⟨"%67"⟩;dropfelt ⟨"%127"⟩;dropfelt ⟨"%128"⟩;dropfelt ⟨"%129"⟩;Code.part52;dropfelt ⟨"%70"⟩;dropfelt ⟨"%130"⟩;dropfelt ⟨"%131"⟩;dropfelt ⟨"%132"⟩;Code.part53;dropfelt ⟨"%73"⟩;dropfelt ⟨"%133"⟩;dropfelt ⟨"%134"⟩;dropfelt ⟨"%135"⟩;Code.part54;dropfelt ⟨"%18"⟩;dropfelt ⟨"%136"⟩;dropfelt ⟨"%137"⟩;dropfelt ⟨"%19"⟩) st) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19] ↔
+  Code.getReturn (part31_state_update st) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19] := by
   unfold MLIR.runProgram; simp only
-  generalize eq : (dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩) = prog
+  generalize eq : (dropfelt ⟨"%2"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%68"⟩;Code.part32;dropfelt ⟨"%1"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%71"⟩;Code.part33;dropfelt ⟨"%20"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;Code.part34;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;Code.part35;dropfelt ⟨"%21"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%81"⟩;Code.part36;dropfelt ⟨"%22"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%84"⟩;Code.part37;dropfelt ⟨"%25"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;Code.part38;dropfelt ⟨"%28"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;Code.part39;dropfelt ⟨"%31"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;Code.part40;dropfelt ⟨"%34"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;Code.part41;dropfelt ⟨"%37"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;Code.part42;dropfelt ⟨"%40"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%102"⟩;Code.part43;dropfelt ⟨"%43"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%105"⟩;Code.part44;dropfelt ⟨"%46"⟩;dropfelt ⟨"%106"⟩;dropfelt ⟨"%107"⟩;dropfelt ⟨"%108"⟩;Code.part45;dropfelt ⟨"%49"⟩;dropfelt ⟨"%109"⟩;dropfelt ⟨"%110"⟩;dropfelt ⟨"%111"⟩;Code.part46;dropfelt ⟨"%52"⟩;dropfelt ⟨"%112"⟩;dropfelt ⟨"%113"⟩;dropfelt ⟨"%114"⟩;Code.part47;dropfelt ⟨"%55"⟩;dropfelt ⟨"%115"⟩;dropfelt ⟨"%116"⟩;dropfelt ⟨"%117"⟩;Code.part48;dropfelt ⟨"%58"⟩;dropfelt ⟨"%118"⟩;dropfelt ⟨"%119"⟩;dropfelt ⟨"%120"⟩;Code.part49;dropfelt ⟨"%61"⟩;dropfelt ⟨"%121"⟩;dropfelt ⟨"%122"⟩;dropfelt ⟨"%123"⟩;Code.part50;dropfelt ⟨"%64"⟩;dropfelt ⟨"%124"⟩;dropfelt ⟨"%125"⟩;dropfelt ⟨"%126"⟩;Code.part51;dropfelt ⟨"%67"⟩;dropfelt ⟨"%127"⟩;dropfelt ⟨"%128"⟩;dropfelt ⟨"%129"⟩;Code.part52;dropfelt ⟨"%70"⟩;dropfelt ⟨"%130"⟩;dropfelt ⟨"%131"⟩;dropfelt ⟨"%132"⟩;Code.part53;dropfelt ⟨"%73"⟩;dropfelt ⟨"%133"⟩;dropfelt ⟨"%134"⟩;dropfelt ⟨"%135"⟩;Code.part54;dropfelt ⟨"%18"⟩;dropfelt ⟨"%136"⟩;dropfelt ⟨"%137"⟩;dropfelt ⟨"%19"⟩) = prog
   unfold Code.part31
   MLIR
   rewrite [←eq]
-  rewrite [MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_dropfelt]
+  rewrite [MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt]
   unfold part31_state_update part31_drops part31_state
   rfl
 
 lemma part31_updates_opaque {st : State} : 
-  Code.getReturn (part30_state_update st) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] ↔
-  Code.getReturn (part31_state_update (part30_drops (part30_state st))) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] := by
+  Code.getReturn (part30_state_update st) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19] ↔
+  Code.getReturn (part31_state_update (part30_drops (part30_state st))) = [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19] := by
   simp [part30_state_update, part31_wp]
 
-lemma part31_cumulative_wp {x0 x1 x2 x3: Felt} :
-  Code.run (start_state [x0,x1,x2,x3]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17] ↔
+lemma part31_cumulative_wp {x0: Felt} :
+  Code.run (start_state [x0]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19] ↔
   Code.getReturn
         (part31_state_update
-          ({
-              buffers :=
-                ((fun x => Map.empty x)[{ name := "in" }] ←ₘ
-                    [[some x0, some x1, some x2, some x3]])[{ name := "data" }] ←ₘ
-                  [[some (feltBitAnd x3 6 * 1006632961), some (feltBitAnd x3 96 * 1950351361),
-                      some (feltBitAnd x2 96 * 1950351361), some (feltBitAnd x2 3),
-                      some (feltBitAnd x2 12 * 1509949441), some (feltBitAnd x1 48 * 1887436801),
-                      some (feltBitAnd x1 3), some (feltBitAnd x1 12 * 1509949441), some (feltBitAnd x3 8 * 1761607681),
-                      some (feltBitAnd x3 16 * 1887436801), some (feltBitAnd x3 128 * 1997537281),
-                      some (feltBitAnd x2 16 * 1887436801), some (feltBitAnd x2 128 * 1997537281),
-                      some (feltBitAnd x3 1), some (feltBitAnd x1 128 * 1997537281),
-                      some (feltBitAnd x1 64 * 1981808641), some (feltBitAnd x0 128 * 1997537281),
-                      some (feltBitAnd x0 127)]],
-              bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 18)[{ name := "in" }] ←ₘ 4,
-              constraints :=
-                [x1 -
-                      (feltBitAnd x1 128 * 1997537281 * 128 +
-                            (feltBitAnd x1 64 * 1981808641 * 4 + feltBitAnd x1 48 * 1887436801) * 16 +
-                          feltBitAnd x1 12 * 1509949441 * 4 +
-                        feltBitAnd x1 3) =
-                    0,
-                  x2 -
-                      ((feltBitAnd x2 128 * 1997537281 * 8 + feltBitAnd x2 96 * 1950351361 * 2 +
-                              feltBitAnd x2 16 * 1887436801) *
-                            16 +
-                          feltBitAnd x2 12 * 1509949441 * 4 +
-                        feltBitAnd x2 3) =
-                    0,
-                  x3 -
-                      ((feltBitAnd x3 128 * 1997537281 * 64 +
-                            (feltBitAnd x3 96 * 1950351361 * 16 + feltBitAnd x3 16 * 1887436801 * 8 +
-                                feltBitAnd x3 8 * 1761607681 * 4 +
-                              feltBitAnd x3 6 * 1006632961)) *
-                          2 +
-                        feltBitAnd x3 1) =
-                    0],
-              cycle := 0, felts := Map.empty[{ name := "%20" }] ←ₘ x0, isFailed := false, props := Map.empty,
-              vars := [{ name := "in" }, { name := "data" }] }[felts][{ name := "%71" }] ←
-            feltBitAnd x0 128 * 1997537281 * 128)) =
-      [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17]  := by
+          (((((((((((((((((({
+                                                buffers :=
+                                                  ((fun x => Map.empty x)[{ name := "code" }] ←ₘ
+                                                      [[some x0]])[{ name := "data" }] ←ₘ
+                                                    [[some (if x0 = 0 then 1 else 0),
+                                                        some (if x0 - 1 = 0 then 1 else 0),
+                                                        some (if x0 - 2 = 0 then 1 else 0),
+                                                        some (if x0 - 3 = 0 then 1 else 0),
+                                                        some (if x0 - 4 = 0 then 1 else 0),
+                                                        some (if x0 - 5 = 0 then 1 else 0),
+                                                        some (if x0 - 6 = 0 then 1 else 0),
+                                                        some (if x0 - 7 = 0 then 1 else 0),
+                                                        some (if x0 - 8 = 0 then 1 else 0),
+                                                        some (if x0 - 9 = 0 then 1 else 0),
+                                                        some (if x0 - 10 = 0 then 1 else 0),
+                                                        some (if x0 - 11 = 0 then 1 else 0),
+                                                        some (if x0 - 12 = 0 then 1 else 0),
+                                                        some (if x0 - 13 = 0 then 1 else 0),
+                                                        some (if x0 - 14 = 0 then 1 else 0),
+                                                        some (if x0 - 15 = 0 then 1 else 0),
+                                                        some (if x0 - 16 = 0 then 1 else 0),
+                                                        some (if x0 - 17 = 0 then 1 else 0),
+                                                        some (if x0 - 18 = 0 then 1 else 0),
+                                                        some (if x0 - 19 = 0 then 1 else 0)]],
+                                                bufferWidths :=
+                                                  ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
+                                                      20)[{ name := "code" }] ←ₘ
+                                                    1,
+                                                constraints := [], cycle := 0,
+                                                felts :=
+                                                  ((((Map.empty[{ name := "%20" }] ←ₘ x0)[{ name := "%18" }] ←ₘ
+                                                          1)[{ name := "%2" }] ←ₘ
+                                                        17)[{ name := "%1" }] ←ₘ
+                                                      18)[{ name := "%0" }] ←ₘ
+                                                    19,
+                                                isFailed := false, props := Map.empty,
+                                                vars :=
+                                                  [{ name := "code" }, { name := "data" }] }[felts][{ name := "%22" }] ←
+                                              if x0 - 2 = 0 then 1 else 0)[felts][{ name := "%21" }] ←
+                                            if x0 - 1 = 0 then 1 else 0)[felts][{ name := "%25" }] ←
+                                          if x0 - 3 = 0 then 1 else 0)[felts][{ name := "%28" }] ←
+                                        if x0 - 4 = 0 then 1 else 0)[felts][{ name := "%31" }] ←
+                                      if x0 - 5 = 0 then 1 else 0)[felts][{ name := "%34" }] ←
+                                    if x0 - 6 = 0 then 1 else 0)[felts][{ name := "%37" }] ←
+                                  if x0 - 7 = 0 then 1 else 0)[felts][{ name := "%40" }] ←
+                                if x0 - 8 = 0 then 1 else 0)[felts][{ name := "%43" }] ←
+                              if x0 - 9 = 0 then 1 else 0)[felts][{ name := "%46" }] ←
+                            if x0 - 10 = 0 then 1 else 0)[felts][{ name := "%49" }] ←
+                          if x0 - 11 = 0 then 1 else 0)[felts][{ name := "%52" }] ←
+                        if x0 - 12 = 0 then 1 else 0)[felts][{ name := "%55" }] ←
+                      if x0 - 13 = 0 then 1 else 0)[felts][{ name := "%58" }] ←
+                    if x0 - 14 = 0 then 1 else 0)[felts][{ name := "%61" }] ←
+                  if x0 - 15 = 0 then 1 else 0)[felts][{ name := "%63" }] ←
+                (if x0 - 1 = 0 then 1 else 0) + (if x0 - 2 = 0 then 1 else 0) * 2 + (if x0 - 3 = 0 then 1 else 0) * 3 +
+                                        (if x0 - 4 = 0 then 1 else 0) * 4 +
+                                      (if x0 - 5 = 0 then 1 else 0) * 5 +
+                                    (if x0 - 6 = 0 then 1 else 0) * 6 +
+                                  (if x0 - 7 = 0 then 1 else 0) * 7 +
+                                (if x0 - 8 = 0 then 1 else 0) * 8 +
+                              (if x0 - 9 = 0 then 1 else 0) * 9 +
+                            (if x0 - 10 = 0 then 1 else 0) * 10 +
+                          (if x0 - 11 = 0 then 1 else 0) * 11 +
+                        (if x0 - 12 = 0 then 1 else 0) * 12 +
+                      (if x0 - 13 = 0 then 1 else 0) * 13 +
+                    (if x0 - 14 = 0 then 1 else 0) * 14 +
+                  (if x0 - 15 = 0 then 1 else 0) * 15)[felts][{ name := "%64" }] ←
+              if x0 - 16 = 0 then 1 else 0)[felts][{ name := "%65" }] ←
+            (if x0 - 16 = 0 then 1 else 0) * 16)) =
+      [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19]  := by
     rewrite [part30_cumulative_wp]
     rewrite [part31_updates_opaque]
     unfold part30_state
+    try simplify_get_hack
     MLIR_states_updates
-    -- 1 withEqZero
-    rewrite [withEqZero_def]
-    MLIR_states_updates
+    -- 0 withEqZeros
+    -- rewrite [withEqZero_def]
+    -- MLIR_states_updates
     unfold part30_drops
-    -- 5 drops
+    -- 4 drops
     simp only [State.drop_update_swap, State.drop_update_same]
     rewrite [State.dropFelts]
     simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
@@ -110,42 +148,4 @@ lemma part31_cumulative_wp {x0 x1 x2 x3: Felt} :
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
 
-lemma closed_form {x0 x1 x2 x3: Felt} :
-  Code.run (start_state [x0,x1,x2,x3]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17] ↔
-   some (feltBitAnd x3 6 * 1006632961) = y0 ∧
-      some (feltBitAnd x3 96 * 1950351361) = y1 ∧
-        some (feltBitAnd x2 96 * 1950351361) = y2 ∧
-          some (feltBitAnd x2 3) = y3 ∧
-            some (feltBitAnd x2 12 * 1509949441) = y4 ∧
-              some (feltBitAnd x1 48 * 1887436801) = y5 ∧
-                some (feltBitAnd x1 3) = y6 ∧
-                  some (feltBitAnd x1 12 * 1509949441) = y7 ∧
-                    some (feltBitAnd x3 8 * 1761607681) = y8 ∧
-                      some (feltBitAnd x3 16 * 1887436801) = y9 ∧
-                        some (feltBitAnd x3 128 * 1997537281) = y10 ∧
-                          some (feltBitAnd x2 16 * 1887436801) = y11 ∧
-                            some (feltBitAnd x2 128 * 1997537281) = y12 ∧
-                              some (feltBitAnd x3 1) = y13 ∧
-                                some (feltBitAnd x1 128 * 1997537281) = y14 ∧
-                                  some (feltBitAnd x1 64 * 1981808641) = y15 ∧
-                                    some (feltBitAnd x0 128 * 1997537281) = y16 ∧ some (feltBitAnd x0 127) = y17  := by
-    rewrite [part31_cumulative_wp]
-    unfold part31_state_update
-    unfold part31_state
-    MLIR_states_updates
-    -- 1 withEqZero
-    rewrite [withEqZero_def]
-    MLIR_states_updates
-    unfold part31_drops
-    -- 5 drops
-    simp only [State.drop_update_swap, State.drop_update_same]
-    rewrite [State.dropFelts]
-    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
-    simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
-    -- 0 sets
-    -- rewrite [Map.drop_of_updates]
-    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
-    unfold Code.getReturn
-    simp only
-    simp [Map.update_get_wobbly, List.getLast!]
 end Risc0.OneHot20.Witness.WP

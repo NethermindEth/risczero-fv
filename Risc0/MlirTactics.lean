@@ -215,15 +215,15 @@ open Lean Elab Tactic in
 elab "simplify_get_hack" : tactic => do
   evalTactic <| ← `(
     tactic| (
-      try (rewrite [getImpl_get_of_isGetValid]; swap; unfold isGetValid; MLIR_states_updates_hack)
+      rewrite [getImpl_get_of_isGetValid]; swap; unfold isGetValid; MLIR_states_updates_hack
     )
   )
 
 elab "MLIR_states_updates" : tactic => do
   evalTactic <| ← `(
     tactic| (
-      simplify_get_hack
-      MLIR_states_new
+      (try simplify_get_hack);
+      MLIR_states_new';
       -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
       MLIR_decide_updates
     )
