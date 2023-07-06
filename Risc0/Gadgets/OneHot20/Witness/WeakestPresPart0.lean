@@ -10,15 +10,22 @@ open MLIRNotation
 def part0_state (st: State) : State :=
   
           ((State.set!
-              ((st["%20"] ←ₛ getImpl st { name := "code" } 0 0)[felts][{ name := "%138" }] ←
-                if Option.get! (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "%20" }) = 0 then
-                  1
-                else 0)
-              { name := "data" } 0
-              (if Option.get! (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } 0 0) { name := "%20" }) = 0 then
-                1
-              else 0))[felts][{ name := "%18" }] ←
-            1) 
+              ((st["%20"] ←ₛ getImpl st { name := "code" } (0 : Back) (0 : ℕ))[felts][{ name := "%138" }] ←
+                if
+                    Option.get!
+                        (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } (0 : Back) (0 : ℕ))
+                          { name := "%20" }) =
+                      (0 : Felt) then
+                  (1 : Felt)
+                else (0 : Felt))
+              { name := "data" } (0 : ℕ)
+              (if
+                  Option.get!
+                      (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } (0 : Back) (0 : ℕ)) { name := "%20" }) =
+                    (0 : Felt) then
+                (1 : Felt)
+              else (0 : Felt)))[felts][{ name := "%18" }] ←
+            (1 : Felt)) 
 
 def part0_drops (st: State) : State :=
   State.dropFelts (st) ⟨"%138"⟩
@@ -50,8 +57,8 @@ lemma part0_cumulative_wp :
                   ({ name := "data" },
                     [[none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none,
                         none, none, none, none]])],
-            bufferWidths := Map.fromList [({ name := "code" }, 1), ({ name := "data" }, 20)], constraints := [],
-            cycle := 0, felts := Map.empty, isFailed := false, props := Map.empty,
+            bufferWidths := Map.fromList [({ name := "code" }, (1 : ℕ)), ({ name := "data" }, (20 : ℕ))],
+            constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
             vars := [{ name := "code" }, { name := "data" }] }) =
       [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19]  := by
     unfold Code.run start_state

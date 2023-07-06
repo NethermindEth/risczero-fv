@@ -11,6 +11,8 @@ import Mathlib.Data.Bitvec.Basic
 import Risc0.Map
 import Risc0.Wheels
 
+import Lean
+
 namespace Risc0
 
 @[inline]
@@ -32,6 +34,13 @@ abbrev FeltVar := Variable FeltTag
 abbrev PropVar := Variable PropTag
 
 abbrev Felt := ZMod P
+#check Ico_ofDual
+#eval [[ 'a', 'z' ]]
+open Lean Meta PrettyPrinter Delaborator SubExpr in
+@[delab app.OfNat.ofNat] def delabOfNat : Delab := do
+  let a ← withAppFn $ withAppArg delab
+  let b ← withType delab
+  `(($a : $b))
 
 -- none is an unset value which can be written to, but not read
 -- some is a set value which can be read, and can only be written to if the new val is equal

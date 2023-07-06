@@ -13,20 +13,20 @@ def part20_state (st: State) : State :=
           ((((st[felts][{ name := "%23" }] ←
                   Option.get! (State.felts st { name := "%22" }) *
                     Option.get! (State.felts st { name := "%17" }))["%21"] ←ₛ
-                getImpl st { name := "data" } 0 1)[felts][{ name := "%24" }] ←
+                getImpl st { name := "data" } (0 : Back) (1 : ℕ))[felts][{ name := "%24" }] ←
               Option.get!
                   (State.felts
                     ((st[felts][{ name := "%23" }] ←
                         Option.get! (State.felts st { name := "%22" }) *
                           Option.get! (State.felts st { name := "%17" }))["%21"] ←ₛ
-                      getImpl st { name := "data" } 0 1)
+                      getImpl st { name := "data" } (0 : Back) (1 : ℕ))
                     { name := "%21" }) +
                 Option.get! (State.felts st { name := "%22" }) *
                   Option.get! (State.felts st { name := "%17" }))["%25"] ←ₛ
             getImpl
               (st[felts][{ name := "%23" }] ←
                 Option.get! (State.felts st { name := "%22" }) * Option.get! (State.felts st { name := "%17" }))
-              { name := "data" } 0 3) 
+              { name := "data" } (0 : Back) (3 : ℕ)) 
 
 def part20_drops (st: State) : State :=
   State.dropFelts (State.dropFelts (st) ⟨"%17"⟩) ⟨"%23"⟩
@@ -60,41 +60,52 @@ lemma part20_cumulative_wp {x0: Felt} :
           ({
               buffers :=
                 (Map.empty[{ name := "code" }] ←ₘ [[some x0]])[{ name := "data" }] ←ₘ
-                  [[some (if x0 = 0 then 1 else 0), some (if x0 - 1 = 0 then 1 else 0),
-                      some (if x0 - 2 = 0 then 1 else 0), some (if x0 - 3 = 0 then 1 else 0),
-                      some (if x0 - 4 = 0 then 1 else 0), some (if x0 - 5 = 0 then 1 else 0),
-                      some (if x0 - 6 = 0 then 1 else 0), some (if x0 - 7 = 0 then 1 else 0),
-                      some (if x0 - 8 = 0 then 1 else 0), some (if x0 - 9 = 0 then 1 else 0),
-                      some (if x0 - 10 = 0 then 1 else 0), some (if x0 - 11 = 0 then 1 else 0),
-                      some (if x0 - 12 = 0 then 1 else 0), some (if x0 - 13 = 0 then 1 else 0),
-                      some (if x0 - 14 = 0 then 1 else 0), some (if x0 - 15 = 0 then 1 else 0),
-                      some (if x0 - 16 = 0 then 1 else 0), some (if x0 - 17 = 0 then 1 else 0),
-                      some (if x0 - 18 = 0 then 1 else 0), some (if x0 - 19 = 0 then 1 else 0)]],
-              bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 20)[{ name := "code" }] ←ₘ 1,
-              constraints := [], cycle := 0,
+                  [[some (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (2 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (3 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (4 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (5 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (6 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (7 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (8 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (9 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (10 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (11 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (12 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (13 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (14 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (15 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (16 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (17 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (18 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (19 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))]],
+              bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (20 : ℕ))[{ name := "code" }] ←ₘ (1 : ℕ),
+              constraints := [], cycle := (0 : ℕ),
               felts :=
-                (((((((((((((((((((Map.empty[{ name := "%20" }] ←ₘ x0)[{ name := "%18" }] ←ₘ 1)[{ name := "%17" }] ←ₘ
-                                                    2)[{ name := "%16" }] ←ₘ
-                                                  3)[{ name := "%15" }] ←ₘ
-                                                4)[{ name := "%14" }] ←ₘ
-                                              5)[{ name := "%13" }] ←ₘ
-                                            6)[{ name := "%12" }] ←ₘ
-                                          7)[{ name := "%11" }] ←ₘ
-                                        8)[{ name := "%10" }] ←ₘ
-                                      9)[{ name := "%9" }] ←ₘ
-                                    10)[{ name := "%8" }] ←ₘ
-                                  11)[{ name := "%7" }] ←ₘ
-                                12)[{ name := "%6" }] ←ₘ
-                              13)[{ name := "%5" }] ←ₘ
-                            14)[{ name := "%4" }] ←ₘ
-                          15)[{ name := "%3" }] ←ₘ
-                        16)[{ name := "%2" }] ←ₘ
-                      17)[{ name := "%1" }] ←ₘ
-                    18)[{ name := "%0" }] ←ₘ
-                  19,
+                (((((((((((((((((((Map.empty[{ name := "%20" }] ←ₘ x0)[{ name := "%18" }] ←ₘ
+                                                      (1 : Felt))[{ name := "%17" }] ←ₘ
+                                                    (2 : Felt))[{ name := "%16" }] ←ₘ
+                                                  (3 : Felt))[{ name := "%15" }] ←ₘ
+                                                (4 : Felt))[{ name := "%14" }] ←ₘ
+                                              (5 : Felt))[{ name := "%13" }] ←ₘ
+                                            (6 : Felt))[{ name := "%12" }] ←ₘ
+                                          (7 : Felt))[{ name := "%11" }] ←ₘ
+                                        (8 : Felt))[{ name := "%10" }] ←ₘ
+                                      (9 : Felt))[{ name := "%9" }] ←ₘ
+                                    (10 : Felt))[{ name := "%8" }] ←ₘ
+                                  (11 : Felt))[{ name := "%7" }] ←ₘ
+                                (12 : Felt))[{ name := "%6" }] ←ₘ
+                              (13 : Felt))[{ name := "%5" }] ←ₘ
+                            (14 : Felt))[{ name := "%4" }] ←ₘ
+                          (15 : Felt))[{ name := "%3" }] ←ₘ
+                        (16 : Felt))[{ name := "%2" }] ←ₘ
+                      (17 : Felt))[{ name := "%1" }] ←ₘ
+                    (18 : Felt))[{ name := "%0" }] ←ₘ
+                  (19 : Felt),
               isFailed := false, props := Map.empty,
               vars := [{ name := "code" }, { name := "data" }] }[felts][{ name := "%22" }] ←
-            if x0 - 2 = 0 then 1 else 0)) =
+            if x0 - (2 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))) =
       [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19]  := by
     rewrite [part19_cumulative_wp]
     rewrite [part20_updates_opaque]

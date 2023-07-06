@@ -16,16 +16,16 @@ def part3_state (st: State) : State :=
                     Option.get! (State.felts st { name := "%16" }))[felts][{ name := "%144" }] ←
                 if
                     Option.get! (State.felts st { name := "%20" }) - Option.get! (State.felts st { name := "%16" }) =
-                      0 then
-                  1
-                else 0)
-              { name := "data" } 3
+                      (0 : Felt) then
+                  (1 : Felt)
+                else (0 : Felt))
+              { name := "data" } (3 : ℕ)
               (if
                   Option.get! (State.felts st { name := "%20" }) - Option.get! (State.felts st { name := "%16" }) =
-                    0 then
-                1
-              else 0))[felts][{ name := "%15" }] ←
-            4) 
+                    (0 : Felt) then
+                (1 : Felt)
+              else (0 : Felt)))[felts][{ name := "%15" }] ←
+            (4 : Felt)) 
 
 def part3_drops (st: State) : State :=
   State.dropFelts (State.dropFelts (st) ⟨"%143"⟩) ⟨"%144"⟩
@@ -59,15 +59,18 @@ lemma part3_cumulative_wp {x0: Felt} :
           ({
               buffers :=
                 (Map.empty[{ name := "code" }] ←ₘ [[some x0]])[{ name := "data" }] ←ₘ
-                  [[some (if x0 = 0 then 1 else 0), some (if x0 - 1 = 0 then 1 else 0),
-                      some (if x0 - 2 = 0 then 1 else 0), none, none, none, none, none, none, none, none, none, none,
-                      none, none, none, none, none, none, none]],
-              bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 20)[{ name := "code" }] ←ₘ 1,
-              constraints := [], cycle := 0,
-              felts := ((Map.empty[{ name := "%20" }] ←ₘ x0)[{ name := "%18" }] ←ₘ 1)[{ name := "%17" }] ←ₘ 2,
+                  [[some (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if x0 - (2 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)), none, none, none, none,
+                      none, none, none, none, none, none, none, none, none, none, none, none, none]],
+              bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (20 : ℕ))[{ name := "code" }] ←ₘ (1 : ℕ),
+              constraints := [], cycle := (0 : ℕ),
+              felts :=
+                ((Map.empty[{ name := "%20" }] ←ₘ x0)[{ name := "%18" }] ←ₘ (1 : Felt))[{ name := "%17" }] ←ₘ
+                  (2 : Felt),
               isFailed := false, props := Map.empty,
               vars := [{ name := "code" }, { name := "data" }] }[felts][{ name := "%16" }] ←
-            3)) =
+            (3 : Felt))) =
       [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19]  := by
     rewrite [part2_cumulative_wp]
     rewrite [part3_updates_opaque]

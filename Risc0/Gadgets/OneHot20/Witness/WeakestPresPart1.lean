@@ -16,16 +16,16 @@ def part1_state (st: State) : State :=
                     Option.get! (State.felts st { name := "%18" }))[felts][{ name := "%140" }] ←
                 if
                     Option.get! (State.felts st { name := "%20" }) - Option.get! (State.felts st { name := "%18" }) =
-                      0 then
-                  1
-                else 0)
-              { name := "data" } 1
+                      (0 : Felt) then
+                  (1 : Felt)
+                else (0 : Felt))
+              { name := "data" } (1 : ℕ)
               (if
                   Option.get! (State.felts st { name := "%20" }) - Option.get! (State.felts st { name := "%18" }) =
-                    0 then
-                1
-              else 0))[felts][{ name := "%17" }] ←
-            2) 
+                    (0 : Felt) then
+                (1 : Felt)
+              else (0 : Felt)))[felts][{ name := "%17" }] ←
+            (2 : Felt)) 
 
 def part1_drops (st: State) : State :=
   State.dropFelts (State.dropFelts (st) ⟨"%139"⟩) ⟨"%140"⟩
@@ -59,12 +59,12 @@ lemma part1_cumulative_wp {x0: Felt} :
           ({
               buffers :=
                 (Map.empty[{ name := "code" }] ←ₘ [[some x0]])[{ name := "data" }] ←ₘ
-                  [[some (if x0 = 0 then 1 else 0), none, none, none, none, none, none, none, none, none, none, none,
-                      none, none, none, none, none, none, none, none]],
-              bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ 20)[{ name := "code" }] ←ₘ 1,
-              constraints := [], cycle := 0, felts := Map.empty[{ name := "%20" }] ←ₘ x0, isFailed := false,
+                  [[some (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)), none, none, none, none, none, none, none,
+                      none, none, none, none, none, none, none, none, none, none, none, none]],
+              bufferWidths := ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (20 : ℕ))[{ name := "code" }] ←ₘ (1 : ℕ),
+              constraints := [], cycle := (0 : ℕ), felts := Map.empty[{ name := "%20" }] ←ₘ x0, isFailed := false,
               props := Map.empty, vars := [{ name := "code" }, { name := "data" }] }[felts][{ name := "%18" }] ←
-            1)) =
+            (1 : Felt))) =
       [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19]  := by
     rewrite [part0_cumulative_wp]
     rewrite [part1_updates_opaque]
