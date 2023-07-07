@@ -34,8 +34,7 @@ abbrev FeltVar := Variable FeltTag
 abbrev PropVar := Variable PropTag
 
 abbrev Felt := ZMod P
-#check Ico_ofDual
-#eval [[ 'a', 'z' ]]
+
 open Lean Meta PrettyPrinter Delaborator SubExpr in
 @[delab app.OfNat.ofNat] def delabOfNat : Delab := do
   let a ← withAppFn $ withAppArg delab
