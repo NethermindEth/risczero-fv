@@ -53,259 +53,32 @@ lemma part6_updates_opaque {st : State} :
   Code.getReturn (part6_state_update (part5_drops (part5_state st))) := by
   simp [part5_state_update, part6_wp]
 
-lemma part6_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19: Felt} :
-  Code.run (start_state [x0] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19])) ↔
+lemma part6_cumulative_wp {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17: Felt} :
+  Code.run (start_state [x0,x1,x2,x3] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17])) ↔
   Code.getReturn
       (part6_state_update
-        ({
-            buffers :=
-              ((((((((({
-                                    buffers :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                          [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7,
-                                              some y8, some y9, some y10, some y11, some y12, some y13, some y14,
-                                              some y15, some y16, some y17, some y18, some y19]])[{ name := "in" }] ←ₘ
-                                        [[some x0]],
-                                    bufferWidths :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ
-                                        (128 : ℕ),
-                                    constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
-                                    props := Map.empty,
-                                    vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
-                                  True)[felts][{ name := "%4" }] ←
-                                (4 : Felt))[felts][{ name := "%2" }] ←
-                              (8 : Felt))[felts][{ name := "%1" }] ←
-                            (16 : Felt))[felts][{ name := "%3" }] ←
-                          (2 : Felt))[felts][{ name := "%25" }] ←
-                        (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                          (2 : Felt))[felts][{ name := "%11" }] ←
-                      y13)[felts][{ name := "%26" }] ←
-                    (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13)["%10"] ←ₛ
-                  none).buffers,
-            bufferWidths :=
-              ((((((((({
-                                    buffers :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                          [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7,
-                                              some y8, some y9, some y10, some y11, some y12, some y13, some y14,
-                                              some y15, some y16, some y17, some y18, some y19]])[{ name := "in" }] ←ₘ
-                                        [[some x0]],
-                                    bufferWidths :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ
-                                        (128 : ℕ),
-                                    constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
-                                    props := Map.empty,
-                                    vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
-                                  True)[felts][{ name := "%4" }] ←
-                                (4 : Felt))[felts][{ name := "%2" }] ←
-                              (8 : Felt))[felts][{ name := "%1" }] ←
-                            (16 : Felt))[felts][{ name := "%3" }] ←
-                          (2 : Felt))[felts][{ name := "%25" }] ←
-                        (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                          (2 : Felt))[felts][{ name := "%11" }] ←
-                      y13)[felts][{ name := "%26" }] ←
-                    (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13)["%10"] ←ₛ
-                  none).bufferWidths,
-            constraints :=
-              ((((((((({
-                                    buffers :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                          [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7,
-                                              some y8, some y9, some y10, some y11, some y12, some y13, some y14,
-                                              some y15, some y16, some y17, some y18, some y19]])[{ name := "in" }] ←ₘ
-                                        [[some x0]],
-                                    bufferWidths :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ
-                                        (128 : ℕ),
-                                    constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
-                                    props := Map.empty,
-                                    vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
-                                  True)[felts][{ name := "%4" }] ←
-                                (4 : Felt))[felts][{ name := "%2" }] ←
-                              (8 : Felt))[felts][{ name := "%1" }] ←
-                            (16 : Felt))[felts][{ name := "%3" }] ←
-                          (2 : Felt))[felts][{ name := "%25" }] ←
-                        (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                          (2 : Felt))[felts][{ name := "%11" }] ←
-                      y13)[felts][{ name := "%26" }] ←
-                    (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13)["%10"] ←ₛ
-                  none).constraints,
-            cycle :=
-              ((((((((({
-                                    buffers :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                          [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7,
-                                              some y8, some y9, some y10, some y11, some y12, some y13, some y14,
-                                              some y15, some y16, some y17, some y18, some y19]])[{ name := "in" }] ←ₘ
-                                        [[some x0]],
-                                    bufferWidths :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ
-                                        (128 : ℕ),
-                                    constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
-                                    props := Map.empty,
-                                    vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
-                                  True)[felts][{ name := "%4" }] ←
-                                (4 : Felt))[felts][{ name := "%2" }] ←
-                              (8 : Felt))[felts][{ name := "%1" }] ←
-                            (16 : Felt))[felts][{ name := "%3" }] ←
-                          (2 : Felt))[felts][{ name := "%25" }] ←
-                        (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                          (2 : Felt))[felts][{ name := "%11" }] ←
-                      y13)[felts][{ name := "%26" }] ←
-                    (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13)["%10"] ←ₛ
-                  none).cycle,
-            felts :=
-              Map.drop
-                (Map.drop
-                  (Map.drop
-                    (Map.drop
-                      ((((((((({
-                                            buffers :=
-                                              ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                                  [[some y0, some y1, some y2, some y3, some y4, some y5, some y6,
-                                                      some y7, some y8, some y9, some y10, some y11, some y12, some y13,
-                                                      some y14, some y15, some y16, some y17, some y18,
-                                                      some y19]])[{ name := "in" }] ←ₘ
-                                                [[some x0]],
-                                            bufferWidths :=
-                                              ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                                  (18 : ℕ))[{ name := "in" }] ←ₘ
-                                                (128 : ℕ),
-                                            constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
-                                            props := Map.empty,
-                                            vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
-                                          True)[felts][{ name := "%4" }] ←
-                                        (4 : Felt))[felts][{ name := "%2" }] ←
-                                      (8 : Felt))[felts][{ name := "%1" }] ←
-                                    (16 : Felt))[felts][{ name := "%3" }] ←
-                                  (2 : Felt))[felts][{ name := "%25" }] ←
-                                (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                                  (2 : Felt))[felts][{ name := "%11" }] ←
-                              y13)[felts][{ name := "%26" }] ←
-                            (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                                (2 : Felt) +
-                              y13)["%10"] ←ₛ
-                          none).felts
-                      { name := "%25" })
-                    { name := "%11" })
-                  { name := "%26" })
-                { name := "%10" },
-            isFailed :=
-              ((((((((({
-                                    buffers :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                          [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7,
-                                              some y8, some y9, some y10, some y11, some y12, some y13, some y14,
-                                              some y15, some y16, some y17, some y18, some y19]])[{ name := "in" }] ←ₘ
-                                        [[some x0]],
-                                    bufferWidths :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ
-                                        (128 : ℕ),
-                                    constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
-                                    props := Map.empty,
-                                    vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
-                                  True)[felts][{ name := "%4" }] ←
-                                (4 : Felt))[felts][{ name := "%2" }] ←
-                              (8 : Felt))[felts][{ name := "%1" }] ←
-                            (16 : Felt))[felts][{ name := "%3" }] ←
-                          (2 : Felt))[felts][{ name := "%25" }] ←
-                        (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                          (2 : Felt))[felts][{ name := "%11" }] ←
-                      y13)[felts][{ name := "%26" }] ←
-                    (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13)["%10"] ←ₛ
-                  none).isFailed,
-            props :=
-              ((((((((({
-                                    buffers :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                          [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7,
-                                              some y8, some y9, some y10, some y11, some y12, some y13, some y14,
-                                              some y15, some y16, some y17, some y18, some y19]])[{ name := "in" }] ←ₘ
-                                        [[some x0]],
-                                    bufferWidths :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ
-                                        (128 : ℕ),
-                                    constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
-                                    props := Map.empty,
-                                    vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
-                                  True)[felts][{ name := "%4" }] ←
-                                (4 : Felt))[felts][{ name := "%2" }] ←
-                              (8 : Felt))[felts][{ name := "%1" }] ←
-                            (16 : Felt))[felts][{ name := "%3" }] ←
-                          (2 : Felt))[felts][{ name := "%25" }] ←
-                        (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                          (2 : Felt))[felts][{ name := "%11" }] ←
-                      y13)[felts][{ name := "%26" }] ←
-                    (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13)["%10"] ←ₛ
-                  none).props,
-            vars :=
-              ((((((((({
-                                    buffers :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                          [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7,
-                                              some y8, some y9, some y10, some y11, some y12, some y13, some y14,
-                                              some y15, some y16, some y17, some y18, some y19]])[{ name := "in" }] ←ₘ
-                                        [[some x0]],
-                                    bufferWidths :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ
-                                        (128 : ℕ),
-                                    constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
-                                    props := Map.empty,
-                                    vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
-                                  True)[felts][{ name := "%4" }] ←
-                                (4 : Felt))[felts][{ name := "%2" }] ←
-                              (8 : Felt))[felts][{ name := "%1" }] ←
-                            (16 : Felt))[felts][{ name := "%3" }] ←
-                          (2 : Felt))[felts][{ name := "%25" }] ←
-                        (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                          (2 : Felt))[felts][{ name := "%11" }] ←
-                      y13)[felts][{ name := "%26" }] ←
-                    (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13)["%10"] ←ₛ
-                  none).vars }[felts][{ name := "%27" }] ←
-          (match
-              State.felts
-                ((((((((({
-                                    buffers :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                          [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7,
-                                              some y8, some y9, some y10, some y11, some y12, some y13, some y14,
-                                              some y15, some y16, some y17, some y18, some y19]])[{ name := "in" }] ←ₘ
-                                        [[some x0]],
-                                    bufferWidths :=
-                                      ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ
-                                        (128 : ℕ),
-                                    constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
-                                    props := Map.empty,
-                                    vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
-                                  True)[felts][{ name := "%4" }] ←
-                                (4 : Felt))[felts][{ name := "%2" }] ←
-                              (8 : Felt))[felts][{ name := "%1" }] ←
-                            (16 : Felt))[felts][{ name := "%3" }] ←
-                          (2 : Felt))[felts][{ name := "%25" }] ←
-                        (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) *
-                          (2 : Felt))[felts][{ name := "%11" }] ←
-                      y13)[felts][{ name := "%26" }] ←
-                    (y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13)["%10"] ←ₛ
-                  none)
-                { name := "%10" } with
-            | some x => x
-            | none =>
-              panicWithPosWithDecl "Init.Data.Option.BasicAux" "Option.get!" (16 : ℕ) (14 : ℕ) "value is none") -
+        (((((({
+                      buffers :=
+                        ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
+                            [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8, some y9,
+                                some y10, some y11, some y12, some y13, some y14, some y15, some y16,
+                                some y17]])[{ name := "in" }] ←ₘ
+                          [[some x0, some x1, some x2, some x3]],
+                      bufferWidths :=
+                        ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ (4 : ℕ),
+                      constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+                      vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
+                    True)[felts][{ name := "%4" }] ←
+                  (4 : Felt))[felts][{ name := "%2" }] ←
+                (8 : Felt))[felts][{ name := "%1" }] ←
+              (16 : Felt))[felts][{ name := "%3" }] ←
+            (2 : Felt))[felts][{ name := "%27" }] ←
+          x3 -
             ((y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) + y13)))  := by
     rewrite [part5_cumulative_wp]
     rewrite [part6_updates_opaque]
     unfold part5_state
     MLIR_states_updates
-    
-    
     -- 0 withEqZeros
     -- rewrite [withEqZero_def]
     -- MLIR_states_updates

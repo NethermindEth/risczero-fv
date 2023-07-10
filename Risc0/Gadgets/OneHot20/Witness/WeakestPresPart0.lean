@@ -46,14 +46,14 @@ lemma part0_wp {st : State} {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y
   unfold part0_state_update part0_drops part0_state
   rfl
 
-lemma part0_cumulative_wp :
+lemma part0_cumulative_wp {x0: Felt} :
   Code.run (start_state [x0]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19] ↔
   Code.getReturn
         (part0_state_update
           {
             buffers :=
               Map.fromList
-                [({ name := "code" }, [[x0]]),
+                [({ name := "code" }, [[some x0]]),
                   ({ name := "data" },
                     [[none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none,
                         none, none, none, none]])],

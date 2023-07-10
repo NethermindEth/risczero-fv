@@ -80,7 +80,7 @@ end Code
 
 def start_state (input data : BufferAtTime) : State :=
   { buffers := Map.fromList [(⟨"in"⟩, [input]), (⟨"data"⟩, [data])]
-  , bufferWidths := Map.fromList [(⟨"in"⟩, 128), (⟨"data"⟩, 18)]
+  , bufferWidths := Map.fromList [(⟨"in"⟩, 4), (⟨"data"⟩, 18)]
   , constraints := []
   , cycle := 0
   , felts := Map.empty

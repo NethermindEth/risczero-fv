@@ -45,8 +45,8 @@ lemma part4_updates_opaque {st : State} :
   Code.getReturn (part4_state_update (part3_drops (part3_state st))) := by
   simp [part3_state_update, part4_wp]
 
-lemma part4_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19: Felt} :
-  Code.run (start_state [x0] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19])) ↔
+lemma part4_cumulative_wp {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17: Felt} :
+  Code.run (start_state [x0,x1,x2,x3] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17])) ↔
   Code.getReturn
       (part4_state_update
         ((((((({
@@ -54,10 +54,10 @@ lemma part4_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 
                           ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
                               [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8,
                                   some y9, some y10, some y11, some y12, some y13, some y14, some y15, some y16,
-                                  some y17, some y18, some y19]])[{ name := "in" }] ←ₘ
-                            [[some x0]],
+                                  some y17]])[{ name := "in" }] ←ₘ
+                            [[some x0, some x1, some x2, some x3]],
                         bufferWidths :=
-                          ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ (128 : ℕ),
+                          ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ (4 : ℕ),
                         constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
                         vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
                       True)[felts][{ name := "%4" }] ←

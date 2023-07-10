@@ -37,19 +37,19 @@ lemma part0_wp {st : State} :
   unfold part0_state_update part0_drops part0_state
   rfl
 
-lemma part0_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19: Felt}:
-  Code.run (start_state [x0] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19])) ↔
+lemma part0_cumulative_wp {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17: Felt}:
+  Code.run (start_state [x0,x1,x2,x3] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17])) ↔
   Code.getReturn
       (part0_state_update
         {
           buffers :=
             Map.fromList
-              [({ name := "in" }, [[some x0]]),
+              [({ name := "in" }, [[some x0, some x1, some x2, some x3]]),
                 ({ name := "data" },
                   [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8, some y9, some y10,
-                      some y11, some y12, some y13, some y14, some y15, some y16, some y17, some y18, some y19]])],
-          bufferWidths := Map.fromList [({ name := "in" }, (128 : ℕ)), ({ name := "data" }, (18 : ℕ))],
-          constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+                      some y11, some y12, some y13, some y14, some y15, some y16, some y17]])],
+          bufferWidths := Map.fromList [({ name := "in" }, (4 : ℕ)), ({ name := "data" }, (18 : ℕ))], constraints := [],
+          cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
           vars := [{ name := "in" }, { name := "data" }] })  := by
     unfold Code.run start_state
     rewrite [Code.optimised_behaviour_full]
