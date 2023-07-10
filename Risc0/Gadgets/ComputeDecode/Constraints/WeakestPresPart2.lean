@@ -57,12 +57,12 @@ lemma part2_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 
                         ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
                             [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8, some y9,
                                 some y10, some y11, some y12, some y13, some y14, some y15, some y16, some y17,
-                                some y18, some y19]])[{ name := "code" }] ←ₘ
+                                some y18, some y19]])[{ name := "in" }] ←ₘ
                           [[some x0]],
                       bufferWidths :=
-                        ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (20 : ℕ))[{ name := "code" }] ←ₘ (1 : ℕ),
+                        ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (18 : ℕ))[{ name := "in" }] ←ₘ (128 : ℕ),
                       constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
-                      vars := [{ name := "code" }, { name := "data" }] }[props][{ name := "%6" }] ←
+                      vars := [{ name := "in" }, { name := "data" }] }[props][{ name := "%6" }] ←
                     True)[felts][{ name := "%4" }] ←
                   (4 : Felt))[felts][{ name := "%14" }] ←
                 y8 * (4 : Felt))[felts][{ name := "%2" }] ←

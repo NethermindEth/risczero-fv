@@ -79,13 +79,13 @@ def run (st: State) : Prop :=
 end Code
 
 def start_state (input data : BufferAtTime) : State :=
-  { buffers := Map.fromList [(⟨"code"⟩, [input]), (⟨"data"⟩, [data])]
-  , bufferWidths := Map.fromList [(⟨"code"⟩, 1), (⟨"data"⟩, 20)]
+  { buffers := Map.fromList [(⟨"in"⟩, [input]), (⟨"data"⟩, [data])]
+  , bufferWidths := Map.fromList [(⟨"in"⟩, 128), (⟨"data"⟩, 18)]
   , constraints := []
   , cycle := 0
   , felts := Map.empty
   , props := Map.empty
-  , vars := [⟨"code"⟩, ⟨"data"⟩]
+  , vars := [⟨"in"⟩, ⟨"data"⟩]
   , isFailed := false
   }
 

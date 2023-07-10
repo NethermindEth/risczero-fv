@@ -44,13 +44,13 @@ lemma part0_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 
         {
           buffers :=
             Map.fromList
-              [({ name := "code" }, [[some x0]]),
+              [({ name := "in" }, [[some x0]]),
                 ({ name := "data" },
                   [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8, some y9, some y10,
                       some y11, some y12, some y13, some y14, some y15, some y16, some y17, some y18, some y19]])],
-          bufferWidths := Map.fromList [({ name := "code" }, (1 : ℕ)), ({ name := "data" }, (20 : ℕ))],
+          bufferWidths := Map.fromList [({ name := "in" }, (128 : ℕ)), ({ name := "data" }, (18 : ℕ))],
           constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
-          vars := [{ name := "code" }, { name := "data" }] })  := by
+          vars := [{ name := "in" }, { name := "data" }] })  := by
     unfold Code.run start_state
     rewrite [Code.optimised_behaviour_full]
     unfold MLIR.runProgram
