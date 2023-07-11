@@ -75,78 +75,67 @@ lemma part54_cumulative_wp {x0: Felt} :
                 ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (20 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
                   (1 : ℕ),
               constraints :=
-                [(if x0 - (19 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                [(x0 - (19 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (19 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (18 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (18 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (18 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (17 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (17 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (17 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (16 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (16 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (16 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (15 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (15 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (15 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (14 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (14 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (14 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (13 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (13 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (13 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (12 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (12 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (12 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (11 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (11 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (11 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (10 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (10 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (10 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (9 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (9 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (9 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (8 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (8 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (8 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (7 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (7 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (7 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (6 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (6 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (6 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (5 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (5 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (5 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (4 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (4 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (4 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (3 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (3 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (3 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (2 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (2 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (2 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 - (1 : Felt) = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) ∨
+                  (x0 = (0 : Felt) → False) ∨
                     ((1 : Felt) - if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) +
-                                                          (if x0 - (2 : Felt) = (0 : Felt) then (1 : Felt)
-                                                            else (0 : Felt)) *
-                                                            (2 : Felt) +
-                                                        (if x0 - (3 : Felt) = (0 : Felt) then (1 : Felt)
-                                                          else (0 : Felt)) *
-                                                          (3 : Felt) +
-                                                      (if x0 - (4 : Felt) = (0 : Felt) then (1 : Felt)
-                                                        else (0 : Felt)) *
-                                                        (4 : Felt) +
-                                                    (if x0 - (5 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) *
-                                                      (5 : Felt) +
-                                                  (if x0 - (6 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) *
-                                                    (6 : Felt) +
-                                                (if x0 - (7 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) *
-                                                  (7 : Felt) +
-                                              (if x0 - (8 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) *
-                                                (8 : Felt) +
-                                            (if x0 - (9 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) *
-                                              (9 : Felt) +
-                                          (if x0 - (10 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) *
-                                            (10 : Felt) +
-                                        (if x0 - (11 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) *
-                                          (11 : Felt) +
-                                      (if x0 - (12 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (12 : Felt) +
-                                    (if x0 - (13 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (13 : Felt) +
-                                  (if x0 - (14 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (14 : Felt) +
-                                (if x0 - (15 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (15 : Felt) +
-                              (if x0 - (16 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (16 : Felt) +
-                            (if x0 - (17 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (17 : Felt) +
-                          (if x0 - (18 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (18 : Felt) +
-                        (if x0 - (19 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (19 : Felt) -
+                  (((((((((((((((((((if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) +
+                                                          if x0 - (2 : Felt) = (0 : Felt) then (2 : Felt)
+                                                          else (0 : Felt)) +
+                                                        if x0 - (3 : Felt) = (0 : Felt) then (3 : Felt)
+                                                        else (0 : Felt)) +
+                                                      if x0 - (4 : Felt) = (0 : Felt) then (4 : Felt) else (0 : Felt)) +
+                                                    if x0 - (5 : Felt) = (0 : Felt) then (5 : Felt) else (0 : Felt)) +
+                                                  if x0 - (6 : Felt) = (0 : Felt) then (6 : Felt) else (0 : Felt)) +
+                                                if x0 - (7 : Felt) = (0 : Felt) then (7 : Felt) else (0 : Felt)) +
+                                              if x0 - (8 : Felt) = (0 : Felt) then (8 : Felt) else (0 : Felt)) +
+                                            if x0 - (9 : Felt) = (0 : Felt) then (9 : Felt) else (0 : Felt)) +
+                                          if x0 - (10 : Felt) = (0 : Felt) then (10 : Felt) else (0 : Felt)) +
+                                        if x0 - (11 : Felt) = (0 : Felt) then (11 : Felt) else (0 : Felt)) +
+                                      if x0 - (12 : Felt) = (0 : Felt) then (12 : Felt) else (0 : Felt)) +
+                                    if x0 - (13 : Felt) = (0 : Felt) then (13 : Felt) else (0 : Felt)) +
+                                  if x0 - (14 : Felt) = (0 : Felt) then (14 : Felt) else (0 : Felt)) +
+                                if x0 - (15 : Felt) = (0 : Felt) then (15 : Felt) else (0 : Felt)) +
+                              if x0 - (16 : Felt) = (0 : Felt) then (16 : Felt) else (0 : Felt)) +
+                            if x0 - (17 : Felt) = (0 : Felt) then (17 : Felt) else (0 : Felt)) +
+                          if x0 - (18 : Felt) = (0 : Felt) then (18 : Felt) else (0 : Felt)) +
+                        if x0 - (19 : Felt) = (0 : Felt) then (19 : Felt) else (0 : Felt)) -
                       x0 =
                     (0 : Felt)],
               cycle := (0 : ℕ), felts := Map.empty[{ name := "%18" : FeltVar }] ←ₘ (1 : Felt), isFailed := false,
@@ -192,6 +181,8 @@ lemma part54_cumulative_wp {x0: Felt} :
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- there are statements after an if
+    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
 lemma closed_form {x0: Felt} :
   Code.run (start_state [x0]) = [y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19] ↔
@@ -233,6 +224,8 @@ lemma closed_form {x0: Felt} :
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- there are statements after an if
+    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
     unfold Code.getReturn
     simp only
     simp [Map.update_get_wobbly, List.getLast!]

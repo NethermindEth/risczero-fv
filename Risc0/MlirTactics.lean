@@ -50,27 +50,27 @@ elab "MLIR_states_new" : tactic => do
   evalTactic <| ← `(tactic| simp [
     getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
-    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
-    State.constraints_if, State.props_if
+    Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
+    State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
+    State.constraints_if_eq, State.props_if_eq
   ])
 
 elab "MLIR_states_new?" : tactic => do
   evalTactic <| ← `(tactic| simp? [
     getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
-    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
-    State.constraints_if, State.props_if
+    Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
+    State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
+    State.constraints_if_eq, State.props_if_eq
   ])
 
 elab "MLIR_states_new'" : tactic => do
   evalTactic <| ← `(tactic| simp only [
     getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
-    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
-    State.constraints_if, State.props_if, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
+    Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
+    State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
+    State.constraints_if_eq, State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
     Option.get!, Buffer.back, Buffer.get!, List.get!, Option.isSome_some, and_true, true_and, ne_eq,
     State.updateFelts_props, State.updateProps_props_get_wobbly,
     State.updateFelts_felts_get_wobbly, mul_eq_zero, State.updateFelts_felts_get_next, State.updateProps_felts
@@ -80,9 +80,9 @@ elab "MLIR_states_new'?" : tactic => do
   evalTactic <| ← `(tactic| simp? only [
     getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
-    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
-    State.constraints_if, State.props_if, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
+    Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
+    State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
+    State.constraints_if_eq, State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
     Option.get!, Buffer.back, Buffer.get!, List.get!, Option.isSome_some, and_true, true_and, ne_eq,
     State.updateFelts_props, State.updateProps_props_get_wobbly,
     State.updateFelts_felts_get_wobbly, mul_eq_zero, State.updateFelts_felts_get_next, State.updateProps_felts
