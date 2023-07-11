@@ -17,6 +17,21 @@ lemma updateFelts_neq_comm {st : State} {name name' : FeltVar} {v v' : Felt} (h 
   rw [Map.update_neq_comm]
   exact h
 
+-- lemma opt_swap_seq (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
+--   Γ st ⟦p₁; p₂⟧ = Γ st ⟦p₂; p₁⟧ := by
+--     rw [MLIR.run_seq_def, h, ←MLIR.run_seq_def]
+
+-- lemma opt_swap_seq_combined
+--   (h1: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧)
+--   (h2: Γ (Γ st ⟦p₁⟧) ⟦p₃⟧ = Γ (Γ st ⟦p₃⟧) ⟦p₁⟧) :
+--   Γ (Γ st ⟦p₁⟧) ⟦p₂; p₃⟧ = Γ (Γ (Γ st ⟦p₂⟧) ⟦p₃⟧) ⟦p₁⟧
+
+-- lemma opt_sec_combined
+--   (h1: Γ st ⟦p₁; p₂; p₃; p₄⟧ = Γ ( Γ st ⟦p₂⟧) ⟦p₁; p₃; p₄⟧)
+--   (h2: Γ ( Γ st ⟦p₂⟧) ⟦p₁; p₃; p₄⟧ = Γ ( Γ ( Γ st ⟦p₂⟧) ⟦p₃⟧) ⟦p₁; p₄⟧) :
+--   Γ st ⟦p₁; p₂; p₃; p₄⟧ = Γ ( Γ ( Γ st ⟦p₂⟧) ⟦p₃⟧) ⟦p₁; p₄⟧ := by
+--     rw [h1, h2]
+
 lemma opt_swap (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
   Γ st ⟦p₁; p₂; p₃⟧ = Γ ( Γ st ⟦p₂⟧) ⟦p₁; p₃⟧ := by
     simp [MLIR.run_seq_def, h]
@@ -29,37 +44,15 @@ lemma opt_swap_nondet_seq (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p�
   Γ st ⟦p₁; nondet (p₂; p₃); p₄⟧ = Γ ( Γ st ⟦p₂⟧) ⟦p₁; nondet p₃; p₄⟧ := by
     simp [MLIR.run_seq_def, MLIR.run_nondet, h]
 
-lemma opt_swap_ddd (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
-  Γ st ⟦p₁; p₂; p₃⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁; p₃⟧ := by
-    simp [MLIR.run_seq_def, h]
+lemma opt_seq
+  (h1: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧)
+  (h2: Γ (Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) ⟦p₃⟧ = Γ (Γ (Γ st ⟦p₂⟧) ⟦p₃⟧) ⟦p₁⟧) :
+  Γ (Γ st ⟦p₁⟧) ⟦p₂; p₃⟧ = Γ (Γ st ⟦p₂; p₃⟧) ⟦p₁⟧ := by
+    rw [MLIR.run_seq_def, MLIR.run_seq_def, h1, h2]
 
-lemma opt_swap_ndd (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
-  Γ st ⟦nondet p₁; p₂; p₃⟧ = Γ (Γ st ⟦p₂⟧) ⟦nondet p₁; p₃⟧ := by
-    simp [MLIR.run_seq_def, MLIR.run_nondet, h]
-
-lemma opt_swap_dnd (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
-  Γ st ⟦p₁; nondet p₂; p₃⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁; p₃⟧ := by
-    simp [MLIR.run_seq_def, MLIR.run_nondet, h]
-
-lemma opt_swap_nnd (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
-  Γ st ⟦nondet (p₁; p₂); p₃⟧ = Γ (Γ st ⟦p₂⟧) ⟦nondet p₁; p₃⟧ := by
-    simp [MLIR.run_seq_def, MLIR.run_nondet, h]
-
-lemma opt_swap_ddn (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
-  Γ st ⟦p₁; p₂; nondet p₃⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁; nondet p₃⟧ := by
-    simp [MLIR.run_seq_def, h]
-
-lemma opt_swap_ndn (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
-  Γ st ⟦nondet p₁; p₂; nondet p₃⟧ = Γ (Γ st ⟦p₂⟧) ⟦nondet (p₁; p₃)⟧ := by
-    simp [MLIR.run_seq_def, MLIR.run_nondet, h]
-
-lemma opt_swap_dnn (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
-  Γ st ⟦p₁; nondet (p₂; p₃)⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁; nondet p₃⟧ := by
-    simp [MLIR.run_seq_def, MLIR.run_nondet, h]
-
-lemma opt_swap_nnn (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
-  Γ st ⟦nondet (p₁; p₂; p₃)⟧ = Γ (Γ st ⟦p₂⟧) ⟦nondet (p₁; p₃)⟧ := by
-    simp [MLIR.run_seq_def, MLIR.run_nondet, h]
+lemma opt_nondet (h: Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ = Γ (Γ st ⟦p₂⟧) ⟦p₁⟧) :
+  Γ (Γ st ⟦p₁⟧) ⟦nondet p₂⟧ = Γ (Γ st ⟦nondet p₂⟧) ⟦p₁⟧ := by
+    rw [MLIR.run_nondet, MLIR.run_nondet, h]
 
 section add
   lemma add_past_const (h: a ≠ b) (h': ⟨b⟩ ≠ c) (h'': ⟨b⟩ ≠ d):
@@ -75,6 +68,20 @@ section add
       aesop
 end add
 
+section andCond
+  lemma andCond_past_const (h: ⟨b⟩ ≠ c):
+    Γ (Γ st ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧) ⟦@MLIR.Assign β b (Op.Const x)⟧ =
+    Γ (Γ st ⟦@MLIR.Assign β b (Op.Const x)⟧) ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧ := by
+      simp [MLIR.run_ass_def, h]
+      aesop
+  
+  lemma andCond_past_drop (h: c ≠ b):
+    Γ (Γ st ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧) ⟦@MLIR.DropFelt β b⟧ =
+    Γ (Γ st ⟦@MLIR.DropFelt β b⟧) ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧ := by
+      simp [MLIR.run_ass_def, MLIR.run_dropfelt, h.symm]
+      aesop
+end andCond
+
 section andeqz
   lemma andEqz_past_const (h: ⟨b⟩ ≠ d):
     Γ (Γ st ⟦@MLIR.Assign α a (Op.AndEqz c d)⟧) ⟦@MLIR.Assign β b (Op.Const x)⟧ =
@@ -82,7 +89,7 @@ section andeqz
       simp [MLIR.run_ass_def, State.updateFelts, State.updateProps, *, Map.update]
       aesop
   
-  lemma andEqz_past_drop (h : ⟨x⟩ ≠ y) (h₁ : rhs ≠ y) :
+  lemma andEqz_past_drop (h : rhs ≠ y) :
     Γ (Γ st ⟦@MLIR.Assign β x (Op.AndEqz lhs rhs)⟧) ⟦@MLIR.DropFelt α y⟧ =
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.AndEqz lhs rhs)⟧ := by
       simp [
@@ -111,6 +118,11 @@ section const
     Γ (Γ st ⟦@MLIR.Assign α a (Op.Const x)⟧) ⟦@MLIR.Assign β b (Op.Add c d)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Add c d)⟧) ⟦@MLIR.Assign α a (Op.Const x)⟧ := by
       rw [add_past_const] <;> aesop
+  
+  lemma const_past_andCond (h: ⟨b⟩ ≠ c):
+    Γ (Γ st ⟦@MLIR.Assign β b (Op.Const x)⟧) ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧ =
+    Γ (Γ st ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧) ⟦@MLIR.Assign β b (Op.Const x)⟧ := by
+      rw [andCond_past_const]; aesop
   
   lemma const_past_andEqz (h: ⟨b⟩ ≠ d):
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Const x)⟧) ⟦@MLIR.Assign α a (Op.AndEqz c d)⟧ =
@@ -146,6 +158,22 @@ section const
       simp [MLIR.run_ass_def]
       aesop
       rewrite [updateFelts_neq_comm] <;> simp [*]
+  
+  lemma const_past_if {branch: MLIR β}
+    (h: ⟨x⟩ ≠ y)
+    (h_branch: Γ (Γ st ⟦@MLIR.Assign α x (Op.Const c)⟧) ⟦branch⟧ = Γ (Γ st ⟦branch⟧) ⟦@MLIR.Assign α x (Op.Const c)⟧):
+    Γ (Γ st ⟦@MLIR.Assign α x (Op.Const c)⟧) ⟦@MLIR.If β y branch⟧ =
+    Γ (Γ st ⟦@MLIR.If β y branch⟧) ⟦@MLIR.Assign α x (Op.Const c)⟧ := by
+      simp [MLIR.run_if, MLIR.run_ass_def, h, State.dropFelts_felts, getElem!, getElem, Map.drop_get]
+      aesop
+  
+  lemma const_past_inv (h: x ≠ y) (h': ⟨x⟩ ≠ z):
+    Γ (Γ st ⟦@MLIR.Assign α x (Op.Const c)⟧) ⟦@MLIR.Assign .InNondet y (Op.Inv z)⟧ =
+    Γ (Γ st ⟦@MLIR.Assign .InNondet y (Op.Inv z)⟧) ⟦@MLIR.Assign α x (Op.Const c)⟧ := by
+      simp [MLIR.run_ass_def]
+      rewrite [updateFelts_neq_comm]
+      simp [State.updateFelts, Map.update_get_next, h']
+      aesop
 
   lemma const_past_isz (h: name ≠ name') (h': ⟨name⟩ ≠ y):
     Γ (Γ st ⟦@MLIR.Assign α name (Op.Const x)⟧) ⟦MLIR.Assign name' (Op.Isz y)⟧ =
@@ -187,7 +215,12 @@ section drop
     Γ (Γ st ⟦@MLIR.Assign β x (Op.Add lhs rhs)⟧) ⟦@MLIR.DropFelt α y⟧ := by
       rw [add_past_drop] <;> aesop
 
-  lemma drop_past_andEqz (h : ⟨x⟩ ≠ y) (h₁ : rhs ≠ y) :
+  lemma drop_past_andCond (h: c ≠ b):
+    Γ (Γ st ⟦@MLIR.DropFelt β b⟧) ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧ =
+    Γ (Γ st ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧) ⟦@MLIR.DropFelt β b⟧ := by
+      rw [andCond_past_drop h]
+
+  lemma drop_past_andEqz (h : rhs ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.AndEqz lhs rhs)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β x (Op.AndEqz lhs rhs)⟧) ⟦@MLIR.DropFelt α y⟧ := by
       rw [andEqz_past_drop] <;> aesop
@@ -213,6 +246,14 @@ section drop
     Γ (Γ st ⟦@MLIR.Assign β x (Op.Get buf back offset)⟧) ⟦@MLIR.DropFelt α y⟧ := by
       simp [MLIR.run_dropfelt, MLIR.run_ass_def]
       sorry
+
+  lemma drop_past_if {branch: MLIR β}
+    (h: y ≠ x)
+    (h_branch: Γ (Γ st ⟦@MLIR.DropFelt α x⟧) ⟦branch⟧ = Γ (Γ st ⟦branch⟧) ⟦@MLIR.DropFelt α x⟧):
+    Γ (Γ st ⟦@MLIR.DropFelt α x⟧) ⟦@MLIR.If β y branch⟧ =
+    Γ (Γ st ⟦@MLIR.If β y branch⟧) ⟦@MLIR.DropFelt α x⟧ := by
+      simp [MLIR.run_if, MLIR.run_dropfelt, h.symm, State.dropFelts_felts, getElem!, getElem, Map.drop_get]
+      aesop
 
   lemma drop_past_isz (h: ⟨name⟩ ≠ y) (h': x ≠ y):
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦MLIR.Assign name (Op.Isz x)⟧ =
@@ -351,6 +392,10 @@ section get
           sorry
 
 end get
+
+section If
+
+end If
 
 section inv
   -- lemma drop_assign_inv_swap (h : name ≠ name') (h₁ : ⟨name'⟩ ≠ lhs) :

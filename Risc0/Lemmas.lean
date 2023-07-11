@@ -45,7 +45,7 @@ lemma run_nondet : Γ st ⟦nondet block⟧ = Γ st ⟦block⟧ := rfl
 --     simp [eq, eq']
 
 lemma run_if {x : FeltVar} :
-  Γ st ⟦guard x then branch⟧ = if st.felts[x]!.get! = 0 then st else branch.run st := rfl
+  Γ st ⟦guard x then branch⟧ = if st.felts[x]!.get! = 0 then st else Γ st ⟦branch⟧ := rfl
 
 -- lemma run_eqz' : Γ st ⟦@MLIR.Eqz α ⟨name⟩⟧
 --                  = if h : ⟨name⟩ ∈ st.felts
