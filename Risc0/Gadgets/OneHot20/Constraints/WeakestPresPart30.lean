@@ -10,15 +10,17 @@ open MLIRNotation
 -- The state obtained by running Code.part30 on st
 def part30_state (st: State) : State :=
   
-        ((((st[props][{ name := "%120" }] ←
-                (Option.get! (State.props st { name := "%116" }) ∧
-                  Option.get! (State.felts st { name := "%119" }) = (0 : Felt)))[felts][{ name := "%121" }] ←
-              Option.get! (State.felts st { name := "%117" }) +
-                Option.get! (State.felts st { name := "%46" }))[felts][{ name := "%122" }] ←
-            Option.get! (State.felts st { name := "%0" }) -
-              Option.get! (State.felts st { name := "%49" }))[felts][{ name := "%123" }] ←
-          Option.get! (State.felts st { name := "%49" }) *
-            (Option.get! (State.felts st { name := "%0" }) - Option.get! (State.felts st { name := "%49" }))) 
+        ((((st[props][{ name := "%120" : PropVar }] ←
+                (Option.get! (State.props st { name := "%116" : PropVar }) ∧
+                  Option.get! (State.felts st { name := "%119" : FeltVar }) =
+                    (0 : Felt)))[felts][{ name := "%121" : FeltVar }] ←
+              Option.get! (State.felts st { name := "%117" : FeltVar }) +
+                Option.get! (State.felts st { name := "%46" : FeltVar }))[felts][{ name := "%122" : FeltVar }] ←
+            Option.get! (State.felts st { name := "%0" : FeltVar }) -
+              Option.get! (State.felts st { name := "%49" : FeltVar }))[felts][{ name := "%123" : FeltVar }] ←
+          Option.get! (State.felts st { name := "%49" : FeltVar }) *
+            (Option.get! (State.felts st { name := "%0" : FeltVar }) -
+              Option.get! (State.felts st { name := "%49" : FeltVar }))) 
 
 def part30_drops (st: State) : State :=
   State.dropFelts (State.dropFelts (State.dropFelts (State.dropFelts (st) ⟨"%46"⟩) ⟨"%117"⟩) ⟨"%119"⟩) ⟨"%122"⟩
@@ -51,33 +53,34 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
       (part30_state_update
         ((((((((((((((((((((((((({
                                                             buffers :=
-                                                              ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
+                                                              ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
                                                                   [[some y0, some y1, some y2, some y3, some y4,
                                                                       some y5, some y6, some y7, some y8, some y9,
                                                                       some y10, some y11, some y12, some y13, some y14,
                                                                       some y15, some y16, some y17, some y18,
-                                                                      some y19]])[{ name := "code" }] ←ₘ
+                                                                      some y19]])[{ name := "code" : BufferVar }] ←ₘ
                                                                 [[some x0]],
                                                             bufferWidths :=
-                                                              ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                                                  (20 : ℕ))[{ name := "code" }] ←ₘ
+                                                              ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
+                                                                  (20 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
                                                                 (1 : ℕ),
                                                             constraints := [], cycle := (0 : ℕ), felts := Map.empty,
                                                             isFailed := false, props := Map.empty,
                                                             vars :=
-                                                              [{ name := "code" },
-                                                                { name := "data" }] }[props][{ name := "%19" }] ←
-                                                          True)[felts][{ name := "%46" }] ←
-                                                        y10)[felts][{ name := "%49" }] ←
-                                                      y11)[felts][{ name := "%52" }] ←
-                                                    y12)[felts][{ name := "%55" }] ←
-                                                  y13)[felts][{ name := "%58" }] ←
-                                                y14)[felts][{ name := "%61" }] ←
-                                              y15)[felts][{ name := "%64" }] ←
-                                            y16)[felts][{ name := "%67" }] ←
-                                          y17)[felts][{ name := "%70" }] ←
-                                        y18)[felts][{ name := "%73" }] ←
-                                      y19)[props][{ name := "%77" }] ←
+                                                              [{ name := "code" : BufferVar },
+                                                                { name := "data" :
+                                                                  BufferVar }] }[props][{ name := "%19" : PropVar }] ←
+                                                          True)[felts][{ name := "%46" : FeltVar }] ←
+                                                        y10)[felts][{ name := "%49" : FeltVar }] ←
+                                                      y11)[felts][{ name := "%52" : FeltVar }] ←
+                                                    y12)[felts][{ name := "%55" : FeltVar }] ←
+                                                  y13)[felts][{ name := "%58" : FeltVar }] ←
+                                                y14)[felts][{ name := "%61" : FeltVar }] ←
+                                              y15)[felts][{ name := "%64" : FeltVar }] ←
+                                            y16)[felts][{ name := "%67" : FeltVar }] ←
+                                          y17)[felts][{ name := "%70" : FeltVar }] ←
+                                        y18)[felts][{ name := "%73" : FeltVar }] ←
+                                      y19)[props][{ name := "%77" : PropVar }] ←
                                     y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) +
                                                                     y6 * (6 : Felt) +
                                                                   y7 * (7 : Felt) +
@@ -94,8 +97,8 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                                             y18 * (18 : Felt) +
                                           y19 * (19 : Felt) -
                                         x0 =
-                                      (0 : Felt))[felts][{ name := "%0" }] ←
-                                  (1 : Felt))[props][{ name := "%81" }] ←
+                                      (0 : Felt))[felts][{ name := "%0" : FeltVar }] ←
+                                  (1 : Felt))[props][{ name := "%81" : PropVar }] ←
                                 (y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) +
                                                                   y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
@@ -113,7 +116,8 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                                         y19 * (19 : Felt) -
                                       x0 =
                                     (0 : Felt) ∧
-                                  (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))))[props][{ name := "%84" }] ←
+                                  (y0 = (0 : Felt) ∨
+                                    (1 : Felt) - y0 = (0 : Felt))))[props][{ name := "%84" : PropVar }] ←
                               ((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) +
                                                                   y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
@@ -132,7 +136,7 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                                       x0 =
                                     (0 : Felt) ∧
                                   (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))) ∧
-                                (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))))[props][{ name := "%88" }] ←
+                                (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))))[props][{ name := "%88" : PropVar }] ←
                             (((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) +
                                                                   y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
@@ -152,7 +156,7 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                                     (0 : Felt) ∧
                                   (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))) ∧
                                 (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))) ∧
-                              (y2 = (0 : Felt) ∨ (1 : Felt) - y2 = (0 : Felt))))[props][{ name := "%92" }] ←
+                              (y2 = (0 : Felt) ∨ (1 : Felt) - y2 = (0 : Felt))))[props][{ name := "%92" : PropVar }] ←
                           ((((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) +
                                                                   y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
@@ -173,7 +177,7 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                                   (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))) ∧
                                 (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))) ∧
                               (y2 = (0 : Felt) ∨ (1 : Felt) - y2 = (0 : Felt))) ∧
-                            (y3 = (0 : Felt) ∨ (1 : Felt) - y3 = (0 : Felt))))[props][{ name := "%96" }] ←
+                            (y3 = (0 : Felt) ∨ (1 : Felt) - y3 = (0 : Felt))))[props][{ name := "%96" : PropVar }] ←
                         (((((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) +
                                                                   y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
@@ -195,7 +199,7 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                                 (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))) ∧
                               (y2 = (0 : Felt) ∨ (1 : Felt) - y2 = (0 : Felt))) ∧
                             (y3 = (0 : Felt) ∨ (1 : Felt) - y3 = (0 : Felt))) ∧
-                          (y4 = (0 : Felt) ∨ (1 : Felt) - y4 = (0 : Felt))))[props][{ name := "%100" }] ←
+                          (y4 = (0 : Felt) ∨ (1 : Felt) - y4 = (0 : Felt))))[props][{ name := "%100" : PropVar }] ←
                       ((((((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) +
                                                                   y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
@@ -218,7 +222,7 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                               (y2 = (0 : Felt) ∨ (1 : Felt) - y2 = (0 : Felt))) ∧
                             (y3 = (0 : Felt) ∨ (1 : Felt) - y3 = (0 : Felt))) ∧
                           (y4 = (0 : Felt) ∨ (1 : Felt) - y4 = (0 : Felt))) ∧
-                        (y5 = (0 : Felt) ∨ (1 : Felt) - y5 = (0 : Felt))))[props][{ name := "%104" }] ←
+                        (y5 = (0 : Felt) ∨ (1 : Felt) - y5 = (0 : Felt))))[props][{ name := "%104" : PropVar }] ←
                     (((((((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) +
                                                                   y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
@@ -242,7 +246,7 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                             (y3 = (0 : Felt) ∨ (1 : Felt) - y3 = (0 : Felt))) ∧
                           (y4 = (0 : Felt) ∨ (1 : Felt) - y4 = (0 : Felt))) ∧
                         (y5 = (0 : Felt) ∨ (1 : Felt) - y5 = (0 : Felt))) ∧
-                      (y6 = (0 : Felt) ∨ (1 : Felt) - y6 = (0 : Felt))))[props][{ name := "%108" }] ←
+                      (y6 = (0 : Felt) ∨ (1 : Felt) - y6 = (0 : Felt))))[props][{ name := "%108" : PropVar }] ←
                   ((((((((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) + y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
                                                               y8 * (8 : Felt) +
@@ -266,7 +270,7 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                           (y4 = (0 : Felt) ∨ (1 : Felt) - y4 = (0 : Felt))) ∧
                         (y5 = (0 : Felt) ∨ (1 : Felt) - y5 = (0 : Felt))) ∧
                       (y6 = (0 : Felt) ∨ (1 : Felt) - y6 = (0 : Felt))) ∧
-                    (y7 = (0 : Felt) ∨ (1 : Felt) - y7 = (0 : Felt))))[props][{ name := "%112" }] ←
+                    (y7 = (0 : Felt) ∨ (1 : Felt) - y7 = (0 : Felt))))[props][{ name := "%112" : PropVar }] ←
                 (((((((((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) + y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
                                                               y8 * (8 : Felt) +
@@ -291,7 +295,7 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                         (y5 = (0 : Felt) ∨ (1 : Felt) - y5 = (0 : Felt))) ∧
                       (y6 = (0 : Felt) ∨ (1 : Felt) - y6 = (0 : Felt))) ∧
                     (y7 = (0 : Felt) ∨ (1 : Felt) - y7 = (0 : Felt))) ∧
-                  (y8 = (0 : Felt) ∨ (1 : Felt) - y8 = (0 : Felt))))[props][{ name := "%116" }] ←
+                  (y8 = (0 : Felt) ∨ (1 : Felt) - y8 = (0 : Felt))))[props][{ name := "%116" : PropVar }] ←
               ((((((((((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) + y6 * (6 : Felt) +
                                                                 y7 * (7 : Felt) +
                                                               y8 * (8 : Felt) +
@@ -317,8 +321,8 @@ lemma part30_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                       (y6 = (0 : Felt) ∨ (1 : Felt) - y6 = (0 : Felt))) ∧
                     (y7 = (0 : Felt) ∨ (1 : Felt) - y7 = (0 : Felt))) ∧
                   (y8 = (0 : Felt) ∨ (1 : Felt) - y8 = (0 : Felt))) ∧
-                (y9 = (0 : Felt) ∨ (1 : Felt) - y9 = (0 : Felt))))[felts][{ name := "%117" }] ←
-            y0 + y1 + y2 + y3 + y4 + y5 + y6 + y7 + y8 + y9)[felts][{ name := "%119" }] ←
+                (y9 = (0 : Felt) ∨ (1 : Felt) - y9 = (0 : Felt))))[felts][{ name := "%117" : FeltVar }] ←
+            y0 + y1 + y2 + y3 + y4 + y5 + y6 + y7 + y8 + y9)[felts][{ name := "%119" : FeltVar }] ←
           y10 * ((1 : Felt) - y10)))  := by
     rewrite [part29_cumulative_wp]
     rewrite [part30_updates_opaque]

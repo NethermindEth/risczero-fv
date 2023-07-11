@@ -10,21 +10,23 @@ open MLIRNotation
 def part0_state (st: State) : State :=
   
           ((State.set!
-              ((st["%20"] ←ₛ getImpl st { name := "code" } (0 : Back) (0 : ℕ))[felts][{ name := "%138" }] ←
+              ((st["%20"] ←ₛ
+                  getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%138" : FeltVar }] ←
                 if
                     Option.get!
-                        (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } (0 : Back) (0 : ℕ))
-                          { name := "%20" }) =
+                        (State.felts (st["%20"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))
+                          { name := "%20" : FeltVar }) =
                       (0 : Felt) then
                   (1 : Felt)
                 else (0 : Felt))
-              { name := "data" } (0 : ℕ)
+              { name := "data" : BufferVar } (0 : ℕ)
               (if
                   Option.get!
-                      (State.felts (st["%20"] ←ₛ getImpl st { name := "code" } (0 : Back) (0 : ℕ)) { name := "%20" }) =
+                      (State.felts (st["%20"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))
+                        { name := "%20" : FeltVar }) =
                     (0 : Felt) then
                 (1 : Felt)
-              else (0 : Felt)))[felts][{ name := "%18" }] ←
+              else (0 : Felt)))[felts][{ name := "%18" : FeltVar }] ←
             (1 : Felt)) 
 
 def part0_drops (st: State) : State :=
@@ -53,13 +55,14 @@ lemma part0_cumulative_wp {x0: Felt} :
           {
             buffers :=
               Map.fromList
-                [({ name := "code" }, [[some x0]]),
-                  ({ name := "data" },
+                [({ name := "code" : BufferVar }, [[some x0]]),
+                  ({ name := "data" : BufferVar },
                     [[none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none,
                         none, none, none, none]])],
-            bufferWidths := Map.fromList [({ name := "code" }, (1 : ℕ)), ({ name := "data" }, (20 : ℕ))],
+            bufferWidths :=
+              Map.fromList [({ name := "code" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (20 : ℕ))],
             constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
-            vars := [{ name := "code" }, { name := "data" }] }) =
+            vars := [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] }) =
       [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19]  := by
     unfold Code.run start_state
     rewrite [Code.optimised_behaviour_full]

@@ -10,14 +10,14 @@ open MLIRNotation
 -- The state obtained by running Code.part6 on st
 def part6_state (st: State) : State :=
   
-        ((((st[felts][{ name := "%38" }] ←
-                Option.get! (State.felts st { name := "%37" }) *
-                  Option.get! (State.felts st { name := "%6" }))[felts][{ name := "%39" }] ←
-              Option.get! (State.felts st { name := "%36" }) +
-                Option.get! (State.felts st { name := "%37" }) *
-                  Option.get! (State.felts st { name := "%6" }))[felts][{ name := "%7" }] ←
+        ((((st[felts][{ name := "%38" : FeltVar }] ←
+                Option.get! (State.felts st { name := "%37" : FeltVar }) *
+                  Option.get! (State.felts st { name := "%6" : FeltVar }))[felts][{ name := "%39" : FeltVar }] ←
+              Option.get! (State.felts st { name := "%36" : FeltVar }) +
+                Option.get! (State.felts st { name := "%37" : FeltVar }) *
+                  Option.get! (State.felts st { name := "%6" : FeltVar }))[felts][{ name := "%7" : FeltVar }] ←
             (8 : Felt))["%40"] ←ₛ
-          getImpl st { name := "data" } (0 : Back) (8 : ℕ)) 
+          getImpl st { name := "data" : BufferVar } (0 : Back) (8 : ℕ)) 
 
 def part6_drops (st: State) : State :=
   State.dropFelts (State.dropFelts (State.dropFelts (st) ⟨"%36"⟩) ⟨"%6"⟩) ⟨"%38"⟩
@@ -50,26 +50,30 @@ lemma part6_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 
       (part6_state_update
         (((((((((({
                               buffers :=
-                                ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
+                                ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
                                     [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8,
                                         some y9, some y10, some y11, some y12, some y13, some y14, some y15, some y16,
-                                        some y17, some y18, some y19]])[{ name := "code" }] ←ₘ
+                                        some y17, some y18, some y19]])[{ name := "code" : BufferVar }] ←ₘ
                                   [[some x0]],
                               bufferWidths :=
-                                ((fun x => Map.empty x)[{ name := "data" }] ←ₘ (20 : ℕ))[{ name := "code" }] ←ₘ (1 : ℕ),
+                                ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
+                                    (20 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
+                                  (1 : ℕ),
                               constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false,
                               props := Map.empty,
-                              vars := [{ name := "code" }, { name := "data" }] }[props][{ name := "%19" }] ←
-                            True)[felts][{ name := "%22" }] ←
-                          y2)[felts][{ name := "%21" }] ←
-                        y1)[felts][{ name := "%25" }] ←
-                      y3)[felts][{ name := "%28" }] ←
-                    y4)[felts][{ name := "%31" }] ←
-                  y5)[felts][{ name := "%34" }] ←
-                y6)[felts][{ name := "%36" }] ←
+                              vars :=
+                                [{ name := "code" : BufferVar },
+                                  { name := "data" : BufferVar }] }[props][{ name := "%19" : PropVar }] ←
+                            True)[felts][{ name := "%22" : FeltVar }] ←
+                          y2)[felts][{ name := "%21" : FeltVar }] ←
+                        y1)[felts][{ name := "%25" : FeltVar }] ←
+                      y3)[felts][{ name := "%28" : FeltVar }] ←
+                    y4)[felts][{ name := "%31" : FeltVar }] ←
+                  y5)[felts][{ name := "%34" : FeltVar }] ←
+                y6)[felts][{ name := "%36" : FeltVar }] ←
               y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) +
-                y6 * (6 : Felt))[felts][{ name := "%6" }] ←
-            (7 : Felt))[felts][{ name := "%37" }] ←
+                y6 * (6 : Felt))[felts][{ name := "%6" : FeltVar }] ←
+            (7 : Felt))[felts][{ name := "%37" : FeltVar }] ←
           y7))  := by
     rewrite [part5_cumulative_wp]
     rewrite [part6_updates_opaque]

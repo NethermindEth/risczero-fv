@@ -41,6 +41,24 @@ open Lean Meta PrettyPrinter Delaborator SubExpr in
   let b ← withType delab
   `(($a : $b))
 
+-- TODO: Inspect the term properly to un-resolve namespaces; Lean is being difficult
+set_option hygiene false in
+open Lean Meta Elab Term PrettyPrinter Delaborator SubExpr in
+@[delab app.Risc0.Variable.mk] def delabOfVariable : Delab := do
+  let ident ← withAppArg delab
+  let T ← withType delab
+  let translate (t : Term) : String := 
+    if s!"{t}" = "(Term.app `Variable [`VarType.BufferTag])" then "BufferVar"
+    else if s!"{t}" = "(Term.app `Variable [`VarType.FeltTag])" then "FeltVar"
+    else assert! s!"{t}" = "(Term.app `Variable [`VarType.PropTag])"; "PropVar"
+  let finalT := mkIdent <| translate T
+  `({ name := $ident : $finalT})
+
+def bufferWidths : List BufferVar := [({ name := "code" })]
+
+-- example : bufferWidths = bufferWidths := by
+--   unfold bufferWidths
+
 -- none is an unset value which can be written to, but not read
 -- some is a set value which can be read, and can only be written to if the new val is equal
 abbrev BufferAtTime := List (Option Felt)

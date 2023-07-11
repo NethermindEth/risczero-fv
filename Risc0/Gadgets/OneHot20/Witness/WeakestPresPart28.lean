@@ -10,27 +10,28 @@ open MLIRNotation
 -- The state obtained by running Code.part28 on st
 def part28_state (st: State) : State :=
   
-          ((((st[felts][{ name := "%54" }] ←
-                  Option.get! (State.felts st { name := "%51" }) +
-                    Option.get! (State.felts st { name := "%53" }))["%55"] ←ₛ
-                getImpl st { name := "data" } (0 : Back) (13 : ℕ))[felts][{ name := "%56" }] ←
+          ((((st[felts][{ name := "%54" : FeltVar }] ←
+                  Option.get! (State.felts st { name := "%51" : FeltVar }) +
+                    Option.get! (State.felts st { name := "%53" : FeltVar }))["%55"] ←ₛ
+                getImpl st { name := "data" : BufferVar } (0 : Back) (13 : ℕ))[felts][{ name := "%56" : FeltVar }] ←
               Option.get!
                   (State.felts
-                    ((st[felts][{ name := "%54" }] ←
-                        Option.get! (State.felts st { name := "%51" }) +
-                          Option.get! (State.felts st { name := "%53" }))["%55"] ←ₛ
-                      getImpl st { name := "data" } (0 : Back) (13 : ℕ))
-                    { name := "%55" }) *
-                Option.get! (State.felts st { name := "%6" }))[felts][{ name := "%57" }] ←
-            Option.get! (State.felts st { name := "%51" }) + Option.get! (State.felts st { name := "%53" }) +
+                    ((st[felts][{ name := "%54" : FeltVar }] ←
+                        Option.get! (State.felts st { name := "%51" : FeltVar }) +
+                          Option.get! (State.felts st { name := "%53" : FeltVar }))["%55"] ←ₛ
+                      getImpl st { name := "data" : BufferVar } (0 : Back) (13 : ℕ))
+                    { name := "%55" : FeltVar }) *
+                Option.get! (State.felts st { name := "%6" : FeltVar }))[felts][{ name := "%57" : FeltVar }] ←
+            Option.get! (State.felts st { name := "%51" : FeltVar }) +
+                Option.get! (State.felts st { name := "%53" : FeltVar }) +
               Option.get!
                   (State.felts
-                    ((st[felts][{ name := "%54" }] ←
-                        Option.get! (State.felts st { name := "%51" }) +
-                          Option.get! (State.felts st { name := "%53" }))["%55"] ←ₛ
-                      getImpl st { name := "data" } (0 : Back) (13 : ℕ))
-                    { name := "%55" }) *
-                Option.get! (State.felts st { name := "%6" })) 
+                    ((st[felts][{ name := "%54" : FeltVar }] ←
+                        Option.get! (State.felts st { name := "%51" : FeltVar }) +
+                          Option.get! (State.felts st { name := "%53" : FeltVar }))["%55"] ←ₛ
+                      getImpl st { name := "data" : BufferVar } (0 : Back) (13 : ℕ))
+                    { name := "%55" : FeltVar }) *
+                Option.get! (State.felts st { name := "%6" : FeltVar })) 
 
 def part28_drops (st: State) : State :=
   State.dropFelts (State.dropFelts (State.dropFelts (State.dropFelts (State.dropFelts (st) ⟨"%6"⟩) ⟨"%51"⟩) ⟨"%53"⟩) ⟨"%54"⟩) ⟨"%56"⟩
@@ -63,8 +64,8 @@ lemma part28_cumulative_wp {x0: Felt} :
         (part28_state_update
           (((((((((((((({
                                         buffers :=
-                                          ((fun x => Map.empty x)[{ name := "code" }] ←ₘ
-                                              [[some x0]])[{ name := "data" }] ←ₘ
+                                          ((fun x => Map.empty x)[{ name := "code" : BufferVar }] ←ₘ
+                                              [[some x0]])[{ name := "data" : BufferVar }] ←ₘ
                                             [[some (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)),
                                                 some (if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
                                                 some (if x0 - (2 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)),
@@ -87,38 +88,47 @@ lemma part28_cumulative_wp {x0: Felt} :
                                                 some
                                                   (if x0 - (19 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))]],
                                         bufferWidths :=
-                                          ((fun x => Map.empty x)[{ name := "data" }] ←ₘ
-                                              (20 : ℕ))[{ name := "code" }] ←ₘ
+                                          ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
+                                              (20 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
                                             (1 : ℕ),
                                         constraints := [], cycle := (0 : ℕ),
                                         felts :=
-                                          ((((((((Map.empty[{ name := "%20" }] ←ₘ x0)[{ name := "%18" }] ←ₘ
-                                                          (1 : Felt))[{ name := "%6" }] ←ₘ
-                                                        (13 : Felt))[{ name := "%5" }] ←ₘ
-                                                      (14 : Felt))[{ name := "%4" }] ←ₘ
-                                                    (15 : Felt))[{ name := "%3" }] ←ₘ
-                                                  (16 : Felt))[{ name := "%2" }] ←ₘ
-                                                (17 : Felt))[{ name := "%1" }] ←ₘ
-                                              (18 : Felt))[{ name := "%0" }] ←ₘ
+                                          ((((((((Map.empty[{ name := "%20" : FeltVar }] ←ₘ
+                                                            x0)[{ name := "%18" : FeltVar }] ←ₘ
+                                                          (1 : Felt))[{ name := "%6" : FeltVar }] ←ₘ
+                                                        (13 : Felt))[{ name := "%5" : FeltVar }] ←ₘ
+                                                      (14 : Felt))[{ name := "%4" : FeltVar }] ←ₘ
+                                                    (15 : Felt))[{ name := "%3" : FeltVar }] ←ₘ
+                                                  (16 : Felt))[{ name := "%2" : FeltVar }] ←ₘ
+                                                (17 : Felt))[{ name := "%1" : FeltVar }] ←ₘ
+                                              (18 : Felt))[{ name := "%0" : FeltVar }] ←ₘ
                                             (19 : Felt),
                                         isFailed := false, props := Map.empty,
-                                        vars := [{ name := "code" }, { name := "data" }] }[felts][{ name := "%22" }] ←
+                                        vars :=
+                                          [{ name := "code" : BufferVar },
+                                            { name := "data" : BufferVar }] }[felts][{ name := "%22" : FeltVar }] ←
                                       if x0 - (2 : Felt) = (0 : Felt) then (1 : Felt)
-                                      else (0 : Felt))[felts][{ name := "%21" }] ←
+                                      else (0 : Felt))[felts][{ name := "%21" : FeltVar }] ←
                                     if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt)
-                                    else (0 : Felt))[felts][{ name := "%25" }] ←
+                                    else (0 : Felt))[felts][{ name := "%25" : FeltVar }] ←
                                   if x0 - (3 : Felt) = (0 : Felt) then (1 : Felt)
-                                  else (0 : Felt))[felts][{ name := "%28" }] ←
+                                  else (0 : Felt))[felts][{ name := "%28" : FeltVar }] ←
                                 if x0 - (4 : Felt) = (0 : Felt) then (1 : Felt)
-                                else (0 : Felt))[felts][{ name := "%31" }] ←
+                                else (0 : Felt))[felts][{ name := "%31" : FeltVar }] ←
                               if x0 - (5 : Felt) = (0 : Felt) then (1 : Felt)
-                              else (0 : Felt))[felts][{ name := "%34" }] ←
-                            if x0 - (6 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))[felts][{ name := "%37" }] ←
-                          if x0 - (7 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))[felts][{ name := "%40" }] ←
-                        if x0 - (8 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))[felts][{ name := "%43" }] ←
-                      if x0 - (9 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))[felts][{ name := "%46" }] ←
-                    if x0 - (10 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))[felts][{ name := "%49" }] ←
-                  if x0 - (11 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))[felts][{ name := "%51" }] ←
+                              else (0 : Felt))[felts][{ name := "%34" : FeltVar }] ←
+                            if x0 - (6 : Felt) = (0 : Felt) then (1 : Felt)
+                            else (0 : Felt))[felts][{ name := "%37" : FeltVar }] ←
+                          if x0 - (7 : Felt) = (0 : Felt) then (1 : Felt)
+                          else (0 : Felt))[felts][{ name := "%40" : FeltVar }] ←
+                        if x0 - (8 : Felt) = (0 : Felt) then (1 : Felt)
+                        else (0 : Felt))[felts][{ name := "%43" : FeltVar }] ←
+                      if x0 - (9 : Felt) = (0 : Felt) then (1 : Felt)
+                      else (0 : Felt))[felts][{ name := "%46" : FeltVar }] ←
+                    if x0 - (10 : Felt) = (0 : Felt) then (1 : Felt)
+                    else (0 : Felt))[felts][{ name := "%49" : FeltVar }] ←
+                  if x0 - (11 : Felt) = (0 : Felt) then (1 : Felt)
+                  else (0 : Felt))[felts][{ name := "%51" : FeltVar }] ←
                 (if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) +
                                     (if x0 - (2 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (2 : Felt) +
                                   (if x0 - (3 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (3 : Felt) +
@@ -130,8 +140,8 @@ lemma part28_cumulative_wp {x0: Felt} :
                       (if x0 - (9 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (9 : Felt) +
                     (if x0 - (10 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (10 : Felt) +
                   (if x0 - (11 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) *
-                    (11 : Felt))[felts][{ name := "%52" }] ←
-              if x0 - (12 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))[felts][{ name := "%53" }] ←
+                    (11 : Felt))[felts][{ name := "%52" : FeltVar }] ←
+              if x0 - (12 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))[felts][{ name := "%53" : FeltVar }] ←
             (if x0 - (12 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) * (12 : Felt))) =
       [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17, y18, y19]  := by
     rewrite [part27_cumulative_wp]

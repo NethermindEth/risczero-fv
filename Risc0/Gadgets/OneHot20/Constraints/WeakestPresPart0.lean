@@ -9,13 +9,14 @@ open MLIRNotation
 -- The state obtained by running Code.part0 on st
 def part0_state (st: State) : State :=
   
-        ((((st[props][{ name := "%19" }] ← True)[felts][{ name := "%1" }] ← (2 : Felt))["%22"] ←ₛ
-            getImpl st { name := "data" } (0 : Back) (2 : ℕ))[felts][{ name := "%23" }] ←
+        ((((st[props][{ name := "%19" : PropVar }] ← True)[felts][{ name := "%1" : FeltVar }] ← (2 : Felt))["%22"] ←ₛ
+            getImpl st { name := "data" : BufferVar } (0 : Back) (2 : ℕ))[felts][{ name := "%23" : FeltVar }] ←
           Option.get!
               (State.felts
-                (((st[props][{ name := "%19" }] ← True)[felts][{ name := "%1" }] ← (2 : Felt))["%22"] ←ₛ
-                  getImpl st { name := "data" } (0 : Back) (2 : ℕ))
-                { name := "%22" }) *
+                (((st[props][{ name := "%19" : PropVar }] ← True)[felts][{ name := "%1" : FeltVar }] ←
+                    (2 : Felt))["%22"] ←ₛ
+                  getImpl st { name := "data" : BufferVar } (0 : Back) (2 : ℕ))
+                { name := "%22" : FeltVar }) *
             (2 : Felt)) 
 
 def part0_drops (st: State) : State :=
@@ -44,13 +45,14 @@ lemma part0_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 
         {
           buffers :=
             Map.fromList
-              [({ name := "code" }, [[some x0]]),
-                ({ name := "data" },
+              [({ name := "code" : BufferVar }, [[some x0]]),
+                ({ name := "data" : BufferVar },
                   [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8, some y9, some y10,
                       some y11, some y12, some y13, some y14, some y15, some y16, some y17, some y18, some y19]])],
-          bufferWidths := Map.fromList [({ name := "code" }, (1 : ℕ)), ({ name := "data" }, (20 : ℕ))],
+          bufferWidths :=
+            Map.fromList [({ name := "code" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (20 : ℕ))],
           constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
-          vars := [{ name := "code" }, { name := "data" }] })  := by
+          vars := [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] })  := by
     unfold Code.run start_state
     rewrite [Code.optimised_behaviour_full]
     unfold MLIR.runProgram
