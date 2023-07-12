@@ -334,15 +334,14 @@ lemma drop_update_swap {st : State} {name name' : FeltVar} {x : Felt} (h : name 
   simp [dropFelts, updateFelts]
   exact Map.update_drop_swap h
 
-
 notation:61 st:max "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
 
 def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
   { state with props := state.props[name] ←ₘ x }
 
 lemma drop_updateProps_swap :
-  dropFelts (updateProps st name x) name' = updateProps (dropFelts st name') name x :=
-  sorry
+  dropFelts (updateProps st name x) name' = updateProps (dropFelts st name') name x := by
+  simp [dropFelts, updateProps]
 
 notation:61 st:max "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
 
@@ -388,6 +387,13 @@ lemma updateProps_props_get_wobbly {st : State} {name : PropVar} {x : Prop} :
 @[simp]
 lemma updateFelts_felts_get_ne {st : State} {name name' : FeltVar} {x : Felt}
   (h : name ≠ name') : (updateFelts st name x).felts[name']! = st.felts[name']! := by
+  simp [updateFelts, Map.update_def, getElem!, Map.getElem_def]
+  aesop
+
+-- This simp lemma feels bad with name ≠ name' but somehow it works out in our context.
+@[simp]
+lemma updateFelts_felts_get_ne' {st : State} {name name' : FeltVar} {x : Felt}
+  (h : name ≠ name') : (updateFelts st name x).felts[name'] = st.felts[name'] := by
   simp [updateFelts, Map.update_def, getElem!, Map.getElem_def]
   aesop
 
@@ -732,11 +738,28 @@ lemma getImpl_val_of_some : getImpl st buf back offset = some lit → ∃ x, lit
   have h: getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := getImpl_none_or_val
   aesop
 
+@[simp]
 lemma getImpl_skip_none_update : getImpl (st[name] ←ₛ .none) buf back offset = getImpl st buf back offset := by
   simp [State.update, getImpl, isGetValid, Buffer.back]
 
+@[simp]
 lemma getImpl_skip_val_update : getImpl (st[name] ←ₛ .some (.Val x)) buf back offset = getImpl st buf back offset := by
   simp [State.update, getImpl, isGetValid, Buffer.back]
+
+@[simp]
+lemma getImpl_dropFelts : 
+  getImpl (State.dropFelts st y) buf back offset = getImpl st buf back offset := by
+  unfold State.dropFelts getImpl
+  aesop
+
+lemma dropFelts_update_of_ne (h : ⟨k⟩ ≠ y) :
+  ((State.dropFelts st y)[k] ←ₛ getImpl st buf back offset) =
+  State.dropFelts (st[k] ←ₛ getImpl st buf back offset) y := by
+  unfold State.dropFelts getImpl
+  aesop
+  simp [State.updateFelts, Map.drop, Map.update]
+  funext z
+  aesop
 
 @[simp]
 lemma getImpl_skip_get_update:
@@ -940,10 +963,70 @@ def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer
 def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
   st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
 
+@[simp]
+lemma State.set!_cycle {st : State} : (st.set! buf off x).cycle = st.cycle := by
+  unfold set! setBufferElementImpl
+  aesop
+
+@[simp]
+lemma State.set!_vars {st : State} : (st.set! buf off x).vars = st.vars := by
+  unfold set! setBufferElementImpl
+  aesop
+
+lemma State.set!_bufferWidths_get_of_ne {st : State} (h : buf ≠ buf') :
+  (st.set! buf' index x).bufferWidths[buf] = st.bufferWidths[buf] := by
+  unfold set! setBufferElementImpl
+  aesop
+
+lemma State.set!_buffers_get_of_ne {st : State} (h : buf ≠ buf') : 
+  (State.set! st buf' index x).buffers[buf] = st.buffers[buf] := by
+  unfold set! setBufferElementImpl Map.update
+  rw [Map.getElem_def]
+  aesop
+
+lemma State.set!_get_getImpl_comm {st : State} : 
+  State.set! (st[x] ←ₛ getImpl st buf back offset) buf' index y =
+  (State.set! st buf' index y)[x] ←ₛ getImpl st buf back offset := by
+  unfold State.update getImpl
+  aesop <;> unfold set! setBufferElementImpl <;> aesop
+  
+-- lemma isGetValid_set_of_ne_offset (h : offset ≠ offset') :
+--   isGetValid (State.set! st buf index x) buf back offset = 
+--   isGetValid st buf back offset := by
+--   unfold isGetValid Buffer.back Back.toNat
+--   simp
+--   aesop
+
+lemma isGetValid_set_of_ne (h : buf ≠ buf') :
+  isGetValid (State.set! st buf' index x) buf back offset = 
+  isGetValid st buf back offset := by
+  unfold isGetValid Buffer.back Back.toNat
+  simp
+  rw [State.set!_bufferWidths_get_of_ne h, State.set!_buffers_get_of_ne h]
+  aesop
+
+lemma get!_set!_of_ne (h : buf ≠ buf') :
+    (State.set! st buf' index x).buffers[buf] = st.buffers[buf] := by
+  unfold State.set! State.setBufferElementImpl Map.update
+  rw [Map.getElem_def]
+  aesop
+
+lemma getImpl_skip_set (h : buf ≠ buf') :
+  getImpl (State.set! st buf' index x) buf back offset = getImpl st buf back offset := by
+  unfold getImpl Buffer.back Buffer.get! Buffer.Idx.time Buffer.Idx.data Back.toNat
+  simp [isGetValid_set_of_ne h]
+  rw [get!_set!_of_ne h]
+
+@[simp]
+lemma get_set!_getElem {st : State} :
+  (State.set! st buf offset val).bufferWidths[buf] =
+  st.bufferWidths[buf] := by
+  unfold State.set! State.setBufferElementImpl
+  aesop
+
 lemma getImpl_skip_set_offset (h: offset ≠ offset'):
   getImpl (State.set! st buf offset val) buf back offset' =
-  getImpl st buf back offset' := by
-    sorry
+  getImpl st buf back offset' := by sorry
 
 @[simp]
 lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val : Felt} :
