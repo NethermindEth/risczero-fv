@@ -28,7 +28,7 @@ elab "MLIR_old" : tactic => do
     tactic| repeat ( first |
       rw [MLIR.run_ass_def] | rw [MLIR.run_set_output] | rw [MLIR.run_if] |
       rw [MLIR.run_nondet] | rw [MLIR.run_eqz] |
-      rw [MLIR.run_seq_def] 
+      rw [MLIR.run_seq_def]
       all_goals try rfl
       simp_op
     )
@@ -50,9 +50,42 @@ elab "MLIR_states_new" : tactic => do
   evalTactic <| ← `(tactic| simp [
     getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
-    Option.isEqSome, List.set, State.felts_if, State.buffers_if, State.bufferWidths_if,
-    State.cycle_if, State.isFailed_if, State.vars_if, State.props_if,
-    State.constraints_if, State.props_if
+    Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
+    State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
+    State.constraints_if_eq, State.props_if_eq
+  ])
+
+elab "MLIR_states_new?" : tactic => do
+  evalTactic <| ← `(tactic| simp? [
+    getImpl, isGetValid, Buffer.back, Option.get!,
+    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
+    State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
+    State.constraints_if_eq, State.props_if_eq
+  ])
+
+elab "MLIR_states_new'" : tactic => do
+  evalTactic <| ← `(tactic| simp only [
+    getImpl, isGetValid, Buffer.back, Option.get!,
+    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
+    State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
+    State.constraints_if_eq, State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
+    Option.get!, Buffer.back, Buffer.get!, List.get!, Option.isSome_some, and_true, true_and, ne_eq,
+    State.updateFelts_props, State.updateProps_props_get_wobbly,
+    State.updateFelts_felts_get_wobbly, mul_eq_zero, State.updateFelts_felts_get_next, State.updateProps_felts
+  ])
+
+elab "MLIR_states_new'?" : tactic => do
+  evalTactic <| ← `(tactic| simp? only [
+    getImpl, isGetValid, Buffer.back, Option.get!,
+    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
+    State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
+    State.constraints_if_eq, State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
+    Option.get!, Buffer.back, Buffer.get!, List.get!, Option.isSome_some, and_true, true_and, ne_eq,
+    State.updateFelts_props, State.updateProps_props_get_wobbly,
+    State.updateFelts_felts_get_wobbly, mul_eq_zero, State.updateFelts_felts_get_next, State.updateProps_felts
   ])
 
 -- private lemma run_set_enforce_aux {st : State} (h : val ∈ st.felts) :
@@ -86,7 +119,25 @@ elab "MLIR_states_new" : tactic => do
 elab "MLIR_statement" : tactic => do
   evalTactic <| ← `(
     tactic| (
-      rewrite [MLIR.run_seq_def]
+      first 
+      | rewrite [MLIR.run_nondet_seq_def]
+      | rewrite [MLIR.run_seq_def]
+      repeat (
+        first
+        | rewrite [MLIR.run_ass_def]
+        | rewrite [MLIR.run_set_def]
+        | rewrite [MLIR.run_if]
+        | rewrite [MLIR.run_nondet]
+        | rewrite [MLIR.run_eqz]
+        | rewrite [MLIR.run_dropfelt]
+      )
+      simp_op
+    )
+  )
+
+elab "MLIR_single" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
       repeat (
         first
         | rewrite [MLIR.run_ass_def]
@@ -98,12 +149,13 @@ elab "MLIR_statement" : tactic => do
       simp_op
     )
   )
+  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
 
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
   )
-  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+  evalTactic <| ← `(tactic| try simp [getImpl_skip_set_offset, Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
 
 elab "MLIR?" : tactic => do
   evalTactic <| ← `(
@@ -139,13 +191,69 @@ elab "MLIR_decide_updates" : tactic => do
       State.updateFelts_constraints, State.updateFelts_cycle, State.updateFelts_isFailed,
       State.updateFelts_props, State.updateFelts_vars, State.updateFelts_felts, State.updateProps_buffers,
       State.updateProps_bufferWidths, State.updateProps_constraints, State.updateProps_cycle,
-      State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props
+      State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props,
+      State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars,
+      withEqZero_buffers, withEqZero_bufferWidths, withEqZero_constraints, withEqZero_cycle, withEqZero_felts, withEqZero_isFailed, withEqZero_props, withEqZero_vars,
+      getImpl_skip_set_offset
     ])
   evalTactic <| ← `(tactic| simp only [Map.update_def.symm])
 
+lemma getImpl_get_of_isGetValid {x : BufferVar} {st : State} (h : isGetValid st x m n) :
+  getImpl st x m n = some (Lit.Val (Option.get! (Buffer.back st x m n))) := by
+  simp [getImpl, h]
+
+elab "MLIR_states_updates_hack" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      MLIR_states_new
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
+  )
+
+open Lean Elab Tactic in
+elab "simplify_get_hack" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      rewrite [getImpl_get_of_isGetValid]; swap; unfold isGetValid; MLIR_states_updates_hack
+    )
+  )
+
 elab "MLIR_states_updates" : tactic => do
   evalTactic <| ← `(
-    tactic| (MLIR_states_new; MLIR_decide_updates)
+    tactic| (
+      (try simplify_get_hack);
+      MLIR_states_new';
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
+  )
+
+elab "MLIR_states_updates?" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      MLIR_states_new?
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
+  )
+
+elab "MLIR_states_updates'" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      MLIR_states_new'
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
+  )
+
+elab "MLIR_states_updates'?" : tactic => do
+  evalTactic <| ← `(
+    tactic| (
+      MLIR_states_new'?
+      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
+      MLIR_decide_updates
+    )
   )
 
 end tactics

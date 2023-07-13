@@ -15,46 +15,10 @@ def part₅_state (st: State) : State :=
                   0))[felts][{ name := "output[0]+Output[1]" }] ←
             Option.get! (State.felts st { name := "output[0]" }) +
               Option.get! (State.felts st { name := "output[1]" }))[felts][{ name := "1-Output[2]" }] ←
-          Option.get!
-              ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[0]" }) +
-                    Option.get! (State.felts st { name := "output[1]" }))
-                { name := "1" }) -
-            Option.get!
-              ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[0]" }) +
-                    Option.get! (State.felts st { name := "output[1]" }))
-                { name := "output[2]" }))[felts][{ name := "output[2]<=1" }] ←
-        Option.get!
-            (((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[0]" }) +
-                    Option.get! (State.felts st { name := "output[1]" }))[{ name := "1-Output[2]" }] ←ₘ
-                Option.get!
-                    ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
-                        Option.get! (State.felts st { name := "output[0]" }) +
-                          Option.get! (State.felts st { name := "output[1]" }))
-                      { name := "1" }) -
-                  Option.get!
-                    ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
-                        Option.get! (State.felts st { name := "output[0]" }) +
-                          Option.get! (State.felts st { name := "output[1]" }))
-                      { name := "output[2]" }))
-              { name := "output[1]" }) *
-          Option.get!
-            (((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[0]" }) +
-                    Option.get! (State.felts st { name := "output[1]" }))[{ name := "1-Output[2]" }] ←ₘ
-                Option.get!
-                    ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
-                        Option.get! (State.felts st { name := "output[0]" }) +
-                          Option.get! (State.felts st { name := "output[1]" }))
-                      { name := "1" }) -
-                  Option.get!
-                    ((st.felts[{ name := "output[0]+Output[1]" }] ←ₘ
-                        Option.get! (State.felts st { name := "output[0]" }) +
-                          Option.get! (State.felts st { name := "output[1]" }))
-                      { name := "output[2]" }))
-              { name := "1-Output[1]" }))
+          Option.get! (State.felts st { name := "1" }) -
+            Option.get! (State.felts st { name := "output[2]" }))[felts][{ name := "output[2]<=1" }] ←
+        Option.get! (State.felts st { name := "output[1]" }) *
+          Option.get! (State.felts st { name := "1-Output[1]" }))
 
 -- Run the whole program by using part₅_state rather than Code.part₅
 def part₅_state_update (st: State): State :=

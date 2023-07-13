@@ -27,4 +27,10 @@ namespace Wheels
 
 end Wheels
 
+register_option pp.explicitOfNat : Bool := {
+  defValue := false
+  group    := "pp"
+  descr    := "(pretty printer) display implicit arguments of ofNat"
+}
+
 end Risc0

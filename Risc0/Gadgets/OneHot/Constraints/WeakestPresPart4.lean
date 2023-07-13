@@ -15,41 +15,11 @@ def part₄_state (st: State) : State :=
             (Option.get! (State.props st { name := "andEqz 2*output[2]+output[1]-input" }) ∧
               (Option.get! (State.felts st { name := "output[0]" }) = 0 ∨
                 Option.get! (State.felts st { name := "1-Output[0]" }) = 0)))[felts][{ name := "1-Output[1]" }] ←
-          Option.get!
-              ((st.felts[{ name := "output[0]<=1" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[0]" }) *
-                    Option.get! (State.felts st { name := "1-Output[0]" }))
-                { name := "1" }) -
-            Option.get!
-              ((st.felts[{ name := "output[0]<=1" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[0]" }) *
-                    Option.get! (State.felts st { name := "1-Output[0]" }))
-                { name := "output[1]" }))[felts][{ name := "output[1]<=1" }] ←
-        Option.get!
-            (((st.felts[{ name := "output[0]<=1" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[0]" }) *
-                    Option.get! (State.felts st { name := "1-Output[0]" }))[{ name := "1-Output[1]" }] ←ₘ
-                Option.get!
-                    ((st.felts[{ name := "output[0]<=1" }] ←ₘ
-                        Option.get! (State.felts st { name := "output[0]" }) *
-                          Option.get! (State.felts st { name := "1-Output[0]" }))
-                      { name := "1" }) -
-                  Option.get!
-                    ((st.felts[{ name := "output[0]<=1" }] ←ₘ
-                        Option.get! (State.felts st { name := "output[0]" }) *
-                          Option.get! (State.felts st { name := "1-Output[0]" }))
-                      { name := "output[1]" }))
-              { name := "output[1]" }) *
-          (Option.get!
-              ((st.felts[{ name := "output[0]<=1" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[0]" }) *
-                    Option.get! (State.felts st { name := "1-Output[0]" }))
-                { name := "1" }) -
-            Option.get!
-              ((st.felts[{ name := "output[0]<=1" }] ←ₘ
-                  Option.get! (State.felts st { name := "output[0]" }) *
-                    Option.get! (State.felts st { name := "1-Output[0]" }))
-                { name := "output[1]" })))
+          Option.get! (State.felts st { name := "1" }) -
+            Option.get! (State.felts st { name := "output[1]" }))[felts][{ name := "output[1]<=1" }] ←
+        Option.get! (State.felts st { name := "output[1]" }) *
+          (Option.get! (State.felts st { name := "1" }) -
+            Option.get! (State.felts st { name := "output[1]" })))
 
 -- Run the whole program by using part₄_state rather than Code.part₄
 def part₄_state_update (st: State): State :=

@@ -6,59 +6,34 @@ namespace Risc0.IsZero.Witness.Code
 open MLIRNotation
 
 def full : MLIRProgram :=
-  "1"         ←ₐ .Const 1;
-  "x"         ←ₐ Op.Get ⟨"input"⟩ 0 0;
+  "%0" ←ₐ .Const 1;
+  "%1" ←ₐ .Get ⟨"in"⟩ 0 0;
   nondet (
-    "isZeroBit" ←ₐ ??₀⟨"x"⟩;
-    ⟨"output"⟩[0]   ←ᵢ ⟨"isZeroBit"⟩;
-    "invVal"    ←ₐ Inv ⟨"x"⟩;
-    ⟨"output"⟩[1]   ←ᵢ ⟨"invVal"⟩  
+    "%4" ←ₐ ??₀⟨"%1"⟩;
+    ⟨"data"⟩[0] ←ᵢ ⟨"%4"⟩;
+    "%5" ←ₐ Inv⟨"%1"⟩;
+    ⟨"data"⟩[1] ←ᵢ ⟨"%5"⟩
   );
-  "arg1[0]"   ←ₐ .Get ⟨"output"⟩ 0 0;
-  guard ⟨"arg1[0]"⟩ then
-    ?₀ ⟨"x"⟩;
-  "1 - arg1[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"arg1[0]"⟩;
-  guard ⟨"1 - arg1[0]"⟩ then
-    "arg1[1]"        ←ₐ .Get ⟨"output"⟩ 0 1;
-    "x * arg1[1]"     ←ₐ .Mul ⟨"x"⟩ ⟨"arg1[1]"⟩;
-    "x * arg1[1] - 1" ←ₐ .Sub ⟨"x * arg1[1]"⟩ ⟨"1"⟩;
-    ?₀ ⟨"x * arg1[1] - 1"⟩
-
+  "%2" ←ₐ .Get ⟨"data"⟩ 0 0;
+  guard ⟨"%2"⟩ then (?₀ ⟨"%1"⟩);
+  "%3" ←ₐ .Sub ⟨"%0"⟩ ⟨"%2"⟩;
+  guard ⟨"%3"⟩ then ("%4" ←ₐ .Get ⟨"data"⟩ 0 1; "%5" ←ₐ .Mul ⟨"%1"⟩ ⟨"%4"⟩; "%6" ←ₐ .Sub ⟨"%5"⟩ ⟨"%0"⟩; ?₀ ⟨"%6"⟩)
+def getReturn (st: State) : BufferAtTime :=
+  st.buffers ⟨"data"⟩ |>.get!.getLast!
 def run (st: State) : BufferAtTime :=
-  full.runProgram st |>.lastOutput
+  getReturn (full.runProgram st)
 
-def part₀ : MLIRProgram :=
-  "1" ←ₐ .Const 1;
-  "x" ←ₐ Op.Get ⟨"input"⟩ 0 0
+end Code
 
-def part₁ : MLIRProgram := nondet (
-    "isZeroBit" ←ₐ ??₀⟨"x"⟩;
-    ⟨"output"⟩[0]   ←ᵢ ⟨"isZeroBit"⟩;
-    "invVal"    ←ₐ Inv ⟨"x"⟩;
-    ⟨"output"⟩[1]   ←ᵢ ⟨"invVal"⟩  
-  )
+def start_state (input : BufferAtTime) : State :=
+  { buffers := Map.fromList [(⟨"in"⟩, [input]), (⟨"data"⟩, [[none, none]])]
+  , bufferWidths := Map.fromList [(⟨"in"⟩, 1), (⟨"data"⟩, 2)]
+  , constraints := []
+  , cycle := 0
+  , felts := Map.empty
+  , props := Map.empty
+  , vars := [⟨"in"⟩, ⟨"data"⟩]
+  , isFailed := false
+  }
 
-def part₂ : MLIRProgram := "arg1[0]" ←ₐ .Get ⟨"output"⟩ 0 0
-
-def part₃ : MLIRProgram := guard ⟨"arg1[0]"⟩ then ?₀ ⟨"x"⟩
-
-def part₄ : MLIRProgram := "1 - arg1[0]" ←ₐ .Sub ⟨"1"⟩ ⟨"arg1[0]"⟩
-
-def part₅ : MLIRProgram :=
-  guard ⟨"1 - arg1[0]"⟩ then
-    "arg1[1]"        ←ₐ .Get ⟨"output"⟩ 0 1;
-    "x * arg1[1]"     ←ₐ .Mul ⟨"x"⟩ ⟨"arg1[1]"⟩;
-    "x * arg1[1] - 1" ←ₐ .Sub ⟨"x * arg1[1]"⟩ ⟨"1"⟩;
-    ?₀ ⟨"x * arg1[1] - 1"⟩
-
-abbrev parts_combined : MLIRProgram :=
-  part₀; part₁; part₂; part₃; part₄; part₅
-
-lemma parts_combine {st: State} :
-  Γ st ⟦full⟧ =
-  Γ st ⟦parts_combined⟧ := by
-  unfold full parts_combined
-    part₀ part₁ part₂ part₃ part₄ part₅
-  simp [MLIR.seq_assoc, MLIR.run_seq_def, MLIR.nondet_blocks_split]
-
-end Risc0.IsZero.Witness.Code
+end Risc0.IsZero.Witness

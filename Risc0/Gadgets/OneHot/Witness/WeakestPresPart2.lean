@@ -10,8 +10,8 @@ open MLIRNotation
 -- The state obtained by running Code.part₂ on st
 def part₂_state (st: State) : State :=
   (State.set!
-          ((State.set! st { name := "output" } 1
-                (Option.get! st.felts[({ name := "input == 1" }: FeltVar)]!)[felts][{ name := "input - 2" }] ←
+          (((State.set! st { name := "output" } 1
+                (Option.get! st.felts[({ name := "input == 1" } : FeltVar)]!))[felts][{ name := "input - 2" }] ←
               Option.get! (State.felts st { name := "input" }) -
                 Option.get! (State.felts st { name := "2" }))[felts][{ name := "input == 2" }] ←
             if Option.get! (State.felts st { name := "input" }) - Option.get! (State.felts st { name := "2" }) = 0 then

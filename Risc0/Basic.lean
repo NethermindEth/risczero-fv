@@ -11,6 +11,8 @@ import Mathlib.Data.Bitvec.Basic
 import Risc0.Map
 import Risc0.Wheels
 
+import Lean
+
 namespace Risc0
 
 @[inline]
@@ -32,6 +34,30 @@ abbrev FeltVar := Variable FeltTag
 abbrev PropVar := Variable PropTag
 
 abbrev Felt := ZMod P
+
+open Lean Meta PrettyPrinter Delaborator SubExpr in
+@[delab app.OfNat.ofNat] def delabOfNat : Delab := do
+  let a ← withAppFn $ withAppArg delab
+  let b ← withType delab
+  `(($a : $b))
+
+-- TODO: Inspect the term properly to un-resolve namespaces; Lean is being difficult
+set_option hygiene false in
+open Lean Meta Elab Term PrettyPrinter Delaborator SubExpr in
+@[delab app.Risc0.Variable.mk] def delabOfVariable : Delab := do
+  let ident ← withAppArg delab
+  let T ← withType delab
+  let translate (t : Term) : String := 
+    if s!"{t}" = "(Term.app `Variable [`VarType.BufferTag])" then "BufferVar"
+    else if s!"{t}" = "(Term.app `Variable [`VarType.FeltTag])" then "FeltVar"
+    else assert! s!"{t}" = "(Term.app `Variable [`VarType.PropTag])"; "PropVar"
+  let finalT := mkIdent <| translate T
+  `({ name := $ident : $finalT})
+
+def bufferWidths : List BufferVar := [({ name := "code" })]
+
+-- example : bufferWidths = bufferWidths := by
+--   unfold bufferWidths
 
 -- none is an unset value which can be written to, but not read
 -- some is a set value which can be read, and can only be written to if the new val is equal
@@ -253,15 +279,78 @@ def update (state : State) (name : String) (x : Option Lit) : State :=
 def updateFelts (state : State) (name : FeltVar) (x : Felt) : State :=
   { state with felts := state.felts[name] ←ₘ x }
 
-notation:61 st "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
+def dropFelts (st : State) (name : FeltVar) : State :=
+  { st with felts := st.felts.drop name }
+
+lemma dropFelts_buffers :
+  (dropFelts st name).buffers = st.buffers := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_bufferWidths :
+  (dropFelts st name).bufferWidths = st.bufferWidths := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_constraints :
+  (dropFelts st name).constraints = st.constraints := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_cycle :
+  (dropFelts st name).cycle = st.cycle := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_felts :
+  (dropFelts st name).felts = st.felts.drop name := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_isFailed :
+  (dropFelts st name).isFailed = st.isFailed := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_props :
+  (dropFelts st name).props = st.props := by
+  unfold dropFelts
+  rfl
+
+lemma dropFelts_vars :
+  (dropFelts st name).vars = st.vars := by
+  unfold dropFelts
+  rfl
+
+@[simp]
+lemma drop_update_same {st : State} {name : FeltVar} {x : Felt} : 
+  dropFelts (updateFelts st name x) name = dropFelts st name := by
+  simp [dropFelts, updateFelts]
+
+-- TODO rename
+@[simp]
+lemma drop_update_swap {st : State} {name name' : FeltVar} {x : Felt} (h : name ≠ name') :
+  dropFelts (updateFelts st name x) name' = updateFelts (dropFelts st name') name x := by
+  simp [dropFelts, updateFelts]
+  exact Map.update_drop_swap h
+
+
+notation:61 st:max "[felts][" n:61 "]" " ← " x:49 => State.updateFelts st n x
 
 def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
   { state with props := state.props[name] ←ₘ x }
 
-notation:61 st "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
+lemma drop_updateProps_swap :
+  dropFelts (updateProps st name x) name' = updateProps (dropFelts st name') name x :=
+  sorry
+
+notation:61 st:max "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
 
 lemma updateFelts_def : 
   updateFelts st k v = { st with felts := st.felts[k] ←ₘ v } := rfl
+
+lemma dropFelts_def :
+  dropFelts st k = { st with felts := st.felts.drop k } := rfl
 
 lemma updateProps_def :
   updateProps st k v = { st with props := st.props[k] ←ₘ v } := rfl
@@ -330,8 +419,13 @@ lemma updateFelts_props : (updateFelts st name x).props = st.props := by simp [u
 @[simp]
 lemma updateFelts_vars : (updateFelts st name x).vars = st.vars := by simp [updateFelts]
 
-@[simp]
+-- @[simp]
 lemma updateFelts_felts : (updateFelts st name x).felts = st.felts[name] ←ₘ x := by simp [updateFelts]
+
+@[simp]
+lemma updateFelts_felts_get_next (h: name ≠ name') : (updateFelts st name x).felts name' = st.felts name' := by
+  simp [updateFelts]
+  exact Map.update_get_next' h
 
 @[simp]
 lemma updateProps_buffers : (updateProps st name x).buffers = st.buffers := by simp [updateProps]
@@ -354,7 +448,7 @@ lemma updateProps_felts : (updateProps st name x).felts = st.felts := by simp [u
 @[simp]
 lemma updateProps_vars : (updateProps st name x).vars = st.vars := by simp [updateProps]
 
-@[simp]
+-- @[simp]
 lemma updateProps_props : (updateProps st name x).props = st.props[name] ←ₘ x := by simp [updateProps]
 
 -- @[simp]
@@ -377,33 +471,86 @@ lemma update_constraint {state : State} {name : String} {c : Prop} :
   update state name (.some (.Constraint c)) = { state with props := state.props.update ⟨name⟩ c } := rfl
 
 @[simp]
+lemma update_skip_felts (h: name' ≠ name) :
+  (State.felts
+    (update st name' x)
+    { name }) =
+  (State.felts st { name }) := by
+    simp only [State.update]
+    aesop
+
+@[simp]
+lemma update_skip_nested_felts (h: name' ≠ name) :
+  (State.felts
+    (update ( update st name' x) name y)
+    { name }) =
+  (State.felts
+    (update st name y)
+    { name }) := by
+  simp [h, State.update]
+  aesop
+  all_goals simp [h, ←Map.getElem_def, Map.update_get_next]
+
+@[simp]
 lemma if_constraints {state₁ state₂ : State} {x : Felt} :
   (if x = 0 then state₁ else state₂).constraints =
   if x = 0 then state₁.constraints else state₂.constraints := by apply apply_ite
 
-lemma buffers_if {c} [Decidable c] {st st' : State} (h : st.buffers = st'.buffers) :
+lemma buffers_if_eq {c} [Decidable c] {st st' : State} (h : st.buffers = st'.buffers) :
   State.buffers (if c then st else st') = st.buffers := by aesop
 
-lemma bufferWidths_if {c} [Decidable c] {st st' : State} (h : st.bufferWidths = st'.bufferWidths) :
+lemma bufferWidths_if_eq {c} [Decidable c] {st st' : State} (h : st.bufferWidths = st'.bufferWidths) :
   State.bufferWidths (if c then st else st') = st.bufferWidths := by aesop
 
-lemma constraints_if {c} [Decidable c] {st st' : State} (h : st.constraints = st'.constraints) :
+lemma constraints_if_eq {c} [Decidable c] {st st' : State} (h : st.constraints = st'.constraints) :
   State.constraints (if c then st else st') = st.constraints := by aesop
 
-lemma cycle_if {c} [Decidable c] {st st' : State} (h : st.cycle = st'.cycle) :
+lemma cycle_if_eq {c} [Decidable c] {st st' : State} (h : st.cycle = st'.cycle) :
   State.cycle (if c then st else st') = st.cycle := by aesop
 
-lemma felts_if {c} [Decidable c] {st st' : State} (h : st.felts = st'.felts) :
+lemma felts_if_eq {c} [Decidable c] {st st' : State} (h : st.felts = st'.felts) :
   State.felts (if c then st else st') = st.felts := by aesop
 
-lemma isFailed_if {c} [Decidable c] {st st' : State} (h : st.isFailed = st'.isFailed) :
+lemma isFailed_if_eq {c} [Decidable c] {st st' : State} (h : st.isFailed = st'.isFailed) :
   State.isFailed (if c then st else st') = st.isFailed := by aesop
 
-lemma props_if {c} [Decidable c] {st st' : State} (h : st.props = st'.props) :
+lemma props_if_eq {c} [Decidable c] {st st' : State} (h : st.props = st'.props) :
   State.props (if c then st else st') = st.props := by aesop
 
-lemma vars_if {c} [Decidable c] {st st' : State} (h : st.vars = st'.vars) :
+lemma vars_if_eq {c} [Decidable c] {st st' : State} (h : st.vars = st'.vars) :
   State.vars (if c then st else st') = st.vars := by aesop
+
+lemma buffers_if_eq_if_buffers [Decidable c] :
+  State.buffers (if c then st else st') = if c then st.buffers else st'.buffers := by
+    aesop
+
+lemma bufferWidths_if_eq_if_bufferWidths [Decidable c] :
+  State.bufferWidths (if c then st else st') = if c then st.bufferWidths else st'.bufferWidths := by
+    aesop
+
+lemma constraints_if_eq_if_constraints [Decidable c] :
+  State.constraints (if c then st else st') = if c then st.constraints else st'.constraints := by
+    aesop
+
+lemma cycle_if_eq_if_cycle [Decidable c] :
+  State.cycle (if c then st else st') = if c then st.cycle else st'.cycle := by
+    aesop
+
+lemma felts_if_eq_if_felts [Decidable c] :
+  State.felts (if c then st else st') = if c then st.felts else st'.felts := by
+    aesop
+
+lemma isFailed_if_eq_if_isFailed [Decidable c] :
+  State.isFailed (if c then st else st') = if c then st.isFailed else st'.isFailed := by
+    aesop
+
+lemma props_if_eq_if_props [Decidable c] :
+  State.props (if c then st else st') = if c then st.props else st'.props := by
+    aesop
+
+lemma vars_if_eq_if_vars [Decidable c] :
+  State.vars (if c then st else st') = if c then st.vars else st'.vars := by
+    aesop
 
 end State
 
@@ -522,6 +669,20 @@ end MLIRNotation
 
 instance : Inhabited Felt := ⟨-42⟩
 
+-- Naughty
+@[simp]
+lemma State.get_dropFelts_of_ne {st : State} {x : FeltVar} (h : name ≠ x) :
+  Option.get! (st.dropFelts name).felts[x] = Option.get! st.felts[x] := by
+  unfold State.dropFelts Map.drop
+  rw [Map.getElem_def]
+  aesop
+
+@[simp]
+lemma State.get_dropFelts_of_ne' {st : State} {x : FeltVar} (h : name ≠ x) :
+  Option.get! ((st.dropFelts name).felts x) = Option.get! (st.felts x) := by
+  unfold State.dropFelts Map.drop
+  aesop
+
 def BufferAtTime.slice (buf : BufferAtTime) (offset size : ℕ) : BufferAtTime :=
   buf.drop offset |>.take size
 
@@ -534,6 +695,8 @@ def Buffer.back (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
 
 lemma Buffer.back_def {st : State} {buf : BufferVar} {back : Back} :
   Buffer.back st buf back offset = st.buffers[buf].get!.get! (st.cycle - back.toNat, offset) := rfl
+
+lemma Buffer.back_zero : Buffer.back st buf 0 k = st.buffers[buf].get!.get! (st.cycle, k) := rfl
 
 def isGetValid (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
   back ≤ st.cycle ∧
@@ -560,6 +723,36 @@ lemma getImpl_def : getImpl st buf back offset =
                     then Option.some <| Lit.Val (Buffer.back st buf back offset).get!
                     else .none := rfl
 
+--Review: should any of these be simps?
+lemma getImpl_none_or_val : getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := by
+  simp [getImpl]
+  aesop
+
+lemma getImpl_val_of_some : getImpl st buf back offset = some lit → ∃ x, lit = .Val x := by
+  have h: getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := getImpl_none_or_val
+  aesop
+
+lemma getImpl_skip_none_update : getImpl (st[name] ←ₛ .none) buf back offset = getImpl st buf back offset := by
+  simp [State.update, getImpl, isGetValid, Buffer.back]
+
+lemma getImpl_skip_val_update : getImpl (st[name] ←ₛ .some (.Val x)) buf back offset = getImpl st buf back offset := by
+  simp [State.update, getImpl, isGetValid, Buffer.back]
+
+@[simp]
+lemma getImpl_skip_get_update:
+  getImpl (st[name] ←ₛ getImpl st' buf' back' offset') buf back offset =
+  getImpl st buf back offset := by
+  generalize eq: getImpl st' buf' back' offset' = x
+  cases x with
+   | none => exact getImpl_skip_none_update
+   | some lit =>
+    have h: ∃ x, lit = Lit.Val x := getImpl_val_of_some eq
+    aesop
+
+def feltBitAnd (x y: Felt) : Felt :=
+  ↑(Bitvec.and (Bitvec.ofNat 256 x.val) (Bitvec.ofNat 256 y.val)).toNat
+
+
 -- Evaluate a pure functional circuit.
 def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
   match op with
@@ -571,7 +764,7 @@ def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
     | Neg lhs     => .some <| .Val <| 0                  - st.felts[lhs].get!
     | Mul lhs rhs => .some <| .Val <| st.felts[lhs].get! * st.felts[rhs].get!
     | Pow lhs rhs => .some <| .Val <| st.felts[lhs].get! ^ rhs
-    | BitAnd lhs rhs => .some <| .Val <| ↑(Bitvec.and (Bitvec.ofNat 256 (st.felts lhs).get!.val) (Bitvec.ofNat 256 (st.felts rhs).get!.val)).toNat
+    | BitAnd lhs rhs => .some <| .Val <| feltBitAnd st.felts[lhs].get! st.felts[rhs].get!
     | Inv x => .some <| .Val <| if st.felts[x]!.get! = 0 then 0 else st.felts[x]!.get!⁻¹
     -- Logic
     | Isz x => .some <| .Val <| if st.felts[x]!.get! = 0 then 1 else 0
@@ -641,7 +834,7 @@ lemma eval_mul : Γ st ⟦@Mul α x y⟧ₑ = .some (.Val ((st.felts x).get! * (
 lemma eval_isz : Γ st ⟦??₀x⟧ₑ = .some (.Val (if (st.felts x).get! = 0 then 1 else 0)) := rfl
 
 @[simp]
-lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .some (.Val (if st.felts[x]!.get! = 0 then 0 else st.felts[x]!.get!⁻¹)) := rfl
+lemma eval_inv : Γ st ⟦Inv x⟧ₑ = .some (.Val (if st.felts[x].get! = 0 then 0 else st.felts[x].get!⁻¹)) := rfl
 
 @[simp]
 lemma eval_andEqz : Γ st ⟦@AndEqz α c x⟧ₑ =
@@ -650,7 +843,13 @@ lemma eval_andEqz : Γ st ⟦@AndEqz α c x⟧ₑ =
 @[simp]
 lemma eval_bitAnd :
   Γ st ⟦@BitAnd α x y⟧ₑ =
-    (.some <| .Val <| ↑(Bitvec.and (Bitvec.ofNat 256 (st.felts x).get!.val) (Bitvec.ofNat 256 (st.felts y).get!.val)).toNat) := rfl
+    (.some <| .Val <| feltBitAnd (st.felts x).get! (st.felts y).get!) := rfl
+
+@[simp]
+lemma eval_neg : Γ st ⟦@Neg α x⟧ₑ = .some (.Val (0 - (st.felts x).get!)) := rfl
+
+@[simp]
+lemma eval_pow : Γ st ⟦@Pow α x n⟧ₑ = .some (.Val ((st.felts x).get! ^ n)) := rfl
 
 @[simp]
 lemma eval_andCond :
@@ -667,6 +866,7 @@ end Op
 inductive MLIR : IsNondet → Type where
   -- Meta
   | Assign    : String        → Op x   → MLIR x
+  | DropFelt  : FeltVar                → MLIR x
   | Eqz       : FeltVar                → MLIR x
   | If        : FeltVar       → MLIR x → MLIR x
   | Nondet    : MLIR InNondet          → MLIR NotInNondet
@@ -681,6 +881,7 @@ namespace MLIRNotation
 
 scoped infix   :51                    "←ₐ "                      => MLIR.Assign
 scoped prefix  :52                    "?₀"                       => MLIR.Eqz
+scoped prefix  :52                    "dropfelt "                => MLIR.DropFelt
 scoped notation:51                    "guard " c " then " x:51   => MLIR.If c x
 scoped prefix  :max                   "nondet"                   => MLIR.Nondet
 scoped infixr  :50                    "; "                       => MLIR.Sequence
@@ -695,6 +896,42 @@ abbrev withEqZero (x : Felt) (st : State) : State :=
 
 lemma withEqZero_def : withEqZero x st = {st with constraints := (x = 0) :: st.constraints} := rfl
 
+lemma withEqZero_updateFelts :
+  withEqZero y (State.updateFelts st name x) = State.updateFelts (withEqZero y st) name x := by
+  aesop
+
+lemma withEqZero_buffers :
+  (withEqZero x st).buffers = st.buffers := by
+  aesop
+
+lemma withEqZero_bufferWidths :
+  (withEqZero x st).bufferWidths = st.bufferWidths := by
+  aesop
+
+lemma withEqZero_constraints :
+  (withEqZero x st).constraints = (x = 0) :: st.constraints := by
+  aesop
+
+lemma withEqZero_cycle :
+  (withEqZero x st).cycle = st.cycle := by
+  aesop
+
+lemma withEqZero_felts :
+  (withEqZero x st).felts = st.felts := by
+  aesop
+
+lemma withEqZero_isFailed :
+  (withEqZero x st).isFailed = st.isFailed := by
+  aesop
+
+lemma withEqZero_props :
+  (withEqZero x st).props = st.props := by
+  aesop
+
+lemma withEqZero_vars :
+  (withEqZero x st).vars = st.vars := by
+  aesop
+
 def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer.Idx) (val : Felt) : State :=
   match (st.buffers[bufferVar].get!).set? idx val with
     | .some b => {st with buffers := st.buffers[bufferVar] ←ₘ b}
@@ -702,6 +939,11 @@ def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer
 
 def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
   st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
+
+lemma getImpl_skip_set_offset (h: offset ≠ offset'):
+  getImpl (State.set! st buf offset val) buf back offset' =
+  getImpl st buf back offset' := by
+    sorry
 
 @[simp]
 lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val : Felt} :
@@ -720,6 +962,7 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
   match program with
     -- Meta
     | Assign name op => st[name] ←ₛ Γ st ⟦op⟧ₑ
+    | DropFelt k     => .dropFelts st k
     | Eqz x          => withEqZero st.felts[x]!.get! st
     | If x program   => if st.felts[x]!.get! = 0 then st else program.run st
     | Nondet block   => block.run st
@@ -734,5 +977,7 @@ def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
 abbrev MLIR.runProgram (program : MLIRProgram) := program.run
 
 notation:61 "Γ " st:max " ⟦" p:49 "⟧" => MLIR.run p st
+
+open MLIRNotation
 
 end Risc0
