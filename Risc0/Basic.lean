@@ -964,10 +964,6 @@ def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer
 def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
   st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
 
-def State.set!_sane (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
-  match st.buffers[bufferVar] with
-    | .none => st
-    | .some buffer => st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
 
 @[simp]
 lemma State.set!_cycle {st : State} : (st.set! buf off x).cycle = st.cycle := by
@@ -1200,7 +1196,10 @@ lemma back_set!_of_ne {st : State} (h : offset ≠ offset') :
   Buffer.back st buf back offset' := by
   unfold Buffer.back Buffer.get! Buffer.Idx.data Buffer.Idx.time
   simp only [State.set!_cycle, ge_iff_le]
-  exact List.get!.get!.set! (Ne.symm h)
+  generalize eq : st.cycle - back.toNat = idx
+  
+
+  -- exact List.get!.get!.set! (Ne.symm h)
 
   -- unfold Buffer.back Buffer.get! Buffer.Idx.data Buffer.Idx.time
   -- simp only [State.set!_cycle, ge_iff_le]
@@ -1230,6 +1229,44 @@ lemma getImpl_skip_set_offset (h: offset ≠ offset') :
     rw [isGetValid_set_offset_of_ne h] at h_1 <;>
     contradiction  
 
+lemma getImpl_skip_set_offset_false (h: offset ≠ offset') :
+  getImpl (State.set! st buf offset val) buf back offset' =
+  getImpl st buf back offset' := by sorry
+
+lemma wa'' {buffer : Buffer}
+           (h : st.buffers[buf] = some buffer)
+           (h₁ : List.get! (List.get! buffer (List.length buffer - (1 : ℕ))) a = some b) :
+           State.set! st buf a b = { st with buffers := st.buffers[buf] ←ₘ buffer } := by
+  unfold State.set!; simp [h]
+  unfold State.setBufferElementImpl; simp [Option.get!, h]
+  simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList]
+  unfold Buffer.set?
+  simp [Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data]
+  aesop
+  unfold Map.update
+  funext z
+  aesop
+  
+#exit
+
+lemma wa' (h : st.buffers[buf].isSome) : State.set! st buf a b = sorry := by
+  unfold State.set!; simp [h]
+  unfold State.setBufferElementImpl; simp [Option.get!, h]
+  simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList]
+  unfold Buffer.set?
+  simp [Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data]
+  aesop
+  
+
+
+lemma ohSnap!' (contra : st.buffers[buf].isSome) :
+  getImpl (State.set! st buf offset val) buf back offset' =
+  getImpl st buf back offset' := by
+  rw [wa]
+  simp [getImpl, isGetValid, Buffer.back]
+  rw [contra]
+  simp [Option.get!, panicWithPosWithDecl, panic, panicCore, default]
+
 lemma getImpl_skip_set_offset' (h: offset ≠ offset') :
   getImpl (State.set! st buf offset val) buf back offset' =
   getImpl st buf back offset' := by
@@ -1238,7 +1275,9 @@ lemma getImpl_skip_set_offset' (h: offset ≠ offset') :
     rw [ohSnap! eq]
   · have : st.buffers[buf].isSome := by
       rwa [Option.isNone_iff_eq_none, ←ne_eq, Option.ne_none_iff_isSome] at eq
-    
+    rw [Option.isSome_iff_exists] at this
+    rcases this with ⟨buffer, h₁⟩
+
     
 
 
