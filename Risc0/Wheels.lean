@@ -12,6 +12,13 @@ namespace List
 def push {α : Type} (x : α) (l : List α) : List α :=
   l ++ [x]
 
+lemma get!_eq_get_of_lt [Inhabited α] {l : List α} (h : n < l.length) :
+  List.get! l n = List.get l ⟨n, h⟩ := by
+  induction l generalizing n with
+    | nil => simp at h
+    | cons hd tl ih => unfold List.get List.get!
+                       cases n <;> aesop
+
 end List
 
 namespace Vector

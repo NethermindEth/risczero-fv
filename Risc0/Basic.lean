@@ -105,6 +105,7 @@ def set? (buf : Buffer) (idx: Idx) (val: Felt) : Option Buffer :=
     then .some <| List.set buf idx.time (bufferAtTime.set idx.data (.some val))
     else .none
 
+
 def isValidUpdate (old new : BufferAtTime) :=
   old.length = new.length ∧
   (List.zip old new).all
@@ -963,6 +964,11 @@ def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer
 def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
   st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
 
+def State.set!_sane (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
+  match st.buffers[bufferVar] with
+    | .none => st
+    | .some buffer => st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
+
 @[simp]
 lemma State.set!_cycle {st : State} : (st.set! buf off x).cycle = st.cycle := by
   unfold set! setBufferElementImpl
@@ -1024,10 +1030,219 @@ lemma get_set!_getElem {st : State} :
   unfold State.set! State.setBufferElementImpl
   aesop
 
-lemma getImpl_skip_set_offset (h: offset ≠ offset'):
-  getImpl (State.set! st buf offset val) buf back offset' =
-  getImpl st buf back offset' := by sorry
+  -- unfold State.set! State.setBufferElementImpl Buffer.set? Buffer.getBufferAtTime!
+  -- aesop
+  -- · simp [Buffer.back, Buffer.get!, Buffer.Idx.data, Buffer.Idx.time]
+  -- · simp [Buffer.back, Buffer.get!, Buffer.Idx.data, Buffer.Idx.time]
+  --   aesop
+  --   simp [Option.isEqSome] at h_1
+  --   aesop; aesop
+  --   generalize eq : List.length (Option.get! st.buffers[buf]) - (1 : ℕ) = n at *
+  --   generalize eq₁ : st.cycle - Back.toNat back = m at *
+  --   generalize eq₂ : List.get! (Option.get! st.buffers[buf]) n = z at *
+  --   generalize eq₃ : Option.get! st.buffers[buf] = z' at *
+  --   simp only [Buffer.Idx.data] at heq
+  --   unfold List.set
+  --   aesop
+  --   · aesop
+  --     have : as = [] := by cases as <;> aesop
+  --     subst this
+  --     unfold List.set
+  --     aesop
 
+    -- unfold List.set
+    -- aesop
+    -- unfold List.set
+    -- aesop
+    -- unfold Option.isNone at h_2
+    -- simp [h_2]
+
+  -- unfold State.set! State.setBufferElementImpl Buffer.set? Buffer.getBufferAtTime!
+  -- aesop
+  -- · simp [Buffer.back, Buffer.get!, Buffer.Idx.data, Buffer.Idx.time]
+  -- · simp [Buffer.back, Buffer.get!, Buffer.Idx.data, Buffer.Idx.time]
+  --   generalize eq : List.length (Option.get! st.buffers[buf]) - (1 : ℕ) = n
+  --   · generalize eq₁ : st.cycle - Back.toNat back = m
+  --     generalize eq₂ : List.get! (Option.get! st.buffers[buf]) n = z
+  --     generalize eq₃ : Option.get! st.buffers[buf] = z'
+  --     unfold List.set
+  --     aesop
+  --     unfold List.set
+  --     aesop
+  --     unfold Option.isNone at h_2
+  --     simp [h_2]
+
+    
+
+  -- unfold Buffer.back
+  -- simp [Buffer.get!, Buffer.Idx.data, Buffer.Idx.time]
+  -- generalize eq : st.cycle - Back.toNat back = idx
+  -- unfold State.set! State.setBufferElementImpl Buffer.set? Buffer.getBufferAtTime!
+  -- aesop; aesop
+  -- unfold Option.isEqSome at h_1
+  -- unfold Option.isNone at h_2
+  -- aesop; aesop
+  -- simp [Buffer.Idx.time, Buffer.Idx.data]
+  -- generalize eq₁ : Option.get! st.buffers[buf] = z
+  -- unfold List.set
+  -- aesop
+  -- unfold List.set
+  -- aesop
+  
+
+
+
+-- lemma wa {h : offset ≠ offset'} :
+--   isGetValid st buf back offset' =
+--   isGetValid (State.set! st buf offset val) buf back offset' := by
+--   simp [isGetValid]
+
+-- private lemma testN {st : State} (h : st.buffers[buf] = none) :
+--   State.set! st buf offset val = sorry := by
+--   unfold State.set!
+--   rw [h]
+--   simp
+--   unfold State.setBufferElementImpl
+--   rw [h]
+--   unfold Buffer.set?
+--   simp
+--   aesop
+
+private lemma List.get!.get!.set!_aux :
+  (State.set! st buf m' val).buffers[buf].isSome ↔
+  st.buffers[buf].isSome := by sorry
+  -- simp [Option.isSome_iff_exists]
+  -- by_cases st.buffers[buf].isSome
+  -- · rw [Option.isSome_iff_exists] at h
+  --   rcases h with ⟨w, h⟩
+  --   unfold State.set! State.setBufferElementImpl Buffer.set? Buffer.getBufferAtTime!
+  --   aesop
+  -- · simp at h
+  --   rw [Option.isNone_iff_eq_none] at h
+  --   rw [h]
+  --   apply Iff.intro <;> intros h'
+  --   · rcases h' with ⟨h', w'⟩
+      
+
+
+  --   unfold State.set! State.setBufferElementImpl Buffer.set? Buffer.getBufferAtTime! Buffer.Idx.time Buffer.Idx.data Option.isEqSome Option.get!
+  --   aesop
+  --   split_ifs at a <;> aesop
+  --   · aesop
+  --     unfold panicWithPosWithDecl panic panicCore at heq
+
+  -- unfold State.set! Option.isSome State.setBufferElementImpl Buffer.set? Option.isEqSome Buffer.getBufferAtTime! Option.get! Buffer.Idx.data Buffer.Idx.time List.set
+  -- aesop; aesop
+  -- unfold List.set at a
+  -- aesop
+
+private lemma List.get!.get!.set!_aux' :
+  (State.set! st buf m' val).buffers[buf].isNone ↔
+  st.buffers[buf].isNone := by sorry
+
+lemma wa (h : st.buffers[buf] = none) : State.set! st buf a b =
+                                        {st with buffers := st.buffers[buf] ←ₘ []} := by
+  unfold State.set!; simp [h]
+  unfold State.setBufferElementImpl; simp [Option.get!, h]
+  simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList]
+  unfold Buffer.set?
+  simp
+
+lemma ohSnap! (contra : st.buffers[buf] = none) :
+  getImpl (State.set! st buf offset val) buf back offset' =
+  getImpl st buf back offset' := by
+  rw [wa contra]
+  simp [getImpl, isGetValid, Buffer.back]
+  rw [contra]
+  simp [Option.get!, panicWithPosWithDecl, panic, panicCore, default]
+
+
+-- lemma List.get!.get!.set! (h : m ≠ m') :
+--   List.get! (List.get! ((State.set! st buf m' val).buffers[buf].get!) k) m =
+--   List.get! (List.get! st.buffers[buf].get! k) m := by
+--   unfold Option.get!
+--   generalize eq : st.buffers[buf] = buffer
+--   cases buffer
+--   · rw [←Option.isNone_iff_eq_none, ←@List.get!.get!.set!_aux' _ _ m' val] at eq
+--     aesop
+--   · next val' => have : ∃ v, st.buffers[buf] = some v := ⟨val, eq⟩
+--                  rw [←Option.isSome_iff_exists, ←@List.get!.get!.set!_aux _ _ m' val] at this
+--                  aesop; aesop
+--                  unfold State.set! State.setBufferElementImpl Buffer.set? Buffer.getBufferAtTime! Buffer.Idx.time Buffer.Idx.data at heq 
+--                  simp at heq
+--                  aesop
+--                  simp [Option.isEqSome, Option.isNone] at heq
+--                  split_ifs at heq
+--                  simp at heq
+--                  subst heq
+--                  rfl
+--                  simp at heq
+--                  rw [←heq]
+--                  congr 2
+--                  unfold List.set
+--                  aesop
+--                  aesop
+                 
+
+                 
+
+
+
+    -- rw [←Option.isSome_iff_exists, ←@List.get!.get!.set!_aux' _ _ m' val] at eq
+
+  -- List.get!.get!.set!_aux
+  -- induction k generalizing m m' with 
+  --   | zero => sorry
+  --   | succ k ih => simp
+
+lemma back_set!_of_ne {st : State} (h : offset ≠ offset') :
+  Buffer.back (State.set! st buf offset val) buf back offset' = 
+  Buffer.back st buf back offset' := by
+  unfold Buffer.back Buffer.get! Buffer.Idx.data Buffer.Idx.time
+  simp only [State.set!_cycle, ge_iff_le]
+  exact List.get!.get!.set! (Ne.symm h)
+
+  -- unfold Buffer.back Buffer.get! Buffer.Idx.data Buffer.Idx.time
+  -- simp only [State.set!_cycle, ge_iff_le]
+  -- generalize eq₁ : st.cycle - Back.toNat back = idx
+  -- generalize eq₂ : st.buffers[buf] = buffer
+  -- by_cases eq₃ : offset' < List.length (List.get! (Option.get! (State.set! st buf offset val).buffers[buf]) idx)
+  -- · rw [List.get!_eq_get_of_lt eq₃]
+    
+  
+  
+
+
+-- #exit
+
+lemma isGetValid_set_offset_of_ne (h : offset ≠ offset') : 
+  isGetValid (State.set! st buf offset val) buf back offset' = 
+  isGetValid st buf back offset' := by
+  unfold isGetValid
+  simp [back_set!_of_ne h]
+
+lemma getImpl_skip_set_offset (h: offset ≠ offset') :
+  getImpl (State.set! st buf offset val) buf back offset' =
+  getImpl st buf back offset' := by
+  unfold getImpl
+  rw [back_set!_of_ne h]
+  aesop <;> aesop <;>
+    rw [isGetValid_set_offset_of_ne h] at h_1 <;>
+    contradiction  
+
+lemma getImpl_skip_set_offset' (h: offset ≠ offset') :
+  getImpl (State.set! st buf offset val) buf back offset' =
+  getImpl st buf back offset' := by
+  by_cases eq : st.buffers[buf].isNone
+  · rw [Option.isNone_iff_eq_none] at eq
+    rw [ohSnap! eq]
+  · have : st.buffers[buf].isSome := by
+      rwa [Option.isNone_iff_eq_none, ←ne_eq, Option.ne_none_iff_isSome] at eq
+    
+    
+
+
+#exit
 @[simp]
 lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val : Felt} :
   (State.set! st bufferVar offset val).felts = st.felts := by
