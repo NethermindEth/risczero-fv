@@ -238,14 +238,17 @@ section drop
   lemma drop_past_eqz (h : x ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Eqz β x⟧ =
     Γ (Γ st ⟦@MLIR.Eqz β x⟧) ⟦@MLIR.DropFelt α y⟧ := by
-      simp [MLIR.run_dropfelt, MLIR.run_eqz, withEqZero, State.dropFelts, Map.drop]
-      sorry --map[x]! issues introduced by eqz
+      simp [
+        MLIR.run_dropfelt, MLIR.run_eqz, withEqZero, State.dropFelts, Map.drop, getElem!, Map.getElem_def
+      ]
+      aesop
 
   lemma drop_past_get (h: ⟨x⟩ ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.Get buf back offset)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β x (Op.Get buf back offset)⟧) ⟦@MLIR.DropFelt α y⟧ := by
       simp [MLIR.run_dropfelt, MLIR.run_ass_def]
-      sorry
+      MLIR
+      exact dropFelts_update_of_ne h
 
   lemma drop_past_if {branch: MLIR β}
     (h: y ≠ x)
@@ -262,9 +265,10 @@ section drop
         MLIR.run_dropfelt, MLIR.run_ass_def, State.updateFelts, Map.update_get_next', *,
         State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle,
         State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars, State.dropFelts,
-        Map.update_drop_swap, Map.drop_get
+        Map.update_drop_swap, Map.drop_get, Map.drop, Map.update
       ]
-      sorry
+      funext z
+      aesop
   
   -- lemma drop_past_if (h : y ≠ x) (h₁ : Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦prog⟧ = Γ (Γ st ⟦prog⟧) ⟦@MLIR.DropFelt α y⟧) :
   --   Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.If β x prog⟧ =
@@ -301,7 +305,10 @@ section drop
   lemma drop_past_sub (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.Sub lhs rhs)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β x (Op.Sub lhs rhs)⟧) ⟦@MLIR.DropFelt α y⟧ := by
-      sorry
+      simp [MLIR.run_dropfelt, MLIR.run_ass_def]
+      simp [State.drop_update_swap, h]
+      unfold State.dropFelts Map.drop State.updateFelts
+      aesop
 
 end drop
 
@@ -315,7 +322,9 @@ section get
         | none => aesop
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          sorry
+          aesop
+          rewrite [updateFelts_neq_comm (by aesop)]
+          rfl
     
   lemma get_past_andEqz (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.AndEqz l r)⟧ =
@@ -326,12 +335,19 @@ section get
         | none => aesop
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          sorry
+          aesop
 
   lemma get_past_bitAnd (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.BitAnd l r)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β y (Op.BitAnd l r)⟧) ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧ := by
-      sorry
+      simp only [MLIR.run_ass_def, Op.eval, *]
+      generalize eq: getImpl st buf back offset = get
+      cases get with
+        | none => aesop
+        | some lit =>
+          have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
+          aesop
+          rw [updateFelts_neq_comm (by aesop)]
 
   lemma get_past_const (h: x ≠ y) :
   Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.Const c)⟧ =
@@ -354,15 +370,27 @@ section get
   lemma get_past_get_buf (h: buf ≠ buf') (h': x ≠ y) :
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.Get buf' back' offset')⟧ =
     Γ (Γ st ⟦@MLIR.Assign β y (Op.Get buf' back' offset')⟧) ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧ := by
-      sorry
+      simp only [MLIR.run_ass_def, Op.eval, *, getImpl_skip_get_update]
+      generalize eq1: getImpl st buf back offset = get1
+      generalize eq2: getImpl st buf' back' offset' = get2
+      cases get1 with
+        | none => simp [State.update]; aesop
+        | some lit1 =>
+          have h1: ∃ k1, lit1 = Lit.Val k1 := getImpl_val_of_some eq1
+          cases get2 with
+            | none => aesop
+            | some lit2 =>
+              have h2: ∃ k2, lit2 = Lit.Val k2 := getImpl_val_of_some eq2
+              aesop
+              rw [updateFelts_neq_comm (by aesop)]
 
   lemma get_past_get_offset (h: offset ≠ offset') (h': x ≠ y) :
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.Get buf' back' offset')⟧ =
     Γ (Γ st ⟦@MLIR.Assign β y (Op.Get buf' back' offset')⟧) ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧ := by
-      simp only [MLIR.run_ass_def, Op.eval] --REVIEW: eval_getBuffer does not go to getImpl, is this expected
-      generalize eq1: getImpl st buf back offset = get1
-      generalize eq2: getImpl st buf' back' offset' = get2
-      sorry
+      simp only [MLIR.run_ass_def, Op.eval, getImpl_skip_get_update] --REVIEW: eval_getBuffer does not go to getImpl, is this expected
+      unfold getImpl; aesop
+      unfold State.updateFelts; aesop
+      unfold Map.update; funext z; aesop
 
   lemma get_past_mul (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.Mul l r)⟧ =
@@ -373,12 +401,22 @@ section get
         | none => aesop
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          sorry
+          aesop
+          rewrite [updateFelts_neq_comm (by aesop)]
+          rfl
 
   lemma get_past_set_buf (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Set buf' index val⟧ =
     Γ (Γ st ⟦@MLIR.Set buf' index val⟧) ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧ := by
-      sorry
+      simp [MLIR.run_ass_def, MLIR.run_set_def, Op.eval, getImpl_skip_get_update, getElem!]
+      generalize eq : getImpl st buf back offset = get; simp only [getElem]
+      rw [State.update_skip_felts _ (by aesop),
+         ←@Map.getElem_def _ _ (State.felts st),
+         getImpl_skip_set (Ne.symm h'),
+         eq]
+      generalize eq₁ : Option.get! st.felts[{ name := val.name : FeltVar }] = y
+      rw [←eq]
+      exact State.set!_get_getImpl_comm
 
   lemma get_past_sub (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.Sub l r)⟧ =
@@ -389,7 +427,10 @@ section get
         | none => aesop
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          sorry
+          aesop
+          rewrite [updateFelts_neq_comm (by aesop)]
+          rfl
+
 
 end get
 

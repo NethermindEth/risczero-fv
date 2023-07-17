@@ -341,8 +341,8 @@ def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
   { state with props := state.props[name] ←ₘ x }
 
 lemma drop_updateProps_swap :
-  dropFelts (updateProps st name x) name' = updateProps (dropFelts st name') name x :=
-  sorry
+  dropFelts (updateProps st name x) name' = updateProps (dropFelts st name') name x := by
+  simp [dropFelts, updateProps]
 
 notation:61 st:max "[props][" n:61 "]" " ← " x:49 => State.updateProps st n x
 
