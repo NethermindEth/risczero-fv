@@ -1,4 +1,4 @@
-import Risc0.State
+import Risc0.BasicTypes
 
 namespace Risc0
 

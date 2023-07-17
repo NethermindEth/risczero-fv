@@ -35,4 +35,18 @@ namespace Risc0.State
       sorry
   end UpdateProps
 
+  -- Naughty
+  @[simp]
+  lemma get_dropFelts_of_ne {st : State} {x : FeltVar} (h : name ≠ x) :
+    Option.get! (st.dropFelts name).felts[x] = Option.get! st.felts[x] := by
+    unfold dropFelts Map.drop
+    rw [Map.getElem_def]
+    aesop
+
+  @[simp]
+  lemma get_dropFelts_of_ne' {st : State} {x : FeltVar} (h : name ≠ x) :
+    Option.get! ((st.dropFelts name).felts x) = Option.get! (st.felts x) := by
+    unfold dropFelts Map.drop
+    aesop
+
 end Risc0.State

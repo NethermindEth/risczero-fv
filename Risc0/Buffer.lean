@@ -66,4 +66,7 @@ namespace Risc0
 
   end Buffer
 
+  def BufferAtTime.slice (buf : BufferAtTime) (offset size : ℕ) : BufferAtTime :=
+    buf.drop offset |>.take size
+
 end Risc0

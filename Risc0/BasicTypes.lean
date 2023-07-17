@@ -32,6 +32,9 @@ namespace Risc0
   abbrev PropVar := Variable VarType.PropTag
 
   abbrev Felt := ZMod P
+  instance : Inhabited Felt := ⟨-42⟩
+  def feltBitAnd (x y: Felt) : Felt :=
+    ↑(Bitvec.and (Bitvec.ofNat 256 x.val) (Bitvec.ofNat 256 y.val)).toNat
 
   open Lean Meta PrettyPrinter Delaborator SubExpr in
   @[delab app.OfNat.ofNat] def delabOfNat : Delab := do

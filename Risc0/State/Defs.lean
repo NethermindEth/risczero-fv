@@ -1,4 +1,5 @@
 import Risc0.Buffer
+import Risc0.Cirgen.BasicTypes
 
 namespace Risc0
 
@@ -28,6 +29,12 @@ namespace Risc0
   abbrev Input := "input"
   abbrev Output := "output"
 
+  def Buffer.back (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
+    st.buffers[buf].get!.get! (st.cycle - back.toNat, offset)
+
+  abbrev withEqZero (x : Felt) (st : State) : State :=
+    {st with constraints := (x = 0) :: st.constraints}
+
   namespace State
 
     def dropFelts (st: State) (name: FeltVar) : State :=
@@ -54,6 +61,20 @@ namespace Risc0
                   else {state with isFailed := true}
                 | .none        => {state with isFailed := true}
 
+    def setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer.Idx) (val : Felt) : State :=
+      match (st.buffers[bufferVar].get!).set? idx val with
+        | .some b => {st with buffers := st.buffers[bufferVar] ←ₘ b}
+        | .none   => {st with isFailed := true}
+
+    -- TODO rename, notation
+    def set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
+      st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
+
+    -- TODO remove let
+    def setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
+      let width := st.bufferWidths[bufferVar].get!
+      st.setBufferElementImpl bufferVar (Buffer.Idx.from1D offset width) val
   end State
+
 
 end Risc0
