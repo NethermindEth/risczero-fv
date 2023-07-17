@@ -1,4 +1,4 @@
-import Risc0.Basic
+import Risc0.Cirgen
 
 open Risc0
 
