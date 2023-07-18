@@ -1085,32 +1085,13 @@ lemma List.get!_set_of_ne {α : Type} [Inhabited α] {l : List α} {i i' : ℕ} 
 private lemma List.get!_set_of_ne' {α : Type} [Inhabited α] {l : List α} {i' : ℕ} {v : α}
   (h : l ≠ [])
   (h₁ : (l.length - 1) ≠ i') : List.get! (List.set l (l.length - 1) v) i' = List.get! l i' := by
-  rw [List.get!_set_of_ne]
-  cases l <;> aesop
+  rw [List.get!_set_of_ne] <;> cases l <;> aesop
 
--- private lemma List.set_empty_of_len_ge (h : ¬i < List.length l) : List.set l i v = [] := by
---   induction l generalizing i with
---     | nil => rfl
---     | cons hd tl ih =>
---         rcases i with _ | i
---         · aesop
---         · 
-
--- private lemma len_of_some (h : List.get! (List.set l i v) i' = some v') (h₁ : i ≠ i') : i < l.length := by
---   by_cases contra : i < l.length
---   · exact contra
---   · exfalso
---     rcases i' with _ | i'
---     · simp at h
---       rcases i with _ | i
---       · simp at h₁
---       · induction l generalizing i with
---           | nil => simp [panicWithPosWithDecl, panic, panicCore] at h
---           | cons hd tl ih => simp at contra; rw [←h] at ih
---                              apply ih i
---                              linarith
---                              simp at h
---                              unfold List.set
+private lemma List.get!_set_of_ne'' {α : Type} [Inhabited α] {l : List (List α)} {i i' : ℕ} {v : α}
+  (h : i ≠ i') (h₁ : l ≠ []) :
+  List.get! (List.set (List.get! l (l.length - (1 : ℕ))) i v) i' =
+  List.get! (List.get! l (l.length - (1 : ℕ))) i' := by
+  sorry
 
 private lemma getImpl_skip_set_offset_of_some_aux'_aux
   (h₀ : offset ≠ offset')
@@ -1129,24 +1110,34 @@ private lemma getImpl_skip_set_offset_of_some_aux'_aux
     generalize eq : List.length buffer - (1 : ℕ) = lastIdx at * <;>
     generalize eq₁ : List.get! buffer lastIdx = lastRow at * <;>
     generalize eq₂ : st.cycle - Back.toNat back = cycleIdx at *
-  · rw [Option.isSome_iff_exists] at a_3 ⊢
+  · have hEmpty : buffer ≠ [] := by 
+      cases buffer
+      simp at *
+      simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList] at h₃ 
+      simp
+    rw [Option.isSome_iff_exists] at a_3 ⊢
     rcases a_3 with ⟨w₃, h₃⟩; use w₃
     by_cases eq₃ : cycleIdx = lastIdx
     · subst eq₃
-      rw [List.get!_set, List.get!_set_of_ne _ h₀] at h₃; rw [eq₁]; exact h₃
-      
-      sorry; sorry
-    · rw [List.get!_set_of_ne _ (Ne.symm eq₃)] at h₃; exact h₃
-      sorry
-  · rw [Option.isSome_iff_exists] at a_3 ⊢
+      rw [←eq]
+      rw [←eq, List.get!_set' hEmpty] at h₃
+      rw [←eq₁, ←eq] at h₃
+      rw [List.get!_set_of_ne'' h₀ hEmpty] at h₃
+      exact h₃
+    · subst eq eq₁
+      rw [List.get!_set_of_ne' hEmpty (by aesop)] at h₃; exact h₃
+  · have hEmpty : buffer ≠ [] := by 
+      cases buffer
+      simp at *
+      simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList] at *
+    rw [Option.isSome_iff_exists] at a_3 ⊢
     rcases a_3 with ⟨w₃, h₃⟩; use w₃
     by_cases eq₃ : cycleIdx = lastIdx
-    · subst eq₃
-      rw [List.get!_set, List.get!_set_of_ne _ h₀]; aesop
-      sorry; sorry
-    · rw [List.get!_set_of_ne _ (Ne.symm eq₃)]; exact h₃
-      sorry
-#exit
+    · subst eq₁ eq eq₃
+      rw [List.get!_set' hEmpty, List.get!_set_of_ne'' h₀ hEmpty]; exact h₃
+    · subst eq₁ eq
+      rw [List.get!_set_of_ne' hEmpty (by aesop)]; exact h₃
+
 private lemma getImpl_skip_set_offset_of_some_aux' {st : State}
   (h₀ : offset ≠ offset')
   (h : List.get! (List.get! buffer (List.length buffer - (1 : ℕ))) offset ≠ some val)
@@ -1167,21 +1158,38 @@ private lemma getImpl_skip_set_offset_of_some_aux' {st : State}
         aesop
       simp only [this, ite_false]
       unfold getImpl
-      congr 1
-      · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀] <;> simp [*]
+      split_ifs with h₃ h₄
       · simp [Buffer.back, Buffer.get!, Buffer.Idx.time, Buffer.Idx.data, h₁]
         generalize eq₃ : st.cycle - Back.toNat back = cycleIdx
+        have hEmpty : buffer ≠ [] := by 
+          cases buffer
+          simp at *
+          simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList] at eq₁
+          subst eq₁
+          simp at eq₂ this
+          simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList, Option.isEqSome] at this
+          unfold isGetValid at h₃
+          simp [h₁] at h₃
+          aesop
+          simp [Buffer.back, Buffer.get!] at right_2
+          aesop
         by_cases eq₄ : cycleIdx = lastIdx
-        · subst eq₄
-          rw [List.get!_set, List.get!_set_of_ne _ h₀, ←eq₁]
-          sorry; sorry
-        · rw [List.get!_set_of_ne _ (Ne.symm eq₄)]
-          sorry
+        · subst eq₄ eq₁ eq
+          rw [List.get!_set' hEmpty, List.get!_set_of_ne'' h₀ hEmpty]
+        · subst eq₁ eq
+          rw [List.get!_set_of_ne' hEmpty (by aesop)]
+      · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃; contradiction
+      · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃; contradiction
+      · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃
     · have :
         Option.isEqSome (List.get! lastRow offset) val = false := by
         simp [Option.isEqSome]
         generalize eq₃ : List.get! lastRow offset = elem at *
+        split
+        simp at *
+        subst eq₁
         aesop
+        rfl
       simp [this]
       rfl
 
@@ -1204,30 +1212,6 @@ lemma getImpl_skip_set_offset (h: offset ≠ offset') :
   · have : st.buffers[buf].isSome := by
       rwa [Option.isNone_iff_eq_none, ←ne_eq, Option.ne_none_iff_isSome] at eq
     rw [getImpl_skip_set_offset_of_some h this]
-
-lemma getImpl_skip_set_offset_ohSnap! {buffer : Buffer} {val' : Felt} (h: offset ≠ offset') :
-  getImpl (State.set! st buf offset val) buf back offset' =
-  getImpl st buf back offset' := by
-  have contra : offset = (List.get! buffer (buffer.length - 1)).length := by sorry
-  have contra₁ : st.buffers[buf].isSome := sorry
-  have contra₂ : st.buffers[buf] = some buffer := sorry
-  have contra₃ : (List.get! (List.get! buffer (buffer.length - 1)) offset).isSome := sorry
-  have contra₄ : List.get! (List.get! buffer (buffer.length - 1)) offset = some val' := sorry
-  have contra₅ : List.get! (List.get! buffer (buffer.length - 1)) offset ≠ val := sorry
-  have contra₆ :
-    Option.isEqSome (List.get! (List.get! buffer (List.length buffer - (1 : ℕ)))
-                      (List.length (List.get! buffer (List.length buffer - (1 : ℕ)))))
-                      val = false := sorry
-  have contra₇ : Option.isNone
-                        (List.get! (List.get! buffer (List.length buffer - (1 : ℕ)))
-                          (List.length (List.get! buffer (List.length buffer - (1 : ℕ))))) = false := sorry
-  unfold getImpl State.set! State.setBufferElementImpl
-  simp [*, isGetValid, Buffer.set?, Buffer.getBufferAtTime!, Buffer.Idx.data, Buffer.Idx.time, Buffer.back]
-
-
-  
-  
-  
 
 @[simp]
 lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val : Felt} :
