@@ -5,6 +5,10 @@ namespace Option
 @[simp]
 lemma get!_of_some {α : Type} [Inhabited α] (x : α) : (some x).get! = x := rfl
 
+lemma not_isNone_iff_isSome {α : Type} [Inhabited α] {x : Option α} :
+  ¬x.isNone ↔ x.isSome := by
+  rw [Option.isNone_iff_eq_none, ←ne_eq, Option.ne_none_iff_isSome]
+
 end Option
 
 namespace List

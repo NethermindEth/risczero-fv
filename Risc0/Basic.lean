@@ -1086,12 +1086,11 @@ private lemma List.get!_set_of_ne''_aux_aux  {α : Type} [Inhabited α] {l : Lis
   induction l generalizing i' i with
     | nil => simp
     | cons hd tl ih =>
-      unfold List.get!
-      unfold List.set
+      unfold List.get! List.set
       aesop
 
 private lemma List.get!_set_of_ne'' {α : Type} [Inhabited α] {l : List (List α)} {i i' : ℕ} {v : α}
-  (h : i ≠ i') (h₁ : l ≠ []) :
+  (h : i ≠ i') :
   List.get! (List.set (List.get! l (l.length - (1 : ℕ))) i v) i' =
   List.get! (List.get! l (l.length - (1 : ℕ))) i' := by 
   exact List.get!_set_of_ne''_aux_aux h
@@ -1124,7 +1123,7 @@ private lemma getImpl_skip_set_offset_of_some_aux'_aux
       rw [←eq]
       rw [←eq, List.get!_set' hEmpty] at h₃
       rw [←eq₁, ←eq] at h₃
-      rw [List.get!_set_of_ne'' h₀ hEmpty] at h₃
+      rw [List.get!_set_of_ne'' h₀] at h₃
       exact h₃
     · subst eq eq₁
       rw [List.get!_set_of_ne' hEmpty (by aesop)] at h₃; exact h₃
@@ -1136,11 +1135,11 @@ private lemma getImpl_skip_set_offset_of_some_aux'_aux
     rcases a_3 with ⟨w₃, h₃⟩; use w₃
     by_cases eq₃ : cycleIdx = lastIdx
     · subst eq₁ eq eq₃
-      rw [List.get!_set' hEmpty, List.get!_set_of_ne'' h₀ hEmpty]; exact h₃
+      rw [List.get!_set' hEmpty, List.get!_set_of_ne'' h₀]; exact h₃
     · subst eq₁ eq
       rw [List.get!_set_of_ne' hEmpty (by aesop)]; exact h₃
 
-private lemma getImpl_skip_set_offset_of_some_aux' {st : State}
+private lemma getImpl_skip_set_offset_of_some_aux' 
   (h₀ : offset ≠ offset')
   (h : List.get! (List.get! buffer (List.length buffer - (1 : ℕ))) offset ≠ some val)
   (h₁ : st.buffers buf = some buffer) :
@@ -1177,7 +1176,7 @@ private lemma getImpl_skip_set_offset_of_some_aux' {st : State}
           aesop
         by_cases eq₄ : cycleIdx = lastIdx
         · subst eq₄ eq₁ eq
-          rw [List.get!_set' hEmpty, List.get!_set_of_ne'' h₀ hEmpty]
+          rw [List.get!_set' hEmpty, List.get!_set_of_ne'' h₀]
         · subst eq₁ eq
           rw [List.get!_set_of_ne' hEmpty (by aesop)]
       · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃; contradiction
@@ -1197,23 +1196,18 @@ private lemma getImpl_skip_set_offset_of_some_aux' {st : State}
 
 lemma getImpl_skip_set_offset_of_some (h : offset ≠ offset') (h₁ : st.buffers[buf].isSome) :
   getImpl (State.set! st buf offset val) buf back offset' =
-  getImpl st buf back offset' := by
-    rw [Option.isSome_iff_exists] at h₁
-    rcases h₁ with ⟨buffer, h₁⟩
-    let lastIdx := buffer.length - 1
-    by_cases eq₁ : List.get! (List.get! buffer lastIdx) offset = val
-    · exact getImpl_skip_set_offset_of_some_aux eq₁ h₁
-    · exact getImpl_skip_set_offset_of_some_aux' h eq₁ h₁
+  getImpl st buf back offset' := 
+    (Option.isSome_iff_exists.1 h₁).casesOn λ buffer h₁ =>
+      if eq₁ : (List.get! buffer (buffer.length - 1)).get! offset = some val
+      then getImpl_skip_set_offset_of_some_aux eq₁ h₁
+      else getImpl_skip_set_offset_of_some_aux' h eq₁ h₁
 
 lemma getImpl_skip_set_offset (h: offset ≠ offset') :
   getImpl (State.set! st buf offset val) buf back offset' =
-  getImpl st buf back offset' := by
-  by_cases eq : st.buffers[buf].isNone
-  · rw [Option.isNone_iff_eq_none] at eq
-    rw [getImpl_skip_set_offset_of_none eq]
-  · have : st.buffers[buf].isSome := by
-      rwa [Option.isNone_iff_eq_none, ←ne_eq, Option.ne_none_iff_isSome] at eq
-    rw [getImpl_skip_set_offset_of_some h this]
+  getImpl st buf back offset' := 
+    if eq : Option.isNone st.buffers[buf]
+    then getImpl_skip_set_offset_of_none (Option.isNone_iff_eq_none.1 eq)
+    else getImpl_skip_set_offset_of_some h (Option.not_isNone_iff_isSome.1 eq)
 
 @[simp]
 lemma State.set!_felts {st : State} {bufferVar : BufferVar} {offset : ℕ} {val : Felt} :
