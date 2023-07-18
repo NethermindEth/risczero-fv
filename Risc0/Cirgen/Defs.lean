@@ -1,5 +1,4 @@
 import Risc0.Cirgen.BasicTypes
-import Risc0.Cirgen.Get
 import Risc0.State.Defs
 
 namespace Risc0
@@ -31,6 +30,18 @@ namespace Risc0
     | Get       : BufferVar → Back → ℕ → Op x
     | GetGlobal : BufferVar → ℕ        → Op x
     | Slice     : BufferVar → ℕ    → ℕ → Op x
+
+  def isGetValid (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
+    back ≤ st.cycle ∧
+    buf ∈ st.vars ∧
+    offset < st.bufferWidths[buf].get! ∧
+    (Buffer.back st buf back offset).isSome
+  instance : Decidable (isGetValid st buf back offset) := by unfold isGetValid; exact inferInstance
+
+  def getImpl (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
+    if isGetValid st buf back offset
+    then Option.some <| Lit.Val (Buffer.back st buf back offset).get!
+    else .none
 
   -- Evaluate a pure functional circuit.
   def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
