@@ -1,4 +1,6 @@
 import Risc0.State.Defs
+import Risc0.Cirgen.Defs
+import Risc0.State.Notation
 
 namespace Risc0.State
 
@@ -34,6 +36,18 @@ namespace Risc0.State
       dropFelts (updateProps st name x) name' = updateProps (dropFelts st name') name x := by
         simp [dropFelts, updateProps]
   end UpdateProps
+
+  section GetImpl
+    -- TODO rename
+    lemma dropFelts_update_of_ne (h : ⟨k⟩ ≠ y) :
+      ((State.dropFelts st y)[k] ←ₛ getImpl st buf back offset) =
+      State.dropFelts (st[k] ←ₛ getImpl st buf back offset) y := by
+      unfold State.dropFelts getImpl
+      aesop
+      simp [State.updateFelts, Map.drop, Map.update]
+      funext z
+      aesop
+  end GetImpl
 
   -- Naughty
   @[simp]

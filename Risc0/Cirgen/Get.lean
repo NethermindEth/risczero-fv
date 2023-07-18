@@ -1,4 +1,5 @@
-import Risc0.State
+import Risc0.State.Defs
+import Risc0.State.Notation
 
 namespace Risc0
 
@@ -36,9 +37,11 @@ namespace Risc0
     have h: getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := getImpl_none_or_val
     aesop
 
+  @[simp]
   lemma getImpl_skip_none_update : getImpl (st[name] ←ₛ .none) buf back offset = getImpl st buf back offset := by
     simp [State.update, getImpl, isGetValid, Buffer.back]
 
+  @[simp]
   lemma getImpl_skip_val_update : getImpl (st[name] ←ₛ .some (.Val x)) buf back offset = getImpl st buf back offset := by
     simp [State.update, getImpl, isGetValid, Buffer.back]
 
@@ -57,5 +60,11 @@ namespace Risc0
     getImpl (State.set! st buf offset val) buf back offset' =
     getImpl st buf back offset' := by
       sorry
+
+  @[simp]
+  lemma getImpl_dropFelts : 
+    getImpl (State.dropFelts st y) buf back offset = getImpl st buf back offset := by
+    unfold State.dropFelts getImpl
+    aesop
 
 end Risc0
