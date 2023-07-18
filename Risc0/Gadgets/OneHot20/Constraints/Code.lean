@@ -1,4 +1,3 @@
-import Risc0.Cirgen
 import Risc0.Lemmas
 
 namespace Risc0.OneHot20.Constraints.Code

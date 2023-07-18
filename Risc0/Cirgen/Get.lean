@@ -28,6 +28,21 @@ namespace Risc0
       then Option.some <| Lit.Val (Buffer.back st buf back offset).get!
       else .none := rfl
 
+    @[simp]
+    lemma getImpl_updateFelts :
+      getImpl (st[felts][x] ← val) buf back offset = getImpl st buf back offset := by
+        aesop
+    
+    @[simp]
+    lemma getImpl_updateProps :
+      getImpl (st[props][x] ← val) buf back offset = getImpl st buf back offset := by
+        aesop
+
+    @[simp]
+    lemma getImpl_withEqZero :
+      getImpl (withEqZero x st) buf back offset = getImpl st buf back offset := by
+        aesop
+
     --Review: should any of these be simps?
     lemma getImpl_none_or_val : getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := by
       simp [getImpl]

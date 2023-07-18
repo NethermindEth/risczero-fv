@@ -1,3 +1,4 @@
+import Risc0.State
 import Risc0.Cirgen
 import Risc0.MlirTactics
 import Risc0.Gadgets.IsZero.Witness.CodeDrops
@@ -29,30 +30,16 @@ def part0_state (st: State) : State :=
               else (0 : Felt)))[felts][{ name := "%5" : FeltVar }] ←
             if
                 Option.get!
-                    ((st["%1"] ←ₛ
-                            getImpl st { name := "in" : BufferVar } (0 : Back)
-                              (0 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
-                          if
-                              Option.get!
-                                  (State.felts (st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
-                                    { name := "%1" : FeltVar }) =
-                                (0 : Felt) then
-                            (1 : Felt)
-                          else (0 : Felt)).felts[{ name := "%1" : FeltVar }] =
+                    (st["%1"] ←ₛ
+                          getImpl st { name := "in" : BufferVar } (0 : Back)
+                            (0 : ℕ)).felts[{ name := "%1" : FeltVar }] =
                   (0 : Felt) then
               (0 : Felt)
             else
               (Option.get!
-                  ((st["%1"] ←ₛ
-                          getImpl st { name := "in" : BufferVar } (0 : Back)
-                            (0 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
-                        if
-                            Option.get!
-                                (State.felts (st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
-                                  { name := "%1" : FeltVar }) =
-                              (0 : Felt) then
-                          (1 : Felt)
-                        else (0 : Felt)).felts[{ name := "%1" : FeltVar }])⁻¹) 
+                  (st["%1"] ←ₛ
+                        getImpl st { name := "in" : BufferVar } (0 : Back)
+                          (0 : ℕ)).felts[{ name := "%1" : FeltVar }])⁻¹) 
 
 def part0_drops (st: State) : State :=
   st
