@@ -10,36 +10,35 @@ open MLIRNotation
 -- The state obtained by running Code.part0 on st
 def part0_state (st: State) : State :=
   
-          ((State.set!
-              ((st["%1"] ←ₛ
-                  getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
-                if
-                    Option.get!
-                        (State.felts (st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
-                          { name := "%1" : FeltVar }) =
-                      (0 : Felt) then
-                  (1 : Felt)
-                else (0 : Felt))
-              { name := "data" : BufferVar } (0 : ℕ)
-              (if
+        ((State.set!
+            ((st["%1"] ←ₛ
+                getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
+              if
                   Option.get!
                       (State.felts (st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
                         { name := "%1" : FeltVar }) =
                     (0 : Felt) then
                 (1 : Felt)
-              else (0 : Felt)))[felts][{ name := "%5" : FeltVar }] ←
-            if
+              else (0 : Felt))
+            { name := "data" : BufferVar } (0 : ℕ)
+            (if
                 Option.get!
-                    (st["%1"] ←ₛ
-                          getImpl st { name := "in" : BufferVar } (0 : Back)
-                            (0 : ℕ)).felts[{ name := "%1" : FeltVar }] =
+                    (State.felts (st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
+                      { name := "%1" : FeltVar }) =
                   (0 : Felt) then
-              (0 : Felt)
-            else
-              (Option.get!
+              (1 : Felt)
+            else (0 : Felt)))[felts][{ name := "%5" : FeltVar }] ←
+          if
+              Option.get!
                   (st["%1"] ←ₛ
-                        getImpl st { name := "in" : BufferVar } (0 : Back)
-                          (0 : ℕ)).felts[{ name := "%1" : FeltVar }])⁻¹) 
+                        getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ)).felts[{ name := "%1" : FeltVar }] =
+                (0 : Felt) then
+            (0 : Felt)
+          else
+            (Option.get!
+                (st["%1"] ←ₛ
+                      getImpl st { name := "in" : BufferVar } (0 : Back)
+                        (0 : ℕ)).felts[{ name := "%1" : FeltVar }])⁻¹) 
 
 def part0_drops (st: State) : State :=
   st
@@ -50,8 +49,8 @@ def part0_state_update (st: State): State :=
 
 -- Prove that substituting part0_state for Code.part0 produces the same result
 lemma part0_wp {st : State} {y0 y1 : Option Felt} :
-  Code.getReturn (Γ st ⟦Code.part0;Code.part1;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧) = [y0, y1] ↔
-  Code.getReturn (part0_state_update st) = [y0, y1] := by
+  Code.getReturn (Γ st ⟦Code.part0;Code.part1;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧) ([y0, y1]) ↔
+  Code.getReturn (part0_state_update st) ([y0, y1]) := by
   generalize eq : (Code.part1;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩) = prog
   unfold Code.part0
   MLIR
@@ -61,18 +60,18 @@ lemma part0_wp {st : State} {y0 y1 : Option Felt} :
   rfl
 
 lemma part0_cumulative_wp {x0: Felt} :
-  Code.run (start_state [x0]) = [y0,y1] ↔
+  Code.run (start_state [x0]) ([y0,y1]) ↔
   Code.getReturn
-        (part0_state_update
-          {
-            buffers :=
-              Map.fromList
-                [({ name := "in" : BufferVar }, [[some x0]]), ({ name := "data" : BufferVar }, [[none, none]])],
-            bufferWidths :=
-              Map.fromList [({ name := "in" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (2 : ℕ))],
-            constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
-            vars := [{ name := "in" : BufferVar }, { name := "data" : BufferVar }] }) =
-      [y0, y1]  := by
+      (part0_state_update
+        {
+          buffers :=
+            Map.fromList
+              [({ name := "in" : BufferVar }, [[some x0]]), ({ name := "data" : BufferVar }, [[none, none]])],
+          bufferWidths :=
+            Map.fromList [({ name := "in" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (2 : ℕ))],
+          constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+          vars := [{ name := "in" : BufferVar }, { name := "data" : BufferVar }] })
+      ([y0, y1])  := by
     unfold Code.run start_state
     rewrite [Code.optimised_behaviour_full]
     unfold MLIR.runProgram

@@ -18,7 +18,7 @@ def full : MLIRProgram :=
   "%10" ←ₐ ⟨"%1"⟩ &₀ ⟨"%9"⟩;
   "%11" ←ₐ guard ⟨"%6"⟩ & ⟨"%5"⟩ with ⟨"%10"⟩
 def getReturn (st: State) : Prop :=
-  st.constraintsInVar ⟨"%11"⟩
+  st.constraintsInVar ⟨"%11"⟩ ∧ ¬st.isFailed
 def run (st: State) : Prop :=
   getReturn (full.runProgram st)
 

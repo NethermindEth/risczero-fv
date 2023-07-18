@@ -127,6 +127,34 @@ lemma part_assoc_ndnn: Γ state ⟦(nondet p₁; p₂; nondet (p₃; p₄)); p�
 lemma part_assoc_dnnn: Γ state ⟦(p₁; nondet (p₂; p₃; p₄)); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
 lemma part_assoc_nnnn: Γ state ⟦(nondet (p₁; p₂; p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
 
+lemma isFailed_monotonic : ∀ state : State, state.isFailed → (Γ state ⟦program⟧).isFailed := by
+  induction program
+  all_goals intros state h_failed
+  case Sequence α α₁ prog₁ prog₂ h₁ h₂ =>
+    simp [run_seq_def, h₁, h₂, h_failed]
+  all_goals simp [MLIR.run, State.update, h_failed]
+  case Set =>
+    unfold State.set! State.setBufferElementImpl
+    rewrite [h_failed]
+    aesop
+  case SetGlobal =>
+    unfold State.setGlobal! State.setBufferElementImpl
+    rewrite [h_failed]
+    aesop
+  all_goals aesop
+
+lemma isFailed_monotonic' : ∀ state : State, (Γ state ⟦program⟧).isFailed = false → state.isFailed = false := by
+  induction program
+  all_goals intros state h_noFail
+  all_goals simp [MLIR.run, State.update, h_noFail] at *
+  case Set =>
+    unfold State.set! State.setBufferElementImpl at h_noFail
+    aesop
+  case SetGlobal =>
+    unfold State.setGlobal! State.setBufferElementImpl at h_noFail
+    aesop
+  all_goals aesop
+
 end MLIR
 
 end WithMLIR 

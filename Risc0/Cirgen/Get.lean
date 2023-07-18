@@ -52,6 +52,19 @@ namespace Risc0
       have h: getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := getImpl_none_or_val
       aesop
 
+    lemma simplify_valid_get (h: ¬(st'[name] ←ₛ getImpl st buf back offset).isFailed):
+      (st'[name] ←ₛ getImpl st buf back offset) = st'[felts][⟨name⟩] ← (Buffer.back st buf back offset).get! := by
+        have h: getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := getImpl_none_or_val
+        cases h with
+          | inl h_none =>
+            rewrite [h_none] at h
+            unfold State.update at h
+            aesop
+          | inr h_some =>
+            unfold getImpl at h_some
+            unfold getImpl
+            aesop
+
     @[simp]
     lemma getImpl_skip_none_update : getImpl (st[name] ←ₛ .none) buf back offset = getImpl st buf back offset := by
       simp [State.update, getImpl, isGetValid, Buffer.back]

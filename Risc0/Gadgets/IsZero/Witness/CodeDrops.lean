@@ -54,6 +54,6 @@ lemma behaviour_with_drops :
 lemma getReturn_ignores_drops :
   getReturn (Γ st ⟦part0;part1;part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧) =
   getReturn (Γ st ⟦part0;part1;part2⟧) := by
-    simp [getReturn, MLIR.run_seq_def, State.constraintsInVar, MLIR.run_dropfelt, State.dropFelts_buffers, State.dropFelts_props]
+    simp [getReturn, MLIR.run_seq_def, State.constraintsInVar, MLIR.run_dropfelt, State.dropFelts_buffers, State.dropFelts_isFailed, State.dropFelts_props]
 
 end Risc0.IsZero.Witness.Code
