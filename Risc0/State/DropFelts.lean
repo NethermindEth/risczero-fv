@@ -31,8 +31,8 @@ namespace Risc0.State
 
   section UpdateProps
     lemma drop_updateProps_swap :
-      dropFelts (updateProps st name x) name' = updateProps (dropFelts st name') name x :=
-      sorry
+      dropFelts (updateProps st name x) name' = updateProps (dropFelts st name') name x := by
+        simp [dropFelts, updateProps]
   end UpdateProps
 
   -- Naughty
