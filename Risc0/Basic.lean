@@ -991,13 +991,6 @@ lemma State.set!_get_getImpl_comm {st : State} :
   (State.set! st buf' index y)[x] ←ₛ getImpl st buf back offset := by
   unfold State.update getImpl
   aesop <;> unfold set! setBufferElementImpl <;> aesop
-  
--- lemma isGetValid_set_of_ne_offset (h : offset ≠ offset') :
---   isGetValid (State.set! st buf index x) buf back offset = 
---   isGetValid st buf back offset := by
---   unfold isGetValid Buffer.back Back.toNat
---   simp
---   aesop
 
 lemma isGetValid_set_of_ne (h : buf ≠ buf') :
   isGetValid (State.set! st buf' index x) buf back offset = 
@@ -1087,11 +1080,21 @@ private lemma List.get!_set_of_ne' {α : Type} [Inhabited α] {l : List α} {i' 
   (h₁ : (l.length - 1) ≠ i') : List.get! (List.set l (l.length - 1) v) i' = List.get! l i' := by
   rw [List.get!_set_of_ne] <;> cases l <;> aesop
 
+private lemma List.get!_set_of_ne''_aux_aux  {α : Type} [Inhabited α] {l : List α} {i i' : ℕ} {v : α}
+  (h : i ≠ i') :
+  List.get! (List.set l i v) i' = List.get! l i' := by
+  induction l generalizing i' i with
+    | nil => simp
+    | cons hd tl ih =>
+      unfold List.get!
+      unfold List.set
+      aesop
+
 private lemma List.get!_set_of_ne'' {α : Type} [Inhabited α] {l : List (List α)} {i i' : ℕ} {v : α}
   (h : i ≠ i') (h₁ : l ≠ []) :
   List.get! (List.set (List.get! l (l.length - (1 : ℕ))) i v) i' =
-  List.get! (List.get! l (l.length - (1 : ℕ))) i' := by
-  sorry
+  List.get! (List.get! l (l.length - (1 : ℕ))) i' := by 
+  exact List.get!_set_of_ne''_aux_aux h
 
 private lemma getImpl_skip_set_offset_of_some_aux'_aux
   (h₀ : offset ≠ offset')
@@ -1113,8 +1116,7 @@ private lemma getImpl_skip_set_offset_of_some_aux'_aux
   · have hEmpty : buffer ≠ [] := by 
       cases buffer
       simp at *
-      simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList] at h₃ 
-      simp
+      aesop
     rw [Option.isSome_iff_exists] at a_3 ⊢
     rcases a_3 with ⟨w₃, h₃⟩; use w₃
     by_cases eq₃ : cycleIdx = lastIdx
