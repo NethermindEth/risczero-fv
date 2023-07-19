@@ -86,11 +86,11 @@ def copyLast (buf : Buffer) : Buffer :=
 def get! (buf : Buffer) (idx : Idx) : Option Felt :=
   List.get! (List.get! buf idx.time) idx.data
 
--- @[simp]
--- lemma www : buffer.get! [[some ...]] (0...k)
-
 def getBufferAtTime! (buf : Buffer) (timeIdx : ℕ) : BufferAtTime :=
   List.get! buf timeIdx
+
+lemma getBufferAtTime!_def {buf : Buffer} {timeIdx : ℕ} :
+  getBufferAtTime! buf timeIdx = List.get! buf timeIdx := rfl 
 
 def setAllLatest! (buf : Buffer) (val : BufferAtTime) : Buffer :=
   List.set buf (buf.length - 1) val
@@ -730,6 +730,15 @@ lemma getImpl_def : getImpl st buf back offset =
                     then Option.some <| Lit.Val (Buffer.back st buf back offset).get!
                     else .none := rfl
 
+lemma isGetValid_congr
+  (h₁ : st.buffers = st'.buffers)
+  (h₂ : st.bufferWidths = st'.bufferWidths)
+  (h₃ : st.cycle = st'.cycle)
+  (h₄ : st.vars = st'.vars) :
+  isGetValid st buf back offset = isGetValid st' buf back offset := by
+  unfold isGetValid Buffer.back
+  aesop
+
 --Review: should any of these be simps?
 lemma getImpl_none_or_val : getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := by
   simp [getImpl]
@@ -964,7 +973,6 @@ def State.setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer
 def State.set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
   st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
 
-
 @[simp]
 lemma State.set!_cycle {st : State} : (st.set! buf off x).cycle = st.cycle := by
   unfold set! setBufferElementImpl
@@ -1129,7 +1137,10 @@ private lemma getImpl_skip_set_offset_of_some_aux'_aux
       rw [List.get!_set_of_ne' hEmpty (by aesop)] at h₃; exact h₃
   · have hEmpty : buffer ≠ [] := by 
       cases buffer
-      simp at *
+      simp at eq₁
+      simp at a_3
+      
+      
       simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList] at *
     rw [Option.isSome_iff_exists] at a_3 ⊢
     rcases a_3 with ⟨w₃, h₃⟩; use w₃
@@ -1139,60 +1150,148 @@ private lemma getImpl_skip_set_offset_of_some_aux'_aux
     · subst eq₁ eq
       rw [List.get!_set_of_ne' hEmpty (by aesop)]; exact h₃
 
+-- lemma Buffer.isEqSome_same_or_isNone_of_set? {buffer : Buffer}
+--   (h : Buffer.set? buffer (buffer.length - 1, offset) val = some row) :
+--   let innerRow :=
+--     (List.get!
+--       (Buffer.getBufferAtTime! buffer (Buffer.Idx.time (buffer.length - 1, offset)))
+--       (Buffer.Idx.data (buffer.length - 1, offset)))
+--   Option.isEqSome innerRow val ∨ Option.isNone innerRow := by
+--   simp only [set?] at h
+--   split_ifs at h <;> aesop
+
+lemma Buffer.isEqSome_same_or_isNone_of_set? {buffer : Buffer}
+  (h : Buffer.set? buffer (buffer.length - 1, offset) val = some row) :
+  let inner := (buffer.getBufferAtTime! (buffer.length - 1)).get! offset
+  (inner = some val) ∨ inner.isNone := by
+  simp only [set?, Option.isEqSome, Buffer.Idx.data, Buffer.Idx.time] at h
+  split_ifs at h <;> aesop
+
+lemma Buffer.get_through_set {st : State} {buf : BufferVar} (h : offset ≠ offset') :
+  Option.get!
+    (Buffer.get!
+      (Option.get! (Buffer.set? buffer (List.length buffer - (1 : ℕ), offset) val))
+      (k, offset')) =
+  Option.get!
+    (Buffer.get!
+      (Option.get! st.buffers[buf])
+      (k, offset')) := by
+  sorry
+
+lemma isGetValid_of_set? {buffer : Buffer}
+  (h : Buffer.set? buffer (buffer.length - 1, offset) val = some row)
+  (h₀ : st.buffers[buf] = some buffer)
+  (hOffset : offset ≠ offset') :
+  isGetValid
+    { buffers := st.buffers[buf] ←ₘ row, bufferWidths := st.bufferWidths, constraints := st.constraints,
+      cycle := st.cycle, felts := st.felts, isFailed := st.isFailed, props := st.props, vars := st.vars }
+    buf back offset' ↔
+  isGetValid st buf back offset' := by
+  simp only [isGetValid, and_congr_right_iff, Buffer.back_def, Map.update_get]; intros _ _ _
+  rw [←h]
+  rcases Buffer.isEqSome_same_or_isNone_of_set? h with h₁ | h₁
+  · have : (List.get! (List.get! buffer (List.length buffer - 1)) offset).isEqSome val := by
+      unfold Buffer.getBufferAtTime! at h₁; unfold Option.isEqSome; aesop
+    simp only [
+      Buffer.get!, Buffer.set?, Buffer.getBufferAtTime!, Buffer.Idx.time, ge_iff_le, tsub_eq_zero_iff_le,
+      Buffer.Idx.data, this, ite_true, Option.get!_of_some, h₀
+    ]
+  · have : ¬(List.get! (List.get! buffer (List.length buffer - 1)) offset).isEqSome val :=
+      Option.not_isEqSome_of_isNone h₁
+    simp only [
+      Buffer.get!, Buffer.set?, Buffer.getBufferAtTime!, Buffer.Idx.time, ge_iff_le, tsub_eq_zero_iff_le,
+      Buffer.Idx.data, this, ite_false, h₀, Option.get!_of_some,
+      ge_iff_le, tsub_eq_zero_iff_le, if_pos (Buffer.getBufferAtTime!_def ▸ h₁),
+      Option.get!_of_some
+    ]
+    by_cases eq : buffer = []
+    · subst eq; simp
+    · by_cases eq₁ : List.length buffer - 1 = st.cycle - Back.toNat back
+      · rw [←eq₁, List.get!_set' eq, List.get!_set_of_ne'' hOffset]
+      · rw [List.get!_set_of_ne' eq eq₁]    
+
+lemma State.set!_of_some {v : Buffer} {st : State} {buf : BufferVar}
+  (h : st.buffers[buf] = some v) :
+  State.set! st buf offset val =
+  let bufferSet? := Buffer.set? v (List.length v - 1, offset) val
+  {
+    st with buffers := match bufferSet? with
+                         | some b => st.buffers[buf] ←ₘ b
+                         | none => st.buffers
+            isFailed := if bufferSet?.isNone then true else st.isFailed
+  } := by simp [set!, setBufferElementImpl, h]; aesop
+
 private lemma getImpl_skip_set_offset_of_some_aux' 
   (h₀ : offset ≠ offset')
-  (h : List.get! (List.get! buffer (List.length buffer - (1 : ℕ))) offset ≠ some val)
-  (h₁ : st.buffers buf = some buffer) :
+  (h : List.get! (List.get! buffer (List.length buffer - 1)) offset ≠ some val)
+  (h₁ : st.buffers[buf] = some buffer) :
   getImpl (State.set! st buf offset val) buf back offset' = getImpl st buf back offset' := by
-    generalize eq : List.length buffer - (1 : ℕ) = lastIdx at *
-    have : State.buffers st buf = st.buffers[buf] := rfl; rw [this] at h₁
-    simp [
-      State.set!, State.setBufferElementImpl, Buffer.set?, Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data
-    ]
-    simp only [h₁, Option.get!_of_some, ge_iff_le, tsub_eq_zero_iff_le, eq]
-    generalize eq₁ : List.get! buffer lastIdx = lastRow
-    by_cases eq₂ : (List.get! lastRow offset).isNone <;> simp [eq₂]
-    · have :
-        Option.isEqSome (List.get! lastRow offset) val = false := by
-        simp [Option.isEqSome]
-        generalize eq₃ : List.get! lastRow offset = elem at *
-        aesop
-      simp only [this, ite_false]
-      unfold getImpl
-      split_ifs with h₃ h₄
-      · simp [Buffer.back, Buffer.get!, Buffer.Idx.time, Buffer.Idx.data, h₁]
-        generalize eq₃ : st.cycle - Back.toNat back = cycleIdx
-        have hEmpty : buffer ≠ [] := by 
-          cases buffer
-          simp at *
-          simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList] at eq₁
-          subst eq₁
-          simp at eq₂ this
-          simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList, Option.isEqSome] at this
-          unfold isGetValid at h₃
-          simp [h₁] at h₃
-          aesop
-          simp [Buffer.back, Buffer.get!] at right_2
-          aesop
-        by_cases eq₄ : cycleIdx = lastIdx
-        · subst eq₄ eq₁ eq
-          rw [List.get!_set' hEmpty, List.get!_set_of_ne'' h₀]
-        · subst eq₁ eq
-          rw [List.get!_set_of_ne' hEmpty (by aesop)]
-      · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃; contradiction
-      · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃; contradiction
-      · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃
-    · have :
-        Option.isEqSome (List.get! lastRow offset) val = false := by
-        simp [Option.isEqSome]
-        generalize eq₃ : List.get! lastRow offset = elem at *
-        split
-        simp at *
-        subst eq₁
-        aesop
-        rfl
-      simp [this]
-      rfl
+    generalize eq : List.length buffer - 1 = lastIdx at *; rw [State.set!_of_some h₁]
+    simp only [getImpl]
+    congr 1
+    set st₁ : State := { st
+      with buffers :=
+        match Buffer.set? buffer (List.length buffer - 1, offset) val with
+        | some b => st.buffers[buf] ←ₘ b
+        | none => st.buffers
+    } with eq₁
+    · rw [@isGetValid_congr (st' := st₁)] <;> simp? [eq₁]
+      match eq₂ : Buffer.set? buffer (List.length buffer - 1, offset) val with
+        | none => simp only
+        | some row => simp only
+                      rw [isGetValid_of_set? eq₂ h₁ h₀]
+    · simp only [Buffer.back, ge_iff_le, Option.some.injEq, Lit.Val.injEq]
+      match eq₂ : Buffer.set? buffer (List.length buffer - 1, offset) val with
+        | none => simp only
+        | some row => simp only [Map.update_get]
+                      exact eq₂.symm ▸ Buffer.get_through_set h₀
+    -- simp [
+    --   State.set!, State.setBufferElementImpl, Buffer.set?, Buffer.getBufferAtTime!,
+    --   Buffer.Idx.time, Buffer.Idx.data, *
+    -- ]
+    -- generalize eq₁ : List.get! buffer lastIdx = lastRow
+    -- by_cases eq₂ : (List.get! lastRow offset).isNone <;> simp [eq₂]
+    -- · have :
+    --     Option.isEqSome (List.get! lastRow offset) val = false := by
+    --     simp [Option.isEqSome]
+    --     generalize eq₃ : List.get! lastRow offset = elem at *
+    --     aesop
+    --   simp only [this, ite_false]
+    --   unfold getImpl
+    --   split_ifs with h₃ h₄
+    --   · simp [Buffer.back, Buffer.get!, Buffer.Idx.time, Buffer.Idx.data, h₁]
+    --     generalize eq₃ : st.cycle - Back.toNat back = cycleIdx
+    --     have hEmpty : buffer ≠ [] := by 
+    --       cases buffer
+    --       simp at *
+    --       simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList] at eq₁
+    --       subst eq₁
+    --       simp at eq₂ this
+    --       simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList, Option.isEqSome] at this
+    --       unfold isGetValid at h₃
+    --       simp [h₁] at h₃
+    --       aesop
+    --       simp [Buffer.back, Buffer.get!] at right_2
+    --       aesop
+    --     by_cases eq₄ : cycleIdx = lastIdx
+    --     · subst eq₄ eq₁ eq
+    --       rw [List.get!_set' hEmpty, List.get!_set_of_ne'' h₀]
+    --     · subst eq₁ eq
+    --       rw [List.get!_set_of_ne' hEmpty (by aesop)]
+    --   · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃; contradiction
+    --   · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃; contradiction
+    --   · rw [getImpl_skip_set_offset_of_some_aux'_aux h₀ eq.symm eq₁.symm h₁] at h₃
+    -- · have :
+    --     Option.isEqSome (List.get! lastRow offset) val = false := by
+    --     simp [Option.isEqSome]
+    --     generalize eq₃ : List.get! lastRow offset = elem at *
+    --     split
+    --     simp at *
+    --     subst eq₁
+    --     aesop
+    --     rfl
+    --   simp [this]
+    --   rfl
 
 lemma getImpl_skip_set_offset_of_some (h : offset ≠ offset') (h₁ : st.buffers[buf].isSome) :
   getImpl (State.set! st buf offset val) buf back offset' =

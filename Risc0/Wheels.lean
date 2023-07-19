@@ -9,6 +9,9 @@ lemma not_isNone_iff_isSome {α : Type} [Inhabited α] {x : Option α} :
   ¬x.isNone ↔ x.isSome := by
   rw [Option.isNone_iff_eq_none, ←ne_eq, Option.ne_none_iff_isSome]
 
+lemma not_isEqSome_of_isNone {α : Type} [Inhabited α] [BEq α] {x : Option α} {y : α} (h : x.isNone) :
+  ¬x.isEqSome y := by unfold isNone isEqSome at *; aesop
+
 end Option
 
 namespace List
