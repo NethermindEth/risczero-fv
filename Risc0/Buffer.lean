@@ -28,11 +28,11 @@ namespace Risc0
     def get! (buf : Buffer) (idx : Idx) : Option Felt :=
       List.get! (List.get! buf idx.time) idx.data
 
-    -- @[simp]
-    -- lemma www : buffer.get! [[some ...]] (0...k)
-
     def getBufferAtTime! (buf : Buffer) (timeIdx : ℕ) : BufferAtTime :=
       List.get! buf timeIdx
+
+    lemma getBufferAtTime!_def :
+      getBufferAtTime! buf timeIdx = List.get! buf timeIdx := rfl 
 
     def setAllLatest! (buf : Buffer) (val : BufferAtTime) : Buffer :=
       List.set buf (buf.length - 1) val
