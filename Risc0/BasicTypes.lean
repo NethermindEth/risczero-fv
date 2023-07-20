@@ -23,9 +23,19 @@ namespace Risc0
 
   inductive VarType := | FeltTag | PropTag | BufferTag deriving DecidableEq
 
+  @[simp]
+  lemma VarType.sizeOf {x : VarType} : sizeOf x = 1 := by
+    cases x <;> simp only
+
   structure Variable (tag : VarType) :=
     name : String
   deriving DecidableEq
+
+  @[simp]
+  lemma Variable.sizeOf {x : Variable y} : sizeOf x = 2 + sizeOf x.name.data := by
+    cases x; simp only
+    simp (config := {arith := true})
+      [SizeOf.sizeOf, _sizeOf_inst, _sizeOf_1, String._sizeOf_1, SizeOf.sizeOf, List._sizeOf_inst]
 
   abbrev BufferVar := Variable VarType.BufferTag
   abbrev FeltVar := Variable VarType.FeltTag

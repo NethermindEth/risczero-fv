@@ -8,6 +8,10 @@ inductive IsNondet :=
 
 open IsNondet
 
+@[simp]
+lemma IsNondet.sizeOf {x : IsNondet} : sizeOf x = 1 := by
+  cases x <;> simp only
+
 @[reducible]
 def lub (x₁ x₂ : IsNondet): IsNondet :=
   match x₁ with

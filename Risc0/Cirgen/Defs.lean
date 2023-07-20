@@ -30,6 +30,9 @@ namespace Risc0
     | Get       : BufferVar → Back → ℕ → Op x
     | GetGlobal : BufferVar → ℕ        → Op x
     | Slice     : BufferVar → ℕ    → ℕ → Op x
+    -- Extern
+    | PlonkAccumRead : BufferVar → ℕ → Op x
+    | PlonkRead      : BufferVar → ℕ → Op x
 
   def isGetValid (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
     back ≤ st.cycle ∧
@@ -42,6 +45,22 @@ namespace Risc0
     if isGetValid st buf back offset
     then Option.some <| Lit.Val (Buffer.back st buf back offset).get!
     else .none
+
+  namespace Op.ExternOp
+    section
+
+      variable (buf : BufferVar) (args : List FeltVar) (outCount : ℕ)
+
+      def plonkRead (st : State) : Option BufferAtTime :=
+        if ⟨mangle .PlonkRows buf⟩ ∈ st.buffers
+        then let front := st.buffers[(⟨mangle .PlonkRows buf⟩ : BufferVar)].get![0]!
+             if front.length = outCount
+             then .some front
+             else .none
+        else .none
+
+    end
+  end Op.ExternOp
 
   -- Evaluate a pure functional circuit.
   def Op.eval {x} (st : State) (op : Op x) : Option Lit :=
@@ -81,6 +100,9 @@ namespace Risc0
                                   else .none
                                 else .none
       | Slice buf offset size => .some <| .Buf <| (List.get! (st.buffers buf).get! (st.cycle - 1)).slice offset size
+      -- Extern
+      | PlonkRead buf outCount => .ExternReadResult .PlonkRows <$> ExternOp.plonkRead buf outCount st
+      | PlonkAccumRead buf outCount => .ExternReadResult .PlonkAccumRows <$> ExternOp.plonkRead buf outCount st
 
   instance : HAdd (FeltVar) (FeltVar) (Op IsNondet.InNondet)    := ⟨Op.Add⟩
   instance : HAdd (FeltVar) (FeltVar) (Op IsNondet.NotInNondet) := ⟨Op.Add⟩
@@ -101,13 +123,30 @@ namespace Risc0
     | Eqz       : FeltVar                → MLIR x
     | If        : FeltVar       → MLIR x → MLIR x
     | Nondet    : MLIR InNondet          → MLIR NotInNondet
+    | Noop      :                          MLIR x
     | Sequence  : MLIR x        → MLIR x → MLIR x
     -- Ops
     | Fail      :                           MLIR x
     | Set       : BufferVar → ℕ → FeltVar → MLIR InNondet
     | SetGlobal : BufferVar → ℕ → FeltVar → MLIR InNondet
+    -- Extern
+    | PlonkAccumWrite : BufferVar → List FeltVar → ℕ → MLIR x
+    | PlonkWrite      : BufferVar → List FeltVar → ℕ → MLIR x
 
   abbrev MLIRProgram := MLIR NotInNondet
+
+  namespace MLIR.ExternOp
+    section
+
+      variable (buf : BufferVar) (args : List FeltVar) (outCount : ℕ)
+
+      def plonkExternWrite (discr : ExternPlonkBuffer) (st : State) : State := 
+        if outCount = 0
+        then (st.allocateBufferRow! buf args.length).setMany! ⟨mangle discr buf⟩ args
+        else {st with isFailed := true}
+
+    end
+  end MLIR.ExternOp  
 
   -- Step through the entirety of a `MLIR` MLIR program from initial state
   -- `state`, yielding the post-execution state and possibly a constraint
@@ -121,12 +160,18 @@ namespace Risc0
       | Eqz x          => withEqZero st.felts[x]!.get! st
       | If x program   => if st.felts[x]!.get! = 0 then st else program.run st
       | Nondet block   => block.run st
+      | Noop           => st
       | Sequence a b   => b.run (a.run st)
       -- Ops
       | Fail                     => {st with isFailed := true}
       | Set buf offset val       => st.set! buf offset st.felts[val]!.get!
       | SetGlobal buf offset val => st.setGlobal! buf offset st.felts[val]!.get! -- Behind the scenes setGlobal actually flattens a 2d buffer into a 1d buffer
-                                                                                -- and indexes into it. This is a side effect of global buffers only being 1d anyway
+                                                                                 -- and indexes into it. This is a side effect of global buffers only being 1d anyway
+      -- Extern
+      -- TODO(minor): This should be a Sequence of Set, brawl the termination checker later.
+      | PlonkAccumWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkRows st
+      | PlonkWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkAccumRows st 
+  termination_by _ => sizeOf program
 
   @[simp]
   abbrev MLIR.runProgram (program : MLIRProgram) := program.run

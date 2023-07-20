@@ -7,6 +7,8 @@ namespace Risc0
   abbrev BufferAtTime := List (Option Felt)
   abbrev Buffer := List BufferAtTime
 
+  def BufferAtTime.init (size : ℕ) : BufferAtTime := List.replicate size .none
+
   namespace Buffer
 
     abbrev Idx := ℕ × ℕ -- time, data
@@ -15,7 +17,7 @@ namespace Risc0
 
     def empty : Buffer := []
 
-    def init (size : ℕ) : Buffer := [List.replicate size .none]
+    def init (size : ℕ) : Buffer := [BufferAtTime.init size]
 
     def init' (row : BufferAtTime) : Buffer := [row]
 
@@ -63,6 +65,9 @@ namespace Risc0
 
     lemma data_idx_le_width (flatOffset width : ℕ) (h: width > 0) : (Idx.from1D flatOffset width).data < width :=
       Nat.mod_lt _ h
+
+    def popFront (buf : Buffer) : Buffer :=
+      buf.drop 1
 
   end Buffer
 
