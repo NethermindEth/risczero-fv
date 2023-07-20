@@ -17,10 +17,10 @@ def full : MLIRProgram :=
   guard ⟨"%2"⟩ then (?₀ ⟨"%1"⟩);
   "%3" ←ₐ .Sub ⟨"%0"⟩ ⟨"%2"⟩;
   guard ⟨"%3"⟩ then ("%4" ←ₐ .Get ⟨"data"⟩ 0 1; "%5" ←ₐ .Mul ⟨"%1"⟩ ⟨"%4"⟩; "%6" ←ₐ .Sub ⟨"%5"⟩ ⟨"%0"⟩; ?₀ ⟨"%6"⟩)
-def getReturn (st: State) : BufferAtTime :=
-  st.buffers ⟨"data"⟩ |>.get!.getLast!
-def run (st: State) : BufferAtTime :=
-  getReturn (full.runProgram st)
+def getReturn (st: State) (res: BufferAtTime) :=
+  (st.buffers ⟨"data"⟩ |>.get!.getLast!) = res
+def run (st: State) (res: BufferAtTime) :=
+  getReturn (full.runProgram st) res
 
 end Code
 
