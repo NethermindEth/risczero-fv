@@ -44,14 +44,15 @@ lemma part0_wp {st : State} :
   unfold part0_state_update part0_drops part0_state
   rfl
 
-lemma part0_cumulative_wp {x0 y0 y1: Felt}:
-  Code.run (start_state [x0] ([y0,y1])) ↔
+lemma part0_cumulative_wp {in0 data0 data1: Felt}:
+  Code.run (start_state ([in0]) ([data0, data1])) ↔
   Code.getReturn
       (part0_state_update
         {
           buffers :=
             Map.fromList
-              [({ name := "in" : BufferVar }, [[some x0]]), ({ name := "data" : BufferVar }, [[some y0, some y1]])],
+              [({ name := "in" : BufferVar }, [[some in0]]),
+                ({ name := "data" : BufferVar }, [[some data0, some data1]])],
           bufferWidths :=
             Map.fromList [({ name := "in" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (2 : ℕ))],
           constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,

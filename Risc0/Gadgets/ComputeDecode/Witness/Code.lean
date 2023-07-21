@@ -135,15 +135,15 @@ def full : MLIRProgram :=
   "%72" ←ₐ .Add ⟨"%71"⟩ ⟨"%69"⟩;
   "%73" ←ₐ .Sub ⟨"%20"⟩ ⟨"%72"⟩;
   ?₀ ⟨"%73"⟩
-def getReturn (st: State) : BufferAtTime :=
-  st.buffers ⟨"data"⟩ |>.get!.getLast!
-def run (st: State) : BufferAtTime :=
-  getReturn (full.runProgram st)
+def getReturn (st: State) (res_data: BufferAtTime) : Prop :=
+  ((st.buffers ⟨"data"⟩ |>.get!.getLast!) = res_data)
+def run (st: State) (res_data: BufferAtTime): Prop :=
+  getReturn (full.runProgram st) res_data
 
 end Code
 
-def start_state (input : BufferAtTime) : State :=
-  { buffers := Map.fromList [(⟨"in"⟩, [input]), (⟨"data"⟩, [[none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none, none]])]
+def start_state (input_in: BufferAtTime) : State :=
+  { buffers := Map.fromList [(⟨"in"⟩, [input_in]), (⟨"data"⟩, [[.none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none]])]
   , bufferWidths := Map.fromList [(⟨"in"⟩, 4), (⟨"data"⟩, 18)]
   , constraints := []
   , cycle := 0

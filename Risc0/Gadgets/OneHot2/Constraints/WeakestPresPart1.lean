@@ -12,18 +12,18 @@ open MLIRNotation
 def part1_state (st: State) : State :=
   
         ((((st[props][{ name := "%5" : PropVar }] ←
-                (Option.get! (State.props st { name := "%1" : PropVar }) ∧
+                (Option.get! (State.props st { name := "%2" : PropVar }) ∧
                   Option.get! (State.felts st { name := "%4" : FeltVar }) =
-                    (0 : Felt)))[felts][{ name := "%0" : FeltVar }] ←
+                    (0 : Felt)))[felts][{ name := "%1" : FeltVar }] ←
               (1 : Felt))["%6"] ←ₛ
             getImpl st { name := "data" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%7" : FeltVar }] ←
           (1 : Felt) -
             Option.get!
               (State.felts
                 (((st[props][{ name := "%5" : PropVar }] ←
-                      (Option.get! (State.props st { name := "%1" : PropVar }) ∧
+                      (Option.get! (State.props st { name := "%2" : PropVar }) ∧
                         Option.get! (State.felts st { name := "%4" : FeltVar }) =
-                          (0 : Felt)))[felts][{ name := "%0" : FeltVar }] ←
+                          (0 : Felt)))[felts][{ name := "%1" : FeltVar }] ←
                     (1 : Felt))["%6"] ←ₛ
                   getImpl st { name := "data" : BufferVar } (0 : Back) (0 : ℕ))
                 { name := "%6" : FeltVar })) 
@@ -33,14 +33,14 @@ def part1_drops (st: State) : State :=
 
 -- Run the program from part1 onwards by using part1_state rather than Code.part1
 def part1_state_update (st: State): State :=
-  Γ (part1_drops (part1_state st)) ⟦Code.part2;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩;Code.part3;dropfelt ⟨"%3"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩⟧
+  Γ (part1_drops (part1_state st)) ⟦Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩⟧
 
 -- Prove that substituting part1_state for Code.part1 produces the same result
 lemma part1_wp {st : State} :
-  Code.getReturn (MLIR.runProgram (Code.part1;dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩;Code.part3;dropfelt ⟨"%3"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩) st) ↔
+  Code.getReturn (MLIR.runProgram (Code.part1;dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩) st) ↔
   Code.getReturn (part1_state_update st) := by
   unfold MLIR.runProgram; simp only
-  generalize eq : (dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩;Code.part3;dropfelt ⟨"%3"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩) = prog
+  generalize eq : (dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩) = prog
   unfold Code.part1
   MLIR
   rewrite [←eq]
@@ -53,25 +53,23 @@ lemma part1_updates_opaque {st : State} :
   Code.getReturn (part1_state_update (part0_drops (part0_state st))) := by
   simp [part0_state_update, part1_wp]
 
-lemma part1_cumulative_wp {x0 y0 y1: Felt} :
-  Code.run (start_state [x0] ([y0,y1])) ↔
+lemma part1_cumulative_wp {code0 data0 data1: Felt} :
+  Code.run (start_state ([code0]) ([data0, data1])) ↔
   Code.getReturn
       (part1_state_update
-        ((({
-                buffers :=
-                  ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
-                      [[some y0, some y1]])[{ name := "code" : BufferVar }] ←ₘ
-                    [[some x0]],
-                bufferWidths :=
-                  ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (2 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
-                    (1 : ℕ),
-                constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
-                vars :=
-                  [{ name := "code" : BufferVar },
-                    { name := "data" : BufferVar }] }[props][{ name := "%1" : PropVar }] ←
-              True)[felts][{ name := "%3" : FeltVar }] ←
-            y1)[felts][{ name := "%4" : FeltVar }] ←
-          y1 - x0))  := by
+        (({
+              buffers :=
+                ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
+                    [[some data0, some data1]])[{ name := "code" : BufferVar }] ←ₘ
+                  [[some code0]],
+              bufferWidths :=
+                ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (2 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
+                  (1 : ℕ),
+              constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+              vars :=
+                [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] }[props][{ name := "%2" : PropVar }] ←
+            True)[felts][{ name := "%4" : FeltVar }] ←
+          -code0))  := by
     rewrite [part0_cumulative_wp]
     rewrite [part1_updates_opaque]
     unfold part0_state
@@ -80,7 +78,7 @@ lemma part1_cumulative_wp {x0 y0 y1: Felt} :
     -- rewrite [withEqZero_def]
     -- MLIR_states_updates
     unfold part0_drops
-    -- 1 drop
+    -- 2 drops
     simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
     rewrite [State.dropFelts]
     simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]

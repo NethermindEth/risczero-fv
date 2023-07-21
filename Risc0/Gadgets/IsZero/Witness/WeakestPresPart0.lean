@@ -48,9 +48,9 @@ def part0_state_update (st: State): State :=
   Γ (part0_drops (part0_state st)) ⟦Code.part1;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧
 
 -- Prove that substituting part0_state for Code.part0 produces the same result
-lemma part0_wp {st : State} {y0 y1 : Option Felt} :
-  Code.getReturn (Γ st ⟦Code.part0;Code.part1;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧) ([y0, y1]) ↔
-  Code.getReturn (part0_state_update st) ([y0, y1]) := by
+lemma part0_wp {st : State} {data0 data1 : Option Felt} :
+  Code.getReturn (Γ st ⟦Code.part0;Code.part1;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧) ([data0, data1]) ↔
+  Code.getReturn (part0_state_update st) ([data0, data1]) := by
   generalize eq : (Code.part1;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩) = prog
   unfold Code.part0
   MLIR
@@ -59,19 +59,19 @@ lemma part0_wp {st : State} {y0 y1 : Option Felt} :
   unfold part0_state_update part0_drops part0_state
   rfl
 
-lemma part0_cumulative_wp {x0: Felt} :
-  Code.run (start_state [x0]) ([y0,y1]) ↔
+lemma part0_cumulative_wp {in0: Felt} {data0 data1: Option Felt} :
+  Code.run (start_state ([in0])) ([data0, data1]) ↔
   Code.getReturn
       (part0_state_update
         {
           buffers :=
             Map.fromList
-              [({ name := "in" : BufferVar }, [[some x0]]), ({ name := "data" : BufferVar }, [[none, none]])],
+              [({ name := "in" : BufferVar }, [[some in0]]), ({ name := "data" : BufferVar }, [[none, none]])],
           bufferWidths :=
             Map.fromList [({ name := "in" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (2 : ℕ))],
           constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
           vars := [{ name := "in" : BufferVar }, { name := "data" : BufferVar }] })
-      ([y0, y1])  := by
+      ([data0, data1])  := by
     unfold Code.run start_state
     rewrite [Code.optimised_behaviour_full]
     unfold MLIR.runProgram

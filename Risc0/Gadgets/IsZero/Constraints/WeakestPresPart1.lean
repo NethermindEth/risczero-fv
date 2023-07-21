@@ -44,15 +44,15 @@ lemma part1_updates_opaque {st : State} :
   Code.getReturn (part1_state_update (part0_drops (part0_state st))) := by
   simp [part0_state_update, part1_wp]
 
-lemma part1_cumulative_wp {x0 y0 y1: Felt} :
-  Code.run (start_state [x0] ([y0,y1])) ↔
+lemma part1_cumulative_wp {in0 data0 data1: Felt} :
+  Code.run (start_state ([in0]) ([data0, data1])) ↔
   Code.getReturn
       (part1_state_update
         (((({
                   buffers :=
                     ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
-                        [[some y0, some y1]])[{ name := "in" : BufferVar }] ←ₘ
-                      [[some x0]],
+                        [[some data0, some data1]])[{ name := "in" : BufferVar }] ←ₘ
+                      [[some in0]],
                   bufferWidths :=
                     ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (2 : ℕ))[{ name := "in" : BufferVar }] ←ₘ
                       (1 : ℕ),
@@ -61,9 +61,9 @@ lemma part1_cumulative_wp {x0 y0 y1: Felt} :
                     [{ name := "in" : BufferVar },
                       { name := "data" : BufferVar }] }[props][{ name := "%1" : PropVar }] ←
                 True)[felts][{ name := "%2" : FeltVar }] ←
-              x0)[props][{ name := "%4" : PropVar }] ←
-            x0 = (0 : Felt))[felts][{ name := "%3" : FeltVar }] ←
-          y0))  := by
+              in0)[props][{ name := "%4" : PropVar }] ←
+            in0 = (0 : Felt))[felts][{ name := "%3" : FeltVar }] ←
+          data0))  := by
     rewrite [part0_cumulative_wp]
     rewrite [part1_updates_opaque]
     unfold part0_state
