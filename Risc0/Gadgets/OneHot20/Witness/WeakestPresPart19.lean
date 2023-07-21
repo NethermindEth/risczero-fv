@@ -1,4 +1,5 @@
-import Risc0.Basic
+import Risc0.State
+import Risc0.Cirgen
 import Risc0.MlirTactics
 import Risc0.Gadgets.OneHot20.Witness.Code
 import Risc0.Gadgets.OneHot20.Witness.WeakestPresPart18
@@ -27,17 +28,7 @@ def part19_state (st: State) : State :=
                     (0 : Felt) then
                 (1 : Felt)
               else (0 : Felt)))["%22"] ←ₛ
-            getImpl
-              ((st[felts][{ name := "%175" : FeltVar }] ←
-                  Option.get! (State.felts st { name := "%20" : FeltVar }) -
-                    Option.get! (State.felts st { name := "%0" : FeltVar }))[felts][{ name := "%176" : FeltVar }] ←
-                if
-                    Option.get! (State.felts st { name := "%20" : FeltVar }) -
-                        Option.get! (State.felts st { name := "%0" : FeltVar }) =
-                      (0 : Felt) then
-                  (1 : Felt)
-                else (0 : Felt))
-              { name := "data" : BufferVar } (0 : Back) (2 : ℕ)) 
+            getImpl st { name := "data" : BufferVar } (0 : Back) (2 : ℕ)) 
 
 def part19_drops (st: State) : State :=
   State.dropFelts (State.dropFelts (st) ⟨"%175"⟩) ⟨"%176"⟩

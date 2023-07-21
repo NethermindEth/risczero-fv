@@ -1,4 +1,5 @@
-import Risc0.Basic
+import Risc0.State
+import Risc0.Cirgen
 import Risc0.MlirTactics
 import Risc0.Gadgets.ComputeDecode.Witness.Code
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart17
@@ -18,8 +19,7 @@ def part18_state (st: State) : State :=
                       getImpl st { name := "data" : BufferVar } (0 : Back) (8 : ℕ))
                     { name := "%26" : FeltVar }) *
                 (4 : Felt))["%28"] ←ₛ
-            getImpl (st[felts][{ name := "%7" : FeltVar }] ← (4 : Felt)) { name := "data" : BufferVar } (0 : Back)
-              (9 : ℕ)) 
+            getImpl st { name := "data" : BufferVar } (0 : Back) (9 : ℕ)) 
 
 def part18_drops (st: State) : State :=
   State.dropFelts (st) ⟨"%26"⟩

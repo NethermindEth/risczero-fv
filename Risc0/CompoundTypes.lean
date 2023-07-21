@@ -1,4 +1,4 @@
-import Risc0.Basic
+import Risc0.Cirgen
 
 namespace Risc0
 

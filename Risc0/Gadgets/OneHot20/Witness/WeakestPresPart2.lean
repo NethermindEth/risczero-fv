@@ -1,4 +1,5 @@
-import Risc0.Basic
+import Risc0.State
+import Risc0.Cirgen
 import Risc0.MlirTactics
 import Risc0.Gadgets.OneHot20.Witness.Code
 import Risc0.Gadgets.OneHot20.Witness.WeakestPresPart1

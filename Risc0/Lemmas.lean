@@ -4,7 +4,8 @@ import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.LibrarySearch
 
-import Risc0.Basic
+import Risc0.Cirgen
+import Risc0.State
 
 namespace Risc0
 

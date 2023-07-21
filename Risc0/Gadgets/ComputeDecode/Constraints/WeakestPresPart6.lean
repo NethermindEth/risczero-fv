@@ -1,4 +1,5 @@
-import Risc0.Basic
+import Risc0.State
+import Risc0.Cirgen
 import Risc0.MlirTactics
 import Risc0.Gadgets.ComputeDecode.Constraints.Code
 import Risc0.Gadgets.ComputeDecode.Constraints.WeakestPresPart5
@@ -22,11 +23,7 @@ def part6_state (st: State) : State :=
                     getImpl st { name := "data" : BufferVar } (0 : Back) (4 : ℕ))
                   { name := "%30" : FeltVar }) *
               Option.get! (State.felts st { name := "%4" : FeltVar }))["%33"] ←ₛ
-          getImpl
-            (st[props][{ name := "%28" : PropVar }] ←
-              (Option.get! (State.props st { name := "%6" : PropVar }) ∧
-                Option.get! (State.felts st { name := "%27" : FeltVar }) = (0 : Felt)))
-            { name := "data" : BufferVar } (0 : Back) (2 : ℕ)) 
+          getImpl st { name := "data" : BufferVar } (0 : Back) (2 : ℕ)) 
 
 def part6_drops (st: State) : State :=
   State.dropFelts (State.dropFelts (st) ⟨"%27"⟩) ⟨"%30"⟩

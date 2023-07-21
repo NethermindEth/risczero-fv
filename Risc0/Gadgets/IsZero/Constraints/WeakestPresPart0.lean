@@ -1,4 +1,5 @@
-import Risc0.Basic
+import Risc0.State
+import Risc0.Cirgen
 import Risc0.MlirTactics
 import Risc0.Gadgets.IsZero.Constraints.CodeDrops
 
@@ -22,8 +23,7 @@ def part0_state (st: State) : State :=
                       getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
                     { name := "%2" : FeltVar }) =
                 (0 : Felt)))["%3"] ←ₛ
-          getImpl (st[props][{ name := "%1" : PropVar }] ← True) { name := "data" : BufferVar } (0 : Back)
-            (0 : ℕ)) 
+          getImpl st { name := "data" : BufferVar } (0 : Back) (0 : ℕ)) 
 
 def part0_drops (st: State) : State :=
   st

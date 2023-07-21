@@ -1,4 +1,5 @@
-import Risc0.Basic
+import Risc0.State
+import Risc0.Cirgen
 import Risc0.MlirTactics
 import Risc0.Gadgets.OneHot2.Constraints.CodeDrops
 
@@ -11,13 +12,11 @@ def part0_state (st: State) : State :=
   
         ((((st[props][{ name := "%1" : PropVar }] ← True)["%2"] ←ₛ
               getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))["%3"] ←ₛ
-            getImpl (st[props][{ name := "%1" : PropVar }] ← True) { name := "data" : BufferVar } (0 : Back)
-              (1 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
+            getImpl st { name := "data" : BufferVar } (0 : Back) (1 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
           Option.get!
               (State.felts
                 ((st[props][{ name := "%1" : PropVar }] ← True)["%3"] ←ₛ
-                  getImpl (st[props][{ name := "%1" : PropVar }] ← True) { name := "data" : BufferVar } (0 : Back)
-                    (1 : ℕ))
+                  getImpl st { name := "data" : BufferVar } (0 : Back) (1 : ℕ))
                 { name := "%3" : FeltVar }) -
             Option.get!
               (State.felts

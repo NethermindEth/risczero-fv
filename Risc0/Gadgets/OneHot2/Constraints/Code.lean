@@ -1,4 +1,3 @@
-import Risc0.Basic
 import Risc0.Lemmas
 
 namespace Risc0.OneHot2.Constraints.Code
