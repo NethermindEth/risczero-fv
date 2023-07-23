@@ -125,7 +125,7 @@ import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart2
 import Risc0.Gadgets.IsZero.Witness.WeakestPresPart0
 import Risc0.Gadgets.IsZero.Witness.WeakestPresPart1
 import Risc0.Gadgets.IsZero.Witness.WeakestPresPart2
--- import Risc0.Gadgets.IsZero.Proofs
+import Risc0.Gadgets.IsZero.Proofs
 
 import Risc0.Gadgets.ComputeDecode.Witness.Code
 import Risc0.Gadgets.ComputeDecode.Constraints.Code
@@ -218,3 +218,5 @@ import Risc0.Gadgets.OneHot1.Witness.WeakestPresPart0
 import Risc0.Gadgets.OneHot1.Witness.WeakestPresPart1
 import Risc0.Gadgets.OneHot1.Witness.WeakestPresPart2
 import Risc0.Gadgets.OneHot1.Witness.WeakestPresPart3
+
+import Risc0.Gadgets.OneHot2.Constraints.WeakestPresPart3
