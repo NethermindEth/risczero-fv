@@ -17,7 +17,7 @@ namespace Risc0.IsZero
 
 open MLIRNotation
 
-theorem constraints_if_witness
+theorem constraints_of_witness
   {input : Felt}
   {output : BufferAtTime}
   (h : output.length = 2) 
