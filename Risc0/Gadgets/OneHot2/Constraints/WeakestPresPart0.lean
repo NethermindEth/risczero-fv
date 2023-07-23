@@ -10,31 +10,36 @@ open MLIRNotation
 -- The state obtained by running Code.part0 on st
 def part0_state (st: State) : State :=
   
-        ((((st[props][{ name := "%2" : PropVar }] ← True)[felts][{ name := "%0" : FeltVar }] ← (0 : Felt))["%3"] ←ₛ
-            getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
-          -Option.get!
+        ((((st[props][{ name := "%1" : PropVar }] ← True)["%2"] ←ₛ
+              getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))["%3"] ←ₛ
+            getImpl st { name := "data" : BufferVar } (0 : Back) (1 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
+          Option.get!
               (State.felts
-                (((st[props][{ name := "%2" : PropVar }] ← True)[felts][{ name := "%0" : FeltVar }] ←
-                    (0 : Felt))["%3"] ←ₛ
+                ((st[props][{ name := "%1" : PropVar }] ← True)["%3"] ←ₛ
+                  getImpl st { name := "data" : BufferVar } (0 : Back) (1 : ℕ))
+                { name := "%3" : FeltVar }) -
+            Option.get!
+              (State.felts
+                ((st[props][{ name := "%1" : PropVar }] ← True)["%2"] ←ₛ
                   getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))
-                { name := "%3" : FeltVar })) 
+                { name := "%2" : FeltVar })) 
 
 def part0_drops (st: State) : State :=
-  State.dropFelts (State.dropFelts (st) ⟨"%0"⟩) ⟨"%3"⟩
+  State.dropFelts (st) ⟨"%2"⟩
 
 -- Run the whole program by using part0_state rather than Code.part0
 def part0_state_update (st: State): State :=
-  Γ (part0_drops (part0_state st)) ⟦Code.part1;dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩⟧
+  Γ (part0_drops (part0_state st)) ⟦Code.part1;dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩;Code.part3;dropfelt ⟨"%3"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩⟧
 
 -- Prove that substituting part0_state for Code.part0 produces the same result
 lemma part0_wp {st : State} :
-  Code.getReturn (Γ st ⟦Code.part0;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;Code.part1;dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩⟧)↔
+  Code.getReturn (Γ st ⟦Code.part0;dropfelt ⟨"%2"⟩;Code.part1;dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩;Code.part3;dropfelt ⟨"%3"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩⟧)↔
   Code.getReturn (part0_state_update st) := by
-  generalize eq : (dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;Code.part1;dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩) = prog
+  generalize eq : (dropfelt ⟨"%2"⟩;Code.part1;dropfelt ⟨"%4"⟩;Code.part2;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩;Code.part3;dropfelt ⟨"%3"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩) = prog
   unfold Code.part0
   MLIR
   rewrite [←eq]
-  rewrite [MLIR.run_seq_def,MLIR.run_dropfelt, MLIR.run_seq_def,MLIR.run_dropfelt]
+  rewrite [MLIR.run_seq_def,MLIR.run_dropfelt]
   unfold part0_state_update part0_drops part0_state
   rfl
 
