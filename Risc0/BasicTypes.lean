@@ -6,7 +6,7 @@ import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.LibrarySearch
-import Mathlib.Data.Bitvec.Basic
+import Mathlib.Data.Bitvec.Defs
 
 import Risc0.Map
 import Risc0.Wheels
