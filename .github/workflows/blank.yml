@@ -28,7 +28,9 @@ jobs:
       # Runs a single command using the runners shell
       - name: Install Elan
         run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf > elan_install.sh
+          chmod +x elan_install.sh
+          ./elan_install.sh -y
           source ~/.profile
           echo $PATH >> $GITHUB_PATH
 
