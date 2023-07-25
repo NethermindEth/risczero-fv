@@ -41,13 +41,13 @@ namespace Risc0.State
   lemma updateFelts_felts_get_ne {st : State} {name name' : FeltVar} {x : Felt}
     (h : name ≠ name') : (updateFelts st name x).felts[name']! = st.felts[name']! := by
     simp [updateFelts, Map.update_def, getElem!, Map.getElem_def]
-    aesop
+    aesop'
 
   @[simp]
   lemma updateFelts_felts_get_ne' {st : State} {name name' : FeltVar} {x : Felt}
     (h : name ≠ name') : (updateFelts st name x).felts[name'] = st.felts[name'] := by
     simp [updateFelts, Map.update_def, getElem!, Map.getElem_def]
-    aesop
+    aesop'
 
   @[simp]
   lemma updateFelts_felts_get_next (h: name ≠ name') : (updateFelts st name x).felts name' = st.felts name' := by
