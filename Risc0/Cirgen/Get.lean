@@ -21,7 +21,7 @@ namespace Risc0
       unfold isGetValid Buffer.back Back.toNat
       simp
       rw [State.set!_bufferWidths_get_of_ne h, State.set!_buffers_get_of_ne h]
-      aesop
+      aesop'
   end isGetValid
 
   section getImpl
@@ -33,26 +33,26 @@ namespace Risc0
     @[simp]
     lemma getImpl_updateFelts :
       getImpl (st[felts][x] ← val) buf back offset = getImpl st buf back offset := by
-        aesop
+        aesop'
     
     @[simp]
     lemma getImpl_updateProps :
       getImpl (st[props][x] ← val) buf back offset = getImpl st buf back offset := by
-        aesop
+        aesop'
 
     @[simp]
     lemma getImpl_withEqZero :
       getImpl (withEqZero x st) buf back offset = getImpl st buf back offset := by
-        aesop
+        aesop'
 
     --Review: should any of these be simps?
     lemma getImpl_none_or_val : getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := by
       simp [getImpl]
-      aesop
+      aesop'
 
     lemma getImpl_val_of_some : getImpl st buf back offset = some lit → ∃ x, lit = .Val x := by
       have h: getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := getImpl_none_or_val
-      aesop
+      aesop'
 
     @[simp]
     lemma getImpl_skip_none_update : getImpl (st[name] ←ₛ .none) buf back offset = getImpl st buf back offset := by
@@ -71,13 +71,13 @@ namespace Risc0
       | none => exact getImpl_skip_none_update
       | some lit =>
         have h: ∃ x, lit = Lit.Val x := getImpl_val_of_some eq
-        aesop
+        aesop'
 
     @[simp]
     lemma getImpl_dropFelts : 
       getImpl (State.dropFelts st y) buf back offset = getImpl st buf back offset := by
       unfold State.dropFelts getImpl
-      aesop
+      aesop'
 
     lemma getImpl_skip_set (h : buf ≠ buf') :
       getImpl (State.set! st buf' index x) buf back offset = getImpl st buf back offset := by
@@ -112,7 +112,7 @@ namespace Risc0
         congr
         unfold Map.update; funext z
         have : State.buffers st z = st.buffers[z] := rfl; rw [this]
-        aesop
+        aesop'
 
     lemma State.set!_of_some {v : Buffer} {st : State} {buf : BufferVar}
       (h : st.buffers[buf] = some v) :
@@ -123,7 +123,7 @@ namespace Risc0
                             | some b => st.buffers[buf] ←ₘ b
                             | none => st.buffers
                 isFailed := if bufferSet?.isNone then true else st.isFailed
-      } := by simp [set!, setBufferElementImpl, h]; aesop
+      } := by simp [set!, setBufferElementImpl, h]; aesop'
 
     private lemma isGetValid_congr
       (h₁ : st.buffers = st'.buffers)
@@ -132,14 +132,14 @@ namespace Risc0
       (h₄ : st.vars = st'.vars) :
       isGetValid st buf back offset = isGetValid st' buf back offset := by
       unfold isGetValid Buffer.back
-      aesop
+      aesop'
 
     private lemma Buffer.isEqSome_same_or_isNone_of_set?
       (h : Buffer.set? buffer (buffer.length - 1, offset) val = some row) :
       let inner := (buffer.getBufferAtTime! (buffer.length - 1)).get! offset
       (inner = some val) ∨ inner.isNone := by
       simp only [set?, Option.isEqSome, Buffer.Idx.data, Buffer.Idx.time] at h
-      split_ifs at h <;> aesop
+      split_ifs at h <;> aesop'
 
     private lemma buffer_eq_row_of_isEqSome
       (h : Buffer.set? buffer (buffer.length - 1, offset) val = some row)
@@ -152,13 +152,13 @@ namespace Risc0
       (h : l ≠ []) :
       List.get! (List.set l (l.length - 1) v) (l.length - 1) = v := by
       rw [List.get!_set_of_lt_length]
-      cases l <;> aesop
+      cases l <;> aesop'
 
     private lemma get!_set_of_nonempty_ne {α : Type} [Inhabited α] {l : List α} {v : α}
       (h : l ≠ [])
       (h₁ : (l.length - 1) ≠ i') :
       List.get! (List.set l (l.length - 1) v) i' = List.get! l i' := by
-      rw [List.get!_set_of_ne]; cases l <;> aesop
+      rw [List.get!_set_of_ne]; cases l <;> aesop'
 
     private lemma getImpl_skip_set_offset_of_some_aux' 
       (h : List.get! (List.get! buffer (List.length buffer - 1)) offset ≠ some val)
@@ -184,7 +184,7 @@ namespace Risc0
           | some row =>
             rcases Buffer.isEqSome_same_or_isNone_of_set? eq₂ with h₂ | h₂
             · have : (List.get! (List.get! buffer (buffer.length - 1)) offset).isEqSome val := by
-                unfold Buffer.getBufferAtTime! at h₂; unfold Option.isEqSome; aesop
+                unfold Buffer.getBufferAtTime! at h₂; unfold Option.isEqSome; aesop'
               have : buffer = row := buffer_eq_row_of_isEqSome eq₂ this; subst this
               simp only [
                 Buffer.get!, Map.update_get, Option.get!_of_some, Buffer.Idx.time, Buffer.Idx.data, h₁

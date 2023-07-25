@@ -38,6 +38,6 @@ namespace Risc0.State
   lemma updateProps_props_get_ne {st : State} {name name' : PropVar} {x : Prop}
     (h : name ≠ name') : (updateProps st name x).props[name']! = st.props[name']! := by
     simp [updateProps, Map.update_def, getElem!, Map.getElem_def]
-    aesop
+    aesop'
 
 end Risc0.State
