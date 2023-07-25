@@ -74,6 +74,31 @@ namespace Risc0
     def setGlobal! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
       let width := st.bufferWidths[bufferVar].get!
       st.setBufferElementImpl bufferVar (Buffer.Idx.from1D offset width) val
+
+    def setMany! (st : State) (buf : BufferVar) (felts : List FeltVar) : State :=
+      (·.1) <| felts.foldl
+        (init := (st, 0))
+        λ (acc, i) feltVar ↦ (acc.set! buf i st.felts[feltVar].get!, i + 1)
+
+    def allocateBuffer (st : State) (buf : BufferVar) : State :=
+      if buf ∈ st.buffers
+      then st
+      else {
+        st with buffers := st.buffers[buf] ←ₘ Buffer.empty
+                vars := buf :: st.vars
+                bufferWidths := st.bufferWidths[buf] ←ₘ 0
+      }
+
+    def allocateBufferRow (st : State) (buf : BufferVar) (n : ℕ) : State :=
+      if buf ∈ st.buffers
+      then { st with buffers := st.buffers[buf] ←ₘ
+                                  st.buffers[buf].get!.push (BufferAtTime.init n)
+                     bufferWidths := st.bufferWidths[buf] ←ₘ n }
+      else st
+
+    def allocateBufferRow! (st : State) (buf : BufferVar) (n : ℕ) : State :=
+      allocateBufferRow (st.allocateBuffer buf) buf n
+
   end State
 
 
