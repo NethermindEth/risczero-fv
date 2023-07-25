@@ -76,10 +76,9 @@ namespace Risc0
               {state with
                  buffers := state.buffers[⟨name⟩] ←ₘ
                               state.buffers[(⟨name⟩ : BufferVar)].get!.popFront
-                -- TODO(before PR): This is just functionality for Map.
-                 felts := (·.1) <| buf.foldl
-                            (init := (state.felts, 0))
-                            λ ⟨felts, i⟩ felt? ↦ (felts[⟨s!"{name}#{i}"⟩] ←ₘ felt?.get!, i + 1)}
+                 felts := Map.updateMany
+                            state.felts
+                            ((List.range buf.length).map (⟨s!"{name}#{·}"⟩) |>.zip (buf.map Option.get!))}
 
     def setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer.Idx) (val : Felt) : State :=
       match (st.buffers[bufferVar].get!).set? idx val with

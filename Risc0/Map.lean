@@ -20,6 +20,9 @@ def update (m : Map α β) (k : α) (v : β) : Map α β :=
 def drop (m : Map α β) (k : α) : Map α β :=
   λ x => if x = k then none else m x
 
+def updateMany (m : Map α β) (l : List (α × β)) : Map α β :=
+  l.foldl (init := m) λ acc ⟨k, v⟩ ↦ update acc k v
+
 end Map
 
 end Map
