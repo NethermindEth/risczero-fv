@@ -59,13 +59,13 @@ section add
     Γ (Γ st ⟦@MLIR.Assign α a (Op.Add c d)⟧) ⟦@MLIR.Assign β b (Op.Const x)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Const x)⟧) ⟦@MLIR.Assign α a (Op.Add c d)⟧ := by
       simp [MLIR.run_ass_def]
-      rewrite [updateFelts_neq_comm] <;> aesop
+      rewrite [updateFelts_neq_comm] <;> aesop'
 
   lemma add_past_drop (h : name ≠ name') (h₁ : ⟨name'⟩ ≠ lhs) (h₂ : ⟨name'⟩ ≠ rhs) :
     Γ (Γ st ⟦@MLIR.Assign α name (Op.Add lhs rhs)⟧) ⟦@MLIR.DropFelt β ⟨name'⟩⟧ =
     Γ (Γ st ⟦@MLIR.DropFelt β ⟨name'⟩⟧) ⟦@MLIR.Assign α name (Op.Add lhs rhs)⟧ := by
       simp [MLIR.run_ass_def, MLIR.run_dropfelt]
-      aesop
+      aesop'
 end add
 
 section andCond
@@ -73,13 +73,13 @@ section andCond
     Γ (Γ st ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧) ⟦@MLIR.Assign β b (Op.Const x)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Const x)⟧) ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧ := by
       simp [MLIR.run_ass_def, h]
-      aesop
+      aesop'
   
   lemma andCond_past_drop (h: c ≠ b):
     Γ (Γ st ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧) ⟦@MLIR.DropFelt β b⟧ =
     Γ (Γ st ⟦@MLIR.DropFelt β b⟧) ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧ := by
       simp [MLIR.run_ass_def, MLIR.run_dropfelt, h.symm]
-      aesop
+      aesop'
 end andCond
 
 section andeqz
@@ -87,7 +87,7 @@ section andeqz
     Γ (Γ st ⟦@MLIR.Assign α a (Op.AndEqz c d)⟧) ⟦@MLIR.Assign β b (Op.Const x)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Const x)⟧) ⟦@MLIR.Assign α a (Op.AndEqz c d)⟧ := by
       simp [MLIR.run_ass_def, State.updateFelts, State.updateProps, *, Map.update]
-      aesop
+      aesop'
   
   lemma andEqz_past_drop (h : rhs ≠ y) :
     Γ (Γ st ⟦@MLIR.Assign β x (Op.AndEqz lhs rhs)⟧) ⟦@MLIR.DropFelt α y⟧ =
@@ -96,7 +96,7 @@ section andeqz
         MLIR.run_ass_def, MLIR.run_dropfelt, State.updateFelts, State.updateProps, Map.update,
         State.dropFelts, Map.drop
       ]
-      aesop
+      aesop'
 end andeqz
 
 section bitand
@@ -104,48 +104,48 @@ section bitand
     Γ (Γ st ⟦@MLIR.Assign α a (Op.BitAnd c d)⟧) ⟦@MLIR.Assign β b (Op.Const x)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Const x)⟧) ⟦@MLIR.Assign α a (Op.BitAnd c d)⟧ := by
       simp [MLIR.run_ass_def]
-      rewrite [updateFelts_neq_comm] <;> aesop
+      rewrite [updateFelts_neq_comm] <;> aesop'
 
   lemma bitAnd_past_drop (h : name ≠ name') (h₁ : ⟨name'⟩ ≠ lhs) (h₂ : ⟨name'⟩ ≠ rhs):
     Γ (Γ st ⟦@MLIR.Assign α name (Op.BitAnd lhs rhs)⟧) ⟦@MLIR.DropFelt β ⟨name'⟩⟧ =
     Γ (Γ st ⟦@MLIR.DropFelt β ⟨name'⟩⟧) ⟦@MLIR.Assign α name (Op.BitAnd lhs rhs)⟧ := by
       simp [MLIR.run_ass_def, MLIR.run_dropfelt]
-      aesop
+      aesop'
 end bitand
 
 section const
   lemma const_past_add (h: a ≠ b) (h': ⟨a⟩ ≠ c) (h'': ⟨a⟩ ≠ d):
     Γ (Γ st ⟦@MLIR.Assign α a (Op.Const x)⟧) ⟦@MLIR.Assign β b (Op.Add c d)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Add c d)⟧) ⟦@MLIR.Assign α a (Op.Const x)⟧ := by
-      rw [add_past_const] <;> aesop
+      rw [add_past_const] <;> aesop'
   
   lemma const_past_andCond (h: ⟨b⟩ ≠ c):
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Const x)⟧) ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧ =
     Γ (Γ st ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧) ⟦@MLIR.Assign β b (Op.Const x)⟧ := by
-      rw [andCond_past_const]; aesop
+      rw [andCond_past_const]; aesop'
   
   lemma const_past_andEqz (h: ⟨b⟩ ≠ d):
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Const x)⟧) ⟦@MLIR.Assign α a (Op.AndEqz c d)⟧ =
     Γ (Γ st ⟦@MLIR.Assign α a (Op.AndEqz c d)⟧) ⟦@MLIR.Assign β b (Op.Const x)⟧ := by
       rw [andEqz_past_const]
-      aesop
+      aesop'
 
   lemma const_past_bitAnd (h: a ≠ b) (h': ⟨a⟩ ≠ c) (h'': ⟨a⟩ ≠ d):
     Γ (Γ st ⟦@MLIR.Assign α a (Op.Const x)⟧) ⟦@MLIR.Assign β b (Op.BitAnd c d)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β b (Op.BitAnd c d)⟧) ⟦@MLIR.Assign α a (Op.Const x)⟧ := by
-      rw [bitAnd_past_const] <;> aesop
+      rw [bitAnd_past_const] <;> aesop'
 
   lemma const_past_const (h: x ≠ y):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Const c₁)⟧) ⟦@MLIR.Assign β y (Op.Const c₂)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β y (Op.Const c₂)⟧) ⟦@MLIR.Assign α x (Op.Const c₁)⟧ := by
       simp [MLIR.run_ass_def]
-      rewrite [updateFelts_neq_comm] <;> aesop
+      rewrite [updateFelts_neq_comm] <;> aesop'
 
   lemma const_past_drop (h : name ≠ name') :
     Γ (Γ st ⟦@MLIR.Assign α name (Op.Const x)⟧) ⟦@MLIR.DropFelt β ⟨name'⟩⟧ =
     Γ (Γ st ⟦@MLIR.DropFelt β ⟨name'⟩⟧) ⟦@MLIR.Assign α name (Op.Const x)⟧ := by
       simp [MLIR.run_ass_def, MLIR.run_dropfelt]
-      aesop
+      aesop'
   
   lemma const_past_eqz (h : ⟨name⟩ ≠ y):
     Γ (Γ st ⟦@MLIR.Assign α name (Op.Const x)⟧) ⟦@MLIR.Eqz β y⟧ =
@@ -156,7 +156,7 @@ section const
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Const c₁)⟧) ⟦@MLIR.Assign β y (Op.Get buf back offset)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β y (Op.Get buf back offset)⟧) ⟦@MLIR.Assign α x (Op.Const c₁)⟧ := by
       simp [MLIR.run_ass_def]
-      aesop
+      aesop'
       rewrite [updateFelts_neq_comm] <;> simp [*]
   
   lemma const_past_if {branch: MLIR β}
@@ -165,7 +165,7 @@ section const
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Const c)⟧) ⟦@MLIR.If β y branch⟧ =
     Γ (Γ st ⟦@MLIR.If β y branch⟧) ⟦@MLIR.Assign α x (Op.Const c)⟧ := by
       simp [MLIR.run_if, MLIR.run_ass_def, h, State.dropFelts_felts, getElem!, getElem, Map.drop_get]
-      aesop
+      aesop'
   
   lemma const_past_inv (h: x ≠ y) (h': ⟨x⟩ ≠ z):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Const c)⟧) ⟦@MLIR.Assign .InNondet y (Op.Inv z)⟧ =
@@ -173,7 +173,7 @@ section const
       simp [MLIR.run_ass_def]
       rewrite [updateFelts_neq_comm]
       simp [State.updateFelts, Map.update_get_next, h']
-      aesop
+      aesop'
 
   lemma const_past_isz (h: name ≠ name') (h': ⟨name⟩ ≠ y):
     Γ (Γ st ⟦@MLIR.Assign α name (Op.Const x)⟧) ⟦MLIR.Assign name' (Op.Isz y)⟧ =
@@ -192,19 +192,19 @@ section const
     Γ (Γ st ⟦@MLIR.Assign α a (Op.Const x)⟧) ⟦@MLIR.Set buf offset b⟧ =
     Γ (Γ st ⟦@MLIR.Set buf offset b⟧) ⟦@MLIR.Assign α a (Op.Const x)⟧ := by
       simp [MLIR.run_ass_def, MLIR.run_set_def, State.set!, State.setBufferElementImpl]
-      aesop
+      aesop'
 
   lemma const_past_sub (h: a ≠ b) (h': ⟨a⟩ ≠ c) (h'': ⟨a⟩ ≠ d):
     Γ (Γ st ⟦@MLIR.Assign α a (Op.Const x)⟧) ⟦@MLIR.Assign β b (Op.Sub c d)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β b (Op.Sub c d)⟧) ⟦@MLIR.Assign α a (Op.Const x)⟧ := by
       simp [MLIR.run_ass_def]
-      rewrite [updateFelts_neq_comm] <;> aesop
+      rewrite [updateFelts_neq_comm] <;> aesop'
   
   lemma const_past_true (h: a ≠ b) :
     Γ (Γ st ⟦@MLIR.Assign α a (Op.Const x)⟧) ⟦@MLIR.Assign β b (Op.True)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β b (Op.True)⟧) ⟦@MLIR.Assign α a (Op.Const x)⟧ := by
       simp [MLIR.run_ass_def]
-      aesop
+      aesop'
 
 end const
 
@@ -213,7 +213,7 @@ section drop
   lemma drop_past_add (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.Add lhs rhs)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β x (Op.Add lhs rhs)⟧) ⟦@MLIR.DropFelt α y⟧ := by
-      rw [add_past_drop] <;> aesop
+      rw [add_past_drop] <;> aesop'
 
   lemma drop_past_andCond (h: c ≠ b):
     Γ (Γ st ⟦@MLIR.DropFelt β b⟧) ⟦@MLIR.Assign α a (Op.AndCond outer c inner)⟧ =
@@ -223,23 +223,23 @@ section drop
   lemma drop_past_andEqz (h : rhs ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.AndEqz lhs rhs)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β x (Op.AndEqz lhs rhs)⟧) ⟦@MLIR.DropFelt α y⟧ := by
-      rw [andEqz_past_drop] <;> aesop
+      rw [andEqz_past_drop]; aesop'
 
   lemma drop_past_bitAnd (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y):
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.BitAnd lhs rhs)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β x (Op.BitAnd lhs rhs)⟧) ⟦@MLIR.DropFelt α y⟧ := by
-      rw [bitAnd_past_drop] <;> aesop
+      rw [bitAnd_past_drop] <;> aesop'
 
   lemma drop_past_const (h : ⟨x⟩ ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.Const c)⟧ =
     Γ (Γ st ⟦@MLIR.Assign β x (Op.Const c)⟧) ⟦@MLIR.DropFelt α y⟧ := by
-      rw [const_past_drop]; aesop
+      rw [const_past_drop]; aesop'
 
   lemma drop_past_eqz (h : x ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Eqz β x⟧ =
     Γ (Γ st ⟦@MLIR.Eqz β x⟧) ⟦@MLIR.DropFelt α y⟧ := by
       simp [MLIR.run_dropfelt, MLIR.run_eqz, withEqZero, State.dropFelts, Map.drop, getElem!, Map.getElem_def]
-      aesop
+      aesop'
 
   lemma drop_past_get (h: ⟨x⟩ ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.Get buf back offset)⟧ =
@@ -254,7 +254,7 @@ section drop
     Γ (Γ st ⟦@MLIR.DropFelt α x⟧) ⟦@MLIR.If β y branch⟧ =
     Γ (Γ st ⟦@MLIR.If β y branch⟧) ⟦@MLIR.DropFelt α x⟧ := by
       simp [MLIR.run_if, MLIR.run_dropfelt, h.symm, State.dropFelts_felts, getElem!, getElem, Map.drop_get]
-      aesop
+      aesop'
 
   lemma drop_past_isz (h: ⟨name⟩ ≠ y) (h': x ≠ y):
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦MLIR.Assign name (Op.Isz x)⟧ =
@@ -266,7 +266,7 @@ section drop
         Map.update_drop_swap, Map.drop_get, Map.drop, Map.update
       ]
       funext z
-      aesop
+      aesop'
   
   -- lemma drop_past_if (h : y ≠ x) (h₁ : Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦prog⟧ = Γ (Γ st ⟦prog⟧) ⟦@MLIR.DropFelt α y⟧) :
   --   Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.If β x prog⟧ =
@@ -275,12 +275,12 @@ section drop
   --     simp [getElem!, State.get_dropFelts_of_ne h]
       
   --     -- MLIR
-  --     -- aesop; aesop
+  --     -- aesop'; aesop'
   --     -- rw [Map.not_mem_iff_none, Map.getElem_def] at h₁
   --     -- unfold State.dropFelts Map.drop
   --     -- congr
   --     -- funext z
-  --     -- aesop
+  --     -- aesop'
 
   lemma drop_past_mul (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.Mul lhs rhs)⟧ =
@@ -298,7 +298,7 @@ section drop
         State.set!_felts, State.set!, State.setBufferElementImpl, Buffer.set?,
         Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data
       ]
-      aesop
+      aesop'
 
   lemma drop_past_sub (h : ⟨x⟩ ≠ y) (h₁ : lhs ≠ y) (h₂ : rhs ≠ y) :
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Assign β x (Op.Sub lhs rhs)⟧ =
@@ -306,7 +306,7 @@ section drop
       simp [MLIR.run_dropfelt, MLIR.run_ass_def]
       simp [State.drop_update_swap, h]
       unfold State.dropFelts Map.drop State.updateFelts
-      aesop
+      aesop'
 
 end drop
 
@@ -317,11 +317,11 @@ section get
       simp only [MLIR.run_ass_def, Op.eval, *]
       generalize eq: getImpl st buf back offset = get
       cases get with
-        | none => aesop
+        | none => aesop'
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          aesop
-          rewrite [updateFelts_neq_comm (by aesop)]
+          aesop'
+          rewrite [updateFelts_neq_comm (by aesop')]
           rfl
     
   lemma get_past_andEqz (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
@@ -330,10 +330,10 @@ section get
       simp only [MLIR.run_ass_def, Op.eval, *]
       generalize eq: getImpl st buf back offset = get
       cases get with
-        | none => aesop
+        | none => aesop'
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          aesop
+          aesop'
 
   lemma get_past_bitAnd (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.BitAnd l r)⟧ =
@@ -341,16 +341,16 @@ section get
       simp only [MLIR.run_ass_def, Op.eval, *]
       generalize eq: getImpl st buf back offset = get
       cases get with
-        | none => aesop
+        | none => aesop'
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          aesop
-          rw [updateFelts_neq_comm (by aesop)]
+          aesop'
+          rw [updateFelts_neq_comm (by aesop')]
 
   lemma get_past_const (h: x ≠ y) :
   Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.Const c)⟧ =
   Γ (Γ st ⟦@MLIR.Assign β y (Op.Const c)⟧) ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧ := by
-    rewrite [const_past_get] <;> aesop
+    rewrite [const_past_get] <;> aesop'
     
 
   -- lemma get_past_drop (h: ⟨x⟩ ≠ y) :
@@ -359,10 +359,10 @@ section get
   --   MLIR
   --   generalize eq: getImpl st buf back offset = get
   --   cases get with
-  --     | none => aesop
+  --     | none => aesop'
   --     | some lit =>
   --       have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-  --       aesop
+  --       aesop'
 
 
   lemma get_past_get_buf (h: buf ≠ buf') (h': x ≠ y) :
@@ -372,23 +372,23 @@ section get
       generalize eq1: getImpl st buf back offset = get1
       generalize eq2: getImpl st buf' back' offset' = get2
       cases get1 with
-        | none => simp [State.update]; aesop
+        | none => simp [State.update]; aesop'
         | some lit1 =>
           have h1: ∃ k1, lit1 = Lit.Val k1 := getImpl_val_of_some eq1
           cases get2 with
-            | none => aesop
+            | none => aesop'
             | some lit2 =>
               have h2: ∃ k2, lit2 = Lit.Val k2 := getImpl_val_of_some eq2
-              aesop
-              rw [updateFelts_neq_comm (by aesop)]
+              aesop'
+              rw [updateFelts_neq_comm (by aesop')]
 
   lemma get_past_get_offset (h: offset ≠ offset') (h': x ≠ y) :
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.Get buf' back' offset')⟧ =
     Γ (Γ st ⟦@MLIR.Assign β y (Op.Get buf' back' offset')⟧) ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧ := by
       simp only [MLIR.run_ass_def, Op.eval, getImpl_skip_get_update]
-      unfold getImpl; aesop
-      unfold State.updateFelts; aesop
-      unfold Map.update; funext z; aesop
+      unfold getImpl; aesop'
+      unfold State.updateFelts; aesop'
+      unfold Map.update; funext z; aesop'
 
   lemma get_past_mul (h: x ≠ y) (hl: ⟨x⟩ ≠ l) (hr: ⟨x⟩ ≠ r):
     Γ (Γ st ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧) ⟦@MLIR.Assign β y (Op.Mul l r)⟧ =
@@ -396,11 +396,11 @@ section get
       simp only [MLIR.run_ass_def, Op.eval, *]
       generalize eq: getImpl st buf back offset = get
       cases get with
-        | none => aesop
+        | none => aesop'
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          aesop
-          rewrite [updateFelts_neq_comm (by aesop)]
+          aesop'
+          rewrite [updateFelts_neq_comm (by aesop')]
           rfl
 
   lemma get_past_set_buf (h: ⟨x⟩ ≠ val) (h': buf' ≠ buf):
@@ -408,7 +408,7 @@ section get
     Γ (Γ st ⟦@MLIR.Set buf' index val⟧) ⟦@MLIR.Assign α x (Op.Get buf back offset)⟧ := by
       simp [MLIR.run_ass_def, MLIR.run_set_def, Op.eval, getImpl_skip_get_update, getElem!]
       generalize eq : getImpl st buf back offset = get; simp only [getElem]
-      rw [State.update_skip_felts (by aesop),
+      rw [State.update_skip_felts (by aesop'),
          ←@Map.getElem_def _ _ (State.felts st),
          getImpl_skip_set (Ne.symm h'),
          eq]
@@ -422,11 +422,11 @@ section get
       simp only [MLIR.run_ass_def, Op.eval, *]
       generalize eq: getImpl st buf back offset = get
       cases get with
-        | none => aesop
+        | none => aesop'
         | some lit =>
           have h_lit: ∃ k, lit = Lit.Val k := getImpl_val_of_some eq
-          aesop
-          rewrite [updateFelts_neq_comm (by aesop)]
+          aesop'
+          rewrite [updateFelts_neq_comm (by aesop')]
           rfl
 
 end get
@@ -450,7 +450,7 @@ section isz
   --     MLIR
   --     simp [State.drop_update_swap, h]
   --     unfold State.dropFelts Map.drop State.updateFelts
-  --     aesop
+  --     aesop'
 end isz
 
 section mul
@@ -460,7 +460,7 @@ section mul
   --     MLIR
   --     simp [State.drop_update_swap, h]
   --     unfold State.dropFelts Map.drop State.updateFelts
-  --     aesop
+  --     aesop'
 end mul
 
 section neg
@@ -470,7 +470,7 @@ section neg
   --     MLIR
   --     simp [State.drop_update_swap, h]
   --     unfold State.dropFelts Map.drop
-  --     aesop
+  --     aesop'
 end neg
 
 section pow
@@ -488,7 +488,7 @@ section sub
   --     MLIR
   --     simp [State.drop_update_swap, h]
   --     unfold State.dropFelts Map.drop State.updateFelts
-  --     aesop
+  --     aesop'
 end sub
 
 section true
@@ -505,123 +505,123 @@ lemma combine_nondets : Γ (Γ st ⟦nondet p₁⟧) ⟦nondet p₂; p₃⟧ = �
 lemma split_nondet_seq : Γ st ⟦nondet (s₁; s₂)⟧ = Γ st ⟦nondet s₁; nondet s₂⟧ := by rfl
 
 lemma step_det : Γ st ⟦(s₁; s₂); s₃⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂; s₃⟧ := by
-  aesop
+  aesop'
 
 lemma step_nondet : Γ st ⟦nondet (s₁; s₂); s₃⟧ = Γ (Γ st ⟦nondet s₁⟧) ⟦nondet s₂; s₃⟧ := by
-  aesop
+  aesop'
 
 section drop_sequencing
 lemma drop_sequencing_dddd :
   Γ st ⟦s₁; s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nddd :
   Γ st ⟦nondet s₁; s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_dndd :
   Γ st ⟦s₁; nondet s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nndd :
   Γ st ⟦nondet (s₁; s₂); s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_ddnd :
   Γ st ⟦s₁; s₂; nondet s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_ndnd :
   Γ st ⟦nondet s₁; s₂; nondet s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_dnnd :
   Γ st ⟦s₁; nondet (s₂; s₃); s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nnnd :
   Γ st ⟦nondet (s₁; s₂; s₃); s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_dddn :
   Γ st ⟦s₁; s₂; s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nddn :
   Γ st ⟦nondet s₁; s₂; s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_dndn :
   Γ st ⟦s₁; nondet s₂; s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nndn :
   Γ st ⟦nondet (s₁; s₂); s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_ddnn :
   Γ st ⟦s₁; s₂; nondet (s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_ndnn :
   Γ st ⟦nondet s₁; s₂; nondet (s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_dnnn :
   Γ st ⟦s₁; nondet (s₂; s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nnnn :
   Γ st ⟦nondet (s₁; s₂; s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_ddd :
   Γ st ⟦s₁; s₂; s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_ndd :
   Γ st ⟦nondet s₁; s₂; s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_dnd :
   Γ st ⟦s₁; nondet s₂; s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nnd :
   Γ st ⟦nondet (s₁; s₂); s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_ddn :
   Γ st ⟦s₁; s₂; nondet s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_ndn :
   Γ st ⟦nondet s₁; s₂; nondet s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_dnn :
   Γ st ⟦s₁; nondet (s₂; s₃)⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nnn :
   Γ st ⟦nondet (s₁; s₂; s₃)⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_dd :
   Γ st ⟦s₁; s₂⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nd :
   Γ st ⟦nondet s₁; s₂⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_dn :
   Γ st ⟦s₁; nondet s₂⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_nn :
   Γ st ⟦nondet (s₁; s₂)⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
-  by aesop
+  by aesop'
 
 lemma drop_sequencing_d :
   Γ st ⟦s₁⟧ = Γ st ⟦s₁⟧ := rfl

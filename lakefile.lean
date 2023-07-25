@@ -1,8 +1,15 @@
 import Lake
 open Lake DSL
 
+def globalArgs := #[
+  "-Dlinter.deprecated=false",
+  "-Dlinter.suspiciousUnexpanderPatterns=false",
+  "-Dlinter.unusedVariables=false"
+]
+
 package risc0 {
-  -- add package configuration options here
+  moreLeanArgs := globalArgs
+  moreServerArgs := globalArgs
 }
 
 lean_lib Risc0 {
@@ -10,7 +17,7 @@ lean_lib Risc0 {
 }
 
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "c59c263ccfa439765d0e990b91ab9f4e09541375"
+  "https://github.com/leanprover-community/mathlib4.git" @ "ab4ba6c49d41daca175dc9bbeb5f493ece93c2f6"
 
 @[default_target]
 lean_exe risc0 {

@@ -55,12 +55,12 @@ namespace Risc0.State
     Option.get! (st.dropFelts name).felts[x] = Option.get! st.felts[x] := by
     unfold dropFelts Map.drop
     rw [Map.getElem_def]
-    aesop
+    aesop'
 
   @[simp]
   lemma get_dropFelts_of_ne' {st : State} {x : FeltVar} (h : name ≠ x) :
     Option.get! ((st.dropFelts name).felts x) = Option.get! (st.felts x) := by
     unfold dropFelts Map.drop
-    aesop
+    aesop'
 
 end Risc0.State

@@ -29,7 +29,7 @@ theorem constraints_if_witness
   rcases h₁ with ⟨⟨w₁, h₁⟩, ⟨w₂, h₂⟩⟩; subst h₁ h₂
   rw [Constraints.WP.closed_form, Witness.WP.closed_form]
   repeat split; all_goals simp [*] at *; try intros; simp [*] at *
-  aesop
+  aesop'
 
 theorem spec_of_constraints {x} {y₁ y₂: Option Felt}
   (hy₁ : y₁.isSome) (hy₂: y₂.isSome) :
@@ -45,7 +45,7 @@ theorem spec_of_constraints {x} {y₁ y₂: Option Felt}
   simp
   intro hy₁ hy₂
   simp [sub_eq_iff_eq_add, *] at *
-  aesop
+  aesop'
   exact Eq.symm (inv_eq_of_mul_eq_one_right hy₂)
 
 end Risc0.IsZero

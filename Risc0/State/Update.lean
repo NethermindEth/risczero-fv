@@ -26,12 +26,12 @@ namespace Risc0.State
   lemma update_skip_felts (h: name' ≠ name) :
     (State.felts (update st name' x) { name }) = (State.felts st { name }) := by
       simp only [State.update]
-      aesop
+      aesop'
 
   @[simp]
   lemma update_skip_nested_felts (h: name' ≠ name) :
     (State.felts (update ( update st name' x) name y) { name }) = (State.felts (update st name y) { name }) := by
     simp [h, State.update]
-    aesop
+    aesop'
 
 end Risc0.State
