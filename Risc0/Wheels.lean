@@ -59,6 +59,13 @@ lemma if_congr_of_and [Decidable c] [Decidable c'] (h : c = c' ∧ t = t' ∧ f 
 
 namespace Risc0
 
+namespace String
+
+@[simp]
+lemma nil_toString_append : toString "" ++ s = s := by simp [toString]
+
+end String
+
 namespace Wheels
 
 end Wheels

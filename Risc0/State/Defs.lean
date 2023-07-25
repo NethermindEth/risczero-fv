@@ -1,6 +1,8 @@
 import Risc0.Buffer
 import Risc0.Cirgen.BasicTypes
 
+import Mathlib.Data.List.Basic
+
 namespace Risc0
 
   inductive ExternPlonkBuffer | PlonkRows | PlonkAccumRows
@@ -12,6 +14,21 @@ namespace Risc0
 
   def mangle (table : ExternPlonkBuffer) (discr : BufferVar) : String :=
     toString table ++ discr.name
+
+  lemma mangle_inj'_of_ne (h : discr ≠ discr') : mangle table ⟨discr⟩ ≠ mangle table' ⟨discr'⟩ := by
+    simp [mangle]
+    rcases discr with ⟨discr⟩; rcases discr' with ⟨discr'⟩
+    cases table <;> cases table' <;> simp [toString] <;> intros contra <;> simp at *
+    · have : discr = discr' := by
+        apply List.append_inj_right (s₁ := "PlonkRows".data) (s₂ := "PlonkRows".data) _ rfl
+        injection contra
+      aesop
+    · injection contra; aesop
+    · injection contra; aesop
+    · have : discr = discr' := by
+        apply List.append_inj_right (s₁ := "PlonkAccumRows".data) (s₂ := "PlonkAccumRows".data) _ rfl
+        injection contra
+      aesop
 
   inductive Lit where
     | Buf              : BufferAtTime → Lit
@@ -57,6 +74,46 @@ namespace Risc0
     def updateProps (state : State) (name : PropVar) (x : Prop) : State :=
       { state with props := state.props[name] ←ₘ x }
 
+    abbrev SpecialSymbol := '^'
+
+    def isSpecial (str : String) := str.get 0 = SpecialSymbol
+
+    instance : Decidable (isSpecial s) := by unfold isSpecial; exact inferInstance
+
+    lemma isSpecial_toString_SpecialSymbol : isSpecial (toString SpecialSymbol) := by simp [isSpecial]
+
+    private lemma String.get_iff_List_get (s : String) : s.get 0 = s.data.get! 0 := by
+      rcases s with ⟨_ | ⟨hd, tl⟩⟩
+      · simp
+      · simp [String.get, String.utf8GetAux]
+
+    lemma isSpecial_toString_SpecialSymbol_app : isSpecial (toString SpecialSymbol ++ b) := by
+      simp [isSpecial, String.get_iff_List_get]
+
+    instance : Decidable (isSpecial s) := by unfold isSpecial; exact inferInstance
+
+    def consecutiveUpdatesFrom (i : ℕ) (name : String) (buf : BufferAtTime) : List (FeltVar × Felt) :=
+      (List.range buf.length).map (⟨s!"{SpecialSymbol}{name}#{·+i}"⟩) |>.zip (buf.map Option.get!)
+
+    def consecutiveUpdates (name : String) (buf : BufferAtTime) : List (FeltVar × Felt) :=
+      consecutiveUpdatesFrom 0 name buf
+
+    @[simp]
+    lemma consecutiveUpdatesFrom_nil : consecutiveUpdatesFrom i name [] = [] := by
+      simp [consecutiveUpdatesFrom]
+
+    @[simp]
+    lemma consecutiveUpdatesFrom_cons {tl : BufferAtTime} :
+      consecutiveUpdatesFrom i name (hd :: tl) =
+      ((⟨s!"{SpecialSymbol}{name}#{i}"⟩ : FeltVar), hd.get!) :: consecutiveUpdatesFrom (i + 1) name tl := by
+      simp [consecutiveUpdatesFrom, List.range_succ_eq_map]; congr
+      funext z
+      simp [Nat.succ_add_eq_succ_add]
+
+    @[simp]
+    lemma consecutiveUpdates_nil : consecutiveUpdates name [] = [] := by
+      simp [consecutiveUpdates, consecutiveUpdatesFrom]
+
     def update (state : State) (name : String) (x : Option Lit) : State :=
       match x with
         | .none => {state with isFailed := true}
@@ -76,9 +133,7 @@ namespace Risc0
               {state with
                  buffers := state.buffers[⟨name⟩] ←ₘ
                               state.buffers[(⟨name⟩ : BufferVar)].get!.popFront
-                 felts := Map.updateMany
-                            state.felts
-                            ((List.range buf.length).map (⟨s!"{name}#{·}"⟩) |>.zip (buf.map Option.get!))}
+                 felts := Map.updateMany state.felts <| consecutiveUpdates name buf}
 
     def setBufferElementImpl (st : State) (bufferVar : BufferVar) (idx: Buffer.Idx) (val : Felt) : State :=
       match (st.buffers[bufferVar].get!).set? idx val with

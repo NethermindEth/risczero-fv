@@ -21,7 +21,7 @@ def drop (m : Map α β) (k : α) : Map α β :=
   λ x => if x = k then none else m x
 
 def updateMany (m : Map α β) (l : List (α × β)) : Map α β :=
-  l.foldl (init := m) λ acc ⟨k, v⟩ ↦ update acc k v
+  l.foldr (init := m) λ ⟨k, v⟩ acc ↦ update acc k v
 
 end Map
 
@@ -184,6 +184,13 @@ lemma drop_of_updates :
   ((m[k] ←ₘ v)[k'] ←ₘ v') =
   ((m[k] ←ₘ v).drop k')[k'] ←ₘ v' := by
   rw [←drop_of_update]
+
+@[simp]
+lemma updateMany_nil : updateMany m [] = m := by simp [updateMany]
+
+@[simp]
+lemma updateMany_cons : updateMany m (hd :: tl) = (updateMany m tl)[hd.1] ←ₘ hd.2 := by
+  simp [updateMany]
 
 end Map
 
