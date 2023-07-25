@@ -4,7 +4,8 @@ open Lake DSL
 def globalArgs := #[
   "-Dlinter.deprecated=false",
   "-Dlinter.suspiciousUnexpanderPatterns=false",
-  "-Dlinter.unusedVariables=false"
+  "-Dlinter.unusedVariables=false",
+  "-DwarningAsError=true"
 ]
 
 package risc0 {
