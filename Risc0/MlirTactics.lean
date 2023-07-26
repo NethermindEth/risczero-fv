@@ -184,19 +184,18 @@ elab "MLIR?" : tactic => do
 elab "MLIR_decide_updates" : tactic => do
   evalTactic <| ← `(tactic|
     simp only [
-      Map.update, getElem!, ite_true, Option.get!_of_some, ite_false, true_and, Option.getD_some,
+      Map.update, getElem!, ite_true, ite_false, ite_self, mul_ite, Option.get!_of_some, true_and, Option.getD_some,
       Map.fromList_cons, Map.fromList_nil, State.update_val', 
       le_refl, List.find?, List.mem_cons, ge_iff_le, tsub_eq_zero_of_le,
       List.cons.injEq, and_imp, forall_apply_eq_imp_iff', forall_eq',
       Nat.succ_ne_self, IsEmpty.forall_iff, implies_true, forall_const, Nat.succ.injEq,
-      getElem, instGetElemMapOptionTrue, State.updateFelts_buffers, State.updateFelts_bufferWidths,
-      State.updateFelts_cycle, State.updateFelts_isFailed,
-      State.updateFelts_props, State.updateFelts_vars, State.updateFelts_felts, State.updateProps_buffers,
-      State.updateProps_bufferWidths, State.updateProps_cycle,
-      State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props,
+      getElem, instGetElemMapOptionTrue,
+      State.buffers_if_eq_if_buffers, State.bufferWidths_if_eq_if_bufferWidths, State.cycle_if_eq_if_cycle, State.felts_if_eq_if_felts, State.isFailed_if_eq_if_isFailed, State.props_if_eq_if_props, State.vars_if_eq_if_vars,
+      State.updateFelts_buffers, State.updateFelts_bufferWidths, State.updateFelts_cycle, State.updateFelts_isFailed, State.updateFelts_props, State.updateFelts_vars, State.updateFelts_felts,
+      State.updateProps_buffers, State.updateProps_bufferWidths, State.updateProps_cycle, State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props,
       State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars,
       withEqZero_buffers, withEqZero_bufferWidths, withEqZero_cycle, withEqZero_felts, withEqZero_isFailed, withEqZero_props, withEqZero_vars,
-      getImpl_skip_set_offset
+      getImpl_skip_set_offset, List.get!, mul_zero, ne_eq
     ])
   evalTactic <| ← `(tactic| simp only [Map.update_def.symm])
 
