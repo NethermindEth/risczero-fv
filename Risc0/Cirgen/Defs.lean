@@ -31,6 +31,28 @@ namespace Risc0
     | GetGlobal : BufferVar → ℕ        → Op x
     | Slice     : BufferVar → ℕ    → ℕ → Op x
 
+  @[default_instance] noncomputable
+  instance : SizeOf (Op x) where
+    sizeOf _ := 1
+      -- match op with
+      --   | .Const _ => 1
+      --   | .True => 1
+      --   | .Add _ _ => 1
+      --   | .Sub _ _ => 1
+      --   | .Neg _ => 1
+      --   | .Mul _ _ => 1
+      --   | .Pow _ _ => 1
+      --   | .BitAnd _ _ => 1
+      --   | .Inv _ => 1
+      --   | .Isz _ => 1        
+      --   | .AndEqz _ _ => 1
+      --   | .AndCond _ _ _ => 1
+      --   | .Alloc _ => 1
+      --   | .Back _ _ => 1
+      --   | .Get _ _ _ => 1
+      --   | .GetGlobal _ _ => 1
+      --   | .Slice _ _ _ => 1
+
   def isGetValid (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
     back ≤ st.cycle ∧
     buf ∈ st.vars ∧
@@ -113,27 +135,6 @@ namespace Risc0
     | PlonkAccumWrite : BufferVar → List FeltVar → ℕ → MLIR x
     | PlonkRead       : BufferVar → ℕ → MLIR x
     | PlonkWrite      : BufferVar → List FeltVar → ℕ → MLIR x
-
-  @[default_instance] noncomputable
-  instance : SizeOf (MLIR α) where
-    sizeOf command :=
-      match command with
-        | .Assign _ op => 1 + sizeOf op
-        | .DropFelt x => 1
-        | .Eqz _ => 1
-        | .If _ prog => 1 + sizeOf prog
-        | .Nondet block => 1 + sizeOf block
-        | .Noop => 1
-        | .Sequence a b => 1 + sizeOf a + sizeOf b
-        -- Ops
-        | .Fail => 1
-        | .Set _ _ _ => 1
-        | .SetGlobal _ _ _ => 1
-        -- Extern
-        | .PlonkAccumRead _ n => sizeOf n
-        | .PlonkAccumWrite _ _ _ => 1
-        | .PlonkRead _ n => sizeOf n
-        | .PlonkWrite _ _ _ => 1
 
   abbrev MLIRProgram := MLIR NotInNondet
 
@@ -280,16 +281,105 @@ namespace Risc0
 
   -- lemma xa {α} {prog : MLIR α} :
   --   sizeOf (MLIR.If x prog) = 1 + sizeOf prog := by
-    
+  
+  -- @[default_instance] noncomputable
+  -- instance : SizeOf (MLIR .NotInNondet) where
+  --   sizeOf command := let rec mario
+  --     | .Assign _ _ => 1
+  --     | .DropFelt _ => 1
+  --     | .Eqz _ => 1
+  --     | .If _ prog => 1 + sizeOf prog
+  --     | .Nondet block => 1 + SizeOf.sizeOf block
+  --     | .Noop => 0
+  --     | .Sequence a b => 1 + mario a + mario b
+  --     -- Ops
+  --     | .Fail => 1
+  --     -- Extern
+  --     | .PlonkAccumRead _ n => 1 + SizeOf.sizeOf n
+  --     | .PlonkAccumWrite _ _ _ => 1
+  --     | .PlonkRead _ n => SizeOf.sizeOf n
+  --     | .PlonkWrite _ _ _ => 1
+  --   mario command
+  
+  -- @[default_instance] noncomputable
+  -- instance : SizeOf (MLIR .InNondet) where
+  --   sizeOf command := let rec mario
+  --     | .Assign _ _ => 1
+  --     | .DropFelt _ => 1
+  --     | .Eqz _ => 1
+  --     | .If _ prog => 1 + sizeOf prog
+  --     | .Noop => 0
+  --     | .Sequence a b => 1 + mario a + mario b
+  --     -- Ops
+  --     | .Fail => 1
+  --     | .Set _ _ _ => 1
+  --     | .SetGlobal _ _ _ => 1
+  --     -- Extern
+  --     | .PlonkAccumRead _ n => 1 + SizeOf.sizeOf n
+  --     | .PlonkAccumWrite _ _ _ => 1
+  --     | .PlonkRead _ n => SizeOf.sizeOf n
+  --     | .PlonkWrite _ _ _ => 1
+  --   mario command
+
+  @[default_instance] noncomputable
+  instance : SizeOf (MLIR x) where
+    sizeOf command := let rec mario {x} : (y : MLIR x) → ℕ
+      | .Assign _ _ => 1
+      | .DropFelt _ => 1
+      | .Eqz _ => 1
+      | @MLIR.If x _ prog => 1 + @mario x prog
+      | .Nondet block => 1 + mario block
+      | .Noop => 0
+      | @MLIR.Sequence x a b => 1 + @mario x a + @mario x b
+      -- Ops
+      | .Fail => 0
+      | .Set _ _ _ => 1
+      | .SetGlobal _ _ _ => 1
+      -- Extern
+      | .PlonkAccumRead _ n => 1 + n + SizeOf.sizeOf n
+      | .PlonkAccumWrite _ _ _ => 1
+      | .PlonkRead _ n => 1 + n + SizeOf.sizeOf n
+      | .PlonkWrite _ _ _ => 1
+    mario command
+
+  @[simp]
+  lemma xa {x : IsNondet}
+    : sizeOf (@MLIR.ExternOp.plonkExternRead buf (Nat.succ k) x discr) = 
+      sizeOf (@MLIR.ExternOp.plonkExternRead buf k x discr) + 2 := by
+      generalize eq : sizeOf (MLIR.ExternOp.plonkExternRead buf k _) = rhs
+      unfold MLIR.ExternOp.plonkExternRead MLIR.ExternOp.getSequence' MLIR.ExternOp.getSequence'_aux
+      simp [sizeOf, instSizeOfMLIR.mario]
+      generalize eq₁ : 1 + 1 + _ = lhs
+      subst eq
+      subst eq₁
+      
+      simp (config := {arith := true})
+      -- unfold instSizeOfMLIR.mario
+      
+      
+      rfl
+      -- subst eq
+      
+  @[simp]
+  lemma xb {x : IsNondet}
+  : sizeOf (@MLIR.PlonkAccumRead x buf (Nat.succ k)) = 
+    sizeOf (@MLIR.PlonkAccumRead x buf k) + 2 := by
+    generalize eq : sizeOf (MLIR.PlonkAccumRead buf k) + _ = rhs
+    simp [sizeOf, instSizeOfMLIR.mario]
+    subst eq
+    simp (config := {arith := true}) [sizeOf, instSizeOfMLIR.mario]
     
 
+
+
+      
     
   --   sorry
 
   -- Step through the entirety of a `MLIR` MLIR program from initial state
   -- `state`, yielding the post-execution state and possibly a constraint
   -- (`Prop`), the return value of the program.
-  def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
+  def MLIR.run {β : IsNondet} (program : MLIR β) (st : State) : State :=
     match program with
       -- Meta
       | Assign name op => st.update name (op.eval st)
@@ -297,25 +387,28 @@ namespace Risc0
       | Eqz x          => withEqZero st.felts[x]!.get! st
       | If x prog   =>
           have : sizeOf prog < sizeOf (If x prog) := by
-            cases α <;> simp [sizeOf] <;>
+            cases β <;> simp [sizeOf, instSizeOfMLIR.mario] <;>
             cases prog <;> simp [_sizeOf_1, sizeOf] <;> try linarith
           if st.felts[x]!.get! = 0 then st else prog.run st
       | Nondet block   =>
           have : sizeOf block < sizeOf (Nondet block) := by
-            cases α <;> simp [sizeOf] <;>
+            cases β <;> simp [sizeOf, instSizeOfMLIR.mario] <;>
             cases block <;> simp [_sizeOf_1, sizeOf] <;> try linarith
           block.run st
       | Noop           => st
       | Sequence a b   =>
           have : sizeOf a < sizeOf (Sequence a b) := by
-            -- cases α <;> simp [sizeOf] <;>
-            -- cases block <;> simp [_sizeOf_1, sizeOf] <;> try linarith
-            sorry
+            cases β
+            · simp [sizeOf]
+              cases a <;> simp [_sizeOf_1, sizeOf, instSizeOfMLIR.mario] <;> try linarith
+            · simp [sizeOf]
+              cases a <;> simp [_sizeOf_1, sizeOf, instSizeOfMLIR.mario] <;> try linarith
           have : sizeOf b < sizeOf (Sequence a b) := by
-            -- cases α <;> simp [sizeOf] <;>
-            -- cases block <;> simp [_sizeOf_1, sizeOf] <;> try linarith
-            sorry
-          
+            cases β
+            · simp [sizeOf]
+              cases b <;> simp [_sizeOf_1, sizeOf, instSizeOfMLIR.mario] <;> try linarith
+            · simp [sizeOf]
+              cases b <;> simp [_sizeOf_1, sizeOf, instSizeOfMLIR.mario] <;> try linarith
           b.run (a.run st)
       -- Ops
       | Fail                     => {st with isFailed := true}
@@ -324,13 +417,28 @@ namespace Risc0
                                                                                 -- and indexes into it. This is a side effect of global buffers only being 1d anyway
       | PlonkAccumRead buf outCount =>
           if st.buffers[(⟨mangle .PlonkAccumRows buf⟩ : BufferVar)].get![0]!.length = outCount ∧ ⟨mangle .PlonkAccumRows buf⟩ ∈ st.buffers
-          then (ExternOp.plonkExternRead buf outCount .PlonkAccumRows).run (α := IsNondet.InNondet) st
-          else Fail.run (α := IsNondet.InNondet) st
+          then 
+            have : sizeOf (@ExternOp.plonkExternRead buf outCount IsNondet.InNondet ExternPlonkBuffer.PlonkAccumRows) < sizeOf (@PlonkAccumRead IsNondet.InNondet buf outCount) := by
+                     induction outCount with
+                       | zero => simp [ExternOp.plonkExternRead, ExternOp.getSequence', ExternOp.getSequence'_aux, sizeOf, instSizeOfMLIR.mario]
+                       | succ k ih => rw [xa, xb]; linarith
+              (ExternOp.plonkExternRead buf outCount .PlonkAccumRows).run (β := IsNondet.InNondet) st
+          else
+            -- have : sizeOf (@Fail β) < sizeOf (@PlonkAccumRead β buf outCount) := by
+            --   simp [sizeOf, instSizeOfMLIR.mario]
+            -- have : sizeOf (@Fail β) < sizeOf (@PlonkRead β buf outCount) := by
+            --   simp [sizeOf, instSizeOfMLIR.mario]
+            Fail.run (β := IsNondet.InNondet) st
       | PlonkAccumWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkAccumRows st
       | PlonkRead buf outCount =>
           if st.buffers[(⟨mangle .PlonkRows buf⟩ : BufferVar)].get![0]!.length = outCount ∧ ⟨mangle .PlonkRows buf⟩ ∈ st.buffers
-          then (ExternOp.plonkExternRead buf outCount .PlonkRows).run (α := IsNondet.InNondet) st
-          else Fail.run (α := IsNondet.InNondet) st
+          then have : sizeOf (@ExternOp.plonkExternRead buf outCount IsNondet.InNondet ExternPlonkBuffer.PlonkRows) < sizeOf (@PlonkAccumRead IsNondet.InNondet buf outCount) := by
+                     induction outCount with
+                       | zero => simp [ExternOp.plonkExternRead, ExternOp.getSequence', ExternOp.getSequence'_aux, sizeOf, instSizeOfMLIR.mario]
+                       | succ k ih => rw [xa, xb]; linarith
+          
+          (ExternOp.plonkExternRead buf outCount .PlonkRows).run (β := IsNondet.InNondet) st
+          else Fail.run (β := IsNondet.InNondet) st
       | PlonkWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkRows st
   termination_by run _ program st => sizeOf program
 
