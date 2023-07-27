@@ -52,15 +52,15 @@ lemma part3_updates_opaque {st : State} :
   Code.getReturn (part3_state_update (part2_drops (part2_state st))) := by
   simp [part2_state_update, part3_wp]
 
-lemma part3_cumulative_wp {x0 y0 y1: Felt} :
-  Code.run (start_state [x0] ([y0,y1])) ↔
+lemma part3_cumulative_wp {code0 data0 data1: Felt} :
+  Code.run (start_state ([code0]) ([data0, data1])) ↔
   Code.getReturn
       (part3_state_update
         ((((((({
                         buffers :=
                           ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
-                              [[some y0, some y1]])[{ name := "code" : BufferVar }] ←ₘ
-                            [[some x0]],
+                              [[some data0, some data1]])[{ name := "code" : BufferVar }] ←ₘ
+                            [[some code0]],
                         bufferWidths :=
                           ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
                               (2 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
@@ -70,13 +70,13 @@ lemma part3_cumulative_wp {x0 y0 y1: Felt} :
                           [{ name := "code" : BufferVar },
                             { name := "data" : BufferVar }] }[props][{ name := "%1" : PropVar }] ←
                       True)[felts][{ name := "%3" : FeltVar }] ←
-                    y1)[props][{ name := "%5" : PropVar }] ←
-                  y1 - x0 = (0 : Felt))[felts][{ name := "%0" : FeltVar }] ←
+                    data1)[props][{ name := "%5" : PropVar }] ←
+                  data1 - code0 = (0 : Felt))[felts][{ name := "%0" : FeltVar }] ←
                 (1 : Felt))[felts][{ name := "%6" : FeltVar }] ←
-              y0)[props][{ name := "%9" : PropVar }] ←
-            (y1 - x0 = (0 : Felt) ∧
-              (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))))[felts][{ name := "%11" : FeltVar }] ←
-          y1 * ((1 : Felt) - y1)))  := by
+              data0)[props][{ name := "%9" : PropVar }] ←
+            (data1 - code0 = (0 : Felt) ∧
+              (data0 = (0 : Felt) ∨ (1 : Felt) - data0 = (0 : Felt))))[felts][{ name := "%11" : FeltVar }] ←
+          data1 * ((1 : Felt) - data1)))  := by
     rewrite [part2_cumulative_wp]
     rewrite [part3_updates_opaque]
     unfold part2_state
@@ -96,11 +96,11 @@ lemma part3_cumulative_wp {x0 y0 y1: Felt} :
     -- there are statements after an if
     try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
-lemma closed_form {x0 y0 y1: Felt} :
-  Code.run (start_state [x0] ([y0,y1])) ↔
-   ((y1 - x0 = (0 : Felt) ∧ (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))) ∧
-        (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))) ∧
-      y0 + y1 - (1 : Felt) = (0 : Felt)  := by
+lemma closed_form {code0 data0 data1: Felt} :
+  Code.run (start_state ([code0]) ([data0, data1])) ↔
+   ((data1 - code0 = (0 : Felt) ∧ (data0 = (0 : Felt) ∨ (1 : Felt) - data0 = (0 : Felt))) ∧
+        (data1 = (0 : Felt) ∨ (1 : Felt) - data1 = (0 : Felt))) ∧
+      data0 + data1 - (1 : Felt) = (0 : Felt)  := by
     rewrite [part3_cumulative_wp]
     unfold part3_state_update
     unfold part3_state

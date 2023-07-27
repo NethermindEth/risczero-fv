@@ -45,17 +45,18 @@ lemma part3_updates_opaque {st : State} :
   Code.getReturn (part3_state_update (part2_drops (part2_state st))) := by
   simp [part2_state_update, part3_wp]
 
-lemma part3_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19: Felt} :
-  Code.run (start_state [x0] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19])) ↔
+lemma part3_cumulative_wp {code0 data0 data1 data2 data3 data4 data5 data6 data7 data8 data9 data10 data11 data12 data13 data14 data15 data16 data17 data18 data19: Felt} :
+  Code.run (start_state ([code0]) ([data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, data13, data14, data15, data16, data17, data18, data19])) ↔
   Code.getReturn
       (part3_state_update
         ((((((({
                         buffers :=
                           ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
-                              [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8,
-                                  some y9, some y10, some y11, some y12, some y13, some y14, some y15, some y16,
-                                  some y17, some y18, some y19]])[{ name := "code" : BufferVar }] ←ₘ
-                            [[some x0]],
+                              [[some data0, some data1, some data2, some data3, some data4, some data5, some data6,
+                                  some data7, some data8, some data9, some data10, some data11, some data12,
+                                  some data13, some data14, some data15, some data16, some data17, some data18,
+                                  some data19]])[{ name := "code" : BufferVar }] ←ₘ
+                            [[some code0]],
                         bufferWidths :=
                           ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
                               (20 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
@@ -65,12 +66,12 @@ lemma part3_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 
                           [{ name := "code" : BufferVar },
                             { name := "data" : BufferVar }] }[props][{ name := "%19" : PropVar }] ←
                       True)[felts][{ name := "%22" : FeltVar }] ←
-                    y2)[felts][{ name := "%21" : FeltVar }] ←
-                  y1)[felts][{ name := "%25" : FeltVar }] ←
-                y3)[felts][{ name := "%27" : FeltVar }] ←
-              y1 + y2 * (2 : Felt) + y3 * (3 : Felt))[felts][{ name := "%3" : FeltVar }] ←
+                    data2)[felts][{ name := "%21" : FeltVar }] ←
+                  data1)[felts][{ name := "%25" : FeltVar }] ←
+                data3)[felts][{ name := "%27" : FeltVar }] ←
+              data1 + data2 * (2 : Felt) + data3 * (3 : Felt))[felts][{ name := "%3" : FeltVar }] ←
             (4 : Felt))[felts][{ name := "%28" : FeltVar }] ←
-          y4))  := by
+          data4))  := by
     rewrite [part2_cumulative_wp]
     rewrite [part3_updates_opaque]
     unfold part2_state

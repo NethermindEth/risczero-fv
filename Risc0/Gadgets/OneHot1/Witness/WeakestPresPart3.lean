@@ -20,9 +20,9 @@ def part3_state_update (st: State): State :=
   part3_drops (part3_state st)
 
 -- Prove that substituting part3_state for Code.part3 produces the same result
-lemma part3_wp {st : State} {y0 : Option Felt} :
-  Code.getReturn (MLIR.runProgram (Code.part3;dropfelt ⟨"%7"⟩) st) = [y0] ↔
-  Code.getReturn (part3_state_update st) = [y0] := by
+lemma part3_wp {st : State} {data0 : Option Felt} :
+  Code.getReturn (MLIR.runProgram (Code.part3;dropfelt ⟨"%7"⟩) st) ([data0]) ↔
+  Code.getReturn (part3_state_update st) ([data0]) := by
   unfold MLIR.runProgram; simp only
   generalize eq : (dropfelt ⟨"%7"⟩) = prog
   unfold Code.part3
@@ -33,31 +33,31 @@ lemma part3_wp {st : State} {y0 : Option Felt} :
   rfl
 
 lemma part3_updates_opaque {st : State} : 
-  Code.getReturn (part2_state_update st) = [y0] ↔
-  Code.getReturn (part3_state_update (part2_drops (part2_state st))) = [y0] := by
+  Code.getReturn (part2_state_update st) ([data0]) ↔
+  Code.getReturn (part3_state_update (part2_drops (part2_state st))) ([data0]) := by
   simp [part2_state_update, part3_wp]
 
-lemma part3_cumulative_wp {x0: Felt} :
-  Code.run (start_state [x0]) = [y0] ↔
+lemma part3_cumulative_wp {code0: Felt} {data0: Option Felt} :
+  Code.run (start_state ([code0])) ([data0]) ↔
   Code.getReturn
-        (part3_state_update
-          ({
-              buffers :=
-                ((fun x => Map.empty x)[{ name := "code" : BufferVar }] ←ₘ
-                    [[some x0]])[{ name := "data" : BufferVar }] ←ₘ
-                  [[some (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt))]],
-              bufferWidths :=
-                ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (1 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
-                  (1 : ℕ),
-              constraints :=
-                [(x0 = (0 : Felt) → False) ∨
-                    ((1 : Felt) - if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  x0 = (0 : Felt)],
-              cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
-              vars :=
-                [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] }[felts][{ name := "%7" : FeltVar }] ←
-            (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) - (1 : Felt))) =
-      [y0]  := by
+      (part3_state_update
+        ({
+            buffers :=
+              ((fun x => Map.empty x)[{ name := "code" : BufferVar }] ←ₘ
+                  [[some code0]])[{ name := "data" : BufferVar }] ←ₘ
+                [[some (if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt))]],
+            bufferWidths :=
+              ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (1 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
+                (1 : ℕ),
+            constraints :=
+              [(code0 = (0 : Felt) → False) ∨
+                  ((1 : Felt) - if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
+                code0 = (0 : Felt)],
+            cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+            vars :=
+              [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] }[felts][{ name := "%7" : FeltVar }] ←
+          (if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) - (1 : Felt)))
+      ([data0])  := by
     rewrite [part2_cumulative_wp]
     rewrite [part3_updates_opaque]
     unfold part2_state
@@ -78,9 +78,9 @@ lemma part3_cumulative_wp {x0: Felt} :
     -- there are statements after an if
     try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
-lemma closed_form {x0: Felt} :
-  Code.run (start_state [x0]) = [y0] ↔
-   some (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = y0  := by
+lemma closed_form {code0: Felt} :
+  Code.run (start_state [code0]) ([data0]) ↔
+   some (if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = data0  := by
     rewrite [part3_cumulative_wp]
     unfold part3_state_update
     unfold part3_state

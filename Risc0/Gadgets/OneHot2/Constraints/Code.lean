@@ -28,8 +28,8 @@ def run (st: State) : Prop :=
 
 end Code
 
-def start_state (input data : BufferAtTime) : State :=
-  { buffers := Map.fromList [(⟨"code"⟩, [input]), (⟨"data"⟩, [data])]
+def start_state (input_code output_data: BufferAtTime) : State :=
+  { buffers := Map.fromList [(⟨"code"⟩, [input_code]), (⟨"data"⟩, [output_data])]
   , bufferWidths := Map.fromList [(⟨"code"⟩, 1), (⟨"data"⟩, 2)]
   , constraints := []
   , cycle := 0

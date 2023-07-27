@@ -20,9 +20,9 @@ def part5_state_update (st: State): State :=
   part5_drops (part5_state st)
 
 -- Prove that substituting part5_state for Code.part5 produces the same result
-lemma part5_wp {st : State} {y0 y1 : Option Felt} :
-  Code.getReturn (MLIR.runProgram (Code.part5;dropfelt ⟨"%11"⟩;dropfelt ⟨"%1"⟩) st) = [y0, y1] ↔
-  Code.getReturn (part5_state_update st) = [y0, y1] := by
+lemma part5_wp {st : State} {data0 data1 : Option Felt} :
+  Code.getReturn (MLIR.runProgram (Code.part5;dropfelt ⟨"%11"⟩;dropfelt ⟨"%1"⟩) st) ([data0, data1]) ↔
+  Code.getReturn (part5_state_update st) ([data0, data1]) := by
   unfold MLIR.runProgram; simp only
   generalize eq : (dropfelt ⟨"%11"⟩;dropfelt ⟨"%1"⟩) = prog
   unfold Code.part5
@@ -33,38 +33,37 @@ lemma part5_wp {st : State} {y0 y1 : Option Felt} :
   rfl
 
 lemma part5_updates_opaque {st : State} : 
-  Code.getReturn (part4_state_update st) = [y0, y1] ↔
-  Code.getReturn (part5_state_update (part4_drops (part4_state st))) = [y0, y1] := by
+  Code.getReturn (part4_state_update st) ([data0, data1]) ↔
+  Code.getReturn (part5_state_update (part4_drops (part4_state st))) ([data0, data1]) := by
   simp [part4_state_update, part5_wp]
 
-lemma part5_cumulative_wp {x0: Felt} :
-  Code.run (start_state [x0]) = [y0,y1] ↔
+lemma part5_cumulative_wp {code0: Felt} {data0 data1: Option Felt} :
+  Code.run (start_state ([code0])) ([data0, data1]) ↔
   Code.getReturn
-        (part5_state_update
-          (({
-                buffers :=
-                  ((fun x => Map.empty x)[{ name := "code" : BufferVar }] ←ₘ
-                      [[some x0]])[{ name := "data" : BufferVar }] ←ₘ
-                    [[some (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)),
-                        some (if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))]],
-                bufferWidths :=
-                  ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (2 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
-                    (1 : ℕ),
-                constraints :=
-                  [(x0 - (1 : Felt) = (0 : Felt) → False) ∨
-                      ((1 : Felt) - if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                    (x0 = (0 : Felt) → False) ∨
-                      ((1 : Felt) - if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                    (if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) - x0 = (0 : Felt)],
-                cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
-                vars :=
-                  [{ name := "code" : BufferVar },
-                    { name := "data" : BufferVar }] }[felts][{ name := "%11" : FeltVar }] ←
-              ((if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) +
-                  if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) -
-                (1 : Felt))[felts][{ name := "%1" : FeltVar }] ←
-            (0 : Felt))) =
-      [y0, y1]  := by
+      (part5_state_update
+        (({
+              buffers :=
+                ((fun x => Map.empty x)[{ name := "code" : BufferVar }] ←ₘ
+                    [[some code0]])[{ name := "data" : BufferVar }] ←ₘ
+                  [[some (if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)),
+                      some (if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt))]],
+              bufferWidths :=
+                ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (2 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
+                  (1 : ℕ),
+              constraints :=
+                [(code0 - (1 : Felt) = (0 : Felt) → False) ∨
+                    ((1 : Felt) - if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
+                  (code0 = (0 : Felt) → False) ∨
+                    ((1 : Felt) - if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
+                  (if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) - code0 = (0 : Felt)],
+              cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+              vars :=
+                [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] }[felts][{ name := "%11" : FeltVar }] ←
+            ((if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) +
+                if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) -
+              (1 : Felt))[felts][{ name := "%1" : FeltVar }] ←
+          (0 : Felt)))
+      ([data0, data1])  := by
     rewrite [part4_cumulative_wp]
     rewrite [part5_updates_opaque]
     unfold part4_state
@@ -85,10 +84,10 @@ lemma part5_cumulative_wp {x0: Felt} :
     -- there are statements after an if
     try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
-lemma closed_form {x0: Felt} :
-  Code.run (start_state [x0]) = [y0,y1] ↔
-   some (if x0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = y0 ∧
-      some (if x0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = y1  := by
+lemma closed_form {code0: Felt} :
+  Code.run (start_state [code0]) ([data0,data1]) ↔
+   some (if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = data0 ∧
+      some (if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = data1  := by
     rewrite [part5_cumulative_wp]
     unfold part5_state_update
     unfold part5_state

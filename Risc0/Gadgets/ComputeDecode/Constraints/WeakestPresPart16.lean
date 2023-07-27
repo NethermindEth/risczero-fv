@@ -40,17 +40,17 @@ lemma part16_updates_opaque {st : State} :
   Code.getReturn (part16_state_update (part15_drops (part15_state st))) := by
   simp [part15_state_update, part16_wp]
 
-lemma part16_cumulative_wp {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17: Felt} :
-  Code.run (start_state [x0,x1,x2,x3] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17])) ↔
+lemma part16_cumulative_wp {in0 in1 in2 in3 data0 data1 data2 data3 data4 data5 data6 data7 data8 data9 data10 data11 data12 data13 data14 data15 data16 data17: Felt} :
+  Code.run (start_state ([in0, in1, in2, in3]) ([data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, data13, data14, data15, data16, data17])) ↔
   Code.getReturn
       (part16_state_update
         ((((({
                     buffers :=
                       ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
-                          [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8, some y9,
-                              some y10, some y11, some y12, some y13, some y14, some y15, some y16,
-                              some y17]])[{ name := "in" : BufferVar }] ←ₘ
-                        [[some x0, some x1, some x2, some x3]],
+                          [[some data0, some data1, some data2, some data3, some data4, some data5, some data6,
+                              some data7, some data8, some data9, some data10, some data11, some data12, some data13,
+                              some data14, some data15, some data16, some data17]])[{ name := "in" : BufferVar }] ←ₘ
+                        [[some in0, some in1, some in2, some in3]],
                     bufferWidths :=
                       ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
                           (18 : ℕ))[{ name := "in" : BufferVar }] ←ₘ
@@ -60,24 +60,28 @@ lemma part16_cumulative_wp {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y1
                       [{ name := "in" : BufferVar },
                         { name := "data" : BufferVar }] }[props][{ name := "%6" : PropVar }] ←
                   True)[props][{ name := "%28" : PropVar }] ←
-                x3 -
-                    ((y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13) =
+                in3 -
+                    ((data10 * (64 : Felt) + (data1 * (16 : Felt) + data9 * (8 : Felt) + data8 * (4 : Felt) + data0)) *
+                        (2 : Felt) +
+                      data13) =
                   (0 : Felt))[props][{ name := "%43" : PropVar }] ←
-              (x3 -
-                    ((y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13) =
+              (in3 -
+                    ((data10 * (64 : Felt) + (data1 * (16 : Felt) + data9 * (8 : Felt) + data8 * (4 : Felt) + data0)) *
+                        (2 : Felt) +
+                      data13) =
                   (0 : Felt) ∧
-                x2 - ((y12 * (8 : Felt) + y2 * (2 : Felt) + y11) * (16 : Felt) + y4 * (4 : Felt) + y3) =
+                in2 - ((data12 * (8 : Felt) + data2 * (2 : Felt) + data11) * (16 : Felt) + data4 * (4 : Felt) + data3) =
                   (0 : Felt)))[props][{ name := "%58" : PropVar }] ←
-            ((x3 -
-                    ((y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) +
-                      y13) =
+            ((in3 -
+                    ((data10 * (64 : Felt) + (data1 * (16 : Felt) + data9 * (8 : Felt) + data8 * (4 : Felt) + data0)) *
+                        (2 : Felt) +
+                      data13) =
                   (0 : Felt) ∧
-                x2 - ((y12 * (8 : Felt) + y2 * (2 : Felt) + y11) * (16 : Felt) + y4 * (4 : Felt) + y3) = (0 : Felt)) ∧
-              x1 - (y14 * (128 : Felt) + (y15 * (4 : Felt) + y5) * (16 : Felt) + y7 * (4 : Felt) + y6) =
+                in2 - ((data12 * (8 : Felt) + data2 * (2 : Felt) + data11) * (16 : Felt) + data4 * (4 : Felt) + data3) =
+                  (0 : Felt)) ∧
+              in1 - (data14 * (128 : Felt) + (data15 * (4 : Felt) + data5) * (16 : Felt) + data7 * (4 : Felt) + data6) =
                 (0 : Felt)))[felts][{ name := "%63" : FeltVar }] ←
-          x0 - (y16 * (128 : Felt) + y17)))  := by
+          in0 - (data16 * (128 : Felt) + data17)))  := by
     rewrite [part15_cumulative_wp]
     rewrite [part16_updates_opaque]
     unfold part15_state
@@ -97,13 +101,18 @@ lemma part16_cumulative_wp {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y1
     -- there are statements after an if
     try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
-lemma closed_form {x0 x1 x2 x3 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17: Felt} :
-  Code.run (start_state [x0,x1,x2,x3] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17])) ↔
-   ((x3 - ((y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) + y13) =
+lemma closed_form {in0 in1 in2 in3 data0 data1 data2 data3 data4 data5 data6 data7 data8 data9 data10 data11 data12 data13 data14 data15 data16 data17: Felt} :
+  Code.run (start_state ([in0, in1, in2, in3]) ([data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, data13, data14, data15, data16, data17])) ↔
+   ((in3 -
+              ((data10 * (64 : Felt) + (data1 * (16 : Felt) + data9 * (8 : Felt) + data8 * (4 : Felt) + data0)) *
+                  (2 : Felt) +
+                data13) =
             (0 : Felt) ∧
-          x2 - ((y12 * (8 : Felt) + y2 * (2 : Felt) + y11) * (16 : Felt) + y4 * (4 : Felt) + y3) = (0 : Felt)) ∧
-        x1 - (y14 * (128 : Felt) + (y15 * (4 : Felt) + y5) * (16 : Felt) + y7 * (4 : Felt) + y6) = (0 : Felt)) ∧
-      x0 - (y16 * (128 : Felt) + y17) = (0 : Felt)  := by
+          in2 - ((data12 * (8 : Felt) + data2 * (2 : Felt) + data11) * (16 : Felt) + data4 * (4 : Felt) + data3) =
+            (0 : Felt)) ∧
+        in1 - (data14 * (128 : Felt) + (data15 * (4 : Felt) + data5) * (16 : Felt) + data7 * (4 : Felt) + data6) =
+          (0 : Felt)) ∧
+      in0 - (data16 * (128 : Felt) + data17) = (0 : Felt)  := by
     rewrite [part16_cumulative_wp]
     unfold part16_state_update
     unfold part16_state
