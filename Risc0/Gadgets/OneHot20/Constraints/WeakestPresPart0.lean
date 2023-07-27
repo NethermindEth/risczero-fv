@@ -38,7 +38,6 @@ lemma part0_wp {st : State} :
   rewrite [MLIR.run_seq_def,MLIR.run_dropfelt]
   unfold part0_state_update part0_drops part0_state
   rfl
-
 lemma part0_cumulative_wp {code0 data0 data1 data2 data3 data4 data5 data6 data7 data8 data9 data10 data11 data12 data13 data14 data15 data16 data17 data18 data19: Felt}:
   Code.run (start_state ([code0]) ([data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, data13, data14, data15, data16, data17, data18, data19])) ↔
   Code.getReturn
@@ -53,7 +52,7 @@ lemma part0_cumulative_wp {code0 data0 data1 data2 data3 data4 data5 data6 data7
                       some data15, some data16, some data17, some data18, some data19]])],
           bufferWidths :=
             Map.fromList [({ name := "code" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (20 : ℕ))],
-          constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+          cycle := (0 : ℕ), felts := Map.empty, isFailed := false = true, props := Map.empty,
           vars := [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] })  := by
     unfold Code.run start_state
     rewrite [Code.optimised_behaviour_full]

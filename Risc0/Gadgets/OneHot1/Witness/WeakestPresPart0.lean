@@ -58,7 +58,7 @@ lemma part0_cumulative_wp {code0: Felt} {data0: Option Felt} :
             Map.fromList [({ name := "code" : BufferVar }, [[some code0]]), ({ name := "data" : BufferVar }, [[none]])],
           bufferWidths :=
             Map.fromList [({ name := "code" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (1 : ℕ))],
-          constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+          cycle := (0 : ℕ), felts := Map.empty, isFailed := false = true, props := Map.empty,
           vars := [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] })
       ([data0])  := by
     unfold Code.run start_state
