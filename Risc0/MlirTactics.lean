@@ -52,7 +52,7 @@ elab "MLIR_states_new" : tactic => do
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
     State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
-    State.constraints_if_eq, State.props_if_eq
+    State.props_if_eq
   ])
 
 elab "MLIR_states_new?" : tactic => do
@@ -61,7 +61,7 @@ elab "MLIR_states_new?" : tactic => do
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
     State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
-    State.constraints_if_eq, State.props_if_eq
+    State.props_if_eq
   ])
 
 elab "MLIR_states_new'" : tactic => do
@@ -70,7 +70,7 @@ elab "MLIR_states_new'" : tactic => do
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
     State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
-    State.constraints_if_eq, State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
+    State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
     Option.get!, Buffer.back, Buffer.get!, List.get!, Option.isSome_some, and_true, true_and, ne_eq,
     State.updateFelts_props, State.updateProps_props_get_wobbly,
     State.updateFelts_felts_get_wobbly, mul_eq_zero, State.updateFelts_felts_get_next, State.updateProps_felts
@@ -82,7 +82,7 @@ elab "MLIR_states_new'?" : tactic => do
     Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
     State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
-    State.constraints_if_eq, State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
+    State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
     Option.get!, Buffer.back, Buffer.get!, List.get!, Option.isSome_some, and_true, true_and, ne_eq,
     State.updateFelts_props, State.updateProps_props_get_wobbly,
     State.updateFelts_felts_get_wobbly, mul_eq_zero, State.updateFelts_felts_get_next, State.updateProps_felts
@@ -190,12 +190,12 @@ elab "MLIR_decide_updates" : tactic => do
       List.cons.injEq, and_imp, forall_apply_eq_imp_iff', forall_eq',
       Nat.succ_ne_self, IsEmpty.forall_iff, implies_true, forall_const, Nat.succ.injEq,
       getElem, instGetElemMapOptionTrue, State.updateFelts_buffers, State.updateFelts_bufferWidths,
-      State.updateFelts_constraints, State.updateFelts_cycle, State.updateFelts_isFailed,
+      State.updateFelts_cycle, State.updateFelts_isFailed,
       State.updateFelts_props, State.updateFelts_vars, State.updateFelts_felts, State.updateProps_buffers,
-      State.updateProps_bufferWidths, State.updateProps_constraints, State.updateProps_cycle,
+      State.updateProps_bufferWidths, State.updateProps_cycle,
       State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props,
-      State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars,
-      withEqZero_buffers, withEqZero_bufferWidths, withEqZero_constraints, withEqZero_cycle, withEqZero_felts, withEqZero_isFailed, withEqZero_props, withEqZero_vars,
+      State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars,
+      withEqZero_buffers, withEqZero_bufferWidths, withEqZero_cycle, withEqZero_felts, withEqZero_isFailed, withEqZero_props, withEqZero_vars,
       getImpl_skip_set_offset
     ])
   evalTactic <| ← `(tactic| simp only [Map.update_def.symm])

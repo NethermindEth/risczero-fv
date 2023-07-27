@@ -122,7 +122,7 @@ namespace Risc0
         st with buffers := match bufferSet? with
                             | some b => st.buffers[buf] ←ₘ b
                             | none => st.buffers
-                isFailed := if bufferSet?.isNone then true else st.isFailed
+                isFailed := if bufferSet?.isNone then True else st.isFailed
       } := by simp [set!, setBufferElementImpl, h]; aesop'
 
     private lemma isGetValid_congr

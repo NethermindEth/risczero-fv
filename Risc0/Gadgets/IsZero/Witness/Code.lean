@@ -19,6 +19,7 @@ def full : MLIRProgram :=
   guard ⟨"%3"⟩ then ("%4" ←ₐ .Get ⟨"data"⟩ 0 1; "%5" ←ₐ .Mul ⟨"%1"⟩ ⟨"%4"⟩; "%6" ←ₐ .Sub ⟨"%5"⟩ ⟨"%0"⟩; ?₀ ⟨"%6"⟩)
 def getReturn (st: State) (res_data: BufferAtTime) : Prop :=
   ((st.buffers ⟨"data"⟩ |>.get!.getLast!) = res_data)
+∧ ¬ st.isFailed
 def run (st: State) (res_data: BufferAtTime): Prop :=
   getReturn (full.runProgram st) res_data
 
@@ -26,13 +27,12 @@ end Code
 
 def start_state (input_in: BufferAtTime) : State :=
   { buffers := Map.fromList [(⟨"in"⟩, [input_in]), (⟨"data"⟩, [[.none, .none]])]
-  , bufferWidths := Map.fromList [(⟨"in"⟩, 1), (⟨"data"⟩, 2)]
-  , constraints := []
-  , cycle := 0
   , felts := Map.empty
   , props := Map.empty
-  , vars := [⟨"in"⟩, ⟨"data"⟩]
   , isFailed := false
+  , bufferWidths := Map.fromList [(⟨"in"⟩, 1), (⟨"data"⟩, 2)]
+  , cycle := 0
+  , vars := [⟨"in"⟩, ⟨"data"⟩]
   }
 
 end Risc0.IsZero.Witness

@@ -2,19 +2,11 @@ import Risc0.State.Defs
 
 namespace Risc0.State
 
-  @[simp]
-  lemma if_constraints {state₁ state₂ : State} {x : Felt} :
-    (if x = 0 then state₁ else state₂).constraints =
-    if x = 0 then state₁.constraints else state₂.constraints := by apply apply_ite
-
   lemma buffers_if_eq {c} [Decidable c] {st st' : State} (h : st.buffers = st'.buffers) :
     State.buffers (if c then st else st') = st.buffers := by aesop'
 
   lemma bufferWidths_if_eq {c} [Decidable c] {st st' : State} (h : st.bufferWidths = st'.bufferWidths) :
     State.bufferWidths (if c then st else st') = st.bufferWidths := by aesop'
-
-  lemma constraints_if_eq {c} [Decidable c] {st st' : State} (h : st.constraints = st'.constraints) :
-    State.constraints (if c then st else st') = st.constraints := by aesop'
 
   lemma cycle_if_eq {c} [Decidable c] {st st' : State} (h : st.cycle = st'.cycle) :
     State.cycle (if c then st else st') = st.cycle := by aesop'
@@ -37,10 +29,6 @@ namespace Risc0.State
 
   lemma bufferWidths_if_eq_if_bufferWidths [Decidable c] :
     State.bufferWidths (if c then st else st') = if c then st.bufferWidths else st'.bufferWidths := by
-      aesop'
-
-  lemma constraints_if_eq_if_constraints [Decidable c] :
-    State.constraints (if c then st else st') = if c then st.constraints else st'.constraints := by
       aesop'
 
   lemma cycle_if_eq_if_cycle [Decidable c] :

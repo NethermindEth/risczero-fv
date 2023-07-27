@@ -22,6 +22,7 @@ def full : MLIRProgram :=
   ?₀ ⟨"%7"⟩
 def getReturn (st: State) (res_data: BufferAtTime) : Prop :=
   ((st.buffers ⟨"data"⟩ |>.get!.getLast!) = res_data)
+∧ ¬ st.isFailed
 def run (st: State) (res_data: BufferAtTime): Prop :=
   getReturn (full.runProgram st) res_data
 
@@ -29,13 +30,12 @@ end Code
 
 def start_state (input_code: BufferAtTime) : State :=
   { buffers := Map.fromList [(⟨"code"⟩, [input_code]), (⟨"data"⟩, [[.none]])]
-  , bufferWidths := Map.fromList [(⟨"code"⟩, 1), (⟨"data"⟩, 1)]
-  , constraints := []
-  , cycle := 0
   , felts := Map.empty
   , props := Map.empty
-  , vars := [⟨"code"⟩, ⟨"data"⟩]
   , isFailed := false
+  , bufferWidths := Map.fromList [(⟨"code"⟩, 1), (⟨"data"⟩, 1)]
+  , cycle := 0
+  , vars := [⟨"code"⟩, ⟨"data"⟩]
   }
 
 end Risc0.OneHot1.Witness
