@@ -127,8 +127,8 @@ lemma behaviour_with_drops :
     rewrite [behaviour_with_drops1, ←MLIR.run_seq_def]
     rfl
 lemma getReturn_ignores_drops :
-  getReturn (Γ st ⟦part0;part1;part2;part3;part4;part5;dropfelt ⟨"%12"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%1"⟩⟧) =
-  getReturn (Γ st ⟦part0;part1;part2;part3;part4;part5⟧) := by
-    simp [getReturn, MLIR.run_seq_def, State.constraintsInVar, MLIR.run_dropfelt, State.dropFelts_buffers, State.dropFelts_props]
+  getReturn (Γ st ⟦part0;part1;part2;part3;part4;part5;dropfelt ⟨"%12"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%1"⟩⟧) res0 =
+  getReturn (Γ st ⟦part0;part1;part2;part3;part4;part5⟧) res0 := by
+    simp [getReturn, MLIR.run_seq_def, State.constraintsInVar, MLIR.run_dropfelt, State.dropFelts_buffers, State.dropFelts_isFailed, State.dropFelts_props]
 
 end Risc0.OneHot2.Witness.Code

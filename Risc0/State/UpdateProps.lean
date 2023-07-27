@@ -11,8 +11,6 @@ namespace Risc0.State
     @[simp]
     lemma updateProps_bufferWidths : (updateProps st name x).bufferWidths = st.bufferWidths := by simp [updateProps]
     @[simp]
-    lemma updateProps_constraints : (updateProps st name x).constraints = st.constraints := by simp [updateProps]
-    @[simp]
     lemma updateProps_cycle : (updateProps st name x).cycle = st.cycle := by simp [updateProps]
     @[simp]
     lemma updateProps_isFailed : (updateProps st name x).isFailed = st.isFailed := by simp [updateProps]

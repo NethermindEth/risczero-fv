@@ -52,8 +52,8 @@ lemma behaviour_with_drops :
     rewrite [behaviour_with_drops1, ←MLIR.run_seq_def]
     rfl
 lemma getReturn_ignores_drops :
-  getReturn (Γ st ⟦part0;part1;part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧) =
-  getReturn (Γ st ⟦part0;part1;part2⟧) := by
-    simp [getReturn, MLIR.run_seq_def, State.constraintsInVar, MLIR.run_dropfelt, State.dropFelts_buffers, State.dropFelts_props]
+  getReturn (Γ st ⟦part0;part1;part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧) res0 =
+  getReturn (Γ st ⟦part0;part1;part2⟧) res0 := by
+    simp [getReturn, MLIR.run_seq_def, State.constraintsInVar, MLIR.run_dropfelt, State.dropFelts_buffers, State.dropFelts_isFailed, State.dropFelts_props]
 
 end Risc0.IsZero.Witness.Code
