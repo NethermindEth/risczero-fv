@@ -140,7 +140,9 @@ def decoder_direct_spec (input : BufferAtTime) (output : BufferAtTime) : Prop :=
   input.length = 4  
   ∧ output = (Instruction.fromWords input).toList.map some
 
-def isByte (x : Felt) := x.val ≤ 255
+def isByte (x : Felt) : Prop := x.val ≤ 255
+
+def isBytes (l : List Felt) : Prop := ∀ i < l.length, isByte (l.get! i) 
 
 lemma byte_destruct₁ {x : ℕ} (h : x < 256):
   (Bitvec.toNat (Bitvec.ofNat 32 x) / 128 % 2) * 128 +
@@ -1058,7 +1060,7 @@ lemma leg_12 {x : Felt} :
     rw [h_4]
 
 
-theorem decoder_closed_form_entails_spec : 
+theorem decoder_closed_form_equiv_decoder_direct_spec : 
   some (feltBitAnd x3 (6 : Felt) * (1006632961 : Felt)) = y0 ∧
       some (feltBitAnd x3 (96 : Felt) * (1950351361 : Felt)) = y1 ∧
         some (feltBitAnd x2 (96 : Felt) * (1950351361 : Felt)) = y2 ∧
@@ -1087,3 +1089,28 @@ theorem decoder_closed_form_entails_spec :
   have h' :(ZMod.val (127 : Felt)) = 127 := by simp
   simp [h']
   aesop
+  
+def constraints_spec (input : List Felt) (output : List Felt) : Prop :=
+  input.length = 4 ∧ 
+  output.length = 18 ∧
+  input = (Instruction.fromList output).toWords
+
+theorem constraints_closed_form_entails_spec:
+  ((x3 - ((y10 * (64 : Felt) + (y1 * (16 : Felt) + y9 * (8 : Felt) + y8 * (4 : Felt) + y0)) * (2 : Felt) + y13) =
+            (0 : Felt) ∧
+          x2 - ((y12 * (8 : Felt) + y2 * (2 : Felt) + y11) * (16 : Felt) + y4 * (4 : Felt) + y3) = (0 : Felt)) ∧
+        x1 - (y14 * (128 : Felt) + (y15 * (4 : Felt) + y5) * (16 : Felt) + y7 * (4 : Felt) + y6) = (0 : Felt)) ∧
+      x0 - (y16 * (128 : Felt) + y17) = (0 : Felt) → constraints_spec [x0, x1, x2, x3] [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] := by 
+  unfold constraints_spec Instruction.fromList Instruction.toWords
+  simp
+  -- ring_nf
+  intros h3 h2 h1 h0
+  rw [sub_eq_iff_eq_add] at h0
+  subst h0
+  rw [sub_eq_iff_eq_add] at h1
+  subst h1
+  rw [sub_eq_iff_eq_add] at h2
+  subst h2
+  rw [sub_eq_iff_eq_add] at h3
+  subst h3
+  ring_nf
