@@ -142,80 +142,11 @@ lemma closed_form {in0: Felt} :
   Code.run (start_state [in0]) ([data0,data1]) ↔
    ((some (if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = data0 ∧
         some (if in0 = (0 : Felt) then (0 : Felt) else in0⁻¹) = data1) ∧
-      ¬if
-            ((1 : Felt) -
-                match
-                  ite (in0 = (0 : Felt) → False)
-                    ({
-                          buffers :=
-                            ((fun x => Map.empty x)[{ name := "in" : BufferVar }] ←ₘ
-                                [[some in0]])[{ name := "data" : BufferVar }] ←ₘ
-                              [[some (if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt)),
-                                  some (if in0 = (0 : Felt) then (0 : Felt) else in0⁻¹)]],
-                          bufferWidths :=
-                            ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
-                                (2 : ℕ))[{ name := "in" : BufferVar }] ←ₘ
-                              (1 : ℕ),
-                          cycle := (0 : ℕ),
-                          felts :=
-                            (((fun x => Map.empty x)[{ name := "%1" : FeltVar }] ←ₘ in0)[{ name := "%4" : FeltVar }] ←ₘ
-                                if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt))[{ name := "%5" : FeltVar }] ←ₘ
-                              if in0 = (0 : Felt) then (0 : Felt) else in0⁻¹,
-                          isFailed := False, props := Map.empty,
-                          vars :=
-                            [{ name := "in" : BufferVar },
-                              { name := "data" : BufferVar }] }[felts][{ name := "%2" : FeltVar }] ←
-                        if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt)).felts
-                    (((((fun x => Map.empty x)[{ name := "%1" : FeltVar }] ←ₘ in0)[{ name := "%4" : FeltVar }] ←ₘ
-                          if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt))[{ name := "%5" : FeltVar }] ←ₘ
-                        if in0 = (0 : Felt) then (0 : Felt) else in0⁻¹)[{ name := "%2" : FeltVar }] ←ₘ
-                      if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt))
-                    { name := "%2" : FeltVar } with
-                | some x => x
-                | none =>
-                  panicWithPosWithDecl "Init.Data.Option.BasicAux" "Option.get!" (16 : ℕ) (14 : ℕ) "value is none") =
-              (0 : Felt) then
+      ¬if ((1 : Felt) - if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt) then
           if in0 = (0 : Felt) → False then False else ¬in0 = (0 : Felt)
         else
           (if in0 = (0 : Felt) → False then False else ¬in0 = (0 : Felt)) ∨
-            ¬(if in0 = (0 : Felt) then (0 : Felt)
-                  else
-                    (match
-                        ite (in0 = (0 : Felt) → False)
-                          ({
-                                buffers :=
-                                  ((fun x => Map.empty x)[{ name := "in" : BufferVar }] ←ₘ
-                                      [[some in0]])[{ name := "data" : BufferVar }] ←ₘ
-                                    [[some (if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt)),
-                                        some (if in0 = (0 : Felt) then (0 : Felt) else in0⁻¹)]],
-                                bufferWidths :=
-                                  ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
-                                      (2 : ℕ))[{ name := "in" : BufferVar }] ←ₘ
-                                    (1 : ℕ),
-                                cycle := (0 : ℕ),
-                                felts :=
-                                  (((fun x => Map.empty x)[{ name := "%1" : FeltVar }] ←ₘ
-                                        in0)[{ name := "%4" : FeltVar }] ←ₘ
-                                      if in0 = (0 : Felt) then (1 : Felt)
-                                      else (0 : Felt))[{ name := "%5" : FeltVar }] ←ₘ
-                                    if in0 = (0 : Felt) then (0 : Felt) else in0⁻¹,
-                                isFailed := False, props := Map.empty,
-                                vars :=
-                                  [{ name := "in" : BufferVar },
-                                    { name := "data" : BufferVar }] }[felts][{ name := "%2" : FeltVar }] ←
-                              if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt)).felts
-                          (((((fun x => Map.empty x)[{ name := "%1" : FeltVar }] ←ₘ in0)[{ name := "%4" : FeltVar }] ←ₘ
-                                if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt))[{ name := "%5" : FeltVar }] ←ₘ
-                              if in0 = (0 : Felt) then (0 : Felt) else in0⁻¹)[{ name := "%2" : FeltVar }] ←ₘ
-                            if in0 = (0 : Felt) then (1 : Felt) else (0 : Felt))
-                          { name := "%1" : FeltVar } with
-                      | some x => x
-                      | none =>
-                        panicWithPosWithDecl "Init.Data.Option.BasicAux" "Option.get!" (16 : ℕ) (14 : ℕ)
-                          "value is none") *
-                      in0⁻¹) -
-                  (1 : Felt) =
-                (0 : Felt))  := by
+            ¬(if in0 = (0 : Felt) then (0 : Felt) else in0 * in0⁻¹) - (1 : Felt) = (0 : Felt))  := by
     rewrite [part2_cumulative_wp]
     unfold part2_state_update
     unfold part2_state

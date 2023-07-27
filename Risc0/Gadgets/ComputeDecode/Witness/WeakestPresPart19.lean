@@ -84,7 +84,7 @@ lemma part19_cumulative_wp {in0 in1 in2 in3: Felt} {data0 data1 data2 data3 data
                 bufferWidths :=
                   ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (18 : ℕ))[{ name := "in" : BufferVar }] ←ₘ
                     (4 : ℕ),
-                constraints := [], cycle := (0 : ℕ),
+                cycle := (0 : ℕ),
                 felts :=
                   (((((((Map.empty[{ name := "%19" : FeltVar }] ←ₘ (128 : Felt))[{ name := "%23" : FeltVar }] ←ₘ
                                 in3)[{ name := "%15" : FeltVar }] ←ₘ
@@ -94,7 +94,7 @@ lemma part19_cumulative_wp {in0 in1 in2 in3: Felt} {data0 data1 data2 data3 data
                         in1)[{ name := "%3" : FeltVar }] ←ₘ
                       (64 : Felt))[{ name := "%20" : FeltVar }] ←ₘ
                     in0,
-                isFailed := false, props := Map.empty,
+                isFailed := False, props := Map.empty,
                 vars :=
                   [{ name := "in" : BufferVar }, { name := "data" : BufferVar }] }[felts][{ name := "%7" : FeltVar }] ←
               (4 : Felt))[felts][{ name := "%27" : FeltVar }] ←
@@ -114,12 +114,12 @@ lemma part19_cumulative_wp {in0 in1 in2 in3: Felt} {data0 data1 data2 data3 data
     -- 1 drop
     simp only [State.drop_update_swap, State.drop_update_same]
     rewrite [State.dropFelts]
-    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
     simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- there are not any statements after an if
-    -- try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
+    -- try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
 end Risc0.ComputeDecode.Witness.WP

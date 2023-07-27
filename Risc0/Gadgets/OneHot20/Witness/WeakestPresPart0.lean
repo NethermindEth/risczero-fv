@@ -62,7 +62,7 @@ lemma part0_cumulative_wp {code0: Felt} {data0 data1 data2 data3 data4 data5 dat
                       none, none, none, none]])],
           bufferWidths :=
             Map.fromList [({ name := "code" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (20 : ℕ))],
-          constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+          cycle := (0 : ℕ), felts := Map.empty, isFailed := false = true, props := Map.empty,
           vars := [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] })
       ([data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, data13, data14,
         data15, data16, data17, data18, data19])  := by
