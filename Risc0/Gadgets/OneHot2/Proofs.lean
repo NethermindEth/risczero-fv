@@ -21,20 +21,24 @@ theorem spec_of_constraints {x0 y0 y1 : Risc0.Felt} :
   ]
   intro h 
   rcases h.1.1.2 with h₀ | h₀
-  rcases h.1.2 with h₁ | h₁
   {
-    aesop
+    rcases h.1.2 with h₁ | h₁
+    {
+      aesop
+    }
+    {
+      simp [sub_eq_zero.1 h.1.1.1, sub_eq_zero.1 h₁]
+    }
   }
   {
-    simp [sub_eq_zero.1 h.1.1.1, sub_eq_zero.1 h₁]
-  }
-  rcases h.1.2 with h₁ | h₁
-  {
-    simp [←sub_eq_zero.1 h.1.1.1, h₁]
-  }
-  {
-    simp [sub_eq_zero, h₀] at h
-    aesop
+    rcases h.1.2 with h₁ | h₁
+    {
+      simp [←sub_eq_zero.1 h.1.1.1, h₁]
+    }
+    {
+      simp [sub_eq_zero, h₀] at h
+      aesop
+    }
   }
 
 end Risc0
