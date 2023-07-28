@@ -11,8 +11,6 @@ namespace Risc0.State
     @[simp]
     lemma updateFelts_bufferWidths : (updateFelts st name x).bufferWidths = st.bufferWidths := by simp [updateFelts]
     @[simp]
-    lemma updateFelts_constraints : (updateFelts st name x).constraints = st.constraints := by simp [updateFelts]
-    @[simp]
     lemma updateFelts_cycle : (updateFelts st name x).cycle = st.cycle := by simp [updateFelts]
     @[simp]
     lemma updateFelts_isFailed : (updateFelts st name x).isFailed = st.isFailed := by simp [updateFelts]

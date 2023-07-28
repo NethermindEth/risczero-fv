@@ -24,7 +24,7 @@ namespace Risc0.State
 
   lemma set!_bufferWidths_get_of_ne {st : State} (h : buf ≠ buf') :
     (st.set! buf' index x).bufferWidths[buf] = st.bufferWidths[buf] := by
-    unfold set! setBufferElementImpl
+    unfold set! setBufferElementImpl Buffer.set? 
     aesop'
 
   lemma set!_buffers_get_of_ne {st : State} (h : buf ≠ buf') : 
@@ -50,7 +50,7 @@ namespace Risc0.State
   lemma get_set!_getElem {st : State} :
     (State.set! st buf offset val).bufferWidths[buf] =
     st.bufferWidths[buf] := by
-    unfold State.set! State.setBufferElementImpl
+    unfold State.set! State.setBufferElementImpl Buffer.set?
     aesop'
 
 end Risc0.State

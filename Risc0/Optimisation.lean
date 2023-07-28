@@ -261,7 +261,7 @@ section drop
     Γ (Γ st ⟦MLIR.Assign name (Op.Isz x)⟧) ⟦@MLIR.DropFelt α y⟧ := by
       simp [
         MLIR.run_dropfelt, MLIR.run_ass_def, State.updateFelts, Map.update_get_next', *,
-        State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle,
+        State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle,
         State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars, State.dropFelts,
         Map.update_drop_swap, Map.drop_get, Map.drop, Map.update
       ]

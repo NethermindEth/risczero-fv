@@ -14,13 +14,13 @@ namespace Risc0
     -- A widths for every buffer.
     bufferWidths : Map BufferVar ℕ
     -- Intermediate constraints.
-    constraints  : List Prop
+    -- constraints  : List Prop
     -- Current cycle.
     cycle        : ℕ
     -- Temporary felts.
     felts        : Map FeltVar Felt
     -- Is the state invalid.
-    isFailed     : Bool
+    isFailed     : Prop
     -- Context of propositions.
     props        : Map PropVar Prop
     -- Valid variables for buffers.
@@ -33,7 +33,7 @@ namespace Risc0
     st.buffers[buf].get!.get! (st.cycle - back.toNat, offset)
 
   abbrev withEqZero (x : Felt) (st : State) : State :=
-    {st with constraints := (x = 0) :: st.constraints}
+    {st with isFailed := st.isFailed ∨ (x ≠ 0)}
 
   namespace State
 

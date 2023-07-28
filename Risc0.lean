@@ -196,12 +196,14 @@ import Risc0.Gadgets.OneHot2.Witness.CodeDrops
 import Risc0.Gadgets.OneHot2.Constraints.WeakestPresPart0
 import Risc0.Gadgets.OneHot2.Constraints.WeakestPresPart1
 import Risc0.Gadgets.OneHot2.Constraints.WeakestPresPart2
+import Risc0.Gadgets.OneHot2.Constraints.WeakestPresPart3
 import Risc0.Gadgets.OneHot2.Witness.WeakestPresPart0
 import Risc0.Gadgets.OneHot2.Witness.WeakestPresPart1
 import Risc0.Gadgets.OneHot2.Witness.WeakestPresPart2
 import Risc0.Gadgets.OneHot2.Witness.WeakestPresPart3
 import Risc0.Gadgets.OneHot2.Witness.WeakestPresPart4
 import Risc0.Gadgets.OneHot2.Witness.WeakestPresPart5
+import Risc0.Gadgets.OneHot2.Proofs
 
 import Risc0.Gadgets.OneHot1.Witness.Code
 import Risc0.Gadgets.OneHot1.Constraints.Code
@@ -218,5 +220,3 @@ import Risc0.Gadgets.OneHot1.Witness.WeakestPresPart0
 import Risc0.Gadgets.OneHot1.Witness.WeakestPresPart1
 import Risc0.Gadgets.OneHot1.Witness.WeakestPresPart2
 import Risc0.Gadgets.OneHot1.Witness.WeakestPresPart3
-
-import Risc0.Gadgets.OneHot2.Constraints.WeakestPresPart3

@@ -82,7 +82,7 @@ lemma part2_cumulative_wp {in0 data0 data1: Felt} :
                           ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
                               (2 : ℕ))[{ name := "in" : BufferVar }] ←ₘ
                             (1 : ℕ),
-                        constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+                        cycle := (0 : ℕ), felts := Map.empty, isFailed := False, props := Map.empty,
                         vars :=
                           [{ name := "in" : BufferVar },
                             { name := "data" : BufferVar }] }[props][{ name := "%1" : PropVar }] ←
@@ -104,13 +104,13 @@ lemma part2_cumulative_wp {in0 data0 data1: Felt} :
     -- 1 drop
     simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
     rewrite [State.dropFelts]
-    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
     simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- there are statements after an if
-    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
+    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths, State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
 lemma closed_form {in0 data0 data1: Felt} :
   Code.run (start_state ([in0]) ([data0, data1])) ↔
@@ -127,13 +127,13 @@ lemma closed_form {in0 data0 data1: Felt} :
     -- 6 drops
     simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
     rewrite [State.dropFelts]
-    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
     simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- there are statements after an if
-    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
+    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths, State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
     unfold Code.getReturn
     simp only
     simp only [Code.getReturn, State.constraintsInVar, State.updateProps_props_get_wobbly, Option.getD_some]

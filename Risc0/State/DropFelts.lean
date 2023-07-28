@@ -10,7 +10,6 @@ namespace Risc0.State
   section MemberAccess
     lemma dropFelts_buffers : (dropFelts st name).buffers = st.buffers := rfl
     lemma dropFelts_bufferWidths : (dropFelts st name).bufferWidths = st.bufferWidths := rfl
-    lemma dropFelts_constraints : (dropFelts st name).constraints = st.constraints := rfl
     lemma dropFelts_cycle : (dropFelts st name).cycle = st.cycle := rfl
     lemma dropFelts_felts : (dropFelts st name).felts = st.felts.drop name := rfl
     lemma dropFelts_isFailed : (dropFelts st name).isFailed = st.isFailed := rfl

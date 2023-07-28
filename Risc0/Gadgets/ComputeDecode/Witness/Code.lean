@@ -137,6 +137,7 @@ def full : MLIRProgram :=
   ?₀ ⟨"%73"⟩
 def getReturn (st: State) (res_data: BufferAtTime) : Prop :=
   ((st.buffers ⟨"data"⟩ |>.get!.getLast!) = res_data)
+∧ ¬ st.isFailed
 def run (st: State) (res_data: BufferAtTime): Prop :=
   getReturn (full.runProgram st) res_data
 
@@ -144,13 +145,12 @@ end Code
 
 def start_state (input_in: BufferAtTime) : State :=
   { buffers := Map.fromList [(⟨"in"⟩, [input_in]), (⟨"data"⟩, [[.none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none, .none]])]
-  , bufferWidths := Map.fromList [(⟨"in"⟩, 4), (⟨"data"⟩, 18)]
-  , constraints := []
-  , cycle := 0
   , felts := Map.empty
   , props := Map.empty
-  , vars := [⟨"in"⟩, ⟨"data"⟩]
   , isFailed := false
+  , bufferWidths := Map.fromList [(⟨"in"⟩, 4), (⟨"data"⟩, 18)]
+  , cycle := 0
+  , vars := [⟨"in"⟩, ⟨"data"⟩]
   }
 
 end Risc0.ComputeDecode.Witness

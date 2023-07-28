@@ -50,13 +50,14 @@ lemma part5_cumulative_wp {code0: Felt} {data0 data1: Option Felt} :
               bufferWidths :=
                 ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ (2 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
                   (1 : ℕ),
-              constraints :=
-                [(code0 - (1 : Felt) = (0 : Felt) → False) ∨
-                    ((1 : Felt) - if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (code0 = (0 : Felt) → False) ∨
-                    ((1 : Felt) - if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt),
-                  (if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) - code0 = (0 : Felt)],
-              cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,
+              cycle := (0 : ℕ), felts := Map.empty,
+              isFailed :=
+                (¬(if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) - code0 = (0 : Felt) ∨
+                    ¬((code0 = (0 : Felt) → False) ∨
+                        ((1 : Felt) - if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt))) ∨
+                  ¬((code0 - (1 : Felt) = (0 : Felt) → False) ∨
+                      ((1 : Felt) - if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt)),
+              props := Map.empty,
               vars :=
                 [{ name := "code" : BufferVar }, { name := "data" : BufferVar }] }[felts][{ name := "%11" : FeltVar }] ←
             ((if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) +
@@ -76,18 +77,27 @@ lemma part5_cumulative_wp {code0: Felt} {data0 data1: Option Felt} :
     -- 5 drops
     simp only [State.drop_update_swap, State.drop_update_same]
     rewrite [State.dropFelts]
-    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
     simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- there are statements after an if
-    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
+    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
 lemma closed_form {code0: Felt} :
   Code.run (start_state [code0]) ([data0,data1]) ↔
-   some (if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = data0 ∧
-      some (if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = data1  := by
+   (some (if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = data0 ∧
+        some (if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = data1) ∧
+      ¬(((¬(if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) - code0 = (0 : Felt) ∨
+              ¬((code0 = (0 : Felt) → False) ∨
+                  ((1 : Felt) - if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt))) ∨
+            ¬((code0 - (1 : Felt) = (0 : Felt) → False) ∨
+                ((1 : Felt) - if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) = (0 : Felt))) ∨
+          ¬((if code0 = (0 : Felt) then (1 : Felt) else (0 : Felt)) +
+                  if code0 - (1 : Felt) = (0 : Felt) then (1 : Felt) else (0 : Felt)) -
+                (1 : Felt) =
+              (0 : Felt))  := by
     rewrite [part5_cumulative_wp]
     unfold part5_state_update
     unfold part5_state
@@ -100,13 +110,13 @@ lemma closed_form {code0: Felt} :
     -- 2 drops
     simp only [State.drop_update_swap, State.drop_update_same]
     rewrite [State.dropFelts]
-    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_constraints, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
     simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
     -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- there are statements after an if
-    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.constraints_if_eq_if_constraints,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
+    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
     unfold Code.getReturn
     simp only
     simp [Map.update_get_wobbly, List.getLast!]

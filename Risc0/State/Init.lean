@@ -7,7 +7,6 @@ namespace Risc0.State
     {
       buffers := Map.empty
       bufferWidths := Map.empty,
-      constraints := [],
       cycle := 0, -- should cycle actually equal zero here or should it be arbitrary?
       felts := Map.empty,
       props := Map.empty,
@@ -34,7 +33,6 @@ namespace Risc0.State
            (_hIn : input.length = numInput) (_hOut : output.length = numOutput) : State where
     buffers      := Map.fromList [(⟨Input⟩, Buffer.init' input), (⟨Output⟩, Buffer.init' output)]
     bufferWidths := Map.fromList [(⟨Input⟩, numInput), (⟨Output⟩, numOutput)]
-    constraints  := []
     cycle        := 0
     felts        := Map.empty
     isFailed     := false

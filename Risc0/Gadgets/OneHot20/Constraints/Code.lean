@@ -174,13 +174,12 @@ end Code
 
 def start_state (input_code output_data: BufferAtTime) : State :=
   { buffers := Map.fromList [(⟨"code"⟩, [input_code]), (⟨"data"⟩, [output_data])]
-  , bufferWidths := Map.fromList [(⟨"code"⟩, 1), (⟨"data"⟩, 20)]
-  , constraints := []
-  , cycle := 0
   , felts := Map.empty
   , props := Map.empty
-  , vars := [⟨"code"⟩, ⟨"data"⟩]
   , isFailed := false
+  , bufferWidths := Map.fromList [(⟨"code"⟩, 1), (⟨"data"⟩, 20)]
+  , cycle := 0
+  , vars := [⟨"code"⟩, ⟨"data"⟩]
   }
 
 end Risc0.OneHot20.Constraints
