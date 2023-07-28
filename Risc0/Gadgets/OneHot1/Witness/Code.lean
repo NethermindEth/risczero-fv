@@ -20,15 +20,15 @@ def full : MLIRProgram :=
   ?₀ ⟨"%6"⟩;
   "%7" ←ₐ .Sub ⟨"%4"⟩ ⟨"%0"⟩;
   ?₀ ⟨"%7"⟩
-def getReturn (st: State) : BufferAtTime :=
-  st.buffers ⟨"data"⟩ |>.get!.getLast!
-def run (st: State) : BufferAtTime :=
-  getReturn (full.runProgram st)
+def getReturn (st: State) (res_data: BufferAtTime) : Prop :=
+  ((st.buffers ⟨"data"⟩ |>.get!.getLast!) = res_data)
+def run (st: State) (res_data: BufferAtTime): Prop :=
+  getReturn (full.runProgram st) res_data
 
 end Code
 
-def start_state (input : BufferAtTime) : State :=
-  { buffers := Map.fromList [(⟨"code"⟩, [input]), (⟨"data"⟩, [[none]])]
+def start_state (input_code: BufferAtTime) : State :=
+  { buffers := Map.fromList [(⟨"code"⟩, [input_code]), (⟨"data"⟩, [[.none]])]
   , bufferWidths := Map.fromList [(⟨"code"⟩, 1), (⟨"data"⟩, 1)]
   , constraints := []
   , cycle := 0

@@ -39,17 +39,18 @@ lemma part0_wp {st : State} :
   unfold part0_state_update part0_drops part0_state
   rfl
 
-lemma part0_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19: Felt}:
-  Code.run (start_state [x0] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19])) ↔
+lemma part0_cumulative_wp {code0 data0 data1 data2 data3 data4 data5 data6 data7 data8 data9 data10 data11 data12 data13 data14 data15 data16 data17 data18 data19: Felt}:
+  Code.run (start_state ([code0]) ([data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, data13, data14, data15, data16, data17, data18, data19])) ↔
   Code.getReturn
       (part0_state_update
         {
           buffers :=
             Map.fromList
-              [({ name := "code" : BufferVar }, [[some x0]]),
+              [({ name := "code" : BufferVar }, [[some code0]]),
                 ({ name := "data" : BufferVar },
-                  [[some y0, some y1, some y2, some y3, some y4, some y5, some y6, some y7, some y8, some y9, some y10,
-                      some y11, some y12, some y13, some y14, some y15, some y16, some y17, some y18, some y19]])],
+                  [[some data0, some data1, some data2, some data3, some data4, some data5, some data6, some data7,
+                      some data8, some data9, some data10, some data11, some data12, some data13, some data14,
+                      some data15, some data16, some data17, some data18, some data19]])],
           bufferWidths :=
             Map.fromList [({ name := "code" : BufferVar }, (1 : ℕ)), ({ name := "data" : BufferVar }, (20 : ℕ))],
           constraints := [], cycle := (0 : ℕ), felts := Map.empty, isFailed := false, props := Map.empty,

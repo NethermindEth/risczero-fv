@@ -48,19 +48,21 @@ lemma part25_updates_opaque {st : State} :
   Code.getReturn (part25_state_update (part24_drops (part24_state st))) := by
   simp [part24_state_update, part25_wp]
 
-lemma part25_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 y18 y19: Felt} :
-  Code.run (start_state [x0] ([y0,y1,y2,y3,y4,y5,y6,y7,y8,y9,y10,y11,y12,y13,y14,y15,y16,y17,y18,y19])) ↔
+lemma part25_cumulative_wp {code0 data0 data1 data2 data3 data4 data5 data6 data7 data8 data9 data10 data11 data12 data13 data14 data15 data16 data17 data18 data19: Felt} :
+  Code.run (start_state ([code0]) ([data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, data13, data14, data15, data16, data17, data18, data19])) ↔
   Code.getReturn
       (part25_state_update
         ((((((((((((((((((((((((({
                                                             buffers :=
                                                               ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
-                                                                  [[some y0, some y1, some y2, some y3, some y4,
-                                                                      some y5, some y6, some y7, some y8, some y9,
-                                                                      some y10, some y11, some y12, some y13, some y14,
-                                                                      some y15, some y16, some y17, some y18,
-                                                                      some y19]])[{ name := "code" : BufferVar }] ←ₘ
-                                                                [[some x0]],
+                                                                  [[some data0, some data1, some data2, some data3,
+                                                                      some data4, some data5, some data6, some data7,
+                                                                      some data8, some data9, some data10, some data11,
+                                                                      some data12, some data13, some data14,
+                                                                      some data15, some data16, some data17,
+                                                                      some data18,
+                                                                      some data19]])[{ name := "code" : BufferVar }] ←ₘ
+                                                                [[some code0]],
                                                             bufferWidths :=
                                                               ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
                                                                   (20 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
@@ -72,135 +74,141 @@ lemma part25_cumulative_wp {x0 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14
                                                                 { name := "data" :
                                                                   BufferVar }] }[props][{ name := "%19" : PropVar }] ←
                                                           True)[felts][{ name := "%31" : FeltVar }] ←
-                                                        y5)[felts][{ name := "%34" : FeltVar }] ←
-                                                      y6)[felts][{ name := "%37" : FeltVar }] ←
-                                                    y7)[felts][{ name := "%40" : FeltVar }] ←
-                                                  y8)[felts][{ name := "%43" : FeltVar }] ←
-                                                y9)[felts][{ name := "%46" : FeltVar }] ←
-                                              y10)[felts][{ name := "%49" : FeltVar }] ←
-                                            y11)[felts][{ name := "%52" : FeltVar }] ←
-                                          y12)[felts][{ name := "%55" : FeltVar }] ←
-                                        y13)[felts][{ name := "%58" : FeltVar }] ←
-                                      y14)[felts][{ name := "%61" : FeltVar }] ←
-                                    y15)[felts][{ name := "%64" : FeltVar }] ←
-                                  y16)[felts][{ name := "%67" : FeltVar }] ←
-                                y17)[felts][{ name := "%70" : FeltVar }] ←
-                              y18)[felts][{ name := "%73" : FeltVar }] ←
-                            y19)[props][{ name := "%77" : PropVar }] ←
-                          y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) + y6 * (6 : Felt) +
-                                                        y7 * (7 : Felt) +
-                                                      y8 * (8 : Felt) +
-                                                    y9 * (9 : Felt) +
-                                                  y10 * (10 : Felt) +
-                                                y11 * (11 : Felt) +
-                                              y12 * (12 : Felt) +
-                                            y13 * (13 : Felt) +
-                                          y14 * (14 : Felt) +
-                                        y15 * (15 : Felt) +
-                                      y16 * (16 : Felt) +
-                                    y17 * (17 : Felt) +
-                                  y18 * (18 : Felt) +
-                                y19 * (19 : Felt) -
-                              x0 =
+                                                        data5)[felts][{ name := "%34" : FeltVar }] ←
+                                                      data6)[felts][{ name := "%37" : FeltVar }] ←
+                                                    data7)[felts][{ name := "%40" : FeltVar }] ←
+                                                  data8)[felts][{ name := "%43" : FeltVar }] ←
+                                                data9)[felts][{ name := "%46" : FeltVar }] ←
+                                              data10)[felts][{ name := "%49" : FeltVar }] ←
+                                            data11)[felts][{ name := "%52" : FeltVar }] ←
+                                          data12)[felts][{ name := "%55" : FeltVar }] ←
+                                        data13)[felts][{ name := "%58" : FeltVar }] ←
+                                      data14)[felts][{ name := "%61" : FeltVar }] ←
+                                    data15)[felts][{ name := "%64" : FeltVar }] ←
+                                  data16)[felts][{ name := "%67" : FeltVar }] ←
+                                data17)[felts][{ name := "%70" : FeltVar }] ←
+                              data18)[felts][{ name := "%73" : FeltVar }] ←
+                            data19)[props][{ name := "%77" : PropVar }] ←
+                          data1 + data2 * (2 : Felt) + data3 * (3 : Felt) + data4 * (4 : Felt) + data5 * (5 : Felt) +
+                                                          data6 * (6 : Felt) +
+                                                        data7 * (7 : Felt) +
+                                                      data8 * (8 : Felt) +
+                                                    data9 * (9 : Felt) +
+                                                  data10 * (10 : Felt) +
+                                                data11 * (11 : Felt) +
+                                              data12 * (12 : Felt) +
+                                            data13 * (13 : Felt) +
+                                          data14 * (14 : Felt) +
+                                        data15 * (15 : Felt) +
+                                      data16 * (16 : Felt) +
+                                    data17 * (17 : Felt) +
+                                  data18 * (18 : Felt) +
+                                data19 * (19 : Felt) -
+                              code0 =
                             (0 : Felt))[felts][{ name := "%0" : FeltVar }] ←
                         (1 : Felt))[props][{ name := "%81" : PropVar }] ←
-                      (y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) + y6 * (6 : Felt) +
-                                                      y7 * (7 : Felt) +
-                                                    y8 * (8 : Felt) +
-                                                  y9 * (9 : Felt) +
-                                                y10 * (10 : Felt) +
-                                              y11 * (11 : Felt) +
-                                            y12 * (12 : Felt) +
-                                          y13 * (13 : Felt) +
-                                        y14 * (14 : Felt) +
-                                      y15 * (15 : Felt) +
-                                    y16 * (16 : Felt) +
-                                  y17 * (17 : Felt) +
-                                y18 * (18 : Felt) +
-                              y19 * (19 : Felt) -
-                            x0 =
+                      (data1 + data2 * (2 : Felt) + data3 * (3 : Felt) + data4 * (4 : Felt) + data5 * (5 : Felt) +
+                                                        data6 * (6 : Felt) +
+                                                      data7 * (7 : Felt) +
+                                                    data8 * (8 : Felt) +
+                                                  data9 * (9 : Felt) +
+                                                data10 * (10 : Felt) +
+                                              data11 * (11 : Felt) +
+                                            data12 * (12 : Felt) +
+                                          data13 * (13 : Felt) +
+                                        data14 * (14 : Felt) +
+                                      data15 * (15 : Felt) +
+                                    data16 * (16 : Felt) +
+                                  data17 * (17 : Felt) +
+                                data18 * (18 : Felt) +
+                              data19 * (19 : Felt) -
+                            code0 =
                           (0 : Felt) ∧
-                        (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))))[props][{ name := "%84" : PropVar }] ←
-                    ((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) + y6 * (6 : Felt) +
-                                                      y7 * (7 : Felt) +
-                                                    y8 * (8 : Felt) +
-                                                  y9 * (9 : Felt) +
-                                                y10 * (10 : Felt) +
-                                              y11 * (11 : Felt) +
-                                            y12 * (12 : Felt) +
-                                          y13 * (13 : Felt) +
-                                        y14 * (14 : Felt) +
-                                      y15 * (15 : Felt) +
-                                    y16 * (16 : Felt) +
-                                  y17 * (17 : Felt) +
-                                y18 * (18 : Felt) +
-                              y19 * (19 : Felt) -
-                            x0 =
+                        (data0 = (0 : Felt) ∨ (1 : Felt) - data0 = (0 : Felt))))[props][{ name := "%84" : PropVar }] ←
+                    ((data1 + data2 * (2 : Felt) + data3 * (3 : Felt) + data4 * (4 : Felt) + data5 * (5 : Felt) +
+                                                        data6 * (6 : Felt) +
+                                                      data7 * (7 : Felt) +
+                                                    data8 * (8 : Felt) +
+                                                  data9 * (9 : Felt) +
+                                                data10 * (10 : Felt) +
+                                              data11 * (11 : Felt) +
+                                            data12 * (12 : Felt) +
+                                          data13 * (13 : Felt) +
+                                        data14 * (14 : Felt) +
+                                      data15 * (15 : Felt) +
+                                    data16 * (16 : Felt) +
+                                  data17 * (17 : Felt) +
+                                data18 * (18 : Felt) +
+                              data19 * (19 : Felt) -
+                            code0 =
                           (0 : Felt) ∧
-                        (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))) ∧
-                      (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))))[props][{ name := "%88" : PropVar }] ←
-                  (((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) + y6 * (6 : Felt) +
-                                                      y7 * (7 : Felt) +
-                                                    y8 * (8 : Felt) +
-                                                  y9 * (9 : Felt) +
-                                                y10 * (10 : Felt) +
-                                              y11 * (11 : Felt) +
-                                            y12 * (12 : Felt) +
-                                          y13 * (13 : Felt) +
-                                        y14 * (14 : Felt) +
-                                      y15 * (15 : Felt) +
-                                    y16 * (16 : Felt) +
-                                  y17 * (17 : Felt) +
-                                y18 * (18 : Felt) +
-                              y19 * (19 : Felt) -
-                            x0 =
+                        (data0 = (0 : Felt) ∨ (1 : Felt) - data0 = (0 : Felt))) ∧
+                      (data1 = (0 : Felt) ∨ (1 : Felt) - data1 = (0 : Felt))))[props][{ name := "%88" : PropVar }] ←
+                  (((data1 + data2 * (2 : Felt) + data3 * (3 : Felt) + data4 * (4 : Felt) + data5 * (5 : Felt) +
+                                                        data6 * (6 : Felt) +
+                                                      data7 * (7 : Felt) +
+                                                    data8 * (8 : Felt) +
+                                                  data9 * (9 : Felt) +
+                                                data10 * (10 : Felt) +
+                                              data11 * (11 : Felt) +
+                                            data12 * (12 : Felt) +
+                                          data13 * (13 : Felt) +
+                                        data14 * (14 : Felt) +
+                                      data15 * (15 : Felt) +
+                                    data16 * (16 : Felt) +
+                                  data17 * (17 : Felt) +
+                                data18 * (18 : Felt) +
+                              data19 * (19 : Felt) -
+                            code0 =
                           (0 : Felt) ∧
-                        (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))) ∧
-                      (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))) ∧
-                    (y2 = (0 : Felt) ∨ (1 : Felt) - y2 = (0 : Felt))))[props][{ name := "%92" : PropVar }] ←
-                ((((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) + y6 * (6 : Felt) +
-                                                      y7 * (7 : Felt) +
-                                                    y8 * (8 : Felt) +
-                                                  y9 * (9 : Felt) +
-                                                y10 * (10 : Felt) +
-                                              y11 * (11 : Felt) +
-                                            y12 * (12 : Felt) +
-                                          y13 * (13 : Felt) +
-                                        y14 * (14 : Felt) +
-                                      y15 * (15 : Felt) +
-                                    y16 * (16 : Felt) +
-                                  y17 * (17 : Felt) +
-                                y18 * (18 : Felt) +
-                              y19 * (19 : Felt) -
-                            x0 =
+                        (data0 = (0 : Felt) ∨ (1 : Felt) - data0 = (0 : Felt))) ∧
+                      (data1 = (0 : Felt) ∨ (1 : Felt) - data1 = (0 : Felt))) ∧
+                    (data2 = (0 : Felt) ∨ (1 : Felt) - data2 = (0 : Felt))))[props][{ name := "%92" : PropVar }] ←
+                ((((data1 + data2 * (2 : Felt) + data3 * (3 : Felt) + data4 * (4 : Felt) + data5 * (5 : Felt) +
+                                                        data6 * (6 : Felt) +
+                                                      data7 * (7 : Felt) +
+                                                    data8 * (8 : Felt) +
+                                                  data9 * (9 : Felt) +
+                                                data10 * (10 : Felt) +
+                                              data11 * (11 : Felt) +
+                                            data12 * (12 : Felt) +
+                                          data13 * (13 : Felt) +
+                                        data14 * (14 : Felt) +
+                                      data15 * (15 : Felt) +
+                                    data16 * (16 : Felt) +
+                                  data17 * (17 : Felt) +
+                                data18 * (18 : Felt) +
+                              data19 * (19 : Felt) -
+                            code0 =
                           (0 : Felt) ∧
-                        (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))) ∧
-                      (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))) ∧
-                    (y2 = (0 : Felt) ∨ (1 : Felt) - y2 = (0 : Felt))) ∧
-                  (y3 = (0 : Felt) ∨ (1 : Felt) - y3 = (0 : Felt))))[props][{ name := "%96" : PropVar }] ←
-              (((((y1 + y2 * (2 : Felt) + y3 * (3 : Felt) + y4 * (4 : Felt) + y5 * (5 : Felt) + y6 * (6 : Felt) +
-                                                      y7 * (7 : Felt) +
-                                                    y8 * (8 : Felt) +
-                                                  y9 * (9 : Felt) +
-                                                y10 * (10 : Felt) +
-                                              y11 * (11 : Felt) +
-                                            y12 * (12 : Felt) +
-                                          y13 * (13 : Felt) +
-                                        y14 * (14 : Felt) +
-                                      y15 * (15 : Felt) +
-                                    y16 * (16 : Felt) +
-                                  y17 * (17 : Felt) +
-                                y18 * (18 : Felt) +
-                              y19 * (19 : Felt) -
-                            x0 =
+                        (data0 = (0 : Felt) ∨ (1 : Felt) - data0 = (0 : Felt))) ∧
+                      (data1 = (0 : Felt) ∨ (1 : Felt) - data1 = (0 : Felt))) ∧
+                    (data2 = (0 : Felt) ∨ (1 : Felt) - data2 = (0 : Felt))) ∧
+                  (data3 = (0 : Felt) ∨ (1 : Felt) - data3 = (0 : Felt))))[props][{ name := "%96" : PropVar }] ←
+              (((((data1 + data2 * (2 : Felt) + data3 * (3 : Felt) + data4 * (4 : Felt) + data5 * (5 : Felt) +
+                                                        data6 * (6 : Felt) +
+                                                      data7 * (7 : Felt) +
+                                                    data8 * (8 : Felt) +
+                                                  data9 * (9 : Felt) +
+                                                data10 * (10 : Felt) +
+                                              data11 * (11 : Felt) +
+                                            data12 * (12 : Felt) +
+                                          data13 * (13 : Felt) +
+                                        data14 * (14 : Felt) +
+                                      data15 * (15 : Felt) +
+                                    data16 * (16 : Felt) +
+                                  data17 * (17 : Felt) +
+                                data18 * (18 : Felt) +
+                              data19 * (19 : Felt) -
+                            code0 =
                           (0 : Felt) ∧
-                        (y0 = (0 : Felt) ∨ (1 : Felt) - y0 = (0 : Felt))) ∧
-                      (y1 = (0 : Felt) ∨ (1 : Felt) - y1 = (0 : Felt))) ∧
-                    (y2 = (0 : Felt) ∨ (1 : Felt) - y2 = (0 : Felt))) ∧
-                  (y3 = (0 : Felt) ∨ (1 : Felt) - y3 = (0 : Felt))) ∧
-                (y4 = (0 : Felt) ∨ (1 : Felt) - y4 = (0 : Felt))))[felts][{ name := "%97" : FeltVar }] ←
-            y0 + y1 + y2 + y3 + y4)[felts][{ name := "%99" : FeltVar }] ←
-          y5 * ((1 : Felt) - y5)))  := by
+                        (data0 = (0 : Felt) ∨ (1 : Felt) - data0 = (0 : Felt))) ∧
+                      (data1 = (0 : Felt) ∨ (1 : Felt) - data1 = (0 : Felt))) ∧
+                    (data2 = (0 : Felt) ∨ (1 : Felt) - data2 = (0 : Felt))) ∧
+                  (data3 = (0 : Felt) ∨ (1 : Felt) - data3 = (0 : Felt))) ∧
+                (data4 = (0 : Felt) ∨ (1 : Felt) - data4 = (0 : Felt))))[felts][{ name := "%97" : FeltVar }] ←
+            data0 + data1 + data2 + data3 + data4)[felts][{ name := "%99" : FeltVar }] ←
+          data5 * ((1 : Felt) - data5)))  := by
     rewrite [part24_cumulative_wp]
     rewrite [part25_updates_opaque]
     unfold part24_state

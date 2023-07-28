@@ -1,0 +1,90 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches:
+        - '**'
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    permissions: write-all
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      - if: github.ref == 'refs/heads/main'
+        name: Delete Build Cache on Main Push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh extension install actions/gh-actions-cache
+
+          REPO=${{ github.repository }}
+          BRANCH=${{ github.ref }}
+
+          cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | grep "Linux-cache-build-" | cut -f 1 )
+
+          set +e
+
+          echo "Deleting caches:"
+
+          for cacheKey in $cacheKeysForPR
+          do
+              gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+              echo $cacheKey
+          done
+          echo -e "\n\nDone"
+
+      - name: Cache Elan and Mathlib
+        id: cache-elan-mathlib
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-elan-mathlib
+        with:
+          path: |
+            ./lake-packages
+            ~/.elan
+            ~/.profile
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
+
+      - if: ${{ steps.cache-elan-mathlib.outputs.cache-hit != 'true' }}
+        name: Install Elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf > elan_install.sh
+          chmod +x elan_install.sh
+          ./elan_install.sh -y
+          source ~/.profile
+          echo $PATH >> $GITHUB_PATH
+
+      - if: ${{ steps.cache-elan-mathlib.outputs.cache-hit != 'true' }}
+        name: Get Mathlib cache
+        run: lake exe cache get
+
+      - name: Cache Build
+        id: cache-build
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-build
+        with:
+          path: |
+            ./build
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
+
+      - name: Build
+        run: |
+          source ~/.profile
+          lake build

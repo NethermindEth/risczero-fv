@@ -54,9 +54,9 @@ lemma run_if {x : FeltVar} :
 --                    else st := by simp [run]
 --                                  by_cases eq : ⟨name⟩ ∈ st.felts <;> simp [eq]
 --                                  · rw [Map.mem_def, Option.isSome_iff_exists] at eq
---                                    aesop
+--                                    aesop'
 --                                  · rw [Map.not_mem_iff_none] at eq
---                                    aesop
+--                                    aesop'
 
 lemma run_eqz {x : FeltVar} :
   Γ st ⟦@MLIR.Eqz α x⟧ = withEqZero st.felts[x]!.get! st := rfl
@@ -79,7 +79,7 @@ lemma run_dropfelt {x : FeltVar} :
 --   )
 --   =
 --   (st[name] ←ₛ x) := by
---   aesop
+--   aesop'
 
 lemma run_dropFelts_get_buffers :
   (Γ st ⟦@MLIR.DropFelt α x⟧).buffers = st.buffers := by
@@ -97,35 +97,35 @@ lemma nested_seq_step_eq (h: ∀ st : State, Γ st ⟦p₂; p₃⟧ = Γ st ⟦p
 
 lemma nondet_seq_step_eq (h: ∀ st: State, Γ st ⟦nondet s₂; s₃⟧ = Γ st ⟦nondet s₄; s₅⟧) :
   Γ state ⟦nondet (s₁; s₂); s₃⟧ = Γ state ⟦nondet (s₁; s₄); s₅⟧ := by
-  aesop
+  aesop'
 
 lemma nondet_step_eq (h: ∀ st: State, Γ st ⟦s₂⟧ = Γ st ⟦nondet s₃; s₄⟧) :
   Γ state ⟦nondet s₁; s₂⟧ = Γ state ⟦nondet (s₁; s₃); s₄⟧ := by
-  aesop
+  aesop'
 
 lemma nondet_end_step_eq (h: ∀ st: State, Γ st ⟦s₂; s₃⟧ = Γ st ⟦s₄⟧) :
   Γ state ⟦(nondet s₁; s₂); s₃⟧ = Γ state ⟦nondet s₁; s₄⟧ := by
-  aesop
+  aesop'
 
 lemma nondet_blocks_split : Γ state ⟦nondet (s₁; s₂)⟧ = Γ state ⟦nondet s₁; nondet s₂⟧ := by
   simp [run_nondet, run_seq_def]
 
-lemma part_assoc_dddd: Γ state ⟦(p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; p₄; p₅⟧ := by aesop
-lemma part_assoc_nddd: Γ state ⟦(nondet p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; p₄; p₅⟧ := by aesop
-lemma part_assoc_dndd: Γ state ⟦(p₁; nondet p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; p₄; p₅⟧ := by aesop
-lemma part_assoc_nndd: Γ state ⟦(nondet (p₁; p₂); p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; p₄; p₅⟧ := by aesop
-lemma part_assoc_ddnd: Γ state ⟦(p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; p₄; p₅⟧ := by aesop
-lemma part_assoc_ndnd: Γ state ⟦(nondet p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; p₄; p₅⟧ := by aesop
-lemma part_assoc_dnnd: Γ state ⟦(p₁; nondet (p₂; p₃); p₄); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by aesop
-lemma part_assoc_nnnd: Γ state ⟦(nondet (p₁; p₂; p₃); p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by aesop
-lemma part_assoc_dddn: Γ state ⟦(p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; nondet p₄; p₅⟧ := by aesop
-lemma part_assoc_nddn: Γ state ⟦(nondet p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; nondet p₄; p₅⟧ := by aesop
-lemma part_assoc_dndn: Γ state ⟦(p₁; nondet p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; nondet p₄; p₅⟧ := by aesop
-lemma part_assoc_nndn: Γ state ⟦(nondet (p₁; p₂); p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; nondet p₄; p₅⟧ := by aesop
-lemma part_assoc_ddnn: Γ state ⟦(p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
-lemma part_assoc_ndnn: Γ state ⟦(nondet p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
-lemma part_assoc_dnnn: Γ state ⟦(p₁; nondet (p₂; p₃; p₄)); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
-lemma part_assoc_nnnn: Γ state ⟦(nondet (p₁; p₂; p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop
+lemma part_assoc_dddd: Γ state ⟦(p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; p₄; p₅⟧ := by aesop'
+lemma part_assoc_nddd: Γ state ⟦(nondet p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; p₄; p₅⟧ := by aesop'
+lemma part_assoc_dndd: Γ state ⟦(p₁; nondet p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; p₄; p₅⟧ := by aesop'
+lemma part_assoc_nndd: Γ state ⟦(nondet (p₁; p₂); p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; p₄; p₅⟧ := by aesop'
+lemma part_assoc_ddnd: Γ state ⟦(p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; p₄; p₅⟧ := by aesop'
+lemma part_assoc_ndnd: Γ state ⟦(nondet p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; p₄; p₅⟧ := by aesop'
+lemma part_assoc_dnnd: Γ state ⟦(p₁; nondet (p₂; p₃); p₄); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by aesop'
+lemma part_assoc_nnnd: Γ state ⟦(nondet (p₁; p₂; p₃); p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by aesop'
+lemma part_assoc_dddn: Γ state ⟦(p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; nondet p₄; p₅⟧ := by aesop'
+lemma part_assoc_nddn: Γ state ⟦(nondet p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; nondet p₄; p₅⟧ := by aesop'
+lemma part_assoc_dndn: Γ state ⟦(p₁; nondet p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; nondet p₄; p₅⟧ := by aesop'
+lemma part_assoc_nndn: Γ state ⟦(nondet (p₁; p₂); p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; nondet p₄; p₅⟧ := by aesop'
+lemma part_assoc_ddnn: Γ state ⟦(p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop'
+lemma part_assoc_ndnn: Γ state ⟦(nondet p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop'
+lemma part_assoc_dnnn: Γ state ⟦(p₁; nondet (p₂; p₃; p₄)); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop'
+lemma part_assoc_nnnn: Γ state ⟦(nondet (p₁; p₂; p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by aesop'
 
 end MLIR
 

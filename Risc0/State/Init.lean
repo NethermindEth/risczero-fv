@@ -62,7 +62,7 @@ namespace Risc0.State
     distinct := by simp [init]
     hVars    := λ var => ⟨
         λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
-        λ h => by simp [init] at *; simp [Map.mem_def, Map.update, Map.getElem_def] at h; split at h <;> aesop 
+        λ h => by simp [init] at *; simp [Map.mem_def, Map.update, Map.getElem_def] at h; split at h <;> aesop' 
       ⟩ 
     hCycle   := λ var h => by
       have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
@@ -73,7 +73,7 @@ namespace Risc0.State
       rcases this with h | h <;> subst h <;> simp [Map.getElem_def] <;> rfl
     hCols    := λ var => ⟨
         λ h => by simp [init] at h; rcases h with h | h <;> subst h ; decide_mem_map,
-        λ h => by simp [init] at h ⊢; simp [Map.mem_def, Map.update, Map.getElem_def] at h; aesop
+        λ h => by simp [init] at h ⊢; simp [Map.mem_def, Map.update, Map.getElem_def] at h; aesop'
       ⟩ 
     hColsLen := valid_init'_aux
 

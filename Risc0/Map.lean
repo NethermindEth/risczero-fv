@@ -1,5 +1,7 @@
 import Mathlib.Data.Option.Basic
 
+import Risc0.Wheels
+
 namespace Risc0
 
 def Map (α : Type) (β : Type) := α → Option β
@@ -79,13 +81,13 @@ lemma update_neq_comm (h : k ≠ k') : ((m[k] ←ₘ v)[k'] ←ₘ v') = ((m[k']
   by_cases eq: x = k
   subst eq
   simp
-  aesop
+  aesop'
   simp only
   by_cases eq': x = k'
   subst eq'
   simp only [ite_true]
-  aesop
-  aesop
+  aesop'
+  aesop'
 
 @[simp]
 lemma update_get : (m[k] ←ₘ v)[k] = v := by simp [update, getElem_def]
@@ -122,7 +124,7 @@ lemma mem_def : (x ∈ m) = m[x].isSome := rfl
 lemma mem_update_self : k ∈ m[k] ←ₘ v := by
   rw [mem_def, Option.isSome_iff_exists, update_get]; use v
 
-lemma mem_skip (h : k ∈ m) : k ∈ m[k'] ←ₘ v := by simp [mem_def, getElem_def, update]; aesop
+lemma mem_skip (h : k ∈ m) : k ∈ m[k'] ←ₘ v := by simp [mem_def, getElem_def, update]; aesop'
 
 @[simp]
 lemma not_mem_empty : k ∉ @empty α β :=
@@ -132,7 +134,7 @@ lemma not_mem_empty : k ∉ @empty α β :=
 lemma not_empty_eq_some : ¬Option.isSome (@empty α β var) = true := not_mem_empty
 
 lemma mem_update_of_ne (h : k ≠ k') (h₁ : k ∈ m[k'] ←ₘ v) : k ∈ m := by
-  rw [mem_def, getElem_def] at *; unfold update at h₁; aesop
+  rw [mem_def, getElem_def] at *; unfold update at h₁; aesop'
 
 lemma mem_fromList {l : List (α × β)} : k ∈ fromList l ↔ k ∈ l.map Prod.fst := by
   induction l with
@@ -142,38 +144,38 @@ lemma mem_fromList {l : List (α × β)} : k ∈ fromList l ↔ k ∈ l.map Prod
         rw [List.map_cons, List.mem_cons, ←ih]; simp
         apply Iff.intro <;> intros h <;> {
           rw [mem_def, getElem_def] at h ⊢; unfold Map.update at *
-          aesop
+          aesop'
         }
 
 lemma mem_unroll_assignment : k ∈ m[k'] ←ₘ v ↔ (k = k' ∨ k ∈ m) := by
-  simp [update, mem_def, getElem_def]; aesop
+  simp [update, mem_def, getElem_def]; aesop'
 
 lemma not_mem_iff_none : k ∉ m ↔ m[k] = none := by
-  rw [mem_def]; rw [getElem_def] at *; aesop; rwa [Option.isNone_iff_eq_none] at a
+  rw [mem_def]; rw [getElem_def] at *; aesop'; rwa [Option.isNone_iff_eq_none] at a
 
 -- Drop lemmas
-lemma drop_get (h: k ≠ k') : (m.drop k) k' = m k' := by unfold drop; aesop
+lemma drop_get (h: k ≠ k') : (m.drop k) k' = m k' := by unfold drop; aesop'
 
 @[simp]
-lemma drop_drop : (m.drop k).drop k = m.drop k := by unfold drop; aesop
+lemma drop_drop : (m.drop k).drop k = m.drop k := by unfold drop; aesop'
 
 @[simp]
 lemma update_drop : (m[k] ←ₘ v).drop k = m.drop k := 
-  by unfold drop update; aesop
+  by unfold drop update; aesop'
 
 lemma update_drop_swap (h : k ≠ k') : (m[k] ←ₘ v).drop k' = (m.drop k')[k] ←ₘ v := by
   unfold drop update
   funext y
-  aesop
+  aesop'
 
 @[simp]
 lemma drop_base : empty.drop k = (@empty α β) := by
-  unfold drop empty; aesop 
+  unfold drop empty; aesop' 
 
 lemma drop_of_update :
   (m[k] ←ₘ v) = (m.drop k)[k] ←ₘ v := by
   unfold update drop
-  aesop
+  aesop'
 
 lemma drop_of_updates :
   ((m[k] ←ₘ v)[k'] ←ₘ v') =

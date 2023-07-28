@@ -69,4 +69,10 @@ register_option pp.explicitOfNat : Bool := {
   descr    := "(pretty printer) display implicit arguments of ofNat"
 }
 
+open Lean Elab Tactic in
+elab "aesop'" : tactic => do
+  evalTactic <| ← `( tactic|
+    aesop (options := { warnOnNonterminal := false })
+  )
+
 end Risc0
