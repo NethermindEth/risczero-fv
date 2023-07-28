@@ -8,7 +8,8 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
+    branches:
+        - '**'
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,8 +26,21 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      # Runs a single command using the runners shell
-      - name: Install Elan
+      - name: Cache Elan and Mathlib
+        id: cache-elan-mathlib
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-elan-mathlib
+        with:
+          # npm cache files are stored in `~/.npm` on Linux/macOS
+          path: |
+            ./lake-packages
+            ~/.elan
+            ~/.profile
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
+
+      - if: ${{ steps.cache-elan-mathlib.outputs.cache-hit != 'true' }}
+        name: Install Elan
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf > elan_install.sh
           chmod +x elan_install.sh
@@ -34,20 +48,11 @@ jobs:
           source ~/.profile
           echo $PATH >> $GITHUB_PATH
 
-      - name: Cache Mathlib modules
-        id: cache-mathlib
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-mathlib
-        with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
-          path: ~/lake-packages
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
-
-      - if: ${{ steps.cache-mathlib.outputs.cache-hit != 'true' }}
+      - if: ${{ steps.cache-elan-mathlib.outputs.cache-hit != 'true' }}
         name: Get Mathlib cache
         run: lake exe cache get
 
-      # Runs a set of commands using the runners shell
       - name: Build
-        run: lake build
+        run: |
+          source ~/.profile
+          lake build
