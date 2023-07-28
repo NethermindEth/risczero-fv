@@ -39,12 +39,15 @@ jobs:
           cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | grep "Linux-cache-build-" | cut -f 1 )
 
           set +e
-          echo "Deleting caches..."
+
+          echo "Deleting caches:"
+
           for cacheKey in $cacheKeysForPR
           do
               gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+              echo $cacheKey
           done
-          echo "Done"
+          echo "\n\nDone"
 
       - name: Cache Elan and Mathlib
         id: cache-elan-mathlib
