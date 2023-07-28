@@ -367,12 +367,7 @@ namespace Risc0
     generalize eq : sizeOf (MLIR.PlonkAccumRead buf k) + _ = rhs
     simp [sizeOf, instSizeOfMLIR.mario]
     subst eq
-    simp (config := {arith := true}) [sizeOf, instSizeOfMLIR.mario]
-    
-
-
-
-      
+    simp (config := {arith := true}) [sizeOf, instSizeOfMLIR.mario]  
     
   --   sorry
 
@@ -387,28 +382,26 @@ namespace Risc0
       | Eqz x          => withEqZero st.felts[x]!.get! st
       | If x prog   =>
           have : sizeOf prog < sizeOf (If x prog) := by
-            cases β <;> simp [sizeOf, instSizeOfMLIR.mario] <;>
-            cases prog <;> simp [_sizeOf_1, sizeOf] <;> try linarith
+            cases β <;> simp [sizeOf, instSizeOfMLIR.mario]
           if st.felts[x]!.get! = 0 then st else prog.run st
       | Nondet block   =>
           have : sizeOf block < sizeOf (Nondet block) := by
-            cases β <;> simp [sizeOf, instSizeOfMLIR.mario] <;>
-            cases block <;> simp [_sizeOf_1, sizeOf] <;> try linarith
+            cases β <;> simp [sizeOf, instSizeOfMLIR.mario]
           block.run st
       | Noop           => st
       | Sequence a b   =>
           have : sizeOf a < sizeOf (Sequence a b) := by
             cases β
             · simp [sizeOf]
-              cases a <;> simp [_sizeOf_1, sizeOf, instSizeOfMLIR.mario] <;> try linarith
+              cases a <;> simp [sizeOf, instSizeOfMLIR.mario] <;> try linarith
             · simp [sizeOf]
-              cases a <;> simp [_sizeOf_1, sizeOf, instSizeOfMLIR.mario] <;> try linarith
+              cases a <;> simp [sizeOf, instSizeOfMLIR.mario] <;> try linarith
           have : sizeOf b < sizeOf (Sequence a b) := by
             cases β
             · simp [sizeOf]
-              cases b <;> simp [_sizeOf_1, sizeOf, instSizeOfMLIR.mario] <;> try linarith
+              cases b <;> simp [sizeOf, instSizeOfMLIR.mario]
             · simp [sizeOf]
-              cases b <;> simp [_sizeOf_1, sizeOf, instSizeOfMLIR.mario] <;> try linarith
+              cases b <;> simp [sizeOf, instSizeOfMLIR.mario]
           b.run (a.run st)
       -- Ops
       | Fail                     => {st with isFailed := true}
@@ -422,13 +415,13 @@ namespace Risc0
                      induction outCount with
                        | zero => simp [ExternOp.plonkExternRead, ExternOp.getSequence', ExternOp.getSequence'_aux, sizeOf, instSizeOfMLIR.mario]
                        | succ k ih => rw [xa, xb]; linarith
-              (ExternOp.plonkExternRead buf outCount .PlonkAccumRows).run (β := IsNondet.InNondet) st
+          (ExternOp.plonkExternRead buf outCount .PlonkAccumRows).run (β := IsNondet.InNondet) st
           else
-            -- have : sizeOf (@Fail β) < sizeOf (@PlonkAccumRead β buf outCount) := by
-            --   simp [sizeOf, instSizeOfMLIR.mario]
-            -- have : sizeOf (@Fail β) < sizeOf (@PlonkRead β buf outCount) := by
-            --   simp [sizeOf, instSizeOfMLIR.mario]
-            Fail.run (β := IsNondet.InNondet) st
+            have : sizeOf (@Fail IsNondet.InNondet) < sizeOf (@PlonkAccumRead β buf outCount) := by
+              simp [sizeOf, instSizeOfMLIR.mario]
+            have : sizeOf (@Fail IsNondet.InNondet) < sizeOf (@PlonkRead β buf outCount) := by
+              simp [sizeOf, instSizeOfMLIR.mario]
+            Fail.run (β := β) st
       | PlonkAccumWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkAccumRows st
       | PlonkRead buf outCount =>
           if st.buffers[(⟨mangle .PlonkRows buf⟩ : BufferVar)].get![0]!.length = outCount ∧ ⟨mangle .PlonkRows buf⟩ ∈ st.buffers
@@ -438,7 +431,12 @@ namespace Risc0
                        | succ k ih => rw [xa, xb]; linarith
           
           (ExternOp.plonkExternRead buf outCount .PlonkRows).run (β := IsNondet.InNondet) st
-          else Fail.run (β := IsNondet.InNondet) st
+          else
+            have : sizeOf (@Fail IsNondet.InNondet) < sizeOf (@PlonkAccumRead β buf outCount) := by
+              simp [sizeOf, instSizeOfMLIR.mario]
+            have : sizeOf (@Fail IsNondet.InNondet) < sizeOf (@PlonkRead β buf outCount) := by
+              simp [sizeOf, instSizeOfMLIR.mario]
+            Fail.run (β := β) st
       | PlonkWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkRows st
   termination_by run _ program st => sizeOf program
 
