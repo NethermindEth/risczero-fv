@@ -26,6 +26,18 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
+      - if: github.ref == `main`
+        name: Delete Build Cache on Main Push
+        run: |
+          gh extension install actions/gh-actions-cache
+
+          REPO=${{ github.repository }}
+          BRANCH=${{ github.ref }}
+
+          set +e
+
+          gh actions-cache delete ${{ gh actions-cache list -R $REPO -B $BRANCH | grep "Linux-cache-build-" | cut -f 1 }} -R $REPO -B $BRANCH --confirm
+
       - name: Cache Elan and Mathlib
         id: cache-elan-mathlib
         uses: actions/cache@v3
