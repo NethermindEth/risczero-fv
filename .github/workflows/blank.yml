@@ -27,7 +27,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Cache Elan and Mathlib
-        id: cache-mathlib
+        id: cache-elan-mathlib
         uses: actions/cache@v3
         env:
           cache-name: cache-mathlib
@@ -37,7 +37,7 @@ jobs:
             ./lake-packages
             ~/.elan
             ~/.profile
-          key: ${{ runner.os }}-build1-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
 
       - if: ${{ steps.cache-mathlib.outputs.cache-hit != 'true' }}
         name: Install Elan
