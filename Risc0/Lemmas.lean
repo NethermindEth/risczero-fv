@@ -23,6 +23,8 @@ lemma run_ass_def : Γ st ⟦name ←ₐ op⟧ = st[name] ←ₛ Γ st ⟦op⟧�
 lemma run_set_def : Γ st ⟦buf[offset] ←ᵢ val⟧ = st.set! buf offset st.felts[val]!.get! := rfl
   
 lemma run_seq_def : Γ st ⟦p₁; p₂⟧ = Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ := rfl
+
+#exit
 lemma run_nondet_seq_def : Γ st ⟦nondet(p₁; p₂); p₃⟧ = Γ (Γ st ⟦p₁⟧) ⟦nondet p₂; p₃⟧ := rfl
 
 lemma run_nondet : Γ st ⟦nondet block⟧ = Γ st ⟦block⟧ := rfl

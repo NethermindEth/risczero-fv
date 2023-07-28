@@ -114,10 +114,10 @@ namespace Risc0
     | SetGlobal : BufferVar → ℕ → FeltVar → MLIR InNondet
     -- Extern
         -- Extern
-    | PlonkAccumRead  : BufferVar → ℕ → MLIR x
-    | PlonkAccumWrite : BufferVar → List FeltVar → ℕ → MLIR x
-    | PlonkRead       : BufferVar → ℕ → MLIR x
-    | PlonkWrite      : BufferVar → List FeltVar → ℕ → MLIR x
+    | PlonkAccumRead  : BufferVar → ℕ                → MLIR InNondet
+    | PlonkAccumWrite : BufferVar → List FeltVar → ℕ → MLIR InNondet
+    | PlonkRead       : BufferVar → ℕ                → MLIR InNondet
+    | PlonkWrite      : BufferVar → List FeltVar → ℕ → MLIR InNondet
 
   abbrev MLIRProgram := MLIR NotInNondet
 
@@ -166,7 +166,7 @@ namespace Risc0
         @getSequence_aux (x := x) buf discr offset k.succ =
         Sequence (Assign s!"{mangle discr buf}#{k}" (Op.Get ⟨mangle discr buf⟩ offset k)) (getSequence_aux buf discr offset k) := rfl
 
-      abbrev plonkExternRead {x : IsNondet} (discr : ExternPlonkBuffer) (offset : ℕ) : MLIR x :=
+      abbrev plonkExternRead (discr : ExternPlonkBuffer) (offset : ℕ) : MLIR .InNondet :=
         getSequence buf outCount discr offset
 
       def memoryFor (mangledName : String) (st : State) :=
@@ -228,58 +228,58 @@ namespace Risc0
 
   @[simp]
   lemma sizeOf_ExternOp_zero :
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf 0 x discr offset) = 0 := by
+    sizeOf (MLIR.ExternOp.plonkExternRead buf 0 discr offset) = 0 := by
     simp [sizeOf, instSizeOfMLIR.go]
 
   @[simp]
   lemma sizeOf_ExternOp_succ :
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf (Nat.succ k) x discr offset) = 
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf k x discr offset) + 2 := by
+    sizeOf (MLIR.ExternOp.plonkExternRead buf (Nat.succ k) discr offset) = 
+    sizeOf (MLIR.ExternOp.plonkExternRead buf k discr offset) + 2 := by
     simp_arith [sizeOf, instSizeOfMLIR.go]
     rfl
       
   @[simp]
   lemma sizeOf_PlonkAccumRead_zero :
-    sizeOf (@MLIR.PlonkAccumRead x buf 0) = 1 := by
+    sizeOf (MLIR.PlonkAccumRead buf 0) = 1 := by
     simp [sizeOf, instSizeOfMLIR.go]
 
   @[simp]
   lemma sizeOf_PlonkAccumRead_succ :
-    sizeOf (@MLIR.PlonkAccumRead x buf (Nat.succ k)) = 
-    sizeOf (@MLIR.PlonkAccumRead x buf k) + 2 := by
+    sizeOf (MLIR.PlonkAccumRead buf (Nat.succ k)) = 
+    sizeOf (MLIR.PlonkAccumRead buf k) + 2 := by
     simp_arith [sizeOf, instSizeOfMLIR.go]
 
   @[simp]
   lemma sizeOf_PlonkRead_zero :
-    sizeOf (@MLIR.PlonkRead x buf 0) = 1 := by
+    sizeOf (MLIR.PlonkRead buf 0) = 1 := by
     simp [sizeOf, instSizeOfMLIR.go]
 
   @[simp]
   lemma sizeOf_PlonkRead_succ :
-    sizeOf (@MLIR.PlonkRead x buf (Nat.succ k)) = 
-    sizeOf (@MLIR.PlonkRead x buf k) + 2 := by
+    sizeOf (MLIR.PlonkRead buf (Nat.succ k)) = 
+    sizeOf (MLIR.PlonkRead buf k) + 2 := by
     simp_arith [sizeOf, instSizeOfMLIR.go]
 
   lemma sizeOf_plonkExternRead_lt_sizeOf_plonkAccumRead :
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf outCount x discr offset) <
-    sizeOf (@MLIR.PlonkAccumRead x buf outCount) := by
+    sizeOf (MLIR.ExternOp.plonkExternRead buf outCount discr offset) <
+    sizeOf (MLIR.PlonkAccumRead buf outCount) := by
     induction outCount <;> simp [*]
 
   lemma sizeOf_plonkExternRead_lt_sizeOf_plonkRead :
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf outCount x discr offset) <
-    sizeOf (@MLIR.PlonkRead x buf outCount) := by
+    sizeOf (MLIR.ExternOp.plonkExternRead buf outCount discr offset) <
+    sizeOf (MLIR.PlonkRead buf outCount) := by
     induction outCount <;> simp [*]
 
   lemma sizeOf_plonkRead_lt_sizeOf_plonkAccumRead :
     sizeOf (MLIR.ExternOp.plonkRead buf outCount discr st) <
-    sizeOf (@MLIR.PlonkAccumRead x buf outCount) := by
+    sizeOf (MLIR.PlonkAccumRead buf outCount) := by
     simp [MLIR.ExternOp.plonkRead]; split_ifs
     · exact sizeOf_plonkExternRead_lt_sizeOf_plonkAccumRead
     · simp [sizeOf, instSizeOfMLIR.go]
 
   lemma sizeOf_plonkRead_lt_sizeOf_plonkRead :
     sizeOf (MLIR.ExternOp.plonkRead buf outCount discr st) <
-    sizeOf (@MLIR.PlonkRead x buf outCount) := by
+    sizeOf (MLIR.PlonkRead buf outCount) := by
     simp [MLIR.ExternOp.plonkRead]; split_ifs
     · exact sizeOf_plonkExternRead_lt_sizeOf_plonkRead
     · simp [sizeOf, instSizeOfMLIR.go]
@@ -287,7 +287,7 @@ namespace Risc0
   -- Step through the entirety of a `MLIR` MLIR program from initial state
   -- `state`, yielding the post-execution state and possibly a constraint
   -- (`Prop`), the return value of the program.
-  def MLIR.run {β : IsNondet} (program : MLIR β) (st : State) : State :=
+  def MLIR.run {α : IsNondet} (program : MLIR α) (st : State) : State :=
     match program with
       -- Meta
       | Assign name op => st.update name (op.eval st)
@@ -295,18 +295,18 @@ namespace Risc0
       | Eqz x          => withEqZero st.felts[x]!.get! st
       | If x prog   =>
           have : sizeOf prog < sizeOf (If x prog) := by
-            cases β <;> simp [sizeOf, instSizeOfMLIR.go]
+            simp [sizeOf, instSizeOfMLIR.go]
           if st.felts[x]!.get! = 0 then st else prog.run st
       | Nondet block   =>
           have : sizeOf block < sizeOf (Nondet block) := by
-            cases β <;> simp [sizeOf, instSizeOfMLIR.go]
+            simp [sizeOf, instSizeOfMLIR.go]
           block.run st
       | Noop           => st
       | Sequence a b   =>
           have : sizeOf a < sizeOf (Sequence a b) := by
-            cases β <;> cases a <;> simp [sizeOf, instSizeOfMLIR.go] <;> linarith
+            cases a <;> simp [sizeOf, instSizeOfMLIR.go] <;> linarith
           have : sizeOf b < sizeOf (Sequence a b) := by
-            cases β <;> cases b <;> simp [sizeOf, instSizeOfMLIR.go]
+            cases b <;> simp [sizeOf, instSizeOfMLIR.go]
           b.run (a.run st)
       -- Ops
       | Barrier                  => ExternOp.sortPlonkBuffers st
@@ -318,14 +318,14 @@ namespace Risc0
       | PlonkAccumRead buf outCount =>
         have : sizeOf (ExternOp.plonkRead buf outCount ExternPlonkBuffer.PlonkAccumRows st) <
                sizeOf (PlonkAccumRead buf outCount) :=
-          sizeOf_plonkRead_lt_sizeOf_plonkAccumRead (x := β)
+          sizeOf_plonkRead_lt_sizeOf_plonkAccumRead
         ExternOp.plonkReadBump buf .PlonkAccumRows <|
           ExternOp.plonkRead buf outCount .PlonkAccumRows st |>.run st
       | PlonkAccumWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkAccumRows st
       | PlonkRead buf outCount =>
         have : sizeOf (ExternOp.plonkRead buf outCount ExternPlonkBuffer.PlonkRows st) <
                sizeOf (PlonkRead buf outCount) :=
-          sizeOf_plonkRead_lt_sizeOf_plonkRead (x := β)
+          sizeOf_plonkRead_lt_sizeOf_plonkRead
         ExternOp.plonkReadBump buf .PlonkRows <|
           ExternOp.plonkRead buf outCount .PlonkRows st |>.run st
       | PlonkWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkRows st
