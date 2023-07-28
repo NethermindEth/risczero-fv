@@ -34,24 +34,6 @@ namespace Risc0
   @[default_instance] noncomputable
   instance : SizeOf (Op x) where
     sizeOf _ := 1
-      -- match op with
-      --   | .Const _ => 1
-      --   | .True => 1
-      --   | .Add _ _ => 1
-      --   | .Sub _ _ => 1
-      --   | .Neg _ => 1
-      --   | .Mul _ _ => 1
-      --   | .Pow _ _ => 1
-      --   | .BitAnd _ _ => 1
-      --   | .Inv _ => 1
-      --   | .Isz _ => 1        
-      --   | .AndEqz _ _ => 1
-      --   | .AndCond _ _ _ => 1
-      --   | .Alloc _ => 1
-      --   | .Back _ _ => 1
-      --   | .Get _ _ _ => 1
-      --   | .GetGlobal _ _ => 1
-      --   | .Slice _ _ _ => 1
 
   def isGetValid (st : State) (buf : BufferVar) (back : Back) (offset : ℕ) :=
     back ≤ st.cycle ∧
@@ -164,17 +146,31 @@ namespace Risc0
 
       def getSequence_aux (discr : ExternPlonkBuffer) : ℕ → MLIR x
         | 0 => Noop
-        | k + 1 => Sequence (Assign s!"{mangle discr buf}#{k}" (Op.Get buf k 0)) (getSequence_aux discr k)
+        | k + 1 => Sequence
+                     (Assign s!"{mangle discr buf}#{k}" (Op.Get ⟨mangle discr buf⟩ k 0))
+                     (getSequence_aux discr k)
 
       def getSequence {x : IsNondet} (discr : ExternPlonkBuffer) := @getSequence_aux (x := x) buf discr outCount
+
+      -- def getMemSequence_aux  (discr : ExternPlonkBuffer) : ℕ → MLIR x
+      --   | 0 => Noop
+      --   | k + 1 => Sequence
+      --                (Assign s!"mem{mangle discr buf}" (Op.Get ⟨s!"mem{mangle discr buf}"⟩ 0 0))
+      --                (getMemSeq)
 
       @[simp]
       lemma getSequence_aux_succ :
         @getSequence_aux (x := x) buf discr k.succ =
-        Sequence (Assign s!"{mangle discr buf}#{k.toNat}" (Op.Get buf k 0)) (getSequence_aux buf discr k) := rfl
+        Sequence (Assign s!"{mangle discr buf}#{k.toNat}" (Op.Get ⟨mangle discr buf⟩ k 0)) (getSequence_aux buf discr k) := rfl
 
       abbrev plonkExternRead {x : IsNondet} (discr : ExternPlonkBuffer) : MLIR x :=
         getSequence buf outCount discr
+
+      def plonkRead (buf : BufferVar) (outCount : ℕ) (discr : ExternPlonkBuffer) (st : State) :=
+        if st.buffers[(⟨mangle discr buf⟩ : BufferVar)].get![0]!.length = outCount ∧
+           ⟨mangle discr buf⟩ ∈ st.buffers
+        then (ExternOp.plonkExternRead buf outCount discr)
+        else @Fail (x := IsNondet.InNondet)
 
     end
   end MLIR.ExternOp  
@@ -250,6 +246,18 @@ namespace Risc0
     sizeOf (@MLIR.PlonkRead x buf outCount) := by
     induction outCount <;> simp [*]
 
+  lemma sizeOf_plonkRead_lt_sizeOf_plonkAccumRead :
+    sizeOf (MLIR.ExternOp.plonkRead buf outCount discr st) < sizeOf (@MLIR.PlonkAccumRead x buf outCount) := by
+    unfold MLIR.ExternOp.plonkRead; split_ifs
+    · exact sizeOf_plonkExternRead_lt_sizeOf_plonkAccumRead
+    · simp [sizeOf, instSizeOfMLIR.go]
+
+  lemma sizeOf_plonkRead_lt_sizeOf_plonkRead :
+    sizeOf (MLIR.ExternOp.plonkRead buf outCount discr st) < sizeOf (@MLIR.PlonkRead x buf outCount) := by
+    unfold MLIR.ExternOp.plonkRead; split_ifs
+    · exact sizeOf_plonkExternRead_lt_sizeOf_plonkRead
+    · simp [sizeOf, instSizeOfMLIR.go]
+
   -- Step through the entirety of a `MLIR` MLIR program from initial state
   -- `state`, yielding the post-execution state and possibly a constraint
   -- (`Prop`), the return value of the program.
@@ -280,20 +288,16 @@ namespace Risc0
       | SetGlobal buf offset val => st.setGlobal! buf offset st.felts[val]!.get! -- Behind the scenes setGlobal actually flattens a 2d buffer into a 1d buffer
                                                                                  -- and indexes into it. This is a side effect of global buffers only being 1d anyway
       | PlonkAccumRead buf outCount =>
-          if st.buffers[(⟨mangle .PlonkAccumRows buf⟩ : BufferVar)].get![0]!.length = outCount ∧ ⟨mangle .PlonkAccumRows buf⟩ ∈ st.buffers
-          then have := @sizeOf_plonkExternRead_lt_sizeOf_plonkAccumRead buf outCount IsNondet.InNondet .PlonkAccumRows
-               (ExternOp.plonkExternRead buf outCount .PlonkAccumRows).run (β := IsNondet.InNondet) st
-          else have : sizeOf (@Fail IsNondet.InNondet) < sizeOf (@PlonkAccumRead β buf outCount) := by
-                 simp [sizeOf, instSizeOfMLIR.go]
-               Fail.run (β := β) st
+        have : sizeOf (ExternOp.plonkRead buf outCount ExternPlonkBuffer.PlonkAccumRows st) <
+               sizeOf (PlonkAccumRead buf outCount) :=
+          sizeOf_plonkRead_lt_sizeOf_plonkAccumRead (x := β)
+        ExternOp.plonkRead buf outCount .PlonkAccumRows st |>.run st
       | PlonkAccumWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkAccumRows st
       | PlonkRead buf outCount =>
-          if st.buffers[(⟨mangle .PlonkRows buf⟩ : BufferVar)].get![0]!.length = outCount ∧ ⟨mangle .PlonkRows buf⟩ ∈ st.buffers
-          then have := @sizeOf_plonkExternRead_lt_sizeOf_plonkRead buf outCount IsNondet.InNondet .PlonkRows
-               (ExternOp.plonkExternRead buf outCount .PlonkRows).run (β := IsNondet.InNondet) st
-          else have : sizeOf (@Fail IsNondet.InNondet) < sizeOf (@PlonkRead β buf outCount) := by
-                 simp [sizeOf, instSizeOfMLIR.go]
-               Fail.run (β := β) st
+        have : sizeOf (ExternOp.plonkRead buf outCount ExternPlonkBuffer.PlonkRows st) <
+               sizeOf (PlonkRead buf outCount) :=
+          sizeOf_plonkRead_lt_sizeOf_plonkRead (x := β)
+        ExternOp.plonkRead buf outCount .PlonkRows st |>.run st
       | PlonkWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkRows st
   termination_by run _ program st => sizeOf program
 
