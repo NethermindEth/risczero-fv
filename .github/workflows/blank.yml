@@ -53,4 +53,6 @@ jobs:
         run: lake exe cache get
 
       - name: Build
-        run: lake build
+        run: |
+          source ~/.profile
+          lake build
