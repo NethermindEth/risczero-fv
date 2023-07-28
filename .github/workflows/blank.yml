@@ -34,9 +34,11 @@ jobs:
           REPO=${{ github.repository }}
           BRANCH=${{ github.ref }}
 
+          cacheKey=${{ gh actions-cache list -R $REPO -B $BRANCH | grep "Linux-cache-build-" | cut -f 1 }}
+
           set +e
 
-          gh actions-cache delete ${{ gh actions-cache list -R $REPO -B $BRANCH | grep "Linux-cache-build-" | cut -f 1 }} -R $REPO -B $BRANCH --confirm
+          gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
 
       - name: Cache Elan and Mathlib
         id: cache-elan-mathlib
