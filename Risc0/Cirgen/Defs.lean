@@ -220,9 +220,9 @@ namespace Risc0
       | .Set _ _ _ => 1
       | .SetGlobal _ _ _ => 1
       -- Extern
-      | .PlonkAccumRead _ n => 1 + n + SizeOf.sizeOf n
+      | .PlonkAccumRead _ n => 1 + n + n
       | .PlonkAccumWrite _ _ _ => 1
-      | .PlonkRead _ n => 1 + n + SizeOf.sizeOf n
+      | .PlonkRead _ n => 1 + n + n
       | .PlonkWrite _ _ _ => 1
     go command
 
