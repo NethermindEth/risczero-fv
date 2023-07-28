@@ -1,5 +1,7 @@
 import Risc0.BasicTypes
 
+import Mathlib.Data.Array.Basic
+
 namespace Risc0
 
   -- none is an unset value which can be written to, but not read
@@ -32,6 +34,14 @@ namespace Risc0
 
     def getBufferAtTime! (buf : Buffer) (timeIdx : ℕ) : BufferAtTime :=
       List.get! buf timeIdx
+
+    private def cmp (lhs rhs : BufferAtTime) : Bool := 
+      (lhs.zip rhs).filter (λ (l, r) ↦ l.get! ≠ r.get!)
+      |>.map (λ (l, r) ↦ l.get!.val < r.get!.val) |>.headD false
+
+    def sort (buf : Buffer) : Buffer :=
+      let arr : Array BufferAtTime := ⟨buf⟩
+      arr.qsort (not <| cmp · ·) |>.toList
 
     lemma getBufferAtTime!_def :
       getBufferAtTime! buf timeIdx = List.get! buf timeIdx := rfl 

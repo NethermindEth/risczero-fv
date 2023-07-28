@@ -108,6 +108,7 @@ namespace Risc0
     | Noop      :                          MLIR x
     | Sequence  : MLIR x        → MLIR x → MLIR x
     -- Ops
+    | Barrier   :                           MLIR x
     | Fail      :                           MLIR x
     | Set       : BufferVar → ℕ → FeltVar → MLIR InNondet
     | SetGlobal : BufferVar → ℕ → FeltVar → MLIR InNondet
@@ -148,31 +149,51 @@ namespace Risc0
              |>.allocateBufferRow! ⟨memoryName mangledName⟩ 1 |>.set! ⟨memoryName mangledName⟩ 0 0
         else {st with isFailed := true}
 
-      def getSequence_aux (discr : ExternPlonkBuffer) : ℕ → MLIR x
+      def getSequence_aux (discr : ExternPlonkBuffer) (offset : ℕ) : ℕ → MLIR x
         | 0 => Noop
         | k + 1 => Sequence
-                     (Assign s!"{mangle discr buf}#{k}" (Op.Get ⟨mangle discr buf⟩ 0 k))
-                     (getSequence_aux discr k)
+                     (Assign s!"{mangle discr buf}#{k}" (Op.Get ⟨mangle discr buf⟩ offset k))
+                     (getSequence_aux discr offset k)
 
-      def getSequence {x : IsNondet} (discr : ExternPlonkBuffer) :=
-        @getSequence_aux (x := x) buf discr outCount
+      def getSequence {x : IsNondet} (discr : ExternPlonkBuffer) (offset : ℕ) :=
+        @getSequence_aux (x := x) buf discr offset outCount
 
       def getOffset (discr : ExternPlonkBuffer) : MLIR x :=
         Assign s!"mem{mangle discr buf}" (Op.Get ⟨s!"mem{mangle discr buf}"⟩ 0 0)
 
       @[simp]
       lemma getSequence_aux_succ :
-        @getSequence_aux (x := x) buf discr k.succ =
-        Sequence (Assign s!"{mangle discr buf}#{k}" (Op.Get ⟨mangle discr buf⟩ 0 k)) (getSequence_aux buf discr k) := rfl
+        @getSequence_aux (x := x) buf discr offset k.succ =
+        Sequence (Assign s!"{mangle discr buf}#{k}" (Op.Get ⟨mangle discr buf⟩ offset k)) (getSequence_aux buf discr offset k) := rfl
 
-      abbrev plonkExternRead {x : IsNondet} (discr : ExternPlonkBuffer) : MLIR x :=
-        getSequence buf outCount discr
+      abbrev plonkExternRead {x : IsNondet} (discr : ExternPlonkBuffer) (offset : ℕ) : MLIR x :=
+        getSequence buf outCount discr offset
 
-      def plonkRead (buf : BufferVar) (outCount : ℕ) (discr : ExternPlonkBuffer) (st : State) :=
-        if st.buffers[(⟨mangle discr buf⟩ : BufferVar)].get![0]!.length = outCount ∧
+      def memoryFor (mangledName : String) (st : State) :=
+        (st.buffers[(⟨memoryName mangledName⟩ : BufferVar)].get![0]!)[0]!.get!.val
+
+      def plonkRead (discr : ExternPlonkBuffer) (st : State) :=
+        let offset := memoryFor (mangle discr buf) st
+        if st.buffers[(⟨mangle discr buf⟩ : BufferVar)].get![offset]!.length = outCount ∧
            ⟨mangle discr buf⟩ ∈ st.buffers
-        then (ExternOp.plonkExternRead buf outCount discr)
+        then ExternOp.plonkExternRead buf outCount discr offset
         else @Fail (x := IsNondet.InNondet)
+
+      def plonkReadBump (discr : ExternPlonkBuffer) (st : State) : State :=
+        let buffer := mangle discr buf
+        st.set! ⟨memoryName buffer⟩ 0 (memoryFor buffer st)
+
+      -- Note: In theory, this can tag a non-special table if they happen to be called like this.
+      -- We'll need a more robust system should we want to extend this further.
+      def isSpecial (buf : BufferVar) :=
+        buf.name.startsWith (toString ExternPlonkBuffer.PlonkRows) ||
+        buf.name.startsWith (toString ExternPlonkBuffer.PlonkAccumRows)
+
+      def sortPlonkBuffers (st : State) : State :=
+        let specialNames := st.vars.filter isSpecial
+        specialNames.foldr (init := st)
+          λ name acc ↦
+            {acc with buffers := acc.buffers[name] ←ₘ acc.buffers[name].get!.sort}
 
     end
   end MLIR.ExternOp  
@@ -187,6 +208,7 @@ namespace Risc0
   instance : SizeOf (MLIR x) where
     sizeOf command := let rec go {x} : MLIR x → ℕ
       | .Assign _ _ => 1
+      | .Barrier => 1
       | .DropFelt _ => 1
       | .Eqz _ => 1
       | @MLIR.If x _ prog => 1 + @go x prog
@@ -206,13 +228,13 @@ namespace Risc0
 
   @[simp]
   lemma sizeOf_ExternOp_zero :
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf 0 x discr) = 0 := by
+    sizeOf (@MLIR.ExternOp.plonkExternRead buf 0 x discr offset) = 0 := by
     simp [sizeOf, instSizeOfMLIR.go]
 
   @[simp]
   lemma sizeOf_ExternOp_succ :
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf (Nat.succ k) x discr) = 
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf k x discr) + 2 := by
+    sizeOf (@MLIR.ExternOp.plonkExternRead buf (Nat.succ k) x discr offset) = 
+    sizeOf (@MLIR.ExternOp.plonkExternRead buf k x discr offset) + 2 := by
     simp_arith [sizeOf, instSizeOfMLIR.go]
     rfl
       
@@ -239,26 +261,26 @@ namespace Risc0
     simp_arith [sizeOf, instSizeOfMLIR.go]
 
   lemma sizeOf_plonkExternRead_lt_sizeOf_plonkAccumRead :
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf outCount x discr) <
+    sizeOf (@MLIR.ExternOp.plonkExternRead buf outCount x discr offset) <
     sizeOf (@MLIR.PlonkAccumRead x buf outCount) := by
     induction outCount <;> simp [*]
 
   lemma sizeOf_plonkExternRead_lt_sizeOf_plonkRead :
-    sizeOf (@MLIR.ExternOp.plonkExternRead buf outCount x discr) <
+    sizeOf (@MLIR.ExternOp.plonkExternRead buf outCount x discr offset) <
     sizeOf (@MLIR.PlonkRead x buf outCount) := by
     induction outCount <;> simp [*]
 
   lemma sizeOf_plonkRead_lt_sizeOf_plonkAccumRead :
     sizeOf (MLIR.ExternOp.plonkRead buf outCount discr st) <
     sizeOf (@MLIR.PlonkAccumRead x buf outCount) := by
-    unfold MLIR.ExternOp.plonkRead; split_ifs
+    simp [MLIR.ExternOp.plonkRead]; split_ifs
     · exact sizeOf_plonkExternRead_lt_sizeOf_plonkAccumRead
     · simp [sizeOf, instSizeOfMLIR.go]
 
   lemma sizeOf_plonkRead_lt_sizeOf_plonkRead :
     sizeOf (MLIR.ExternOp.plonkRead buf outCount discr st) <
     sizeOf (@MLIR.PlonkRead x buf outCount) := by
-    unfold MLIR.ExternOp.plonkRead; split_ifs
+    simp [MLIR.ExternOp.plonkRead]; split_ifs
     · exact sizeOf_plonkExternRead_lt_sizeOf_plonkRead
     · simp [sizeOf, instSizeOfMLIR.go]
 
@@ -287,6 +309,7 @@ namespace Risc0
             cases β <;> cases b <;> simp [sizeOf, instSizeOfMLIR.go]
           b.run (a.run st)
       -- Ops
+      | Barrier                  => ExternOp.sortPlonkBuffers st
       | Fail                     => {st with isFailed := true}
       | Set buf offset val       => st.set! buf offset st.felts[val]!.get!
       | SetGlobal buf offset val => st.setGlobal! buf offset st.felts[val]!.get! -- Behind the scenes setGlobal actually flattens a 2d buffer into a 1d buffer
@@ -296,13 +319,15 @@ namespace Risc0
         have : sizeOf (ExternOp.plonkRead buf outCount ExternPlonkBuffer.PlonkAccumRows st) <
                sizeOf (PlonkAccumRead buf outCount) :=
           sizeOf_plonkRead_lt_sizeOf_plonkAccumRead (x := β)
-        ExternOp.plonkRead buf outCount .PlonkAccumRows st |>.run st
+        ExternOp.plonkReadBump buf .PlonkAccumRows <|
+          ExternOp.plonkRead buf outCount .PlonkAccumRows st |>.run st
       | PlonkAccumWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkAccumRows st
       | PlonkRead buf outCount =>
         have : sizeOf (ExternOp.plonkRead buf outCount ExternPlonkBuffer.PlonkRows st) <
                sizeOf (PlonkRead buf outCount) :=
           sizeOf_plonkRead_lt_sizeOf_plonkRead (x := β)
-        ExternOp.plonkRead buf outCount .PlonkRows st |>.run st
+        ExternOp.plonkReadBump buf .PlonkRows <|
+          ExternOp.plonkRead buf outCount .PlonkRows st |>.run st
       | PlonkWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkRows st
   termination_by run _ program st => sizeOf program
 

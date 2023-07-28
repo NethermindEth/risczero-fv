@@ -46,8 +46,8 @@ namespace Risc0.State
     init numInput numOutput
           ((Buffer.init numInput).head (by simp [Buffer.init]))
           ((Buffer.init numOutput).head (by simp [Buffer.init]))
-          (by simp [Buffer.init])
-          (by simp [Buffer.init])
+          (by simp [Buffer.init, BufferAtTime.init])
+          (by simp [Buffer.init, BufferAtTime.init])
 
   private lemma valid_init'_aux :
     bufferLensConsistent (State.init m n input output hIn hOut) := λ var h h₁ row h₂ => by
