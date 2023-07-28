@@ -28,6 +28,8 @@ jobs:
 
       - # if: github.ref == 'main'
         name: Delete Build Cache on Main Push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh extension install actions/gh-actions-cache
 
