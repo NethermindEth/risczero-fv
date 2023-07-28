@@ -26,7 +26,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v3
 
-      - # if: github.ref == 'main'
+      - if: github.ref == 'refs/heads/main'
         name: Delete Build Cache on Main Push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,13 +36,15 @@ jobs:
           REPO=${{ github.repository }}
           BRANCH=${{ github.ref }}
 
-          cacheKey=$(gh actions-cache list -R $REPO -B $BRANCH | grep "Linux-cache-build-" | cut -f 1 )
+          cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | grep "Linux-cache-build-" | cut -f 1 )
 
-          echo "$cacheKey"
-
-          # set +e
-
-          # gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+          set +e
+          echo "Deleting caches..."
+          for cacheKey in $cacheKeysForPR
+          do
+              gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+          done
+          echo "Done"
 
       - name: Cache Elan and Mathlib
         id: cache-elan-mathlib
