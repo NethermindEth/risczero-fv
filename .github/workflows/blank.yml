@@ -35,6 +35,7 @@ jobs:
           # npm cache files are stored in `~/.npm` on Linux/macOS
           path: |
             ./lake-packages
+            ./build
             ~/.elan
             ~/.profile
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
