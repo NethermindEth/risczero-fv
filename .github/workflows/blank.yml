@@ -47,7 +47,7 @@ jobs:
               gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
               echo $cacheKey
           done
-          echo "\n\nDone"
+          echo -e "\n\nDone"
 
       - name: Cache Elan and Mathlib
         id: cache-elan-mathlib
