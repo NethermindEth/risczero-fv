@@ -20,7 +20,7 @@ theorem spec_of_constraints {x0 y0 y1 : Risc0.Felt} :
       Risc0.OneHot2.Constraints.WP.closed_form
   ]
   intro h 
-  rcases h.1.1.2 with h₀ | h₀; 
+  rcases h.1.1.2 with h₀ | h₀
   rcases h.1.2 with h₁ | h₁
   {
     aesop
