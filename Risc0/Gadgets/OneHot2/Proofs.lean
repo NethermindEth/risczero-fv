@@ -16,30 +16,8 @@ theorem constraints_of_witness {x0 y0 y1 : Risc0.Felt} :
 theorem spec_of_constraints {x0 y0 y1 : Risc0.Felt} : 
   Risc0.OneHot2.Constraints.Code.run (Risc0.OneHot2.Constraints.start_state [some x0] [some y0, some y1]) →
     x0 = 0 ∨ x0 = 1 := by 
-  rw [
-      Risc0.OneHot2.Constraints.WP.closed_form
-  ]
-  intro h 
-  rcases h.1.1.2 with h₀ | h₀
-  {
-    rcases h.1.2 with h₁ | h₁
-    {
-      aesop
-    }
-    {
-      simp [sub_eq_zero.1 h.1.1.1, sub_eq_zero.1 h₁]
-    }
-  }
-  {
-    rcases h.1.2 with h₁ | h₁
-    {
-      simp [←sub_eq_zero.1 h.1.1.1, h₁]
-    }
-    {
-      simp [sub_eq_zero, h₀] at h
-      aesop
-    }
-  }
+  rw [Risc0.OneHot2.Constraints.WP.closed_form]
+  rintro ⟨⟨⟨_, _ | _⟩, _ | _⟩, _⟩ <;> simp_all [sub_eq_zero]
 
 end Risc0
 
