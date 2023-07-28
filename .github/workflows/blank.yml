@@ -32,13 +32,11 @@ jobs:
         env:
           cache-name: cache-elan-mathlib
         with:
-          # npm cache files are stored in `~/.npm` on Linux/macOS
           path: |
             ./lake-packages
-            ./build
             ~/.elan
             ~/.profile
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
 
       - if: ${{ steps.cache-elan-mathlib.outputs.cache-hit != 'true' }}
         name: Install Elan
@@ -52,6 +50,16 @@ jobs:
       - if: ${{ steps.cache-elan-mathlib.outputs.cache-hit != 'true' }}
         name: Get Mathlib cache
         run: lake exe cache get
+
+      - name: Cache Build
+        id: cache-build
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-build
+        with:
+          path: |
+            ./build
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/lakefile.lean') }}
 
       - name: Build
         run: |
