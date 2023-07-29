@@ -22,21 +22,15 @@ lemma run_ass_def : Γ st ⟦name ←ₐ op⟧ = st[name] ←ₛ Γ st ⟦op⟧�
 
 lemma run_set_def : Γ st ⟦buf[offset] ←ᵢ val⟧ = st.set! buf offset st.felts[val]!.get! := rfl
   
-lemma run_seq_def : Γ st ⟦p₁; p₂⟧ = Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ := by
-  unfold MLIR.run
-  simp only
-  conv_lhs => unfold MLIR.run
+lemma run_seq_def : Γ st ⟦p₁; p₂⟧ = Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ := by rw [MLIR.run]
 
-lemma run_nondet : Γ st ⟦nondet block⟧ = Γ st ⟦block⟧ := by
-  unfold MLIR.run
-  simp
-  conv_lhs => unfold MLIR.run
+lemma run_nondet : Γ st ⟦nondet block⟧ = Γ st ⟦block⟧ := by rw [MLIR.run]
 
 lemma run_nondet_seq_def' : Γ st ⟦nondet(p₁; p₂)⟧ = Γ (Γ st ⟦p₁⟧) ⟦nondet p₂⟧ := by
-  simp [run_nondet, run_seq_def]
+  simp only [run_nondet, run_seq_def]
 
 lemma run_nondet_seq_def : Γ st ⟦nondet(p₁; p₂); p₃⟧ = Γ (Γ st ⟦p₁⟧) ⟦nondet p₂; p₃⟧ := by
-  simp [run_nondet, run_seq_def]
+  simp only [run_nondet, run_seq_def]
   
 -- lemma run_set_output (x : Felt) (h₁ : st.felts nameₓ = some x) :
 --   Γ st ⟦⟨"output"⟩[i] ←ᵢ nameₓ⟧ = { st with output := st.output.set i x } := by simp [run_set_def, h₁]
@@ -58,9 +52,7 @@ lemma run_nondet_seq_def : Γ st ⟦nondet(p₁; p₂); p₃⟧ = Γ (Γ st ⟦p
 
 lemma run_if {x : FeltVar} :
   Γ st ⟦guard x then branch⟧ = if st.felts[x]!.get! = 0 then st else Γ st ⟦branch⟧ := by
-  unfold MLIR.run
-  simp
-  conv_lhs => unfold MLIR.run
+  rw [MLIR.run]
 
 -- lemma run_eqz' : Γ st ⟦@MLIR.Eqz α ⟨name⟩⟧
 --                  = if h : ⟨name⟩ ∈ st.felts
@@ -97,13 +89,13 @@ lemma run_dropfelt {x : FeltVar} :
 
 lemma run_dropFelts_get_buffers :
   (Γ st ⟦@MLIR.DropFelt α x⟧).buffers = st.buffers := by
-  simp [MLIR.run, State.dropFelts_buffers]
+  simp only [MLIR.run, State.dropFelts_buffers]
 
-lemma seq_assoc : Γ state ⟦p₁; (p₂; p₃)⟧ = Γ state ⟦(p₁; p₂); p₃⟧ := by simp [run_seq_def]
+lemma seq_assoc : Γ state ⟦p₁; (p₂; p₃)⟧ = Γ state ⟦(p₁; p₂); p₃⟧ := by simp only [run_seq_def]
 
 lemma seq_step_eq (h: ∀ st : State, Γ st ⟦p₂⟧ = Γ st ⟦p₃⟧):
   Γ state ⟦p₁; p₂⟧ = Γ state ⟦p₁; p₃⟧ := by
-  simp [*, MLIR.run_seq_def]
+  simp only [*, MLIR.run_seq_def]
 
 lemma nested_seq_step_eq (h: ∀ st : State, Γ st ⟦p₂; p₃⟧ = Γ st ⟦p₄⟧):
   Γ state ⟦(p₁; p₂); p₃⟧ = Γ state ⟦p₁; p₄⟧ :=
@@ -111,36 +103,36 @@ lemma nested_seq_step_eq (h: ∀ st : State, Γ st ⟦p₂; p₃⟧ = Γ st ⟦p
 
 lemma nondet_seq_step_eq (h: ∀ st: State, Γ st ⟦nondet s₂; s₃⟧ = Γ st ⟦nondet s₄; s₅⟧) :
   Γ state ⟦nondet (s₁; s₂); s₃⟧ = Γ state ⟦nondet (s₁; s₄); s₅⟧ := by
-  simp only [run_nondet_seq_def]; aesop'
+  simp only [run_nondet_seq_def, *]
 
 lemma nondet_step_eq (h: ∀ st: State, Γ st ⟦s₂⟧ = Γ st ⟦nondet s₃; s₄⟧) :
   Γ state ⟦nondet s₁; s₂⟧ = Γ state ⟦nondet (s₁; s₃); s₄⟧ := by
-  simp [run_nondet, run_seq_def, *]
+  simp only [run_nondet, run_seq_def, *]
 
 lemma nondet_end_step_eq (h: ∀ st: State, Γ st ⟦s₂; s₃⟧ = Γ st ⟦s₄⟧) :
   Γ state ⟦(nondet s₁; s₂); s₃⟧ = Γ state ⟦nondet s₁; s₄⟧ := by
-  simp [run_nondet, run_seq_def]; rw [←h]; simp [run_seq_def]
+  simp only [run_nondet, run_seq_def]; rw [←h]; simp only [run_seq_def]
 
 
 lemma nondet_blocks_split : Γ state ⟦nondet (s₁; s₂)⟧ = Γ state ⟦nondet s₁; nondet s₂⟧ := by
-  simp [run_nondet, run_seq_def]
+  simp only [run_nondet, run_seq_def]
 
-lemma part_assoc_dddd: Γ state ⟦(p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_nddd: Γ state ⟦(nondet p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_dndd: Γ state ⟦(p₁; nondet p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_nndd: Γ state ⟦(nondet (p₁; p₂); p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_ddnd: Γ state ⟦(p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_ndnd: Γ state ⟦(nondet p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_dnnd: Γ state ⟦(p₁; nondet (p₂; p₃); p₄); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_nnnd: Γ state ⟦(nondet (p₁; p₂; p₃); p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_dddn: Γ state ⟦(p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; nondet p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_nddn: Γ state ⟦(nondet p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; nondet p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_dndn: Γ state ⟦(p₁; nondet p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; nondet p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_nndn: Γ state ⟦(nondet (p₁; p₂); p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; nondet p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_ddnn: Γ state ⟦(p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_ndnn: Γ state ⟦(nondet p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_dnnn: Γ state ⟦(p₁; nondet (p₂; p₃; p₄)); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
-lemma part_assoc_nnnn: Γ state ⟦(nondet (p₁; p₂; p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by simp [run_nondet, run_seq_def]
+lemma part_assoc_dddd: Γ state ⟦(p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_nddd: Γ state ⟦(nondet p₁; p₂; p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_dndd: Γ state ⟦(p₁; nondet p₂; p₃; p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_nndd: Γ state ⟦(nondet (p₁; p₂); p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_ddnd: Γ state ⟦(p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_ndnd: Γ state ⟦(nondet p₁; p₂; nondet p₃; p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_dnnd: Γ state ⟦(p₁; nondet (p₂; p₃); p₄); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_nnnd: Γ state ⟦(nondet (p₁; p₂; p₃); p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_dddn: Γ state ⟦(p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁; p₂; p₃; nondet p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_nddn: Γ state ⟦(nondet p₁; p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; p₂; p₃; nondet p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_dndn: Γ state ⟦(p₁; nondet p₂; p₃; nondet p₄); p₅⟧ = Γ state ⟦p₁;nondet p₂; p₃; nondet p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_nndn: Γ state ⟦(nondet (p₁; p₂); p₃; nondet p₄); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; p₃; nondet p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_ddnn: Γ state ⟦(p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_ndnn: Γ state ⟦(nondet p₁; p₂; nondet (p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; p₂; nondet p₃; nondet p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_dnnn: Γ state ⟦(p₁; nondet (p₂; p₃; p₄)); p₅⟧ = Γ state ⟦p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
+lemma part_assoc_nnnn: Γ state ⟦(nondet (p₁; p₂; p₃; p₄)); p₅⟧ = Γ state ⟦nondet p₁; nondet p₂; nondet p₃; nondet p₄; p₅⟧ := by simp only [run_nondet, run_seq_def]
 
 end MLIR
 
