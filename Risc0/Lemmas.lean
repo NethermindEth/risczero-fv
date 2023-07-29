@@ -24,7 +24,7 @@ lemma run_set_def : Γ st ⟦buf[offset] ←ᵢ val⟧ = st.set! buf offset st.f
   
 lemma run_seq_def : Γ st ⟦p₁; p₂⟧ = Γ (Γ st ⟦p₁⟧) ⟦p₂⟧ := by
   unfold MLIR.run
-  simp
+  simp only
   conv_lhs => unfold MLIR.run
 
 lemma run_nondet : Γ st ⟦nondet block⟧ = Γ st ⟦block⟧ := by
