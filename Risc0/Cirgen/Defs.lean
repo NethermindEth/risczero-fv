@@ -149,21 +149,21 @@ namespace Risc0
              |>.allocateBufferRow! ⟨memoryName mangledName⟩ 1 |>.set! ⟨memoryName mangledName⟩ 0 0
         else {st with isFailed := true}
 
-      def getSequence_aux (discr : ExternPlonkBuffer) (offset : ℕ) : ℕ → MLIR x
+      def getSequence_aux (discr : ExternPlonkBuffer) (offset : ℕ) : ℕ → MLIR .InNondet
         | 0 => Noop
         | k + 1 => Sequence
                      (Assign s!"{mangle discr buf}#{k}" (Op.Get ⟨mangle discr buf⟩ offset k))
                      (getSequence_aux discr offset k)
 
-      def getSequence {x : IsNondet} (discr : ExternPlonkBuffer) (offset : ℕ) :=
-        @getSequence_aux (x := x) buf discr offset outCount
+      def getSequence (discr : ExternPlonkBuffer) (offset : ℕ) :=
+        getSequence_aux buf discr offset outCount
 
       def getOffset (discr : ExternPlonkBuffer) : MLIR x :=
         Assign s!"mem{mangle discr buf}" (Op.Get ⟨s!"mem{mangle discr buf}"⟩ 0 0)
 
       @[simp]
       lemma getSequence_aux_succ :
-        @getSequence_aux (x := x) buf discr offset k.succ =
+        getSequence_aux buf discr offset k.succ =
         Sequence (Assign s!"{mangle discr buf}#{k}" (Op.Get ⟨mangle discr buf⟩ offset k)) (getSequence_aux buf discr offset k) := rfl
 
       abbrev plonkExternRead (discr : ExternPlonkBuffer) (offset : ℕ) : MLIR .InNondet :=
@@ -177,7 +177,7 @@ namespace Risc0
         if st.buffers[(⟨mangle discr buf⟩ : BufferVar)].get![offset]!.length = outCount ∧
            ⟨mangle discr buf⟩ ∈ st.buffers
         then ExternOp.plonkExternRead buf outCount discr offset
-        else @Fail (x := IsNondet.InNondet)
+        else Fail
 
       def plonkReadBump (discr : ExternPlonkBuffer) (st : State) : State :=
         let buffer := mangle discr buf
@@ -211,10 +211,10 @@ namespace Risc0
       | .Barrier => 1
       | .DropFelt _ => 1
       | .Eqz _ => 1
-      | @MLIR.If x _ prog => 1 + @go x prog
+      | .If _ prog => 1 + go prog
       | .Nondet block => 1 + go block
       | .Noop => 0
-      | @MLIR.Sequence x a b => 1 + @go x a + @go x b
+      | .Sequence a b => 1 + go a + go b
       -- Ops
       | .Fail => 0
       | .Set _ _ _ => 1

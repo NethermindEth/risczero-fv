@@ -500,134 +500,138 @@ section true
   --   simp [State.drop_update_swap, h]
 end true
 
-lemma combine_nondets : Γ (Γ st ⟦nondet p₁⟧) ⟦nondet p₂; p₃⟧ = Γ st ⟦nondet (p₁; p₂); p₃⟧ := rfl
+open Risc0.MLIR
 
-lemma split_nondet_seq : Γ st ⟦nondet (s₁; s₂)⟧ = Γ st ⟦nondet s₁; nondet s₂⟧ := by rfl
+lemma combine_nondets : Γ (Γ st ⟦nondet p₁⟧) ⟦nondet p₂; p₃⟧ = Γ st ⟦nondet (p₁; p₂); p₃⟧ := by
+  simp [run_nondet, run_seq_def]
+
+lemma split_nondet_seq : Γ st ⟦nondet (s₁; s₂)⟧ = Γ st ⟦nondet s₁; nondet s₂⟧ := by
+  simp [run_nondet, run_seq_def]
 
 lemma step_det : Γ st ⟦(s₁; s₂); s₃⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂; s₃⟧ := by
-  aesop'
+  simp [run_nondet, run_seq_def]
 
 lemma step_nondet : Γ st ⟦nondet (s₁; s₂); s₃⟧ = Γ (Γ st ⟦nondet s₁⟧) ⟦nondet s₂; s₃⟧ := by
-  aesop'
+  simp [run_nondet, run_seq_def]
 
 section drop_sequencing
 lemma drop_sequencing_dddd :
-  Γ st ⟦s₁; s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  Γ st ⟦s₁; s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ := by
+  simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nddd :
-  Γ st ⟦nondet s₁; s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  Γ st ⟦nondet s₁; s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ := by
+  simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_dndd :
-  Γ st ⟦s₁; nondet s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  Γ st ⟦s₁; nondet s₂; s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ := by
+  simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nndd :
-  Γ st ⟦nondet (s₁; s₂); s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  Γ st ⟦nondet (s₁; s₂); s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ := by
+  simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_ddnd :
-  Γ st ⟦s₁; s₂; nondet s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  Γ st ⟦s₁; s₂; nondet s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ := by
+  simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_ndnd :
-  Γ st ⟦nondet s₁; s₂; nondet s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  Γ st ⟦nondet s₁; s₂; nondet s₃; s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ := by
+  simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_dnnd :
-  Γ st ⟦s₁; nondet (s₂; s₃); s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  Γ st ⟦s₁; nondet (s₂; s₃); s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ := by
+  simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nnnd :
-  Γ st ⟦nondet (s₁; s₂; s₃); s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  Γ st ⟦nondet (s₁; s₂; s₃); s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ := by
+  simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_dddn :
   Γ st ⟦s₁; s₂; s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nddn :
   Γ st ⟦nondet s₁; s₂; s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_dndn :
   Γ st ⟦s₁; nondet s₂; s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nndn :
   Γ st ⟦nondet (s₁; s₂); s₃; nondet s₄⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_ddnn :
   Γ st ⟦s₁; s₂; nondet (s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_ndnn :
   Γ st ⟦nondet s₁; s₂; nondet (s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_dnnn :
   Γ st ⟦s₁; nondet (s₂; s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nnnn :
   Γ st ⟦nondet (s₁; s₂; s₃; s₄)⟧ = Γ (Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧) ⟦s₄⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_ddd :
   Γ st ⟦s₁; s₂; s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_ndd :
   Γ st ⟦nondet s₁; s₂; s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_dnd :
   Γ st ⟦s₁; nondet s₂; s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nnd :
   Γ st ⟦nondet (s₁; s₂); s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_ddn :
   Γ st ⟦s₁; s₂; nondet s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_ndn :
   Γ st ⟦nondet s₁; s₂; nondet s₃⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_dnn :
   Γ st ⟦s₁; nondet (s₂; s₃)⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nnn :
   Γ st ⟦nondet (s₁; s₂; s₃)⟧ = Γ (Γ (Γ st ⟦s₁⟧) ⟦s₂⟧) ⟦s₃⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_dd :
   Γ st ⟦s₁; s₂⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nd :
   Γ st ⟦nondet s₁; s₂⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_dn :
   Γ st ⟦s₁; nondet s₂⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_nn :
   Γ st ⟦nondet (s₁; s₂)⟧ = Γ (Γ st ⟦s₁⟧) ⟦s₂⟧ :=
-  by aesop'
+  by simp [run_nondet, run_seq_def]
 
 lemma drop_sequencing_d :
   Γ st ⟦s₁⟧ = Γ st ⟦s₁⟧ := rfl
 
 lemma drop_sequencing_n :
-  Γ st ⟦nondet (s₁)⟧ = Γ st ⟦s₁⟧ := rfl
+  Γ st ⟦nondet (s₁)⟧ = Γ st ⟦s₁⟧ := by simp [run_nondet, run_seq_def]
 
 
 -- TODO general tactic for unrolling N statements regardless of det/nondet like this would be nice

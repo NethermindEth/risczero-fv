@@ -17,7 +17,7 @@ lemma drop_past_part1 (h0: ⟨"%4"⟩ ≠ x) (h1: ⟨"%0"⟩ ≠ x) (h2: ⟨"%6"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part1
-    rfl
+    simp [MLIR.run_nondet, MLIR.run_seq_def]
 lemma drop_past_part2 (h0: ⟨"%6"⟩ ≠ x) (h1: ⟨"%7"⟩ ≠ x) (h2: ⟨"%8"⟩ ≠ x) (h3: ⟨"%0"⟩ ≠ x) (h4: ⟨"%3"⟩ ≠ x) (h5: ⟨"%10"⟩ ≠ x) (h6: ⟨"%11"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part2; rest⟧) =
   (Γ st ⟦part2; dropfelt x; rest⟧) := by
@@ -31,7 +31,7 @@ lemma drop_past_part2 (h0: ⟨"%6"⟩ ≠ x) (h1: ⟨"%7"⟩ ≠ x) (h2: ⟨"%8"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part2
-    rfl
+    simp [MLIR.run_nondet, MLIR.run_seq_def]
 lemma drop_past_part3 (h0: ⟨"%11"⟩ ≠ x) (h1: ⟨"%6"⟩ ≠ x) (h2: ⟨"%3"⟩ ≠ x) (h3: ⟨"%13"⟩ ≠ x) (h4: ⟨"%0"⟩ ≠ x) (h5: ⟨"%14"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part3; rest⟧) =
   (Γ st ⟦part3; dropfelt x; rest⟧) := by
@@ -45,7 +45,7 @@ lemma drop_past_part3 (h0: ⟨"%11"⟩ ≠ x) (h1: ⟨"%6"⟩ ≠ x) (h2: ⟨"%3
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part3
-    rfl
+    simp [MLIR.run_nondet, MLIR.run_seq_def]
 
 lemma behaviour_with_drops3 :
   Γ st ⟦dropfelt ⟨"%2"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%10"⟩;part3;dropfelt ⟨"%3"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩⟧ =
