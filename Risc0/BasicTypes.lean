@@ -51,7 +51,7 @@ namespace Risc0
     let translate (t : Term) : String := 
       if s!"{t}" = "(Term.app `Variable [`VarType.BufferTag])" then "BufferVar"
       else if s!"{t}" = "(Term.app `Variable [`VarType.FeltTag])" then "FeltVar"
-      else assert! s!"{t}" = "(Term.app `Variable [`VarType.PropTag])"; "PropVar"
+      else "PropVar"
     let finalT := mkIdent <| translate T
     `({ name := $ident : $finalT})
 

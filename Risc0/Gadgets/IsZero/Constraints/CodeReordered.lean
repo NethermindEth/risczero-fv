@@ -17,8 +17,9 @@ lemma optimised_behaviour1 :
     simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def]
+
     unfold opt1
-    simp only
+    with_reducible rfl
 
 def opt2 : MLIRProgram :=
   "%1" ←ₐ ⊤; "%3" ←ₐ .Get ⟨"data"⟩ 0 0; "%2" ←ₐ .Get ⟨"in"⟩ 0 0; "%4" ←ₐ ⟨"%1"⟩ &₀ ⟨"%2"⟩; "%5" ←ₐ guard ⟨"%3"⟩ & ⟨"%1"⟩ with ⟨"%4"⟩; "%0" ←ₐ .Const 1; "%6" ←ₐ .Sub ⟨"%0"⟩ ⟨"%3"⟩; "%7" ←ₐ .Get ⟨"data"⟩ 0 1; "%8" ←ₐ .Mul ⟨"%2"⟩ ⟨"%7"⟩; "%9" ←ₐ .Sub ⟨"%8"⟩ ⟨"%0"⟩; "%10" ←ₐ ⟨"%1"⟩ &₀ ⟨"%9"⟩; "%11" ←ₐ guard ⟨"%6"⟩ & ⟨"%5"⟩ with ⟨"%10"⟩
@@ -32,8 +33,9 @@ lemma optimised_behaviour2 :
     simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←MLIR.run_seq_def]
+
     unfold opt2
-    simp only
+    with_reducible rfl
 
 def opt3 : MLIRProgram :=
   "%1" ←ₐ ⊤; "%2" ←ₐ .Get ⟨"in"⟩ 0 0; "%4" ←ₐ ⟨"%1"⟩ &₀ ⟨"%2"⟩; "%3" ←ₐ .Get ⟨"data"⟩ 0 0; "%5" ←ₐ guard ⟨"%3"⟩ & ⟨"%1"⟩ with ⟨"%4"⟩; "%0" ←ₐ .Const 1; "%6" ←ₐ .Sub ⟨"%0"⟩ ⟨"%3"⟩; "%7" ←ₐ .Get ⟨"data"⟩ 0 1; "%8" ←ₐ .Mul ⟨"%2"⟩ ⟨"%7"⟩; "%9" ←ₐ .Sub ⟨"%8"⟩ ⟨"%0"⟩; "%10" ←ₐ ⟨"%1"⟩ &₀ ⟨"%9"⟩; "%11" ←ₐ guard ⟨"%6"⟩ & ⟨"%5"⟩ with ⟨"%10"⟩
@@ -47,8 +49,9 @@ lemma optimised_behaviour3 :
     simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←MLIR.run_seq_def,←MLIR.run_seq_def]
+
     unfold opt3
-    simp only
+    with_reducible rfl
 
 def opt_full : MLIRProgram := opt3
 lemma opt_full_def : opt_full = opt3 := rfl

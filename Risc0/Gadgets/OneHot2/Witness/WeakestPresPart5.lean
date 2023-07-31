@@ -37,6 +37,7 @@ lemma part5_updates_opaque {st : State} :
   Code.getReturn (part5_state_update (part4_drops (part4_state st))) = [y0, y1] := by
   simp [part4_state_update, part5_wp]
 
+set_option maxRecDepth 10000000 in
 lemma part5_cumulative_wp {x0: Felt} :
   Code.run (start_state [x0]) = [y0,y1] ↔
   Code.getReturn

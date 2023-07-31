@@ -294,12 +294,8 @@ namespace Risc0
       | DropFelt k     => .dropFelts st k
       | Eqz x          => withEqZero st.felts[x]!.get! st
       | If x prog   =>
-          -- have : sizeOf prog < sizeOf (If x prog) := by
-          --   simp [sizeOf, instSizeOfMLIR.go]
           if st.felts[x]!.get! = 0 then st else prog.run st
       | Nondet block   =>
-          -- have : sizeOf block < sizeOf (Nondet block) := by
-          --   simp [sizeOf, instSizeOfMLIR.go]
           block.run st
       | Noop           => st
       | Sequence a b   =>
@@ -316,16 +312,10 @@ namespace Risc0
                                                                                  -- and indexes into it. This is a side effect of global buffers only being 1d anyway
       -- Extern
       | PlonkAccumRead buf outCount =>
-        -- have : sizeOf (ExternOp.plonkRead buf outCount ExternPlonkBuffer.PlonkAccumRows st) <
-        --        sizeOf (PlonkAccumRead buf outCount) :=
-        --   sizeOf_plonkRead_lt_sizeOf_plonkAccumRead
         ExternOp.plonkReadBump buf .PlonkAccumRows <|
           ExternOp.plonkRead buf outCount .PlonkAccumRows st |>.run st
       | PlonkAccumWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkAccumRows st
       | PlonkRead buf outCount =>
-        -- have : sizeOf (ExternOp.plonkRead buf outCount ExternPlonkBuffer.PlonkRows st) <
-        --        sizeOf (PlonkRead buf outCount) :=
-        --   sizeOf_plonkRead_lt_sizeOf_plonkRead
         ExternOp.plonkReadBump buf .PlonkRows <|
           ExternOp.plonkRead buf outCount .PlonkRows st |>.run st
       | PlonkWrite buf args outCount => ExternOp.plonkExternWrite buf args outCount .PlonkRows st
@@ -334,13 +324,6 @@ namespace Risc0
                 all_goals try (simp [sizeOf, instSizeOfMLIR.go]; done)
                 all_goals try (cases a <;> simp [sizeOf, instSizeOfMLIR.go] <;> try linarith)
                 all_goals try apply sizeOf_plonkRead_lt_sizeOf_plonkAccumRead
-                -- have : sizeOf (ExternOp.plonkRead buf outCount ExternPlonkBuffer.PlonkAccumRows st) <
-                --   sizeOf (PlonkAccumRead buf outCount) :=
-                --   sizeOf_plonkRead_lt_sizeOf_plonkAccumRead 
-                -- exact this
-                -- exact sizeOf_plonkRead_lt_sizeOf_plonkAccumRead
-                -- all_goals try exact [sizeOf_plonkRead_lt_sizeOf_plonkAccumRead]
-                -- all_goals try exact [sizeOf_plonkRead_lt_sizeOf_plonkRead]
 
 
   @[simp]

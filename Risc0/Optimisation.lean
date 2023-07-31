@@ -8,6 +8,13 @@ section Reordering
 
 open MLIRNotation
 
+-- I am not useless, please do not delete me.
+-- I threaten Lean with a big stick so it behaves.
+lemma optim_rfl_hic_sunt_dracones (h : p₁ = p₂) :
+  List.getLast! (Option.get! (State.buffers (Γ st ⟦p₁⟧) n)) = 
+  List.getLast! (Option.get! (State.buffers (Γ st ⟦p₂⟧) n)) :=
+  h ▸ rfl
+
 open State in
 lemma updateFelts_neq_comm {st : State} {name name' : FeltVar} {v v' : Felt} (h : name ≠ name') :
   (updateFelts (updateFelts st name v) name' v') =
