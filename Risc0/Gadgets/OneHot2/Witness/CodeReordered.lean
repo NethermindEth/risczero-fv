@@ -17,8 +17,9 @@ lemma optimised_behaviour1 :
     simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←step_nondet,←MLIR.run_seq_def,←MLIR.run_seq_def]
+    apply optim_rfl_hic_sunt_dracones
     unfold opt1
-    simp only
+    with_reducible rfl
 
 def opt2 : MLIRProgram :=
   "%2" ←ₐ .Get ⟨"code"⟩ 0 0; nondet ( "%12" ←ₐ ??₀⟨"%2"⟩; ⟨"data"⟩[0] ←ᵢ ⟨"%12"⟩ ); "%0" ←ₐ .Const 1; nondet ( "%13" ←ₐ .Sub ⟨"%2"⟩ ⟨"%0"⟩; "%14" ←ₐ ??₀⟨"%13"⟩; ⟨"data"⟩[1] ←ᵢ ⟨"%14"⟩ ); "%3" ←ₐ .Get ⟨"data"⟩ 0 1; "%4" ←ₐ .Sub ⟨"%3"⟩ ⟨"%2"⟩; ?₀ ⟨"%4"⟩; "%5" ←ₐ .Get ⟨"data"⟩ 0 0; "%6" ←ₐ .Sub ⟨"%0"⟩ ⟨"%5"⟩; "%7" ←ₐ .Mul ⟨"%5"⟩ ⟨"%6"⟩; ?₀ ⟨"%7"⟩; "%8" ←ₐ .Sub ⟨"%0"⟩ ⟨"%3"⟩; "%9" ←ₐ .Mul ⟨"%3"⟩ ⟨"%8"⟩; ?₀ ⟨"%9"⟩; "%10" ←ₐ .Add ⟨"%5"⟩ ⟨"%3"⟩; "%11" ←ₐ .Sub ⟨"%10"⟩ ⟨"%0"⟩; "%1" ←ₐ .Const 0; ?₀ ⟨"%11"⟩
@@ -31,8 +32,9 @@ lemma optimised_behaviour2 :
     simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←step_nondet,←step_nondet,←MLIR.run_seq_def,←MLIR.run_seq_def,←step_nondet,←MLIR.run_seq_def]
+    apply optim_rfl_hic_sunt_dracones
     unfold opt2
-    simp only
+    with_reducible rfl
 
 def opt_full : MLIRProgram := opt2
 lemma opt_full_def : opt_full = opt2 := rfl
