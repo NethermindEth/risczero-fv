@@ -17,7 +17,7 @@ lemma drop_past_part1 (h0: ⟨"%74"⟩ ≠ x) (h1: ⟨"%18"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_nndn]
     rewrite [h_rhs]
     unfold part1
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part2 (h0: ⟨"%16"⟩ ≠ x) (h1: ⟨"%76"⟩ ≠ x) (h2: ⟨"%77"⟩ ≠ x) (h3: ⟨"%15"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part2; rest⟧) =
   (Γ st ⟦part2; dropfelt x; rest⟧) := by
@@ -31,7 +31,7 @@ lemma drop_past_part2 (h0: ⟨"%16"⟩ ≠ x) (h1: ⟨"%76"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_dnnd]
     rewrite [h_rhs]
     unfold part2
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part3 (h0: ⟨"%23"⟩ ≠ x) (h1: ⟨"%15"⟩ ≠ x) (h2: ⟨"%78"⟩ ≠ x) (h3: ⟨"%14"⟩ ≠ x) (h4: ⟨"%79"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part3; rest⟧) =
   (Γ st ⟦part3; dropfelt x; rest⟧) := by
@@ -45,7 +45,7 @@ lemma drop_past_part3 (h0: ⟨"%23"⟩ ≠ x) (h1: ⟨"%15"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part3
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part4 (h0: ⟨"%13"⟩ ≠ x) (h1: ⟨"%23"⟩ ≠ x) (h2: ⟨"%80"⟩ ≠ x) (h3: ⟨"%12"⟩ ≠ x) (h4: ⟨"%81"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part4; rest⟧) =
   (Γ st ⟦part4; dropfelt x; rest⟧) := by
@@ -59,7 +59,7 @@ lemma drop_past_part4 (h0: ⟨"%13"⟩ ≠ x) (h1: ⟨"%23"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_dndn]
     rewrite [h_rhs]
     unfold part4
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part5 (h0: ⟨"%81"⟩ ≠ x) (h1: ⟨"%10"⟩ ≠ x) (h2: ⟨"%23"⟩ ≠ x) (h3: ⟨"%82"⟩ ≠ x) (h4: ⟨"%9"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part5; rest⟧) =
   (Γ st ⟦part5; dropfelt x; rest⟧) := by
@@ -73,7 +73,7 @@ lemma drop_past_part5 (h0: ⟨"%81"⟩ ≠ x) (h1: ⟨"%10"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_ndnd]
     rewrite [h_rhs]
     unfold part5
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part6 (h0: ⟨"%82"⟩ ≠ x) (h1: ⟨"%9"⟩ ≠ x) (h2: ⟨"%83"⟩ ≠ x) (h3: ⟨"%8"⟩ ≠ x) (h4: ⟨"%23"⟩ ≠ x) (h5: ⟨"%84"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part6; rest⟧) =
   (Γ st ⟦part6; dropfelt x; rest⟧) := by
@@ -87,7 +87,7 @@ lemma drop_past_part6 (h0: ⟨"%82"⟩ ≠ x) (h1: ⟨"%9"⟩ ≠ x) (h2: ⟨"%8
     rewrite [←drop_sequencing_nndn]
     rewrite [h_rhs]
     unfold part6
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part7 (h0: ⟨"%84"⟩ ≠ x) (h1: ⟨"%22"⟩ ≠ x) (h2: ⟨"%19"⟩ ≠ x) (h3: ⟨"%85"⟩ ≠ x) (h4: ⟨"%18"⟩ ≠ x) (h5: ⟨"%86"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part7; rest⟧) =
   (Γ st ⟦part7; dropfelt x; rest⟧) := by
@@ -101,7 +101,7 @@ lemma drop_past_part7 (h0: ⟨"%84"⟩ ≠ x) (h1: ⟨"%22"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part7
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part8 (h0: ⟨"%86"⟩ ≠ x) (h1: ⟨"%22"⟩ ≠ x) (h2: ⟨"%17"⟩ ≠ x) (h3: ⟨"%87"⟩ ≠ x) (h4: ⟨"%16"⟩ ≠ x) (h5: ⟨"%88"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part8; rest⟧) =
   (Γ st ⟦part8; dropfelt x; rest⟧) := by
@@ -115,7 +115,7 @@ lemma drop_past_part8 (h0: ⟨"%86"⟩ ≠ x) (h1: ⟨"%22"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_nnnn]
     rewrite [h_rhs]
     unfold part8
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part9 (h0: ⟨"%22"⟩ ≠ x) (h1: ⟨"%15"⟩ ≠ x) (h2: ⟨"%89"⟩ ≠ x) (h3: ⟨"%14"⟩ ≠ x) (h4: ⟨"%90"⟩ ≠ x) (h5: ⟨"%6"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part9; rest⟧) =
   (Γ st ⟦part9; dropfelt x; rest⟧) := by
@@ -129,7 +129,7 @@ lemma drop_past_part9 (h0: ⟨"%22"⟩ ≠ x) (h1: ⟨"%15"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_nnnd]
     rewrite [h_rhs]
     unfold part9
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part10 (h0: ⟨"%22"⟩ ≠ x) (h1: ⟨"%6"⟩ ≠ x) (h2: ⟨"%91"⟩ ≠ x) (h3: ⟨"%5"⟩ ≠ x) (h4: ⟨"%92"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part10; rest⟧) =
   (Γ st ⟦part10; dropfelt x; rest⟧) := by
@@ -143,7 +143,7 @@ lemma drop_past_part10 (h0: ⟨"%22"⟩ ≠ x) (h1: ⟨"%6"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part10
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part11 (h0: ⟨"%4"⟩ ≠ x) (h1: ⟨"%22"⟩ ≠ x) (h2: ⟨"%93"⟩ ≠ x) (h3: ⟨"%21"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part11; rest⟧) =
   (Γ st ⟦part11; dropfelt x; rest⟧) := by
@@ -157,7 +157,7 @@ lemma drop_past_part11 (h0: ⟨"%4"⟩ ≠ x) (h1: ⟨"%22"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_dnnd]
     rewrite [h_rhs]
     unfold part11
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part12 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%19"⟩ ≠ x) (h2: ⟨"%94"⟩ ≠ x) (h3: ⟨"%18"⟩ ≠ x) (h4: ⟨"%95"⟩ ≠ x) (h5: ⟨"%3"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part12; rest⟧) =
   (Γ st ⟦part12; dropfelt x; rest⟧) := by
@@ -171,7 +171,7 @@ lemma drop_past_part12 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%19"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_nnnd]
     rewrite [h_rhs]
     unfold part12
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part13 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%3"⟩ ≠ x) (h2: ⟨"%96"⟩ ≠ x) (h3: ⟨"%2"⟩ ≠ x) (h4: ⟨"%97"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part13; rest⟧) =
   (Γ st ⟦part13; dropfelt x; rest⟧) := by
@@ -185,7 +185,7 @@ lemma drop_past_part13 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%3"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part13
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part14 (h0: ⟨"%1"⟩ ≠ x) (h1: ⟨"%21"⟩ ≠ x) (h2: ⟨"%98"⟩ ≠ x) (h3: ⟨"%14"⟩ ≠ x) (h4: ⟨"%99"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part14; rest⟧) =
   (Γ st ⟦part14; dropfelt x; rest⟧) := by
@@ -199,7 +199,7 @@ lemma drop_past_part14 (h0: ⟨"%1"⟩ ≠ x) (h1: ⟨"%21"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_dnnn]
     rewrite [h_rhs]
     unfold part14
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part15 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%6"⟩ ≠ x) (h2: ⟨"%100"⟩ ≠ x) (h3: ⟨"%5"⟩ ≠ x) (h4: ⟨"%101"⟩ ≠ x) (h5: ⟨"%4"⟩ ≠ x) (h6: ⟨"%102"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part15; rest⟧) =
   (Γ st ⟦part15; dropfelt x; rest⟧) := by
@@ -213,7 +213,7 @@ lemma drop_past_part15 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%6"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_nnnn]
     rewrite [h_rhs]
     unfold part15
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part16 (h0: ⟨"%102"⟩ ≠ x) (h1: ⟨"%20"⟩ ≠ x) (h2: ⟨"%19"⟩ ≠ x) (h3: ⟨"%103"⟩ ≠ x) (h4: ⟨"%18"⟩ ≠ x) (h5: ⟨"%104"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part16; rest⟧) =
   (Γ st ⟦part16; dropfelt x; rest⟧) := by
@@ -227,7 +227,7 @@ lemma drop_past_part16 (h0: ⟨"%102"⟩ ≠ x) (h1: ⟨"%20"⟩ ≠ x) (h2: ⟨
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part16
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part17 (h0: ⟨"%104"⟩ ≠ x) (h1: ⟨"%0"⟩ ≠ x) (h2: ⟨"%20"⟩ ≠ x) (h3: ⟨"%105"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part17; rest⟧) =
   (Γ st ⟦part17; dropfelt x; rest⟧) := by
@@ -241,7 +241,7 @@ lemma drop_past_part17 (h0: ⟨"%104"⟩ ≠ x) (h1: ⟨"%0"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_ndnn]
     rewrite [h_rhs]
     unfold part17
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part18 (h0: ⟨"%7"⟩ ≠ x) (h1: ⟨"%26"⟩ ≠ x) (h2: ⟨"%27"⟩ ≠ x) (h3: ⟨"%28"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part18; rest⟧) =
   (Γ st ⟦part18; dropfelt x; rest⟧) := by
@@ -255,7 +255,7 @@ lemma drop_past_part18 (h0: ⟨"%7"⟩ ≠ x) (h1: ⟨"%26"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part18
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part19 (h0: ⟨"%28"⟩ ≠ x) (h1: ⟨"%13"⟩ ≠ x) (h2: ⟨"%29"⟩ ≠ x) (h3: ⟨"%30"⟩ ≠ x) (h4: ⟨"%15"⟩ ≠ x) (h5: ⟨"%31"⟩ ≠ x) (h6: ⟨"%32"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part19; rest⟧) =
   (Γ st ⟦part19; dropfelt x; rest⟧) := by
@@ -269,7 +269,7 @@ lemma drop_past_part19 (h0: ⟨"%28"⟩ ≠ x) (h1: ⟨"%13"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part19
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part20 (h0: ⟨"%32"⟩ ≠ x) (h1: ⟨"%27"⟩ ≠ x) (h2: ⟨"%33"⟩ ≠ x) (h3: ⟨"%25"⟩ ≠ x) (h4: ⟨"%34"⟩ ≠ x) (h5: ⟨"%35"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part20; rest⟧) =
   (Γ st ⟦part20; dropfelt x; rest⟧) := by
@@ -283,7 +283,7 @@ lemma drop_past_part20 (h0: ⟨"%32"⟩ ≠ x) (h1: ⟨"%27"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part20
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part21 (h0: ⟨"%35"⟩ ≠ x) (h1: ⟨"%3"⟩ ≠ x) (h2: ⟨"%36"⟩ ≠ x) (h3: ⟨"%34"⟩ ≠ x) (h4: ⟨"%37"⟩ ≠ x) (h5: ⟨"%11"⟩ ≠ x) (h6: ⟨"%38"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part21; rest⟧) =
   (Γ st ⟦part21; dropfelt x; rest⟧) := by
@@ -297,7 +297,7 @@ lemma drop_past_part21 (h0: ⟨"%35"⟩ ≠ x) (h1: ⟨"%3"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part21
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part22 (h0: ⟨"%24"⟩ ≠ x) (h1: ⟨"%38"⟩ ≠ x) (h2: ⟨"%39"⟩ ≠ x) (h3: ⟨"%23"⟩ ≠ x) (h4: ⟨"%40"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part22; rest⟧) =
   (Γ st ⟦part22; dropfelt x; rest⟧) := by
@@ -311,7 +311,7 @@ lemma drop_past_part22 (h0: ⟨"%24"⟩ ≠ x) (h1: ⟨"%38"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part22
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part23 (h0: ⟨"%42"⟩ ≠ x) (h1: ⟨"%7"⟩ ≠ x) (h2: ⟨"%43"⟩ ≠ x) (h3: ⟨"%45"⟩ ≠ x) (h4: ⟨"%11"⟩ ≠ x) (h5: ⟨"%46"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part23; rest⟧) =
   (Γ st ⟦part23; dropfelt x; rest⟧) := by
@@ -325,7 +325,7 @@ lemma drop_past_part23 (h0: ⟨"%42"⟩ ≠ x) (h1: ⟨"%7"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part23
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part24 (h0: ⟨"%47"⟩ ≠ x) (h1: ⟨"%13"⟩ ≠ x) (h2: ⟨"%48"⟩ ≠ x) (h3: ⟨"%46"⟩ ≠ x) (h4: ⟨"%49"⟩ ≠ x) (h5: ⟨"%44"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part24; rest⟧) =
   (Γ st ⟦part24; dropfelt x; rest⟧) := by
@@ -339,7 +339,7 @@ lemma drop_past_part24 (h0: ⟨"%47"⟩ ≠ x) (h1: ⟨"%13"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part24
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part25 (h0: ⟨"%49"⟩ ≠ x) (h1: ⟨"%44"⟩ ≠ x) (h2: ⟨"%50"⟩ ≠ x) (h3: ⟨"%15"⟩ ≠ x) (h4: ⟨"%51"⟩ ≠ x) (h5: ⟨"%43"⟩ ≠ x) (h6: ⟨"%52"⟩ ≠ x) (h7: ⟨"%41"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part25; rest⟧) =
   (Γ st ⟦part25; dropfelt x; rest⟧) := by
@@ -353,7 +353,7 @@ lemma drop_past_part25 (h0: ⟨"%49"⟩ ≠ x) (h1: ⟨"%44"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part25
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part26 (h0: ⟨"%52"⟩ ≠ x) (h1: ⟨"%41"⟩ ≠ x) (h2: ⟨"%53"⟩ ≠ x) (h3: ⟨"%22"⟩ ≠ x) (h4: ⟨"%54"⟩ ≠ x) (h5: ⟨"%56"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part26; rest⟧) =
   (Γ st ⟦part26; dropfelt x; rest⟧) := by
@@ -367,7 +367,7 @@ lemma drop_past_part26 (h0: ⟨"%52"⟩ ≠ x) (h1: ⟨"%41"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part26
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part27 (h0: ⟨"%56"⟩ ≠ x) (h1: ⟨"%7"⟩ ≠ x) (h2: ⟨"%57"⟩ ≠ x) (h3: ⟨"%59"⟩ ≠ x) (h4: ⟨"%60"⟩ ≠ x) (h5: ⟨"%58"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part27; rest⟧) =
   (Γ st ⟦part27; dropfelt x; rest⟧) := by
@@ -381,7 +381,7 @@ lemma drop_past_part27 (h0: ⟨"%56"⟩ ≠ x) (h1: ⟨"%7"⟩ ≠ x) (h2: ⟨"%
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part27
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part28 (h0: ⟨"%60"⟩ ≠ x) (h1: ⟨"%58"⟩ ≠ x) (h2: ⟨"%61"⟩ ≠ x) (h3: ⟨"%15"⟩ ≠ x) (h4: ⟨"%62"⟩ ≠ x) (h5: ⟨"%63"⟩ ≠ x) (h6: ⟨"%19"⟩ ≠ x) (h7: ⟨"%64"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part28; rest⟧) =
   (Γ st ⟦part28; dropfelt x; rest⟧) := by
@@ -395,7 +395,7 @@ lemma drop_past_part28 (h0: ⟨"%60"⟩ ≠ x) (h1: ⟨"%58"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part28
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part29 (h0: ⟨"%64"⟩ ≠ x) (h1: ⟨"%62"⟩ ≠ x) (h2: ⟨"%65"⟩ ≠ x) (h3: ⟨"%57"⟩ ≠ x) (h4: ⟨"%66"⟩ ≠ x) (h5: ⟨"%55"⟩ ≠ x) (h6: ⟨"%67"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part29; rest⟧) =
   (Γ st ⟦part29; dropfelt x; rest⟧) := by
@@ -409,7 +409,7 @@ lemma drop_past_part29 (h0: ⟨"%64"⟩ ≠ x) (h1: ⟨"%62"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part29
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part30 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%67"⟩ ≠ x) (h2: ⟨"%68"⟩ ≠ x) (h3: ⟨"%70"⟩ ≠ x) (h4: ⟨"%19"⟩ ≠ x) (h5: ⟨"%71"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part30; rest⟧) =
   (Γ st ⟦part30; dropfelt x; rest⟧) := by
@@ -423,7 +423,7 @@ lemma drop_past_part30 (h0: ⟨"%21"⟩ ≠ x) (h1: ⟨"%67"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part30
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part31 (h0: ⟨"%69"⟩ ≠ x) (h1: ⟨"%71"⟩ ≠ x) (h2: ⟨"%72"⟩ ≠ x) (h3: ⟨"%20"⟩ ≠ x) (h4: ⟨"%73"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part31; rest⟧) =
   (Γ st ⟦part31; dropfelt x; rest⟧) := by
@@ -437,7 +437,7 @@ lemma drop_past_part31 (h0: ⟨"%69"⟩ ≠ x) (h1: ⟨"%71"⟩ ≠ x) (h2: ⟨"
     rewrite [←drop_sequencing_dddd]
     rewrite [h_rhs]
     unfold part31
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 
 lemma behaviour_with_drops31_1 :
   Γ st ⟦dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;part31;rest⟧ =
@@ -515,7 +515,7 @@ lemma behaviour_with_drops31 :
     rewrite [behaviour_with_drops31_10, ←MLIR.run_seq_def]
     rewrite [drop_past_part31 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops30_1 :
   Γ st ⟦dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;part30;rest⟧ =
   Γ st ⟦part30;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;rest⟧ := by
@@ -586,7 +586,7 @@ lemma behaviour_with_drops30 :
     rewrite [drop_past_part30 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part30 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part30 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part30 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part30 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part30 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops31, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops29_1 :
   Γ st ⟦dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;part29;rest⟧ =
   Γ st ⟦part29;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;rest⟧ := by
@@ -650,7 +650,7 @@ lemma behaviour_with_drops29 :
     rewrite [drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part29 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops30, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops28_1 :
   Γ st ⟦dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;part28;rest⟧ =
   Γ st ⟦part28;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;rest⟧ := by
@@ -714,7 +714,7 @@ lemma behaviour_with_drops28 :
     rewrite [drop_past_part28 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part28 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part28 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part28 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part28 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops29, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops27_1 :
   Γ st ⟦dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;part27;rest⟧ =
   Γ st ⟦part27;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;rest⟧ := by
@@ -778,7 +778,7 @@ lemma behaviour_with_drops27 :
     rewrite [drop_past_part27 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part27 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops28, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops26_1 :
   Γ st ⟦dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;part26;rest⟧ =
   Γ st ⟦part26;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;rest⟧ := by
@@ -835,7 +835,7 @@ lemma behaviour_with_drops26 :
     rewrite [drop_past_part26 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part26 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part26 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part26 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part26 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part26 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part26 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops27, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops25_1 :
   Γ st ⟦dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;part25;rest⟧ =
   Γ st ⟦part25;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;rest⟧ := by
@@ -892,7 +892,7 @@ lemma behaviour_with_drops25 :
     rewrite [drop_past_part25 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part25 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops26, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops24_1 :
   Γ st ⟦dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;part24;rest⟧ =
   Γ st ⟦part24;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;rest⟧ := by
@@ -942,7 +942,7 @@ lemma behaviour_with_drops24 :
     rewrite [drop_past_part24 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part24 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part24 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part24 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part24 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part24 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part24 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part24 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops25, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops23_1 :
   Γ st ⟦dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;part23;rest⟧ =
   Γ st ⟦part23;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;rest⟧ := by
@@ -992,7 +992,7 @@ lemma behaviour_with_drops23 :
     rewrite [drop_past_part23 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part23 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part23 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part23 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part23 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops24, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops22_1 :
   Γ st ⟦dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;part22;rest⟧ =
   Γ st ⟦part22;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;rest⟧ := by
@@ -1035,7 +1035,7 @@ lemma behaviour_with_drops22 :
     rewrite [drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part22 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops23, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops21_1 :
   Γ st ⟦dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;part21;rest⟧ =
   Γ st ⟦part21;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;rest⟧ := by
@@ -1078,7 +1078,7 @@ lemma behaviour_with_drops21 :
     rewrite [drop_past_part21 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part21 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part21 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part21 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part21 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops22, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops20_1 :
   Γ st ⟦dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;part20;rest⟧ =
   Γ st ⟦part20;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;rest⟧ := by
@@ -1120,7 +1120,7 @@ lemma behaviour_with_drops20 :
     rewrite [behaviour_with_drops20_5, ←MLIR.run_seq_def]
     rewrite [drop_past_part20 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops21, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops19_1 :
   Γ st ⟦dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;part19;rest⟧ =
   Γ st ⟦part19;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;rest⟧ := by
@@ -1156,7 +1156,7 @@ lemma behaviour_with_drops19 :
     rewrite [drop_past_part19 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part19 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part19 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part19 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part19 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part19 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part19 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops20, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops18_1 :
   Γ st ⟦dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;part18;rest⟧ =
   Γ st ⟦part18;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;rest⟧ := by
@@ -1192,7 +1192,7 @@ lemma behaviour_with_drops18 :
     rewrite [drop_past_part18 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part18 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part18 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part18 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part18 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part18 (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops19, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops17_1 :
   Γ st ⟦dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;part17;rest⟧ =
   Γ st ⟦part17;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;rest⟧ := by
@@ -1228,7 +1228,7 @@ lemma behaviour_with_drops17 :
     rewrite [drop_past_part17 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part17 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part17 (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops18, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops16_1 :
   Γ st ⟦dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;part16;rest⟧ =
   Γ st ⟦part16;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;rest⟧ := by
@@ -1257,7 +1257,7 @@ lemma behaviour_with_drops16 :
     rewrite [drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part16 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops17, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops15_1 :
   Γ st ⟦dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;part15;rest⟧ =
   Γ st ⟦part15;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;rest⟧ := by
@@ -1286,7 +1286,7 @@ lemma behaviour_with_drops15 :
     rewrite [drop_past_part15 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part15 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part15 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part15 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part15 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops16, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops14_1 :
   Γ st ⟦dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;part14;rest⟧ =
   Γ st ⟦part14;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;rest⟧ := by
@@ -1314,7 +1314,7 @@ lemma behaviour_with_drops14 :
     rewrite [behaviour_with_drops14_3, ←MLIR.run_seq_def]
     rewrite [drop_past_part14 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops15, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops13_1 :
   Γ st ⟦dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;part13;rest⟧ =
   Γ st ⟦part13;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;rest⟧ := by
@@ -1336,7 +1336,7 @@ lemma behaviour_with_drops13 :
     rewrite [drop_past_part13 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part13 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part13 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part13 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part13 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part13 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part13 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part13 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops14, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops12_1 :
   Γ st ⟦dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;part12;rest⟧ =
   Γ st ⟦part12;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;rest⟧ := by
@@ -1358,7 +1358,7 @@ lemma behaviour_with_drops12 :
     rewrite [drop_past_part12 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part12 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part12 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part12 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part12 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part12 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops13, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops11_1 :
   Γ st ⟦dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;part11;rest⟧ =
   Γ st ⟦part11;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;rest⟧ := by
@@ -1380,7 +1380,7 @@ lemma behaviour_with_drops11 :
     rewrite [drop_past_part11 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part11 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part11 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part11 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part11 (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops12, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops10_1 :
   Γ st ⟦dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;part10;rest⟧ =
   Γ st ⟦part10;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;rest⟧ := by
@@ -1402,7 +1402,7 @@ lemma behaviour_with_drops10 :
     rewrite [drop_past_part10 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part10 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part10 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops11, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops9_1 :
   Γ st ⟦dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;part9;rest⟧ =
   Γ st ⟦part9;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;rest⟧ := by
@@ -1423,7 +1423,7 @@ lemma behaviour_with_drops9 :
     rewrite [behaviour_with_drops9_2, ←MLIR.run_seq_def]
     rewrite [drop_past_part9 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops10, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops8_1 :
   Γ st ⟦dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;part8;rest⟧ =
   Γ st ⟦part8;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;rest⟧ := by
@@ -1438,7 +1438,7 @@ lemma behaviour_with_drops8 :
     rewrite [drop_past_part8 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part8 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part8 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part8 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part8 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part8 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops9, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops7_1 :
   Γ st ⟦dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;part7;rest⟧ =
   Γ st ⟦part7;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;rest⟧ := by
@@ -1453,7 +1453,7 @@ lemma behaviour_with_drops7 :
     rewrite [drop_past_part7 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part7 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part7 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part7 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops8, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops6 :
   Γ st ⟦dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;part6;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;part7;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;part8;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;part9;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;part10;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;part11;dropfelt ⟨"%93"⟩;part12;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;part13;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;part14;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;part15;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;part16;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;part17;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;part18;dropfelt ⟨"%26"⟩;part19;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;part20;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;part21;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;part22;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;part23;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;part24;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;part25;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;part26;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;part27;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;part28;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;part29;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;part30;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;part31;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ =
   Γ st ⟦part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ := by
@@ -1461,7 +1461,7 @@ lemma behaviour_with_drops6 :
     rewrite [drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part6 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops7, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops5 :
   Γ st ⟦dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;part5;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;part6;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;part7;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;part8;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;part9;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;part10;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;part11;dropfelt ⟨"%93"⟩;part12;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;part13;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;part14;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;part15;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;part16;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;part17;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;part18;dropfelt ⟨"%26"⟩;part19;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;part20;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;part21;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;part22;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;part23;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;part24;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;part25;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;part26;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;part27;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;part28;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;part29;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;part30;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;part31;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ =
   Γ st ⟦part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ := by
@@ -1469,7 +1469,7 @@ lemma behaviour_with_drops5 :
     rewrite [drop_past_part5 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part5 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part5 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part5 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part5 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part5 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part5 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part5 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops6, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops4 :
   Γ st ⟦dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;part4;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;part5;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;part6;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;part7;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;part8;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;part9;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;part10;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;part11;dropfelt ⟨"%93"⟩;part12;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;part13;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;part14;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;part15;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;part16;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;part17;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;part18;dropfelt ⟨"%26"⟩;part19;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;part20;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;part21;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;part22;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;part23;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;part24;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;part25;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;part26;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;part27;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;part28;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;part29;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;part30;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;part31;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ =
   Γ st ⟦part4;part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ := by
@@ -1477,7 +1477,7 @@ lemma behaviour_with_drops4 :
     rewrite [drop_past_part4 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part4 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part4 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part4 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part4 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part4 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops5, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops3 :
   Γ st ⟦dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;part3;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;part4;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;part5;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;part6;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;part7;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;part8;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;part9;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;part10;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;part11;dropfelt ⟨"%93"⟩;part12;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;part13;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;part14;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;part15;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;part16;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;part17;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;part18;dropfelt ⟨"%26"⟩;part19;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;part20;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;part21;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;part22;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;part23;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;part24;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;part25;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;part26;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;part27;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;part28;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;part29;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;part30;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;part31;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ =
   Γ st ⟦part3;part4;part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ := by
@@ -1485,7 +1485,7 @@ lemma behaviour_with_drops3 :
     rewrite [drop_past_part3 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part3 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def,drop_past_part3 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part3 (by trivial) (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops4, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops2 :
   Γ st ⟦dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;part2;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;part3;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;part4;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;part5;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;part6;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;part7;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;part8;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;part9;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;part10;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;part11;dropfelt ⟨"%93"⟩;part12;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;part13;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;part14;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;part15;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;part16;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;part17;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;part18;dropfelt ⟨"%26"⟩;part19;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;part20;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;part21;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;part22;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;part23;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;part24;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;part25;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;part26;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;part27;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;part28;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;part29;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;part30;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;part31;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ =
   Γ st ⟦part2;part3;part4;part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ := by
@@ -1493,22 +1493,23 @@ lemma behaviour_with_drops2 :
     rewrite [drop_past_part2 (by trivial) (by trivial) (by trivial) (by trivial), ←MLIR.run_seq_def]
     rewrite [drop_past_part2 (by trivial) (by trivial) (by trivial) (by trivial), MLIR.run_seq_def]
     rewrite [behaviour_with_drops3, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops1 :
   Γ st ⟦part1;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;part2;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;part3;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;part4;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;part5;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;part6;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;part7;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;part8;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;part9;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;part10;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;part11;dropfelt ⟨"%93"⟩;part12;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;part13;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;part14;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;part15;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;part16;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;part17;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;part18;dropfelt ⟨"%26"⟩;part19;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;part20;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;part21;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;part22;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;part23;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;part24;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;part25;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;part26;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;part27;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;part28;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;part29;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;part30;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;part31;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ =
   Γ st ⟦part1;part2;part3;part4;part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ := by
     rewrite [MLIR.run_seq_def]
     rewrite [behaviour_with_drops2, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops :
   Γ st ⟦part0;part1;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;part2;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;part3;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;part4;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;part5;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;part6;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;part7;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;part8;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;part9;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;part10;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;part11;dropfelt ⟨"%93"⟩;part12;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;part13;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;part14;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;part15;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;part16;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;part17;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;part18;dropfelt ⟨"%26"⟩;part19;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;part20;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;part21;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;part22;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;part23;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;part24;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;part25;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;part26;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;part27;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;part28;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;part29;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;part30;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;part31;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ =
   Γ st ⟦part0;part1;part2;part3;part4;part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧ := by
     rewrite [MLIR.run_seq_def]
     rewrite [behaviour_with_drops1, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma getReturn_ignores_drops :
   getReturn (Γ st ⟦part0;part1;part2;part3;part4;part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31;dropfelt ⟨"%74"⟩;dropfelt ⟨"%75"⟩;dropfelt ⟨"%76"⟩;dropfelt ⟨"%77"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%12"⟩;dropfelt ⟨"%81"⟩;dropfelt ⟨"%10"⟩;dropfelt ⟨"%82"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%8"⟩;dropfelt ⟨"%84"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%17"⟩;dropfelt ⟨"%16"⟩;dropfelt ⟨"%86"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%88"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%90"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%92"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%94"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%96"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%14"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%98"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%100"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%18"⟩;dropfelt ⟨"%102"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%104"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%26"⟩;dropfelt ⟨"%28"⟩;dropfelt ⟨"%29"⟩;dropfelt ⟨"%30"⟩;dropfelt ⟨"%31"⟩;dropfelt ⟨"%27"⟩;dropfelt ⟨"%32"⟩;dropfelt ⟨"%33"⟩;dropfelt ⟨"%25"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%34"⟩;dropfelt ⟨"%35"⟩;dropfelt ⟨"%36"⟩;dropfelt ⟨"%37"⟩;dropfelt ⟨"%23"⟩;dropfelt ⟨"%38"⟩;dropfelt ⟨"%24"⟩;dropfelt ⟨"%39"⟩;dropfelt ⟨"%40"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%42"⟩;dropfelt ⟨"%45"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%46"⟩;dropfelt ⟨"%47"⟩;dropfelt ⟨"%48"⟩;dropfelt ⟨"%43"⟩;dropfelt ⟨"%49"⟩;dropfelt ⟨"%44"⟩;dropfelt ⟨"%50"⟩;dropfelt ⟨"%51"⟩;dropfelt ⟨"%22"⟩;dropfelt ⟨"%52"⟩;dropfelt ⟨"%41"⟩;dropfelt ⟨"%53"⟩;dropfelt ⟨"%54"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%56"⟩;dropfelt ⟨"%59"⟩;dropfelt ⟨"%15"⟩;dropfelt ⟨"%60"⟩;dropfelt ⟨"%58"⟩;dropfelt ⟨"%61"⟩;dropfelt ⟨"%63"⟩;dropfelt ⟨"%57"⟩;dropfelt ⟨"%62"⟩;dropfelt ⟨"%64"⟩;dropfelt ⟨"%65"⟩;dropfelt ⟨"%66"⟩;dropfelt ⟨"%55"⟩;dropfelt ⟨"%19"⟩;dropfelt ⟨"%21"⟩;dropfelt ⟨"%67"⟩;dropfelt ⟨"%68"⟩;dropfelt ⟨"%70"⟩;dropfelt ⟨"%20"⟩;dropfelt ⟨"%71"⟩;dropfelt ⟨"%69"⟩;dropfelt ⟨"%72"⟩;dropfelt ⟨"%73"⟩⟧) res0 =
   getReturn (Γ st ⟦part0;part1;part2;part3;part4;part5;part6;part7;part8;part9;part10;part11;part12;part13;part14;part15;part16;part17;part18;part19;part20;part21;part22;part23;part24;part25;part26;part27;part28;part29;part30;part31⟧) res0 := by
-    simp [getReturn, MLIR.run_seq_def, State.constraintsInVar, MLIR.run_dropfelt, State.dropFelts_buffers, State.dropFelts_isFailed, State.dropFelts_props]
+    unfold getReturn
+    -- simp [getReturn, MLIR.run_seq_def, State.constraintsInVar, MLIR.run_dropfelt, State.dropFelts_buffers, State.dropFelts_isFailed, State.dropFelts_props]
 
 end Risc0.ComputeDecode.Witness.Code

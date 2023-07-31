@@ -42,6 +42,7 @@ lemma part0_wp {st : State} :
   rewrite [MLIR.run_seq_def,MLIR.run_dropfelt]
   unfold part0_state_update part0_drops part0_state
   rfl
+set_option maxRecDepth 10000000 in
 lemma part0_cumulative_wp {code0 data0 data1: Felt}:
   Code.run (start_state ([code0]) ([data0, data1])) ↔
   Code.getReturn

@@ -17,8 +17,9 @@ lemma optimised_behaviour1 :
     simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←MLIR.run_seq_def,←MLIR.run_seq_def,←step_nondet,←step_nondet,←step_nondet,←MLIR.run_seq_def]
+    apply optim_rfl_hic_sunt_dracones
     unfold opt1
-    simp only
+    with_reducible rfl
 
 def opt_full : MLIRProgram := opt1
 lemma opt_full_def : opt_full = opt1 := rfl

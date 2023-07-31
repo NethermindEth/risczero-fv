@@ -43,6 +43,7 @@ lemma part0_wp {st : State} :
   
   unfold part0_state_update part0_drops part0_state
   rfl
+set_option maxRecDepth 10000000 in
 lemma part0_cumulative_wp {in0 data0 data1: Felt}:
   Code.run (start_state ([in0]) ([data0, data1])) ↔
   Code.getReturn

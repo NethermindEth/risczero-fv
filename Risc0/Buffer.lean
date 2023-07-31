@@ -1,11 +1,15 @@
 import Risc0.BasicTypes
 
+import Mathlib.Data.Array.Basic
+
 namespace Risc0
 
   -- none is an unset value which can be written to, but not read
   -- some is a set value which can be read, and can only be written to if the new val is equal
   abbrev BufferAtTime := List (Option Felt)
   abbrev Buffer := List BufferAtTime
+
+  def BufferAtTime.init (size : ℕ) : BufferAtTime := List.replicate size .none
 
   namespace Buffer
 
@@ -15,7 +19,7 @@ namespace Risc0
 
     def empty : Buffer := []
 
-    def init (size : ℕ) : Buffer := [List.replicate size .none]
+    def init (size : ℕ) : Buffer := [BufferAtTime.init size]
 
     def init' (row : BufferAtTime) : Buffer := [row]
 
@@ -30,6 +34,14 @@ namespace Risc0
 
     def getBufferAtTime! (buf : Buffer) (timeIdx : ℕ) : BufferAtTime :=
       List.get! buf timeIdx
+
+    private def cmp (lhs rhs : BufferAtTime) : Bool := 
+      (lhs.zip rhs).filter (λ (l, r) ↦ l.get! ≠ r.get!)
+      |>.map (λ (l, r) ↦ l.get!.val < r.get!.val) |>.headD false
+
+    def sort (buf : Buffer) : Buffer :=
+      let arr : Array BufferAtTime := ⟨buf⟩
+      arr.qsort (not <| cmp · ·) |>.toList
 
     lemma getBufferAtTime!_def :
       getBufferAtTime! buf timeIdx = List.get! buf timeIdx := rfl 

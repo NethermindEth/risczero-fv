@@ -17,7 +17,7 @@ lemma drop_past_part1 (h0: ⟨"%5"⟩ ≠ x) (h1: ⟨"%2"⟩ ≠ x) (h2: ⟨"%1"
     rewrite [←drop_sequencing_nddd]
     rewrite [h_rhs]
     unfold part1
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma drop_past_part2 (h0: ⟨"%0"⟩ ≠ x) (h1: ⟨"%2"⟩ ≠ x) (h2: ⟨"%3"⟩ ≠ x) (h3: ⟨"%1"⟩ ≠ x) (h4: ⟨"%4"⟩ ≠ x) (h5: ⟨"%5"⟩ ≠ x) (h6: ⟨"%6"⟩ ≠ x):
   (Γ st ⟦dropfelt x; part2; rest⟧) =
   (Γ st ⟦part2; dropfelt x; rest⟧) := by
@@ -31,26 +31,26 @@ lemma drop_past_part2 (h0: ⟨"%0"⟩ ≠ x) (h1: ⟨"%2"⟩ ≠ x) (h2: ⟨"%3"
     rewrite [←drop_sequencing_dd]
     rewrite [h_rhs]
     unfold part2
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 
 lemma behaviour_with_drops2 :
   Γ st ⟦part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧ =
   Γ st ⟦part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧ := by
     rewrite [MLIR.run_seq_def]
     rewrite [←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops1 :
   Γ st ⟦part1;part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧ =
   Γ st ⟦part1;part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧ := by
     rewrite [MLIR.run_seq_def]
     rewrite [behaviour_with_drops2, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma behaviour_with_drops :
   Γ st ⟦part0;part1;part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧ =
   Γ st ⟦part0;part1;part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧ := by
     rewrite [MLIR.run_seq_def]
     rewrite [behaviour_with_drops1, ←MLIR.run_seq_def]
-    rfl
+    simp only [MLIR.run_seq_def]; try rfl
 lemma getReturn_ignores_drops :
   getReturn (Γ st ⟦part0;part1;part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩⟧) res0 =
   getReturn (Γ st ⟦part0;part1;part2⟧) res0 := by
