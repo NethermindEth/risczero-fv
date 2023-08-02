@@ -119,13 +119,13 @@ import Risc0.Gadgets.IsZero.Constraints.CodeParts
 import Risc0.Gadgets.IsZero.Witness.CodeParts
 import Risc0.Gadgets.IsZero.Constraints.CodeDrops
 import Risc0.Gadgets.IsZero.Witness.CodeDrops
-import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart0
-import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart1
-import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart2
-import Risc0.Gadgets.IsZero.Witness.WeakestPresPart0
-import Risc0.Gadgets.IsZero.Witness.WeakestPresPart1
-import Risc0.Gadgets.IsZero.Witness.WeakestPresPart2
-import Risc0.Gadgets.IsZero.Proofs
+-- import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart0
+-- import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart1
+-- import Risc0.Gadgets.IsZero.Constraints.WeakestPresPart2
+-- import Risc0.Gadgets.IsZero.Witness.WeakestPresPart0
+-- import Risc0.Gadgets.IsZero.Witness.WeakestPresPart1
+-- import Risc0.Gadgets.IsZero.Witness.WeakestPresPart2
+-- import Risc0.Gadgets.IsZero.Proofs
 
 import Risc0.Gadgets.ComputeDecode.Witness.Code
 import Risc0.Gadgets.ComputeDecode.Constraints.Code
