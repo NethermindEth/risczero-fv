@@ -5,6 +5,8 @@ import Risc0.BasicTypes
 import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart31
 import Risc0.Gadgets.ComputeDecode.Lemmas.Lemmas
 
+
+
 open Risc0
 
 -- void DecoderImpl::set(U32Val inst) {
@@ -109,29 +111,33 @@ def Instruction.toWords (instr : Instruction) : List Felt :=
   , (instr.f7_6 * 0x40 + (instr.f7_45 * 0x10 + instr.f7_3 * 0x08 + instr.f7_2 * 0x04 + instr.f7_01)) * 0x02 + instr.rs2_4]
 
 def Instruction.fromWords (words : BufferAtTime) : Instruction :=
-  let word0 := Bitvec.ofNat 32 (words.get! 0).get!.val
-  let word1 := Bitvec.ofNat 32 (words.get! 1).get!.val
-  let word2 := Bitvec.ofNat 32 (words.get! 2).get!.val
-  let word3 := Bitvec.ofNat 32 (words.get! 3).get!.val
+  let word0 := ←ℕ (words.get! 0).get!.val
+  let word1 := ←ℕ (words.get! 1).get!.val
+  let word2 := ←ℕ (words.get! 2).get!.val
+  let word3 := ←ℕ (words.get! 3).get!.val
   Instruction.mk 
-    (Bitvec.ushr (Bitvec.and word3 (Bitvec.ofNat 32 0x80)) 7).toNat
-    (Bitvec.ushr (Bitvec.and word3 (Bitvec.ofNat 32 0x60)) 5).toNat
-    (Bitvec.ushr (Bitvec.and word3 (Bitvec.ofNat 32 0x10)) 4).toNat
-    (Bitvec.ushr (Bitvec.and word3 (Bitvec.ofNat 32 0x08)) 3).toNat
-    (Bitvec.ushr (Bitvec.and word3 (Bitvec.ofNat 32 0x06)) 1).toNat
-    (Bitvec.ushr (Bitvec.and word3 (Bitvec.ofNat 32 0x01)) 0).toNat
-    (Bitvec.ushr (Bitvec.and word2 (Bitvec.ofNat 32 0x80)) 7).toNat
-    (Bitvec.ushr (Bitvec.and word2 (Bitvec.ofNat 32 0x60)) 5).toNat
-    (Bitvec.ushr (Bitvec.and word2 (Bitvec.ofNat 32 0x10)) 4).toNat
-    (Bitvec.ushr (Bitvec.and word2 (Bitvec.ofNat 32 0x0C)) 2).toNat
-    (Bitvec.ushr (Bitvec.and word2 (Bitvec.ofNat 32 0x03)) 0).toNat
-    (Bitvec.ushr (Bitvec.and word1 (Bitvec.ofNat 32 0x80)) 7).toNat
-    (Bitvec.ushr (Bitvec.and word1 (Bitvec.ofNat 32 0x40)) 6).toNat
-    (Bitvec.ushr (Bitvec.and word1 (Bitvec.ofNat 32 0x30)) 4).toNat
-    (Bitvec.ushr (Bitvec.and word1 (Bitvec.ofNat 32 0x0C)) 2).toNat
-    (Bitvec.ushr (Bitvec.and word1 (Bitvec.ofNat 32 0x03)) 0).toNat
-    (Bitvec.ushr (Bitvec.and word0 (Bitvec.ofNat 32 0x80)) 7).toNat
-    (Bitvec.and word0 (Bitvec.ofNat 32 0x7f)).toNat
+    →ℕ (word3 &&& (←ℕ 0x80) >>> 7)
+    →ℕ (word3 &&& (←ℕ 0x60) >>> 5)
+    →ℕ (word3 &&& (←ℕ 0x10) >>> 4)
+    →ℕ (word3 &&& (←ℕ 0x08) >>> 3)
+    →ℕ (word3 &&& (←ℕ 0x06) >>> 1)
+    →ℕ (word3 &&& (←ℕ 0x01) >>> 0)
+    →ℕ (word2 &&& (←ℕ 0x80) >>> 7)
+    →ℕ (word2 &&& (←ℕ 0x60) >>> 5)
+    →ℕ (word2 &&& (←ℕ 0x10) >>> 4)
+    →ℕ (word2 &&& (←ℕ 0x0C) >>> 2)
+    →ℕ (word2 &&& (←ℕ 0x03) >>> 0)
+    →ℕ (word1 &&& (←ℕ 0x80) >>> 7)
+    →ℕ (word1 &&& (←ℕ 0x40) >>> 6)
+    →ℕ (word1 &&& (←ℕ 0x30) >>> 4)
+    →ℕ (word1 &&& (←ℕ 0x0C) >>> 2)
+    →ℕ (word1 &&& (←ℕ 0x03) >>> 0)
+    →ℕ (word0 &&& (←ℕ 0x80) >>> 7)
+    →ℕ (word0 &&& (←ℕ 0x7f))
+
+@[simp]
+lemma Instruction.fromWords_f7_01 :
+  (fromWords [some x₀, some x₁, some x₂, some x₃]).f7_01 = ↑→ℕ(←ℕ x₃.val &&& ←ℕ 6 >>> 1) := rfl
 
 def instr_equality (instr : Instruction) (input : BufferAtTime) : Prop :=
   input = instr.toWords
@@ -145,13 +151,11 @@ def isByte (x : Felt) : Prop := x.val ≤ 255
 def isBytes (l : List Felt) : Prop := ∀ i < l.length, isByte (l.get! i) 
 
 lemma byte_destruct₁ {x : ℕ} (h : x < 256):
-  (Bitvec.toNat (Bitvec.ofNat 32 x) / 128 % 2) * 128 +
-      (Bitvec.toNat
-          (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 (allOnes 7)))) = x := by 
+  (→ℕ (←ℕ x) / 128 % 2) * 128 + (→ℕ ((· &&& ·) (←ℕ x) (←ℕ (allOnes 7)))) = x := by 
   have h' : 128 = 2 ^ 7 := by rfl
   rw [h', Bitvec.ushr_toNat,
       ←Bitvec.lastBit (by linarith)]
-  have h' : Bitvec.ofNat (32 : ℕ) (allOnes (1 : ℕ)) = (Bitvec.ofNat (32 : ℕ) (allOnes (8 : ℕ))).ushr 7 := by
+  have h' : ←ℕ (allOnes 1) = (←ℕ (allOnes 8)) >>> 7 := by
     rw [Bitvec.allOnes_ushr (by linarith) (by linarith)]
   rw [h', Bitvec.toNat_and_allOnes,
       ←Bitvec.ushr_and_commute,
@@ -250,15 +254,15 @@ lemma toe_lemma₅ {x : ℕ}:
   rw [←Nat.add_assoc, h, Nat.div_add_mod]
 
 lemma byte_destruct₂ {x : ℕ} (h : x < 256):
-  (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 128)) 7) * 128 +
-          (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 64)) 6) * 4 +
-              Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 48)) 4)) *
+  (→ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 128)) >>> 7) * 128 +
+          (→ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 64)) >>> 6) * 4 +
+              →ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 48)) >>> 4)) *
             16 +
-        Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 12)) 2) * 4 +
-      Bitvec.toNat (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 3))) = x := by 
+        →ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 12)) >>> 2) * 4 +
+      →ℕ ((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 3))) = x := by 
   rw [Bitvec.ushr_and_commute,
       Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (128 : ℕ)) (7 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (128 : ℕ)) >>> (7 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
   rw [h',
       Bitvec.lastBit (by {
         linarith
@@ -275,7 +279,7 @@ lemma byte_destruct₂ {x : ℕ} (h : x < 256):
   rw [h',
       Bitvec.ushr_and_commute,
       Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (64 : ℕ)) (6 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (64 : ℕ)) >>> (6 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
   rw [h',
       Bitvec.lastBit (by {
         linarith
@@ -291,7 +295,7 @@ lemma byte_destruct₂ {x : ℕ} (h : x < 256):
     })]
   rw [h', Bitvec.ushr_and_commute,
       Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (48 : ℕ)) (4 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (48 : ℕ)) >>> (4 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
   rw [h',
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat]
@@ -304,7 +308,7 @@ lemma byte_destruct₂ {x : ℕ} (h : x < 256):
       linarith
     })]
   rw [h', Bitvec.ushr_and_commute, Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (12 : ℕ)) (2 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (12 : ℕ)) >>> (2 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
   rw [h',
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat]
@@ -338,15 +342,15 @@ lemma byte_destruct₂ {x : ℕ} (h : x < 256):
 
 
 lemma byte_destruct₃ {x : ℕ} (h : x < 256):
-  ((Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 128)) 7) * 8 +
-              Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 96)) 5) * 2 +
-            Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 16)) 4)) *
+  ((→ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 128)) >>> 7) * 8 +
+              →ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 96)) >>> 5) * 2 +
+            →ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 16)) >>> 4)) *
           16 +
-        Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 12)) 2) * 4 +
-      Bitvec.toNat (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 3))) = x := by 
+        →ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 12)) >>> 2) * 4 +
+      →ℕ ((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 3))) = x := by 
   rw [Bitvec.ushr_and_commute,
       Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (128 : ℕ)) (7 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (128 : ℕ)) >>> (7 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
   rw [h',
       Bitvec.lastBit (by {
         linarith
@@ -363,7 +367,7 @@ lemma byte_destruct₃ {x : ℕ} (h : x < 256):
   rw [h',
       Bitvec.ushr_and_commute,
       Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (96 : ℕ)) (5 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (96 : ℕ)) >>> (5 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
   rw [h',
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat]
@@ -377,7 +381,7 @@ lemma byte_destruct₃ {x : ℕ} (h : x < 256):
     })]
   rw [h', Bitvec.ushr_and_commute,
       Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (16 : ℕ)) (4 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (16 : ℕ)) >>> (4 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
   rw [h',
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat]
@@ -390,7 +394,7 @@ lemma byte_destruct₃ {x : ℕ} (h : x < 256):
       linarith
     })]
   rw [h', Bitvec.ushr_and_commute, Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (12 : ℕ)) (2 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (12 : ℕ)) >>> (2 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
   rw [h',
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat]
@@ -426,16 +430,16 @@ lemma byte_destruct₃ {x : ℕ} (h : x < 256):
 
 
 lemma byte_destruct₄ {x : ℕ} (h : x < 256):
-  ((Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 128)) 7) * 64 +
-          (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 96)) 5) * 16 +
-                Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 16)) 4) * 8 +
-              Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 8)) 3) * 4 +
-            Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 6)) 1))) *
+  ((→ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 128)) >>> 7) * 64 +
+          (→ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 96)) >>> 5) * 16 +
+                →ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 16)) >>> 4) * 8 +
+              →ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 8)) >>> 3) * 4 +
+            →ℕ (((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 6)) >>> 1))) *
         2 +
-      Bitvec.toNat (Bitvec.and (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 1))) = x := by 
+      →ℕ ((· &&& ·) (Bitvec.ofNat 32 x) (Bitvec.ofNat 32 1))) = x := by 
   rw [Bitvec.ushr_and_commute,
       Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (128 : ℕ)) (7 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (128 : ℕ)) >>> (7 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
   rw [h',
       Bitvec.lastBit (by {
         linarith
@@ -452,7 +456,7 @@ lemma byte_destruct₄ {x : ℕ} (h : x < 256):
   rw [h',
       Bitvec.ushr_and_commute,
       Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (96 : ℕ)) (5 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (96 : ℕ)) >>> (5 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
   rw [h',
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat]
@@ -466,7 +470,7 @@ lemma byte_destruct₄ {x : ℕ} (h : x < 256):
     })]
   rw [h', Bitvec.ushr_and_commute,
       Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (16 : ℕ)) (4 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (16 : ℕ)) >>> (4 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
   rw [h',
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat]
@@ -479,7 +483,7 @@ lemma byte_destruct₄ {x : ℕ} (h : x < 256):
       linarith
     })]
   rw [h', Bitvec.ushr_and_commute, Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (8 : ℕ)) (3 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (8 : ℕ)) >>> (3 : ℕ)) = Bitvec.ofNat 32 (allOnes 1) := by rfl
   rw [h',
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat]
@@ -492,7 +496,7 @@ lemma byte_destruct₄ {x : ℕ} (h : x < 256):
       linarith
     })]
   rw [h', Bitvec.ushr_and_commute, Bitvec.ushr_ofNat (Nat.lt_trans h (by linarith))]
-  have h' : (Bitvec.ushr (Bitvec.ofNat (32 : ℕ) (6 : ℕ)) (1 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
+  have h' : ((Bitvec.ofNat (32 : ℕ) (6 : ℕ)) >>> (1 : ℕ)) = Bitvec.ofNat 32 (allOnes 2) := by rfl
   rw [h', 
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat]
@@ -537,6 +541,7 @@ lemma byte_destruct₄ {x : ℕ} (h : x < 256):
 theorem toWords_fromWords {words : BufferAtTime} (h : words.length = 4) (h_isBytes : (∀ i, i < 4 → isByte (Option.get! (words.get! i)))) (h_isSome : (∀ i, i < 4 → ∃ x, words.get! i = some x)):
   (Instruction.fromWords words).toWords.map some = words := by
   unfold Instruction.toWords Instruction.fromWords
+  dsimp [(→ℕ·), (·&&&·), (·>>>·)]
   simp
   apply List.ext
   intros n
@@ -545,7 +550,7 @@ theorem toWords_fromWords {words : BufferAtTime} (h : words.length = 4) (h_isByt
     simp
     --have h' : 128 = allOnes 7 + 1 := by simp
     rw [Bitvec.ushr_and_commute]
-    have h' : (Bitvec.ushr (Bitvec.ofNat 32 128) 7) = Bitvec.ofNat 32 1 := by
+    have h' : (Bitvec.ofNat 32 128) >>> 7 = Bitvec.ofNat 32 1 := by
       rw [Bitvec.ushr_ofNat (by linarith)]
       have h : (128 : ℕ) / (2 : ℕ) ^ (7 : ℕ) = 1 := by rfl
       rw [h]
@@ -561,11 +566,11 @@ theorem toWords_fromWords {words : BufferAtTime} (h : words.length = 4) (h_isByt
     rw [h_2]
     have h_3 : 127 = allOnes 7 := by simp
     rw [h_3]
-    have h_4 : (↑(Bitvec.toNat (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) / 128 % 2) * 128 : Felt) = ↑(Bitvec.toNat (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) / 128 % 2 * 128) := by simp
+    have h_4 : (↑(→ℕ (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) / 128 % 2) * 128 : Felt) = ↑(→ℕ (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) / 128 % 2 * 128) := by simp
     rw [h_4]
-    have h_5 : (↑(Bitvec.toNat (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) / 128 % 2 * 128) + ↑(Bitvec.toNat
-      (Bitvec.and (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) (Bitvec.ofNat 32 (allOnes 7))))) = (↑((Bitvec.toNat (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) / 128 % 2 * 128) + (Bitvec.toNat
-      (Bitvec.and (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) (Bitvec.ofNat 32 (allOnes 7))))) : Felt) := by simp
+    have h_5 : (↑(→ℕ (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) / 128 % 2 * 128) + ↑(→ℕ
+      ((· &&& ·) (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) (Bitvec.ofNat 32 (allOnes 7))))) = (↑((→ℕ (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) / 128 % 2 * 128) + (→ℕ
+      ((· &&& ·) (Bitvec.ofNat 32 (ZMod.val (Option.get! (List.get! words 0)))) (Bitvec.ofNat 32 (allOnes 7))))) : Felt) := by simp
     rw [h_5]
     rw [byte_destruct₁ (by {
       have h := h_isBytes 0 (by simp)
@@ -580,17 +585,19 @@ theorem toWords_fromWords {words : BufferAtTime} (h : words.length = 4) (h_isByt
     rcases (h_isSome 1 (by simp)) with ⟨x, h_isSome⟩ 
     rw [h_isSome]
     simp
-    have h' : ↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) 7)) * 128 +
-        (↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 64)) 6)) * 4 +
-            ↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 48)) 4))) *
+    have h' : ↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) >>> 7)) * 128 +
+        (↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 64)) >>> 6)) * 4 +
+            ↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 48)) >>> 4))) *
           16 +
-      ↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 12)) 2)) * 4 +
-    ↑(Bitvec.toNat (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 3))) = (↑((Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) 7)) * 128 +
-        ((Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 64)) 6)) * 4 +
-            (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 48)) 4))) *
+      ↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 12)) >>> 2)) * 4 +
+    ↑(→ℕ ((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 3))) =
+    (↑((→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) >>> 7)) * 128 +
+        ((→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 64)) >>> 6)) * 4 +
+            (→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 48)) >>> 4))) *
           16 +
-      (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 12)) 2)) * 4 +
-    (Bitvec.toNat (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 3)))) : Felt) := by simp
+      (→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 12)) >>> 2)) * 4 +
+    (→ℕ ((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 3)))) : Felt) := by simp
+    dsimp at *
     rw [h']
     rw [byte_destruct₂ (by {
       have h := h_isBytes 1 (by simp)
@@ -605,17 +612,18 @@ theorem toWords_fromWords {words : BufferAtTime} (h : words.length = 4) (h_isByt
     rcases (h_isSome 2 (by simp)) with ⟨x, h_isSome⟩ 
     rw [h_isSome]
     simp
-    have h' : (↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) 7)) * 8 +
-            ↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 96)) 5)) * 2 +
-          ↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 16)) 4))) *
+    have h' : (↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) >>> 7)) * 8 +
+            ↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 96)) >>> 5)) * 2 +
+          ↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 16)) >>> 4))) *
         16 +
-      ↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 12)) 2)) * 4 +
-    ↑(Bitvec.toNat (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 3))) = (↑(((Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) 7)) * 8 +
-            (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 96)) 5)) * 2 +
-          (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 16)) 4))) *
+      ↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 12)) >>> 2)) * 4 +
+    ↑(→ℕ ((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 3))) = (↑(((→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) >>> 7)) * 8 +
+            (→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 96)) >>> 5)) * 2 +
+          (→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 16)) >>> 4))) *
         16 +
-      (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 12)) 2)) * 4 +
-    (Bitvec.toNat (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 3)))) : Felt) := by simp
+      (→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 12)) >>> 2)) * 4 +
+    (→ℕ ((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 3)))) : Felt) := by simp
+    dsimp at *
     rw [h']
     rw [byte_destruct₃ (by {
       have h := h_isBytes 2 (by simp)
@@ -630,19 +638,20 @@ theorem toWords_fromWords {words : BufferAtTime} (h : words.length = 4) (h_isByt
     rcases (h_isSome 3 (by simp)) with ⟨x, h_isSome⟩ 
     rw [h_isSome]
     simp
-    have h' : (↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) 7)) * 64 +
-        (↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 96)) 5)) * 16 +
-              ↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 16)) 4)) * 8 +
-            ↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 8)) 3)) * 4 +
-          ↑(Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 6)) 1)))) *
+    have h' : (↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) >>> 7)) * 64 +
+        (↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 96)) >>> 5)) * 16 +
+              ↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 16)) >>> 4)) * 8 +
+            ↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 8)) >>> 3)) * 4 +
+          ↑(→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 6)) >>> 1)))) *
       2 +
-    ↑(Bitvec.toNat (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 1))) = (↑(((Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) 7)) * 64 +
-        ((Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 96)) 5)) * 16 +
-              (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 16)) 4)) * 8 +
-            (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 8)) 3)) * 4 +
-          (Bitvec.toNat (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 6)) 1)))) *
+    ↑(→ℕ ((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 1))) = (↑(((→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 128)) >>> 7)) * 64 +
+        ((→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 96)) >>> 5)) * 16 +
+              (→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 16)) >>> 4)) * 8 +
+            (→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 8)) >>> 3)) * 4 +
+          (→ℕ (((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 6)) >>> 1)))) *
       2 +
-    (Bitvec.toNat (Bitvec.and (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 1)))) : Felt) := by simp
+    (→ℕ ((· &&& ·) (Bitvec.ofNat 32 (ZMod.val x)) (Bitvec.ofNat 32 1)))) : Felt) := by simp
+    dsimp at *
     rw [h']
     rw [byte_destruct₄ (by {
       have h := h_isBytes 3 (by simp)
@@ -658,7 +667,7 @@ theorem toWords_fromWords {words : BufferAtTime} (h : words.length = 4) (h_isByt
     linarith
 
 lemma leg_128 {x : Felt} :
-  feltBitAnd x (128 : Felt) * (1997537281 : Felt) = (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 128)) 7).toNat := by
+  feltBitAnd x (128 : Felt) * (1997537281 : Felt) = (((· &&& ·) (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 128)) >>> 7).toNat := by
   unfold feltBitAnd
   have h₁ : ∀ {x}, x * (1997537281 : Felt) = x / (128 : Felt) := by
     intros x
@@ -700,7 +709,7 @@ lemma leg_128 {x : Felt} :
     rw [h_128]
   
 lemma leg_64 {x : Felt} :
-  feltBitAnd x (64 : Felt) * (1981808641 : Felt) = (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 64)) 6).toNat := by
+  feltBitAnd x (64 : Felt) * (1981808641 : Felt) = (((· &&& ·) (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 64)) >>> 6).toNat := by
   unfold feltBitAnd
   have h₁ : ∀ {x}, x * (1981808641 : Felt) = x / (64 : Felt) := by
     intros x
@@ -739,7 +748,7 @@ lemma leg_64 {x : Felt} :
     rw [h_64]
 
 lemma leg_16 {x : Felt} :
-  feltBitAnd x (16 : Felt) * (1887436801 : Felt) = (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 16)) 4).toNat := by
+  feltBitAnd x (16 : Felt) * (1887436801 : Felt) = (((· &&& ·) (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 16)) >>> 4).toNat := by
   unfold feltBitAnd
   have h₁ : ∀ {x}, x * (1887436801 : Felt) = x / (16 : Felt) := by
     intros x
@@ -778,7 +787,7 @@ lemma leg_16 {x : Felt} :
     rw [h_16]
 
 lemma leg_8 {x : Felt} :
-  feltBitAnd x (8 : Felt) * (1761607681 : Felt) = (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 8)) 3).toNat := by
+  feltBitAnd x (8 : Felt) * (1761607681 : Felt) = (((· &&& ·) (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 8)) >>> 3).toNat := by
   unfold feltBitAnd
   have h₁ : ∀ {x}, x * (1761607681 : Felt) = x / (8 : Felt) := by
     intros x
@@ -818,7 +827,7 @@ lemma leg_8 {x : Felt} :
 
 
 lemma leg_96 {x : Felt} :
-  feltBitAnd x (96 : Felt) * (1950351361 : Felt) = (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 0x60)) 5).toNat := by
+  feltBitAnd x (96 : Felt) * (1950351361 : Felt) = (((· &&& ·) (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 0x60)) >>> 5).toNat := by
   unfold feltBitAnd
   have h₁ : ∀ {x}, x * (1950351361 : Felt) = x / (32 : Felt) := by
     intros x
@@ -880,7 +889,7 @@ lemma leg_96 {x : Felt} :
     rw [h_32]
 
 lemma leg_48 {x : Felt} :
-  feltBitAnd x (48 : Felt) * (1887436801 : Felt) = (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 0x30)) 4).toNat := by
+  feltBitAnd x (48 : Felt) * (1887436801 : Felt) = (((· &&& ·) (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 0x30)) >>> 4).toNat := by
   unfold feltBitAnd
   have h₁ : ∀ {x}, x * (1887436801 : Felt) = x / (16 : Felt) := by
     intros x
@@ -942,7 +951,7 @@ lemma leg_48 {x : Felt} :
     rw [h_48]
 
 lemma leg_6 {x : Felt} :
-  feltBitAnd x (6 : Felt) * (1006632961 : Felt) = (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 0x06)) 1).toNat := by
+  feltBitAnd x (6 : Felt) * (1006632961 : Felt) = (((· &&& ·) (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 0x06)) >>> 1).toNat := by
   unfold feltBitAnd
   have h₁ : ∀ {x}, x * (1006632961 : Felt) = x / (2 : Felt) := by
     intros x
@@ -998,7 +1007,7 @@ lemma leg_6 {x : Felt} :
     simp
 
 lemma leg_12 {x : Felt} :
-  feltBitAnd x (12 : Felt) * (1509949441 : Felt) = (Bitvec.ushr (Bitvec.and (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 0x0C)) 2).toNat := by
+  feltBitAnd x (12 : Felt) * (1509949441 : Felt) = (((· &&& ·) (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 0x0C)) >>> 2).toNat := by
   unfold feltBitAnd
   have h₁ : ∀ {x}, x * (1509949441 : Felt) = x / (4 : Felt) := by
     intros x

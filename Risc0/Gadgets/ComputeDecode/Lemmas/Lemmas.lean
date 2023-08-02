@@ -4,7 +4,17 @@ import Mathlib.Data.Vector.Basic
 import Mathlib.Tactic.Linarith.Frontend
 import Mathlib.Data.Nat.ModEq
 import Mathlib.Init.Data.Nat.Lemmas
+import Mathlib.Data.Vector.Basic
 import Risc0.Wheels
+
+instance {n} : HShiftRight (Bitvec n) ℕ (Bitvec n) := ⟨Bitvec.ushr⟩
+instance {n} : HShiftRight (Vector Bool n) ℕ (Bitvec n) := ⟨Bitvec.ushr⟩
+instance {n} : HAnd (Bitvec n) (Bitvec n) (Bitvec n) := ⟨Bitvec.and⟩
+
+prefix:max "←ℕ" => Bitvec.ofNat 32
+prefix:max "→ℕ" => Bitvec.toNat
+
+instance {n} : HAnd (Bitvec n) (Bitvec n) (Bitvec n) := ⟨Bitvec.and⟩
 
 @[simp]
 theorem Vector.map₂_cons (hd₁ : α) (tl₁ : Vector α n) (hd₂ : β) (tl₂ : Vector β n) (f : α → β → γ) :
@@ -284,8 +294,9 @@ lemma Bitvec.allOnes_get {m n : ℕ} {i : Fin m} : Vector.get (Bitvec.ofNat m (a
     simp
 
 theorem Bitvec.and_allOnes_eq_get' {n m : ℕ} {x : Bitvec m} {i : Fin m} (h : n ≤ m): 
-  (Bitvec.and x (Bitvec.ofNat m (allOnes n))).get i = if i < m - n then false else x.get i := by
+  (x &&& (Bitvec.ofNat m (allOnes n))).get i = if i < m - n then false else x.get i := by
   rcases i with ⟨i, h'⟩ 
+  dsimp [(· &&& ·)]
   unfold Bitvec.and
   simp
   rw [Bitvec.allOnes_get' h]
@@ -306,10 +317,10 @@ theorem Bitvec.and_allOnes_eq_get' {n m : ℕ} {x : Bitvec m} {i : Fin m} (h : n
     exact ⟨h'', rfl⟩
 
 theorem Bitvec.and_allOnes_eq_get {n m : ℕ} {x : Bitvec m} {i : Fin m}: 
-  (Bitvec.and x (Bitvec.ofNat m (allOnes n))).get i = if i < m - n then false else x.get i := by
+  (x &&& (Bitvec.ofNat m (allOnes n))).get i = if i < m - n then false else x.get i := by
   by_cases h : n ≤ m
   · rw [Bitvec.and_allOnes_eq_get' h]
-  · unfold Bitvec.and
+  · dsimp [(· &&& ·)]; unfold Bitvec.and
     simp
     rw [Bitvec.allOnes_get]
     simp at h
@@ -366,10 +377,10 @@ theorem List.get?_replicate {α : Type u_1} {a : α} {n : Nat} {m : ℕ} (h : m 
   simp
 
 theorem Bitvec.ushr_full_length {n m : ℕ} {x : Bitvec n} (h : n ≤ m) :
-  x.ushr m = Vector.replicate n false := by
+  x >>> m = Vector.replicate n false := by
+  dsimp [(·>>>·), ushr, fillShr]
   apply Vector.ext
   intro i
-  unfold ushr fillShr
   rw [@Bitvec.get_cong _ _ _ ⟨i, by {
     simp
     rw [Nat.add_comm, Nat.sub_add_min_cancel]
@@ -393,14 +404,14 @@ theorem Bitvec.ushr_full_length {n m : ℕ} {x : Bitvec n} (h : n ≤ m) :
   
 
 theorem Bitvec.ushr_alternative₁ {n m : ℕ} {x : Bitvec n} {i : Fin n} (h : i < m) :
-  (x.ushr m).get i = false := by
+  (x >>> m).get i = false := by
   by_cases le : n ≤ m
   · rw [Bitvec.ushr_full_length le]
     rw [Vector.get_eq_get, ←Option.some_inj]
     unfold Vector.replicate
     simp
   · have h_lt := Nat.lt_of_not_le le
-    unfold ushr fillShr
+    dsimp [(·>>>·), ushr, fillShr]
     rw [@Bitvec.get_cong _ _ _ ⟨i, by {
       simp
       rw [Nat.add_comm, Nat.sub_add_min_cancel]
@@ -418,13 +429,13 @@ theorem Bitvec.ushr_alternative₁ {n m : ℕ} {x : Bitvec n} {i : Fin n} (h : i
     simp [h]
 
 theorem Bitvec.ushr_alternative₂ {n m : ℕ} {x : Bitvec n} {i : Fin n} (h : m ≤ i) :
-  (x.ushr m).get i = x.get ⟨i - m, Nat.lt_of_le_of_lt (Nat.sub_le _ _) (i.isLt)⟩ := by
+  (x >>> m).get i = x.get ⟨i - m, Nat.lt_of_le_of_lt (Nat.sub_le _ _) (i.isLt)⟩ := by
   by_cases le : n ≤ m
   · rcases i with ⟨i, h_i⟩
     simp at *
     linarith
   · have h_lt := Nat.lt_of_not_le le
-    unfold ushr fillShr
+    dsimp [(·>>>·), ushr, fillShr]
     rw [@Bitvec.get_cong _ _ _ ⟨i, by {
       simp
       rw [Nat.add_comm, Nat.sub_add_min_cancel]
@@ -458,37 +469,36 @@ theorem Bitvec.ushr_alternative₂ {n m : ℕ} {x : Bitvec n} {i : Fin n} (h : m
     })]
     simp
 
+-- Boy are dependent types fun or what? (Shoudl be simp but breaks proofs.)
+lemma Vector.nil_append {vec₁ : Vector α 0} {vec₂ : Vector α n} :
+  Vector.append vec₁ vec₂ =
+    ⟨vec₂.toList,
+      of_eq_true ((congr (congrArg Eq (toList_length vec₂)) (zero_add n)).trans (eq_self n))
+    ⟩ := by
+  cases vec₂; rcases vec₁ with ⟨_ | ⟨_, _⟩, contra⟩
+  · simp [append]
+  · congr; simp at contra
 
 @[simp]
 theorem Bitvec.ushr_zero {n : ℕ} {x : Bitvec n} : 
-  x.ushr 0 = x := by
-  unfold ushr fillShr
-  apply Vector.ext
-  rintro ⟨m, h⟩ 
-  rw [@Bitvec.get_cong _ _ _ ⟨m, by aesop⟩ _ (by aesop) (by simp)]
-  rw [Vector.get_eq_get]
-  rw [Vector.get_eq_get]
-  rw [←Option.some_inj]
-  rw [←List.get?_eq_get]
-  rw [←List.get?_eq_get]
-  simp
-  rw [List.get?_append_right (by simp [Vector.replicate])]
-  rw [List.get?_take (by simp [Vector.replicate, h])]
-  simp [Vector.replicate]
+  x >>> 0 = x := by
+  dsimp [(·>>>·), ushr, fillShr]; congr <;> simp
+  rcases x with ⟨x, h⟩; rw [min_zero]; simp [Vector.nil_append]
+  congr <;> simp [h]; aesop
 
 theorem Bitvec.ushr_and_commute {n m : ℕ} {x y : Bitvec n} : 
-  (Bitvec.and x y).ushr m = Bitvec.and (x.ushr m) (y.ushr m) := by
+  (x &&& y) >>> m = (x >>> m) &&& (y >>> m) := by
   apply Vector.ext
   rintro ⟨i, h⟩ 
   by_cases lt : i < m
-  · unfold Bitvec.and
+  · dsimp [(· &&& ·), Bitvec.and]
     rw [Bitvec.ushr_alternative₁ (by simp[lt]),
         Vector.get_map₂,
         Bitvec.ushr_alternative₁ (by simp[lt])]
     simp
   · have lt := Nat.le_of_not_lt lt
     rw [Bitvec.ushr_alternative₂ (by simp[lt])]
-    unfold Bitvec.and
+    dsimp [(· &&& ·), Bitvec.and]
     rw [Vector.get_map₂,
         Vector.get_map₂,
         Bitvec.ushr_alternative₂ (by simp[lt]),
@@ -540,15 +550,15 @@ theorem Bitvec.allOnes_eq_cons {n m : ℕ} (h : n ≤ m):
       rw [eq]
 
 theorem Bitvec.and_comm {n : ℕ} {x y : Bitvec n} :
-  Bitvec.and x y = Bitvec.and y x := by
-  unfold Bitvec.and
+  x &&& y = y &&& x := by
+  dsimp [(· &&& ·), Bitvec.and]
   apply Vector.ext
   rintro ⟨m, h⟩
   rw [Vector.get_map₂, Vector.get_map₂, Bool.and_comm]
 
 theorem Bitvec.and_assoc {n : ℕ} {x y z : Bitvec n} : 
-  Bitvec.and (Bitvec.and x y) z = Bitvec.and x (Bitvec.and y z) := by
-  unfold Bitvec.and 
+  (x &&& y) &&& z = x &&& (y &&& z) := by
+  dsimp [(· &&& ·), Bitvec.and]
   apply Vector.ext
   rintro ⟨m, h⟩
   rw [Vector.get_map₂, Vector.get_map₂, Vector.get_map₂, Vector.get_map₂, Bool.and_assoc]
@@ -599,8 +609,8 @@ theorem Bitvec.toNat_replicate_false_eq_zero {n : ℕ}  :
 
 @[simp]
 theorem Bitvec.replicate_zero_and_x_eq_replicate_zero {n : ℕ} {x : Bitvec n} :
-  Bitvec.and (Vector.replicate n false) x = Vector.replicate n false := by
-  unfold Bitvec.and
+  (Vector.replicate n false) &&& x = Vector.replicate n false := by
+  dsimp [(· &&& ·), Bitvec.and]
   apply Vector.ext
   intros m
   simp [Vector.get_map₂, Vector.get_replicate]
@@ -800,15 +810,15 @@ theorem Bitvec.toNat_oneBitSetVec_eq_oneBitSet {n : ℕ} {m : Fin n} :
 
 
 lemma oneSetBit_and {n : ℕ} {m : Fin n} {x : Bitvec n} : 
-  (Bitvec.and x (oneBitSetVec n m)) = Vector.replicate n false 
-    ∨ (Bitvec.and x (oneBitSetVec n m)) = oneBitSetVec n m  := by
+  (x &&& (oneBitSetVec n m)) = Vector.replicate n false 
+    ∨ (x &&& (oneBitSetVec n m)) = oneBitSetVec n m  := by
   generalize eq : Vector.get x m = s
   cases s
   · left
     unfold oneBitSetVec
     apply Vector.ext
     intros i
-    unfold Bitvec.and
+    dsimp [(· &&& ·), Bitvec.and]
     rw [Vector.get_map₂]
     rw [Vector.get_set_eq_if]
     by_cases eq': i = m
@@ -820,7 +830,7 @@ lemma oneSetBit_and {n : ℕ} {m : Fin n} {x : Bitvec n} :
       tauto
   · right
     apply Vector.ext
-    unfold oneBitSetVec Bitvec.and
+    dsimp [(· &&& ·), Bitvec.and, oneBitSetVec]
     intros i
     rw [Vector.get_map₂]
     rw [Vector.get_set_eq_if]
@@ -1147,8 +1157,8 @@ theorem Bitvec.two_bits_set' {n : ℕ} {i j : Fin n} (h : i ≠ j) :
   simp [h', h'']
 
 theorem Bitvec.or_and_distr_left {n : ℕ} {x y z : Bitvec n}:
-  Bitvec.and x (Bitvec.or y z) = Bitvec.or (Bitvec.and x y) (Bitvec.and x z) := by
-  unfold Bitvec.and Bitvec.or
+  x &&& (Bitvec.or y z) = Bitvec.or (x &&& y) (x &&& z) := by
+  dsimp [(· &&& ·), Bitvec.and, Bitvec.or]
   apply Vector.ext
   intro m
   rw [Vector.get_map₂, Vector.get_map₂, Vector.get_map₂, Vector.get_map₂, Vector.get_map₂, Bool.and_or_distrib_left]
@@ -1172,10 +1182,10 @@ theorem Bitvec.or_comm {n : ℕ} {x y : Bitvec n} :
   
 
 theorem Bitvec.twoBitSet_and {n : ℕ} {i j : Fin n} {x : Bitvec n} : 
-  (Bitvec.and x (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))) = Vector.replicate n false 
-    ∨ (Bitvec.and x (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))) = oneBitSetVec n i
-    ∨ (Bitvec.and x (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))) = oneBitSetVec n j
-    ∨ (Bitvec.and x (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))) = (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))  := by
+  (x &&& (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))) = Vector.replicate n false 
+    ∨ (x &&& (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))) = oneBitSetVec n i
+    ∨ (x &&& (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))) = oneBitSetVec n j
+    ∨ (x &&& (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))) = (Bitvec.or (oneBitSetVec n i) (oneBitSetVec n j))  := by
   rw [Bitvec.or_and_distr_left]
   rcases (@oneSetBit_and _ i x) with h | h; rw [h]
   · rcases (@oneSetBit_and _ j x) with h' | h'; rw [h']
@@ -1291,7 +1301,7 @@ lemma Bitvec.ofNat_succ_allOnes_1 {n : ℕ} (h : 1 ≤ n):
 
 @[simp]
 theorem Bitvec.toNat_false_cons {n : ℕ} {x : Bitvec n} :
-  Bitvec.toNat (false ::ᵥ x) = x.toNat := by
+  →ℕ (false ::ᵥ x) = x.toNat := by
   match x with
   | ⟨.nil, _⟩ => aesop
   | ⟨.cons b x, _⟩ => 
@@ -1353,7 +1363,7 @@ theorem Bitvec.ofNat_true_cons {n x: ℕ} (h : x < 2^n):
 
 @[simp]
 theorem Bitvec.toNat_true_cons {n : ℕ} {x : Bitvec n} :
-  Bitvec.toNat (true ::ᵥ x) = 2^n + x.toNat := by
+  →ℕ (true ::ᵥ x) = 2^n + x.toNat := by
   have h : 2^n + x.toNat = (2^n + x.toNat) % 2 ^ n.succ := by
     rw [Nat.mod_eq_of_lt]
     rw [Nat.add_comm]
@@ -1372,26 +1382,29 @@ theorem Bitvec.ofNat_nil {x : ℕ}:
   Bitvec.ofNat 0 x = Vector.nil := by simp [Bitvec.ofNat]
 
 lemma Bitvec.lastBit' {x : Bitvec 1} :
-  Bitvec.toNat (Bitvec.and x (Bitvec.ofNat 1 (allOnes 1))) = x.toNat % 2 := by
+  →ℕ (x &&& (Bitvec.ofNat 1 (allOnes 1))) = x.toNat % 2 := by
   rcases x with ⟨x, h⟩
   rcases x with _ | ⟨b, x⟩; try tauto
   rcases x with _ | ⟨b, x⟩
   · rw [Bitvec.ofNat_succ]
     simp [Bitvec.ofNat_nil]
-    unfold Bitvec.and Vector.map₂ Vector.append Bitvec.toNat bitsToNat addLsb
+    -- Here Vector.append has been unfolded - see Vector.nil_append defined above
+    dsimp [(· &&& ·)]
+    unfold Bitvec.and Vector.map₂ Bitvec.toNat bitsToNat addLsb
     simp
     cases b; try aesop
     aesop
   · rw [Bitvec.ofNat_succ]
     simp [Bitvec.ofNat_nil]
-    unfold Bitvec.and Vector.map₂ Vector.append Bitvec.toNat bitsToNat addLsb
+    dsimp [(· &&& ·)]
+    unfold Bitvec.and Vector.map₂ Bitvec.toNat bitsToNat addLsb
     simp
     cases b; try aesop
     aesop
   
 
 lemma Bitvec.lastBit'' {n : ℕ} {x : Bitvec n} (h : 1 < n):
-  Bitvec.toNat (Bitvec.and x (Bitvec.ofNat n (allOnes 1))) = x.toNat % 2 := by
+  Bitvec.toNat (x &&& (Bitvec.ofNat n (allOnes 1))) = x.toNat % 2 := by
   induction x using Vector.inductionOn with
   | h_nil => simp
   | @h_cons n b x ih =>
@@ -1408,7 +1421,8 @@ lemma Bitvec.lastBit'' {n : ℕ} {x : Bitvec n} (h : 1 < n):
       rcases x with ⟨x, hx⟩
       rcases x with _ | ⟨a, x⟩; try tauto
       rcases x with _ | ⟨a, x⟩
-      · unfold Bitvec.toNat Bitvec.and bitsToNat addLsb
+      · dsimp [(· &&& ·)]
+        unfold Bitvec.toNat Bitvec.and bitsToNat addLsb
         simp
         ring_nf
         simp [Nat.add_mod]
@@ -1417,6 +1431,7 @@ lemma Bitvec.lastBit'' {n : ℕ} {x : Bitvec n} (h : 1 < n):
       · simp at hx
     · have h := Nat.lt_of_le_of_ne h (Ne.symm eq)
       rw [Bitvec.ofNat_succ_allOnes_1 (Nat.le_of_lt h)]
+      dsimp [(· &&& ·)] at *
       unfold Bitvec.and
       simp only [Vector.map₂_cons, Bool.and_false, toNat_false_cons]
       unfold Bitvec.and at ih
@@ -1430,7 +1445,7 @@ lemma Bitvec.lastBit'' {n : ℕ} {x : Bitvec n} (h : 1 < n):
       simp
 
 theorem Bitvec.lastBit {n : ℕ} {x : Bitvec n} (h : 1 ≤ n): 
-  Bitvec.toNat (Bitvec.and x (Bitvec.ofNat n (allOnes 1))) = x.toNat % 2 := by
+  Bitvec.toNat (x &&& (Bitvec.ofNat n (allOnes 1))) = x.toNat % 2 := by
   by_cases eq : 1 = n
   · subst eq
     rw [Bitvec.lastBit']
@@ -1439,7 +1454,7 @@ theorem Bitvec.lastBit {n : ℕ} {x : Bitvec n} (h : 1 ≤ n):
 
 @[simp]
 theorem Bitvec.toNat_nil :
-  Bitvec.toNat Vector.nil = 0 := by simp
+  →ℕ Vector.nil = 0 := by simp
 
 @[simp]
 theorem Bitvec.ushr_nil {m : ℕ} :
@@ -1447,7 +1462,7 @@ theorem Bitvec.ushr_nil {m : ℕ} :
 
 @[simp]
 theorem Bitvec.ushr_cons_false {m n: ℕ} {x : Bitvec n}:
-  Bitvec.ushr (false ::ᵥ x) m = false ::ᵥ Bitvec.ushr x m := by
+  (false ::ᵥ x) >>> m = false ::ᵥ x >>> m := by
   apply Vector.ext
   rintro ⟨i, hi⟩
   by_cases lt : i < m
@@ -1490,17 +1505,17 @@ theorem Bitvec.ushr_cons_false {m n: ℕ} {x : Bitvec n}:
       
 @[simp]
 theorem Bitvec.toNat_cong {a b : ℕ} {x : Bitvec a} {h : a = b}:
-  Bitvec.toNat (Bitvec.cong h x) = Bitvec.toNat x := by
+  →ℕ (Bitvec.cong h x) = Bitvec.toNat x := by
   unfold Bitvec.cong Bitvec.toNat
   rcases x with ⟨x, _⟩ 
   simp
 
 @[simp]
 theorem Bitvec.toNat_append_full {n m: ℕ} {x : Bitvec n} {y : Bitvec m} :
-  Bitvec.toNat (Vector.append x y) = 2^m * (Bitvec.toNat x) + Bitvec.toNat y := by
+  →ℕ (Vector.append x y) = 2^m * (→ℕ x) + (→ℕ y) := by
   induction x using Vector.inductionOn generalizing m y with
   | h_nil => 
-    simp
+    simp -- Let's not spend too much time :).
     have h : Vector.append Vector.nil y = Bitvec.cong (by simp) y := by
       apply Vector.ext
       rintro ⟨i, hi⟩
@@ -1531,7 +1546,7 @@ theorem Bitvec.toNat_append_full {n m: ℕ} {x : Bitvec n} {y : Bitvec m} :
       simp
   
 theorem Bitvec.ushr_eq {n m : ℕ} {x : Bitvec n} (h : m ≤ n) :
-  x.ushr m = Bitvec.cong (by simp [Nat.add_sub_cancel', h]) (Vector.append (Vector.replicate m false) (Vector.take (n - m) x)) := by
+  x >>> m = Bitvec.cong (by simp [Nat.add_sub_cancel', h]) (Vector.append (Vector.replicate m false) (Vector.take (n - m) x)) := by
   apply Vector.ext
   rintro ⟨i, hi⟩
   by_cases lt : i < m
@@ -1648,7 +1663,7 @@ theorem Bitvec.toNat_take {n m : ℕ} {x : Bitvec n} (h : m < n) :
 
 
 theorem Bitvec.ushr_toNat {n m : ℕ} {x : Bitvec n} :
-  x.toNat / (2 ^ m) = (x.ushr m).toNat := by
+  x.toNat / (2 ^ m) = (x >>> m).toNat := by
   by_cases le : m ≤ n
   · rw [Bitvec.ushr_eq le]
     simp
@@ -1669,7 +1684,7 @@ theorem Bitvec.ushr_toNat {n m : ℕ} {x : Bitvec n} :
     rw [Nat.div_eq_zero (Nat.lt_trans (Bitvec.toNat_lt _) (Nat.pow_lt_pow_of_lt_right (by linarith) lt))]
 
 theorem Bitvec.ushr_ofNat {n m x: ℕ} (h: x < 2 ^ n) :
-  ((Bitvec.ofNat n x).ushr m) = Bitvec.ofNat n (x / 2 ^ m) := by
+  (Bitvec.ofNat n x >>> m) = Bitvec.ofNat n (x / 2 ^ m) := by
   have h' : x = x % (2 ^ n) := by rw [Nat.mod_eq_of_lt h]
   symm
   rw [h', ←Bitvec.toNat_ofNat,
@@ -1678,7 +1693,7 @@ theorem Bitvec.ushr_ofNat {n m x: ℕ} (h: x < 2 ^ n) :
       Bitvec.ofNat_toNat]
 
 theorem Bitvec.allOnes_ushr {n m i : ℕ} (h : i ≤ n) (h' : m ≤ i):
-  Bitvec.ushr (Bitvec.ofNat n (allOnes i)) m = Bitvec.ofNat n (allOnes (i - m)) := by
+  Bitvec.ofNat n (allOnes i) >>> m = Bitvec.ofNat n (allOnes (i - m)) := by
   rw [Bitvec.ushr_ofNat (by {
     simp [allOnes]
     exact Nat.lt_of_lt_of_le (Nat.sub_lt (by simp) (by linarith)) (Nat.pow_le_pow_of_le_right (by linarith) h)
@@ -1927,7 +1942,7 @@ theorem Bitvec.drop_ofNat' {m n x : ℕ} (h : m ≤ n):
   rw [←h']
 
 theorem Bitvec.ofNat_and_allOnes {n m : ℕ} {x : Bitvec n} :
-  Bitvec.and x (Bitvec.ofNat n (allOnes (m : ℕ))) = Bitvec.ofNat n (x.toNat % (2 ^ m)) := by
+  x &&& (Bitvec.ofNat n (allOnes (m : ℕ))) = Bitvec.ofNat n (x.toNat % (2 ^ m)) := by
   by_cases le : m ≤ n
   · rw [←Bitvec.toNat_ofNat,
         @Bitvec.drop_ofNat m n _ le]
@@ -1972,7 +1987,7 @@ theorem Bitvec.ofNat_and_allOnes {n m : ℕ} {x : Bitvec n} :
 
 
 theorem Bitvec.toNat_and_allOnes {n m : ℕ} {x : Bitvec n} :
-  Bitvec.toNat (Bitvec.and x (Bitvec.ofNat n (allOnes (m : ℕ)))) = x.toNat % (2 ^ m) := by
+  →ℕ (x &&& (Bitvec.ofNat n (allOnes (m : ℕ)))) = (→ℕ x) % (2 ^ m) := by
   by_cases lt : m < n
   · rw [Bitvec.ofNat_and_allOnes,
         Bitvec.toNat_ofNat,
@@ -1996,8 +2011,8 @@ theorem Bitvec.toNat_and_allOnes {n m : ℕ} {x : Bitvec n} :
     
 
 theorem Bitvec.and_ofNat_allOnes {n m x : ℕ} (h : x < 2 ^ m) (h' : m ≤ n):
-  Bitvec.ofNat n x = Bitvec.and (Bitvec.ofNat n x) (Bitvec.ofNat n (allOnes m)) := by
-  rw [←Bitvec.ofNat_toNat (Bitvec.and (Bitvec.ofNat n x) (Bitvec.ofNat n (allOnes m))), 
+  Bitvec.ofNat n x = (Bitvec.ofNat n x) &&& (Bitvec.ofNat n (allOnes m)) := by
+  rw [←Bitvec.ofNat_toNat ((Bitvec.ofNat n x) &&& (Bitvec.ofNat n (allOnes m))), 
       Bitvec.toNat_and_allOnes,
       Bitvec.toNat_ofNat,
       Nat.mod_eq_of_lt (by {
