@@ -49,7 +49,7 @@ elab "MLIR_states" : tactic => do
 elab "MLIR_states_new" : tactic => do
   evalTactic <| ← `(tactic| simp [
     getImpl, isGetValid, Buffer.back, Option.get!,
-    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Buffer.get!, State.set!, State.setBufferElementImpl_def, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
     State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
     State.props_if_eq
@@ -58,7 +58,7 @@ elab "MLIR_states_new" : tactic => do
 elab "MLIR_states_new?" : tactic => do
   evalTactic <| ← `(tactic| simp? [
     getImpl, isGetValid, Buffer.back, Option.get!,
-    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Buffer.get!, State.set!, State.setBufferElementImpl_def, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
     State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
     State.props_if_eq
@@ -67,7 +67,7 @@ elab "MLIR_states_new?" : tactic => do
 elab "MLIR_states_new'" : tactic => do
   evalTactic <| ← `(tactic| simp only [
     getImpl, isGetValid, Buffer.back, Option.get!,
-    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Buffer.get!, State.set!, State.setBufferElementImpl_def, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
     State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
     State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
@@ -79,7 +79,7 @@ elab "MLIR_states_new'" : tactic => do
 elab "MLIR_states_new'?" : tactic => do
   evalTactic <| ← `(tactic| simp? only [
     getImpl, isGetValid, Buffer.back, Option.get!,
-    Buffer.get!, State.set!, State.setBufferElementImpl, State.set!, Buffer.set?,
+    Buffer.get!, State.set!, State.setBufferElementImpl_def, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
     State.cycle_if_eq, State.isFailed_if_eq, State.vars_if_eq, State.props_if_eq,
     State.props_if_eq, Map.fromList_cons, Map.fromList_nil, getImpl, isGetValid, le_refl, List.find?, List.mem_cons,
