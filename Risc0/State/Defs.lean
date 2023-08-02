@@ -66,6 +66,11 @@ namespace Risc0
         | .some b => {st with buffers := st.buffers[bufferVar] ←ₘ b}
         | .none   => {st with isFailed := true}
 
+    lemma setBufferElementImpl_def : setBufferElementImpl st bufferVar idx val = 
+      match (st.buffers[bufferVar].get!).set? idx val with
+        | .some b => {st with buffers := st.buffers[bufferVar] ←ₘ b}
+        | .none   => {st with isFailed := true} := rfl
+
     -- TODO rename, notation
     def set! (st : State) (bufferVar : BufferVar) (offset : ℕ) (val : Felt) : State :=
       st.setBufferElementImpl bufferVar (((st.buffers[bufferVar].get!).length - 1), offset) val
