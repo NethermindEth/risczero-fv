@@ -10,35 +10,30 @@ open MLIRNotation
 -- The state obtained by running Code.part0 on st
 def part0_state (st: State) : State :=
   
-        ((State.set!
-            ((st["%1"] ←ₛ
-                getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
-              if
-                  Option.get!
-                      (State.felts (st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
-                        { name := "%1" : FeltVar }) =
-                    (0 : Felt) then
-                (1 : Felt)
-              else (0 : Felt))
+        ((((st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
+                if
+                    ((st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ)).felts
+                          { name := "%1" : FeltVar }).get! =
+                      (0 : Felt) then
+                  (1 : Felt)
+                else (0 : Felt)).set!
             { name := "data" : BufferVar } (0 : ℕ)
             (if
-                Option.get!
-                    (State.felts (st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
-                      { name := "%1" : FeltVar }) =
+                ((st["%1"] ←ₛ getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ)).felts
+                      { name := "%1" : FeltVar }).get! =
                   (0 : Felt) then
               (1 : Felt)
             else (0 : Felt)))[felts][{ name := "%5" : FeltVar }] ←
           if
-              Option.get!
-                  (st["%1"] ←ₛ
-                        getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ)).felts[{ name := "%1" : FeltVar }] =
+              (st["%1"] ←ₛ
+                        getImpl st { name := "in" : BufferVar } (0 : Back)
+                          (0 : ℕ)).felts[{ name := "%1" : FeltVar }].get! =
                 (0 : Felt) then
             (0 : Felt)
           else
-            (Option.get!
-                (st["%1"] ←ₛ
+            (st["%1"] ←ₛ
                       getImpl st { name := "in" : BufferVar } (0 : Back)
-                        (0 : ℕ)).felts[{ name := "%1" : FeltVar }])⁻¹) 
+                        (0 : ℕ)).felts[{ name := "%1" : FeltVar }].get!⁻¹) 
 
 def part0_drops (st: State) : State :=
   st
@@ -54,7 +49,7 @@ lemma part0_wp {st : State} {data0 data1 : Option Felt} :
   generalize eq : (Code.part1;Code.part2;dropfelt ⟨"%1"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%2"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%6"⟩) = prog
   unfold Code.part0
   MLIR
-  rewrite [←eq]
+  simp [←eq]
   
   unfold part0_state_update part0_drops part0_state
   rfl

@@ -10,21 +10,18 @@ open MLIRNotation
 -- The state obtained by running Code.part0 on st
 def part0_state (st: State) : State :=
   
-        ((State.set!
-            ((st["%2"] ←ₛ
-                getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%12" : FeltVar }] ←
-              if
-                  Option.get!
-                      (State.felts (st["%2"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))
-                        { name := "%2" : FeltVar }) =
-                    (0 : Felt) then
-                (1 : Felt)
-              else (0 : Felt))
+        ((((st["%2"] ←ₛ
+                  getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%12" : FeltVar }] ←
+                if
+                    ((st["%2"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ)).felts
+                          { name := "%2" : FeltVar }).get! =
+                      (0 : Felt) then
+                  (1 : Felt)
+                else (0 : Felt)).set!
             { name := "data" : BufferVar } (0 : ℕ)
             (if
-                Option.get!
-                    (State.felts (st["%2"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))
-                      { name := "%2" : FeltVar }) =
+                ((st["%2"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ)).felts
+                      { name := "%2" : FeltVar }).get! =
                   (0 : Felt) then
               (1 : Felt)
             else (0 : Felt)))[felts][{ name := "%0" : FeltVar }] ←
@@ -44,7 +41,7 @@ lemma part0_wp {st : State} {data0 data1 : Option Felt} :
   generalize eq : (dropfelt ⟨"%12"⟩;Code.part1;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩;Code.part2;dropfelt ⟨"%2"⟩;dropfelt ⟨"%4"⟩;Code.part3;dropfelt ⟨"%6"⟩;dropfelt ⟨"%7"⟩;dropfelt ⟨"%8"⟩;Code.part4;dropfelt ⟨"%0"⟩;dropfelt ⟨"%3"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%9"⟩;dropfelt ⟨"%10"⟩;Code.part5;dropfelt ⟨"%11"⟩;dropfelt ⟨"%1"⟩) = prog
   unfold Code.part0
   MLIR
-  rewrite [←eq]
+  simp [←eq]
   rewrite [MLIR.run_seq_def,MLIR.run_dropfelt]
   unfold part0_state_update part0_drops part0_state
   rfl

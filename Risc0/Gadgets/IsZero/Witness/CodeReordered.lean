@@ -14,7 +14,7 @@ lemma optimised_behaviour1 :
   getReturn (opt1.runProgram st) res := by
     unfold getReturn MLIR.runProgram full
     rewrite[opt_swap (const_past_get (by trivial)),opt_swap_nondet_seq (const_past_isz (by trivial) (by trivial)),opt_swap_nondet_seq (const_past_set (by trivial)),opt_swap_nondet_seq (const_past_inv (by trivial) (by trivial)),opt_swap_nondet_single (const_past_set (by trivial)),opt_swap (const_past_get (by trivial)),opt_swap (const_past_if  (by trivial) (const_past_eqz (by trivial)))]
-    simp only [←MLIR.run_nondet]
+    try simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←MLIR.run_seq_def,←MLIR.run_seq_def,←step_nondet,←step_nondet,←step_nondet,←MLIR.run_seq_def]
     unfold opt1

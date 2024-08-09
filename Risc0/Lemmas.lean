@@ -1,8 +1,5 @@
-import Mathlib.Data.Nat.Prime
-import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
-import Mathlib.Tactic.LibrarySearch
 
 import Risc0.Cirgen
 import Risc0.State

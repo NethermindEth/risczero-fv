@@ -44,8 +44,8 @@ namespace Risc0.State
       State.dropFelts (st[k] ←ₛ getImpl st buf back offset) y := by
       unfold State.dropFelts getImpl
       by_cases h_isGetValid: (isGetValid st buf back offset)
-      . simp only [h_isGetValid, ite_true, update_val', updateFelts, ne_eq, h, not_false_eq_true, Map.update_drop_swap]
-      . simp only [update, h_isGetValid, ite_false]
+      · simp only [h_isGetValid, ite_true, update_val', updateFelts, ne_eq, h, not_false_eq_true, Map.update_drop_swap]
+      · simp only [update, h_isGetValid, ite_false]
   end GetImpl
 
   -- Naughty

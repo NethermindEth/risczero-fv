@@ -1,10 +1,8 @@
 -- This file contains the MLIR program labeled `ORIGINAL` in the `nonzero-example` output.
-import Mathlib.Data.Nat.Prime
-import Mathlib.Data.Vector
+import Mathlib.Data.Vector.Basic
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
-import Mathlib.Tactic.LibrarySearch
-import Mathlib.Tactic.FieldSimp
+import Mathlib.Tactic
 
 import Risc0.Cirgen
 import Risc0.Lemmas
@@ -24,11 +22,11 @@ theorem constraints_of_witness
   (h₁ : output.all Option.isSome) :
   -- Constraints.Code.run (Witness.Code.run (Witness.WP.start_state input)) := by
   Witness.Code.run (Witness.start_state [input]) (output) → Constraints.Code.run (Constraints.start_state [input] output) := by
-  rcases output with _ | ⟨y1, _ | ⟨y₂, ⟨_ | _⟩⟩⟩ <;> simp at *
-  simp only [Option.isSome_iff_exists] at h₁
+  rcases output with _ | ⟨y1, _ | ⟨y₂, ⟨_ | _⟩⟩⟩ <;> try simp at *
+  try try simp only [Option.isSome_iff_exists] at h₁
   rcases h₁ with ⟨⟨w₁, h₁⟩, ⟨w₂, h₂⟩⟩; subst h₁ h₂
   rw [Constraints.WP.closed_form, Witness.WP.closed_form]
-  repeat split; all_goals simp [*] at *; try intros; simp [*] at *
+  repeat split; all_goals try simp [*] at *; try intros; try simp [*] at *
   aesop'
 
 theorem spec_of_constraints {x: Felt} {y₁ y₂: Option Felt}
@@ -37,15 +35,16 @@ theorem spec_of_constraints {x: Felt} {y₁ y₂: Option Felt}
     x = 0 ∧ y₁ = some 1 ∨
     x ≠ 0 ∧ y₁ = some 0 ∧ y₂ = x⁻¹
   ) := by
-  simp only [Option.isSome_iff_exists] at hy₁
-  simp only [Option.isSome_iff_exists] at hy₂
+  try try simp only [Option.isSome_iff_exists] at hy₁
+  try try simp only [Option.isSome_iff_exists] at hy₂
   rcases hy₁ with ⟨is0, hy₁_val⟩; subst y₁
   rcases hy₂ with ⟨inv, hy₂_val⟩; subst y₂
   rewrite [Constraints.WP.closed_form]
-  simp
+  try simp
   intro hy₁ hy₂
-  simp [sub_eq_iff_eq_add, *] at *
-  aesop'
-  exact Eq.symm (inv_eq_of_mul_eq_one_right hy₂)
+  try simp [sub_eq_iff_eq_add, *] at *
+  rw [←if_true_left] at hy₁ hy₂
+  split_ifs at hy₁ hy₂ <;> aesop'
+  rw [inv_eq_of_mul_eq_one_right hy₂]
 
 end Risc0.IsZero

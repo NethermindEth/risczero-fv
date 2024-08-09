@@ -12,19 +12,15 @@ open MLIRNotation
 def part3_state (st: State) : State :=
   
         ((((st[props][{ name := "%12" : PropVar }] ←
-                (Option.get! (State.props st { name := "%9" : PropVar }) ∧
-                  Option.get! (State.felts st { name := "%11" : FeltVar }) =
-                    (0 : Felt)))[felts][{ name := "%13" : FeltVar }] ←
-              Option.get! (State.felts st { name := "%6" : FeltVar }) +
-                Option.get! (State.felts st { name := "%3" : FeltVar }))[felts][{ name := "%14" : FeltVar }] ←
-            Option.get! (State.felts st { name := "%6" : FeltVar }) +
-                Option.get! (State.felts st { name := "%3" : FeltVar }) -
-              Option.get! (State.felts st { name := "%0" : FeltVar }))[props][{ name := "%15" : PropVar }] ←
-          ((Option.get! (State.props st { name := "%9" : PropVar }) ∧
-              Option.get! (State.felts st { name := "%11" : FeltVar }) = (0 : Felt)) ∧
-            Option.get! (State.felts st { name := "%6" : FeltVar }) +
-                  Option.get! (State.felts st { name := "%3" : FeltVar }) -
-                Option.get! (State.felts st { name := "%0" : FeltVar }) =
+                ((st.props { name := "%9" : PropVar }).get! ∧
+                  (st.felts { name := "%11" : FeltVar }).get! = (0 : Felt)))[felts][{ name := "%13" : FeltVar }] ←
+              (st.felts { name := "%6" : FeltVar }).get! +
+                (st.felts { name := "%3" : FeltVar }).get!)[felts][{ name := "%14" : FeltVar }] ←
+            (st.felts { name := "%6" : FeltVar }).get! + (st.felts { name := "%3" : FeltVar }).get! -
+              (st.felts { name := "%0" : FeltVar }).get!)[props][{ name := "%15" : PropVar }] ←
+          (((st.props { name := "%9" : PropVar }).get! ∧ (st.felts { name := "%11" : FeltVar }).get! = (0 : Felt)) ∧
+            (st.felts { name := "%6" : FeltVar }).get! + (st.felts { name := "%3" : FeltVar }).get! -
+                (st.felts { name := "%0" : FeltVar }).get! =
               (0 : Felt))) 
 
 def part3_drops (st: State) : State :=
@@ -38,7 +34,7 @@ def part3_state_update (st: State): State :=
 lemma part3_wp {st : State}:
   Code.getReturn (MLIR.runProgram (Code.part3;dropfelt ⟨"%3"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩) st) ↔
   Code.getReturn (part3_state_update st) := by
-  unfold MLIR.runProgram; simp only
+  unfold MLIR.runProgram; try simp only
   generalize eq : (dropfelt ⟨"%3"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%6"⟩;dropfelt ⟨"%11"⟩;dropfelt ⟨"%13"⟩;dropfelt ⟨"%14"⟩) = prog
   unfold Code.part3
   MLIR
@@ -50,7 +46,7 @@ lemma part3_wp {st : State}:
 lemma part3_updates_opaque {st : State} : 
   Code.getReturn (part2_state_update st) ↔
   Code.getReturn (part3_state_update (part2_drops (part2_state st))) := by
-  simp [part2_state_update, part3_wp]
+  try simp [part2_state_update, part3_wp]
 
 lemma part3_cumulative_wp {code0 data0 data1: Felt} :
   Code.run (start_state ([code0]) ([data0, data1])) ↔
@@ -58,12 +54,11 @@ lemma part3_cumulative_wp {code0 data0 data1: Felt} :
       (part3_state_update
         ((((((({
                         buffers :=
-                          ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
+                          (Map.empty[{ name := "data" : BufferVar }] ←ₘ
                               [[some data0, some data1]])[{ name := "code" : BufferVar }] ←ₘ
                             [[some code0]],
                         bufferWidths :=
-                          ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
-                              (2 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
+                          (Map.empty[{ name := "data" : BufferVar }] ←ₘ (2 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
                             (1 : ℕ),
                         cycle := (0 : ℕ), felts := Map.empty, isFailed := False, props := Map.empty,
                         vars :=
@@ -86,15 +81,15 @@ lemma part3_cumulative_wp {code0 data0 data1: Felt} :
     -- MLIR_states_updates
     unfold part2_drops
     -- 3 drops
-    simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
+    try simp [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
     rewrite [State.dropFelts]
-    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
-    simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    try simp [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    try simp [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
-    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- try simp [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- there are statements after an if
-    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths, State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
+    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
 lemma closed_form {code0 data0 data1: Felt} :
   Code.run (start_state ([code0]) ([data0, data1])) ↔
@@ -110,16 +105,16 @@ lemma closed_form {code0 data0 data1: Felt} :
     -- MLIR_states_updates
     unfold part3_drops
     -- 6 drops
-    simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
+    try simp [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
     rewrite [State.dropFelts]
-    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
-    simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    try simp [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    try simp [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
-    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- try simp [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- there are statements after an if
-    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths, State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
+    try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
     unfold Code.getReturn
-    simp only
-    simp only [Code.getReturn, State.constraintsInVar, State.updateProps_props_get_wobbly, Option.getD_some]
+    try simp only
+    try simp only [Code.getReturn, State.constraintsInVar, State.updateProps_props_get_wobbly, Option.getD_some]
 end Risc0.OneHot2.Constraints.WP

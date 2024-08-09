@@ -1,5 +1,3 @@
-import Mathlib.Data.Nat.Prime
-import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Tactic.FieldSimp
@@ -17,7 +15,7 @@ open Lean Elab Tactic
 open Op in
 elab "simp_op" : tactic => do
   evalTactic <| ← `( tactic|
-    simp only [
+    try simp only [
       eval_const, eval_true, eval_getBuffer, eval_add, eval_sub,
       eval_mul, eval_isz, eval_inv, eval_andEqz, eval_andCond
     ]
@@ -47,7 +45,7 @@ elab "MLIR_states" : tactic => do
   evalTactic <| ← `(tactic| repeat MLIR_state)
 
 elab "MLIR_states_new" : tactic => do
-  evalTactic <| ← `(tactic| simp [
+  evalTactic <| ← `(tactic| try simp [
     getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl_def, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
@@ -56,7 +54,7 @@ elab "MLIR_states_new" : tactic => do
   ])
 
 elab "MLIR_states_new?" : tactic => do
-  evalTactic <| ← `(tactic| simp? [
+  evalTactic <| ← `(tactic| try simp? [
     getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl_def, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
@@ -65,7 +63,7 @@ elab "MLIR_states_new?" : tactic => do
   ])
 
 elab "MLIR_states_new'" : tactic => do
-  evalTactic <| ← `(tactic| simp only [
+  evalTactic <| ← `(tactic| try simp only [
     getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl_def, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
@@ -77,7 +75,7 @@ elab "MLIR_states_new'" : tactic => do
   ])
 
 elab "MLIR_states_new'?" : tactic => do
-  evalTactic <| ← `(tactic| simp? only [
+  evalTactic <| ← `(tactic| try simp? only [
     getImpl, isGetValid, Buffer.back, Option.get!,
     Buffer.get!, State.set!, State.setBufferElementImpl_def, State.set!, Buffer.set?,
     Option.isEqSome, List.set, State.felts_if_eq, State.buffers_if_eq, State.bufferWidths_if_eq,
@@ -149,21 +147,21 @@ elab "MLIR_single" : tactic => do
       simp_op
     )
   )
-  evalTactic <| ← `(tactic| try simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+  evalTactic <| ← `(tactic|  simp [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
 
 elab "MLIR" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
   )
   evalTactic <| ← `(tactic| try simp only [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm])
-  evalTactic <| ← `(tactic| try simp [getImpl_skip_set_offset, Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+  evalTactic <| ← `(tactic| try simp [-if_true_left, getImpl_skip_set_offset, Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
 
 elab "MLIR?" : tactic => do
   evalTactic <| ← `(
     tactic| repeat MLIR_statement
   )
-  evalTactic <| ← `(tactic| try simp only [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm])
-  evalTactic <| ← `(tactic| try simp? [getImpl_skip_set_offset, Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
+  evalTactic <| ← `(tactic|  simp only [Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm])
+  evalTactic <| ← `(tactic|  simp? [getImpl_skip_set_offset, Buffer.back_def.symm, isGetValid_def.symm, getImpl_def.symm, -zero_le, -zero_le', -Nat.zero_le])
   
 -- elab "MLIR_statement" : tactic => do
 --   evalTactic <| ← `(
@@ -183,7 +181,7 @@ elab "MLIR?" : tactic => do
 
 elab "MLIR_decide_updates" : tactic => do
   evalTactic <| ← `(tactic|
-    simp only [
+     try simp only [
       Map.update, getElem!, ite_true, ite_false, ite_self, mul_ite, Option.get!_of_some, true_and, Option.getD_some,
       Map.fromList_cons, Map.fromList_nil, State.update_val', 
       le_refl, List.find?, List.mem_cons, ge_iff_le, tsub_eq_zero_of_le,
@@ -195,13 +193,19 @@ elab "MLIR_decide_updates" : tactic => do
       State.updateProps_buffers, State.updateProps_bufferWidths, State.updateProps_cycle, State.updateProps_isFailed, State.updateProps_felts, State.updateProps_vars, State.updateProps_props,
       State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars,
       withEqZero_buffers, withEqZero_bufferWidths, withEqZero_cycle, withEqZero_felts, withEqZero_isFailed, withEqZero_props, withEqZero_vars,
-      getImpl_skip_set_offset, List.get!, mul_zero, ne_eq
+      getImpl_skip_set_offset, List.get!, mul_zero, ne_eq, true_and,
+      List.length_singleton, Nat.lt_add_one, ↓reduceDIte, List.getElem_singleton, List.length_cons,
+      Nat.reduceAdd, List.getElem_cons_succ, List.getElem_cons_zero, Option.isSome_some, and_self
     ])
-  evalTactic <| ← `(tactic| simp only [Map.update_def.symm])
+  evalTactic <| ← `(tactic| try simp only [ decidableGetElem?, List.length_singleton, Nat.lt_add_one, ↓reduceDIte, List.get_eq_getElem,
+      List.getElem_singleton, ↓dreduceDIte, Nat.succ_eq_add_one, Option.isSome_some, Map.update_def.symm,
+      Variable.mk.injEq, String.reduceEq, ↓reduceIte, Nat.one_lt_ofNat])
+  evalTactic <| ← `(tactic| try simp only [List.length_nil, zero_add, Nat.reduceAdd, Nat.lt_add_one, ↓reduceDIte,
+      List.getElem_cons_succ, List.getElem_cons_zero, Option.isSome_some])
 
 lemma getImpl_get_of_isGetValid {x : BufferVar} {st : State} (h : isGetValid st x m n) :
   getImpl st x m n = some (Lit.Val (Option.get! (Buffer.back st x m n))) := by
-  simp [getImpl, h]
+   simp [getImpl, h]
 
 elab "MLIR_states_updates_hack" : tactic => do
   evalTactic <| ← `(
@@ -216,17 +220,22 @@ open Lean Elab Tactic in
 elab "simplify_get_hack" : tactic => do
   evalTactic <| ← `(
     tactic| (
-      rewrite [getImpl_get_of_isGetValid]; swap; unfold isGetValid; MLIR_states_updates_hack
+      try (rewrite [getImpl_get_of_isGetValid]; swap; unfold isGetValid; MLIR_states_updates_hack; try simp [Buffer.Idx.data, Buffer.getBufferAtTime!, List.length, Buffer.Idx.time])
     )
   )
 
 elab "MLIR_states_updates" : tactic => do
   evalTactic <| ← `(
     tactic| (
-      (try simplify_get_hack);
+      ( simplify_get_hack); try simp;
       MLIR_states_new';
-      -- simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get]
-      MLIR_decide_updates
+      -- try sim[ ]
+      try simp [←Map.getElem_def, Map.update_get_next, Map.update_get_next', Map.update_get, -if_true_left]
+      MLIR_decide_updates;
+      try simp [-if_true_left]
+      -- try dsimp;
+      -- MLIR_decide_updates;
+      -- try dsimp
     )
   )
 

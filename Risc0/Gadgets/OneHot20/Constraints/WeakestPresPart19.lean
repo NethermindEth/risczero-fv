@@ -12,21 +12,18 @@ open MLIRNotation
 def part19_state (st: State) : State :=
   
         ((((st[props][{ name := "%77" : PropVar }] ←
-                (Option.get! (State.props st { name := "%19" : PropVar }) ∧
-                  Option.get! (State.felts st { name := "%76" : FeltVar }) =
-                    (0 : Felt)))[felts][{ name := "%0" : FeltVar }] ←
+                ((st.props { name := "%19" : PropVar }).get! ∧
+                  (st.felts { name := "%76" : FeltVar }).get! = (0 : Felt)))[felts][{ name := "%0" : FeltVar }] ←
               (1 : Felt))["%78"] ←ₛ
             getImpl st { name := "data" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%79" : FeltVar }] ←
           (1 : Felt) -
-            Option.get!
-              (State.felts
-                (((st[props][{ name := "%77" : PropVar }] ←
-                      (Option.get! (State.props st { name := "%19" : PropVar }) ∧
-                        Option.get! (State.felts st { name := "%76" : FeltVar }) =
-                          (0 : Felt)))[felts][{ name := "%0" : FeltVar }] ←
-                    (1 : Felt))["%78"] ←ₛ
-                  getImpl st { name := "data" : BufferVar } (0 : Back) (0 : ℕ))
-                { name := "%78" : FeltVar })) 
+            ((((st[props][{ name := "%77" : PropVar }] ←
+                        ((st.props { name := "%19" : PropVar }).get! ∧
+                          (st.felts { name := "%76" : FeltVar }).get! =
+                            (0 : Felt)))[felts][{ name := "%0" : FeltVar }] ←
+                      (1 : Felt))["%78"] ←ₛ
+                    getImpl st { name := "data" : BufferVar } (0 : Back) (0 : ℕ)).felts
+                { name := "%78" : FeltVar }).get!) 
 
 def part19_drops (st: State) : State :=
   State.dropFelts (st) ⟨"%76"⟩
@@ -39,7 +36,7 @@ def part19_state_update (st: State): State :=
 lemma part19_wp {st : State} :
   Code.getReturn (MLIR.runProgram (Code.part19;dropfelt ⟨"%76"⟩;Code.part20;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%82"⟩;Code.part21;dropfelt ⟨"%21"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%86"⟩;Code.part22;dropfelt ⟨"%22"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%90"⟩;Code.part23;dropfelt ⟨"%25"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%94"⟩;Code.part24;dropfelt ⟨"%28"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%98"⟩;Code.part25;dropfelt ⟨"%31"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%102"⟩;Code.part26;dropfelt ⟨"%34"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%106"⟩;Code.part27;dropfelt ⟨"%37"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%107"⟩;dropfelt ⟨"%110"⟩;Code.part28;dropfelt ⟨"%40"⟩;dropfelt ⟨"%109"⟩;dropfelt ⟨"%111"⟩;dropfelt ⟨"%114"⟩;Code.part29;dropfelt ⟨"%43"⟩;dropfelt ⟨"%113"⟩;dropfelt ⟨"%115"⟩;dropfelt ⟨"%118"⟩;Code.part30;dropfelt ⟨"%46"⟩;dropfelt ⟨"%117"⟩;dropfelt ⟨"%119"⟩;dropfelt ⟨"%122"⟩;Code.part31;dropfelt ⟨"%49"⟩;dropfelt ⟨"%121"⟩;dropfelt ⟨"%123"⟩;dropfelt ⟨"%126"⟩;Code.part32;dropfelt ⟨"%52"⟩;dropfelt ⟨"%125"⟩;dropfelt ⟨"%127"⟩;dropfelt ⟨"%130"⟩;Code.part33;dropfelt ⟨"%55"⟩;dropfelt ⟨"%129"⟩;dropfelt ⟨"%131"⟩;dropfelt ⟨"%134"⟩;Code.part34;dropfelt ⟨"%58"⟩;dropfelt ⟨"%133"⟩;dropfelt ⟨"%135"⟩;dropfelt ⟨"%138"⟩;Code.part35;dropfelt ⟨"%61"⟩;dropfelt ⟨"%137"⟩;dropfelt ⟨"%139"⟩;dropfelt ⟨"%142"⟩;Code.part36;dropfelt ⟨"%64"⟩;dropfelt ⟨"%141"⟩;dropfelt ⟨"%143"⟩;dropfelt ⟨"%146"⟩;Code.part37;dropfelt ⟨"%67"⟩;dropfelt ⟨"%145"⟩;dropfelt ⟨"%147"⟩;dropfelt ⟨"%150"⟩;Code.part38;dropfelt ⟨"%70"⟩;dropfelt ⟨"%149"⟩;dropfelt ⟨"%151"⟩;dropfelt ⟨"%154"⟩;Code.part39;dropfelt ⟨"%73"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%153"⟩;dropfelt ⟨"%155"⟩;dropfelt ⟨"%157"⟩;dropfelt ⟨"%158"⟩) st) ↔
   Code.getReturn (part19_state_update st) := by
-  unfold MLIR.runProgram; simp only
+  unfold MLIR.runProgram; try simp only
   generalize eq : (dropfelt ⟨"%76"⟩;Code.part20;dropfelt ⟨"%79"⟩;dropfelt ⟨"%80"⟩;dropfelt ⟨"%82"⟩;Code.part21;dropfelt ⟨"%21"⟩;dropfelt ⟨"%78"⟩;dropfelt ⟨"%83"⟩;dropfelt ⟨"%86"⟩;Code.part22;dropfelt ⟨"%22"⟩;dropfelt ⟨"%85"⟩;dropfelt ⟨"%87"⟩;dropfelt ⟨"%90"⟩;Code.part23;dropfelt ⟨"%25"⟩;dropfelt ⟨"%89"⟩;dropfelt ⟨"%91"⟩;dropfelt ⟨"%94"⟩;Code.part24;dropfelt ⟨"%28"⟩;dropfelt ⟨"%93"⟩;dropfelt ⟨"%95"⟩;dropfelt ⟨"%98"⟩;Code.part25;dropfelt ⟨"%31"⟩;dropfelt ⟨"%97"⟩;dropfelt ⟨"%99"⟩;dropfelt ⟨"%102"⟩;Code.part26;dropfelt ⟨"%34"⟩;dropfelt ⟨"%101"⟩;dropfelt ⟨"%103"⟩;dropfelt ⟨"%106"⟩;Code.part27;dropfelt ⟨"%37"⟩;dropfelt ⟨"%105"⟩;dropfelt ⟨"%107"⟩;dropfelt ⟨"%110"⟩;Code.part28;dropfelt ⟨"%40"⟩;dropfelt ⟨"%109"⟩;dropfelt ⟨"%111"⟩;dropfelt ⟨"%114"⟩;Code.part29;dropfelt ⟨"%43"⟩;dropfelt ⟨"%113"⟩;dropfelt ⟨"%115"⟩;dropfelt ⟨"%118"⟩;Code.part30;dropfelt ⟨"%46"⟩;dropfelt ⟨"%117"⟩;dropfelt ⟨"%119"⟩;dropfelt ⟨"%122"⟩;Code.part31;dropfelt ⟨"%49"⟩;dropfelt ⟨"%121"⟩;dropfelt ⟨"%123"⟩;dropfelt ⟨"%126"⟩;Code.part32;dropfelt ⟨"%52"⟩;dropfelt ⟨"%125"⟩;dropfelt ⟨"%127"⟩;dropfelt ⟨"%130"⟩;Code.part33;dropfelt ⟨"%55"⟩;dropfelt ⟨"%129"⟩;dropfelt ⟨"%131"⟩;dropfelt ⟨"%134"⟩;Code.part34;dropfelt ⟨"%58"⟩;dropfelt ⟨"%133"⟩;dropfelt ⟨"%135"⟩;dropfelt ⟨"%138"⟩;Code.part35;dropfelt ⟨"%61"⟩;dropfelt ⟨"%137"⟩;dropfelt ⟨"%139"⟩;dropfelt ⟨"%142"⟩;Code.part36;dropfelt ⟨"%64"⟩;dropfelt ⟨"%141"⟩;dropfelt ⟨"%143"⟩;dropfelt ⟨"%146"⟩;Code.part37;dropfelt ⟨"%67"⟩;dropfelt ⟨"%145"⟩;dropfelt ⟨"%147"⟩;dropfelt ⟨"%150"⟩;Code.part38;dropfelt ⟨"%70"⟩;dropfelt ⟨"%149"⟩;dropfelt ⟨"%151"⟩;dropfelt ⟨"%154"⟩;Code.part39;dropfelt ⟨"%73"⟩;dropfelt ⟨"%0"⟩;dropfelt ⟨"%153"⟩;dropfelt ⟨"%155"⟩;dropfelt ⟨"%157"⟩;dropfelt ⟨"%158"⟩) = prog
   unfold Code.part19
   MLIR
@@ -51,7 +48,7 @@ lemma part19_wp {st : State} :
 lemma part19_updates_opaque {st : State} : 
   Code.getReturn (part18_state_update st) ↔
   Code.getReturn (part19_state_update (part18_drops (part18_state st))) := by
-  simp [part18_state_update, part19_wp]
+  try simp [part18_state_update, part19_wp]
 
 lemma part19_cumulative_wp {code0 data0 data1 data2 data3 data4 data5 data6 data7 data8 data9 data10 data11 data12 data13 data14 data15 data16 data17 data18 data19: Felt} :
   Code.run (start_state ([code0]) ([data0, data1, data2, data3, data4, data5, data6, data7, data8, data9, data10, data11, data12, data13, data14, data15, data16, data17, data18, data19])) ↔
@@ -59,7 +56,7 @@ lemma part19_cumulative_wp {code0 data0 data1 data2 data3 data4 data5 data6 data
       (part19_state_update
         ((((((((((((((((((((({
                                                     buffers :=
-                                                      ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
+                                                      (Map.empty[{ name := "data" : BufferVar }] ←ₘ
                                                           [[some data0, some data1, some data2, some data3, some data4,
                                                               some data5, some data6, some data7, some data8,
                                                               some data9, some data10, some data11, some data12,
@@ -68,7 +65,7 @@ lemma part19_cumulative_wp {code0 data0 data1 data2 data3 data4 data5 data6 data
                                                               some data19]])[{ name := "code" : BufferVar }] ←ₘ
                                                         [[some code0]],
                                                     bufferWidths :=
-                                                      ((fun x => Map.empty x)[{ name := "data" : BufferVar }] ←ₘ
+                                                      (Map.empty[{ name := "data" : BufferVar }] ←ₘ
                                                           (20 : ℕ))[{ name := "code" : BufferVar }] ←ₘ
                                                         (1 : ℕ),
                                                     cycle := (0 : ℕ), felts := Map.empty, isFailed := False,
@@ -122,14 +119,14 @@ lemma part19_cumulative_wp {code0 data0 data1 data2 data3 data4 data5 data6 data
     -- MLIR_states_updates
     unfold part18_drops
     -- 5 drops
-    simp only [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
+    try simp [State.drop_update_swap, State.drop_update_same, State.drop_updateProps_swap]
     rewrite [State.dropFelts]
-    simp only [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
-    simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    try simp [State.dropFelts_buffers, State.dropFelts_bufferWidths, State.dropFelts_cycle, State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars]
+    try simp [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- 0 sets
     -- rewrite [Map.drop_of_updates]
-    -- simp only [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
+    -- try simp [Map.drop_base, ne_eq, Map.update_drop_swap, Map.update_drop]
     -- there are not any statements after an if
-    -- try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths, State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
+    -- try simp [State.buffers_if_eq_if_buffers,State.bufferWidths_if_eq_if_bufferWidths,State.cycle_if_eq_if_cycle,State.felts_if_eq_if_felts,State.isFailed_if_eq_if_isFailed,State.props_if_eq_if_props,State.vars_if_eq_if_vars]
 
 end Risc0.OneHot20.Constraints.WP

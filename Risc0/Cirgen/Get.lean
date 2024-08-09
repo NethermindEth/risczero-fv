@@ -47,8 +47,9 @@ namespace Risc0
 
     --Review: should any of these be simps?
     lemma getImpl_none_or_val : getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := by
-      simp [getImpl]
+      unfold getImpl
       aesop'
+      tauto
 
     lemma getImpl_val_of_some : getImpl st buf back offset = some lit → ∃ x, lit = .Val x := by
       have h: getImpl st buf back offset = .none ∨ ∃ x, getImpl st buf back offset = some (.Val x) := getImpl_none_or_val
@@ -92,6 +93,7 @@ namespace Risc0
       simp [panicWithPosWithDecl, panic, panicCore, default, instInhabitedList]
       unfold Buffer.set?
       simp
+      aesop'
 
     lemma getImpl_skip_set_offset_of_none (contra : st.buffers[buf] = none) :
       getImpl (State.set! st buf offset val) buf back offset' =
@@ -110,8 +112,7 @@ namespace Risc0
             getElem, h₁, h, Option.isEqSome
         ]
         congr
-        unfold Map.update; funext z
-        have : State.buffers st z = st.buffers[z] := rfl; rw [this]
+        unfold Map.update; aesop'; cases st; simp; funext z
         aesop'
 
     lemma State.set!_of_some {v : Buffer} {st : State} {buf : BufferVar}
@@ -146,7 +147,7 @@ namespace Risc0
       (h₁ : Option.isEqSome (List.get! (List.get! buffer (buffer.length - 1)) offset) val = true) :
       buffer = row := by
       simp [Buffer.set?, Buffer.getBufferAtTime!, Buffer.Idx.time, Buffer.Idx.data, h₁] at h
-      exact h
+      aesop'
 
     private lemma get!_set_of_nonempty {α : Type} [Inhabited α] {l : List α} {v : α}
       (h : l ≠ []) :

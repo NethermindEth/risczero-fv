@@ -15,15 +15,15 @@ def one_hot_spec (n : ℕ) (input : Felt) (output: BufferAtTime) : Prop :=
 
 def one_hot_direct_spec (n : ℕ) (input : Felt) (output: BufferAtTime) : Prop :=
   ∃ (i : ℕ), i < n ∧ input = i ∧ 
-  output.get! i = some 1 ∧ 
+  output[i]? = some (some 1) ∧ 
   output.length = n ∧ 
-  ∀ j, j < n ∧ j ≠ i → output.get! j = some 0
+  ∀ j, j < n ∧ j ≠ i → output[j]? = some (some 0)
 
 lemma List.replicate_n_same_comm :
   a :: List.replicate n a = List.replicate n a ++ [a] := by
   induction n with
     | zero => simp
-    | succ n ih => simp; exact ih
+    | succ n ih => simp [List.replicate_succ]; exact ih
 
 @[simp]
 lemma ith_hot_simple_get_succ {n i : ℕ} :
@@ -34,14 +34,15 @@ lemma ith_hot_simple_get_succ {n i : ℕ} :
     simp
     induction i with
       | zero => simp
-      | succ i ih => simp [ih]
+      | succ i ih => simp [List.replicate_succ]; exact ih
+                  
   · simp
     induction i generalizing n with
       | zero => simp [eq]
                 cases n <;> aesop'
                 simp [List.set]
                 exact List.replicate_n_same_comm
-      | succ i ih => cases n <;> aesop'
+      | succ i ih => cases n <;> simp_all [List.replicate_succ]
 
 @[simp]
 lemma ith_hot_len {n i : ℕ} :
@@ -50,8 +51,10 @@ lemma ith_hot_len {n i : ℕ} :
 lemma ith_hot_get_succ₁ {n : ℕ} :
   ith_hot n.succ n = ith_hot n n ++ [some 1] := by
   rcases n with _ | n <;> simp [ith_hot]
-  · simp [ith_hot]; rw [List.range_succ, List.map_append]
+  · rw [List.range_succ, List.map_append]
     aesop'
+  rw [List.range_succ]
+  simp
 
 lemma ith_hot_get_succ₂ {n : ℕ} {i : ℕ} (h : i ≠ n) :
   ith_hot n.succ i = ith_hot n i ++ [some 0] := by
@@ -78,24 +81,21 @@ theorem ith_hot_eq_ith_hot_simple : ith_hot n i = ith_hot_simple n i := by
 lemma List.list_get! [Inhabited α] {n : ℕ} {l : List α} {j : ℕ} (h : j < n) : 
   n = l.length → List.get? l j = some (List.get! l j) := by
   induction n generalizing j l with
-    | zero => aesop'
+    | zero => cases h
     | succ k ih => intros h₁
                    rcases l <;> rcases j <;> try aesop'
-                   rw [ih (Nat.lt_of_succ_lt_succ h) rfl]
+                   specialize ih (l := tail) (Nat.lt_of_succ_lt_succ h) rfl
+                   aesop
 
 theorem List.get!_eq_get? [Inhabited α] {l : List α} {j : ℕ} (h : j < l.length) : 
   List.get? l j = some (List.get! l j) := by rw [list_get! h]; try rfl
 
 @[simp]
 lemma ith_hot_get {n : ℕ} {i j : ℕ} (h : j < n): 
-   (ith_hot n i).get! j = some (if i = j then 1 else 0) := by
-  rw [ith_hot_eq_ith_hot_simple]
+   (ith_hot n i)[j]'(by simp [h]) = some (if i = j then 1 else 0) := by
+  simp [ith_hot_eq_ith_hot_simple]
   simp [ith_hot_simple]
-  apply List.get!_of_get?
-  rw [List.get?_eq_get (by aesop'),
-      List.get_set,
-      List.get_replicate,
-      ←apply_ite]
+  aesop
 
 lemma one_hot_direct_spec_of_one_hot_spec {n : ℕ} {input : Felt} {output: BufferAtTime} :
   one_hot_spec n input output ↔ one_hot_direct_spec n input output := by
@@ -108,14 +108,11 @@ lemma one_hot_direct_spec_of_one_hot_spec {n : ℕ} {input : Felt} {output: Buff
   · rintro ⟨i, h₁, h₂, h₃, h₄, h₅⟩
     exists i
     aesop'
-    apply @List.ext _ output (ith_hot _ i)
+    apply @List.ext_getElem? _ output (ith_hot _ i)
     intros j
     by_cases j_le : j < output.length
-    · rw [List.get!_eq_get? j_le, 
-        List.get!_eq_get? (by simp; exact j_le),
-        ith_hot_get (by aesop')]
-      aesop'
-    · have h_lhs : List.get? output j = none := by aesop'
-      have h_rhs : List.get? (ith_hot output.length i) j = none := by aesop'
-      rw [h_lhs, h_rhs]
-
+    · aesop'
+    · have h_lhs : output[j]? = none := by aesop'
+      have h_rhs : (ith_hot output.length i)[j]? = none := by aesop'
+      rw [h_rhs]
+      exact h_lhs

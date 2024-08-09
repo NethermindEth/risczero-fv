@@ -76,13 +76,12 @@ lemma fromList_cons {l : List (α × β)} :
   fromList ((k, v) :: l) = (Map.fromList l)[k] ←ₘ v := rfl
 
 lemma update_neq_comm (h : k ≠ k') : ((m[k] ←ₘ v)[k'] ←ₘ v') = ((m[k'] ←ₘ v')[k] ←ₘ v) := by
-  simp [update]
+  unfold update
   funext x
   by_cases eq: x = k
   subst eq
   simp
   aesop'
-  simp only
   by_cases eq': x = k'
   subst eq'
   simp only [ite_true]
@@ -151,7 +150,7 @@ lemma mem_unroll_assignment : k ∈ m[k'] ←ₘ v ↔ (k = k' ∨ k ∈ m) := b
   simp [update, mem_def, getElem_def]; aesop'
 
 lemma not_mem_iff_none : k ∉ m ↔ m[k] = none := by
-  rw [mem_def]; rw [getElem_def] at *; aesop'; rwa [Option.isNone_iff_eq_none] at a
+  rw [mem_def]; rw [getElem_def] at *; aesop'
 
 -- Drop lemmas
 lemma drop_get (h: k ≠ k') : (m.drop k) k' = m k' := by unfold drop; aesop'

@@ -14,7 +14,7 @@ lemma optimised_behaviour1 :
   getReturn (opt1.runProgram st) res := by
     unfold getReturn MLIR.runProgram full
     rewrite[opt_swap (const_past_const (by trivial)),opt_swap (const_past_get (by trivial)),opt_swap_nondet_seq (const_past_isz (by trivial) (by trivial)),opt_swap_nondet_single (const_past_set (by trivial)),opt_swap (const_past_sub (by trivial) (by trivial) (by trivial)),opt_swap (const_past_eqz (by trivial)),opt_swap (const_past_get (by trivial))]
-    simp only [←MLIR.run_nondet]
+    try simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←step_nondet,←MLIR.run_seq_def,←MLIR.run_seq_def]
     unfold opt1
@@ -28,7 +28,7 @@ lemma optimised_behaviour2 :
     rewrite [optimised_behaviour1]
     unfold getReturn MLIR.runProgram opt1
     rewrite[opt_swap (const_past_get (by trivial)),opt_swap_nondet_seq (const_past_isz (by trivial) (by trivial)),opt_swap_nondet_single (const_past_set (by trivial))]
-    simp only [←MLIR.run_nondet]
+    try simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←step_nondet,←MLIR.run_seq_def]
     unfold opt2
@@ -43,7 +43,7 @@ lemma optimised_behaviour3 :
     unfold getReturn MLIR.runProgram opt2
     rewrite[MLIR.run_seq_def,step_nondet,MLIR.run_seq_def,MLIR.run_seq_def,MLIR.run_seq_def,MLIR.run_seq_def]
     rewrite[opt_swap (get_past_const (by trivial))]
-    simp only [←MLIR.run_nondet]
+    try simp only [←MLIR.run_nondet]
     rewrite [←MLIR.run_seq_def]
     rewrite[←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←MLIR.run_seq_def,←step_nondet,←MLIR.run_seq_def]
     unfold opt3

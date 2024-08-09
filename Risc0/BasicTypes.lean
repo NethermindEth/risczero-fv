@@ -1,15 +1,12 @@
-import Mathlib.Data.Nat.Prime
 import Mathlib.Data.Finmap
 import Mathlib.Data.List.Basic
 import Mathlib.Data.Option.Basic
-import Mathlib.Data.Vector
 import Mathlib.Data.ZMod.Defs
 import Mathlib.Data.ZMod.Basic
-import Mathlib.Tactic.LibrarySearch
-import Mathlib.Data.Bitvec.Defs
 
 import Risc0.Map
 import Risc0.Wheels
+import Risc0.Bitvec.Defs
 
 import Lean
 
@@ -33,6 +30,7 @@ namespace Risc0
 
   abbrev Felt := ZMod P
   instance : Inhabited Felt := ⟨-42⟩
+
   def feltBitAnd (x y: Felt) : Felt :=
     ↑(Bitvec.and (Bitvec.ofNat 32 x.val) (Bitvec.ofNat 32 y.val)).toNat
 
@@ -52,7 +50,7 @@ namespace Risc0
       if s!"{t}" = "(Term.app `Variable [`VarType.BufferTag])" then "BufferVar"
       else if s!"{t}" = "(Term.app `Variable [`VarType.FeltTag])" then "FeltVar"
       else assert! s!"{t}" = "(Term.app `Variable [`VarType.PropTag])"; "PropVar"
-    let finalT := mkIdent <| translate T
+    let finalT := mkIdent <| (Name.mkSimple <| translate T)
     `({ name := $ident : $finalT})
 
 end Risc0

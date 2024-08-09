@@ -12,12 +12,9 @@ def part0_state (st: State) : State :=
   
         ((((st[props][{ name := "%2" : PropVar }] ← True)[felts][{ name := "%0" : FeltVar }] ← (0 : Felt))["%3"] ←ₛ
             getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%4" : FeltVar }] ←
-          -Option.get!
-              (State.felts
-                (((st[props][{ name := "%2" : PropVar }] ← True)[felts][{ name := "%0" : FeltVar }] ←
-                    (0 : Felt))["%3"] ←ₛ
-                  getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))
-                { name := "%3" : FeltVar })) 
+          -((((st[props][{ name := "%2" : PropVar }] ← True)[felts][{ name := "%0" : FeltVar }] ← (0 : Felt))["%3"] ←ₛ
+                    getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ)).felts
+                { name := "%3" : FeltVar }).get!) 
 
 def part0_drops (st: State) : State :=
   State.dropFelts (State.dropFelts (st) ⟨"%0"⟩) ⟨"%3"⟩

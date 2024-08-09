@@ -12,16 +12,12 @@ def part0_state (st: State) : State :=
   
         ((((st[props][{ name := "%1" : PropVar }] ← True)["%2"] ←ₛ
               getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))[props][{ name := "%4" : PropVar }] ←
-            (Option.get!
-                (State.props
-                  ((st[props][{ name := "%1" : PropVar }] ← True)["%2"] ←ₛ
-                    getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
-                  { name := "%1" : PropVar }) ∧
-              Option.get!
-                  (State.felts
-                    ((st[props][{ name := "%1" : PropVar }] ← True)["%2"] ←ₛ
-                      getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ))
-                    { name := "%2" : FeltVar }) =
+            ((((st[props][{ name := "%1" : PropVar }] ← True)["%2"] ←ₛ
+                      getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ)).props
+                  { name := "%1" : PropVar }).get! ∧
+              (((st[props][{ name := "%1" : PropVar }] ← True)["%2"] ←ₛ
+                        getImpl st { name := "in" : BufferVar } (0 : Back) (0 : ℕ)).felts
+                    { name := "%2" : FeltVar }).get! =
                 (0 : Felt)))["%3"] ←ₛ
           getImpl st { name := "data" : BufferVar } (0 : Back) (0 : ℕ)) 
 

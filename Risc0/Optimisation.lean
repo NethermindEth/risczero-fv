@@ -265,8 +265,6 @@ section drop
         State.dropFelts_felts, State.dropFelts_isFailed, State.dropFelts_props, State.dropFelts_vars, State.dropFelts,
         Map.update_drop_swap, Map.drop_get, Map.drop, Map.update
       ]
-      funext z
-      aesop'
   
   -- lemma drop_past_if (h : y ≠ x) (h₁ : Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦prog⟧ = Γ (Γ st ⟦prog⟧) ⟦@MLIR.DropFelt α y⟧) :
   --   Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.If β x prog⟧ =
@@ -291,7 +289,7 @@ section drop
     Γ (Γ st ⟦@MLIR.DropFelt α y⟧) ⟦@MLIR.Set buf offset val⟧ =
     Γ (Γ st ⟦@MLIR.Set buf offset val⟧) ⟦@MLIR.DropFelt α y⟧ := by
       simp [MLIR.run_dropfelt, MLIR.run_set_def]
-      MLIR; simp only [getElem!, dite_true, ne_eq]
+      simp only [getElem!, dite_true, ne_eq]
       rw [State.get_dropFelts_of_ne h.symm]
       unfold State.dropFelts Map.drop
       simp only [
@@ -412,7 +410,6 @@ section get
          ←@Map.getElem_def _ _ (State.felts st),
          getImpl_skip_set (Ne.symm h'),
          eq]
-      generalize eq₁ : Option.get! st.felts[{ name := val.name : FeltVar }] = y
       rw [←eq]
       exact State.set!_get_getImpl_comm
 

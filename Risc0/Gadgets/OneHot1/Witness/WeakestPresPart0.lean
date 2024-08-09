@@ -10,21 +10,18 @@ open MLIRNotation
 -- The state obtained by running Code.part0 on st
 def part0_state (st: State) : State :=
   
-        ((State.set!
-            ((st["%2"] ←ₛ
-                getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%8" : FeltVar }] ←
-              if
-                  Option.get!
-                      (State.felts (st["%2"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))
-                        { name := "%2" : FeltVar }) =
-                    (0 : Felt) then
-                (1 : Felt)
-              else (0 : Felt))
+        ((((st["%2"] ←ₛ
+                  getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))[felts][{ name := "%8" : FeltVar }] ←
+                if
+                    ((st["%2"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ)).felts
+                          { name := "%2" : FeltVar }).get! =
+                      (0 : Felt) then
+                  (1 : Felt)
+                else (0 : Felt)).set!
             { name := "data" : BufferVar } (0 : ℕ)
             (if
-                Option.get!
-                    (State.felts (st["%2"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ))
-                      { name := "%2" : FeltVar }) =
+                ((st["%2"] ←ₛ getImpl st { name := "code" : BufferVar } (0 : Back) (0 : ℕ)).felts
+                      { name := "%2" : FeltVar }).get! =
                   (0 : Felt) then
               (1 : Felt)
             else (0 : Felt)))[felts][{ name := "%1" : FeltVar }] ←
@@ -44,7 +41,7 @@ lemma part0_wp {st : State} {data0 : Option Felt} :
   generalize eq : (dropfelt ⟨"%8"⟩;Code.part1;dropfelt ⟨"%2"⟩;dropfelt ⟨"%1"⟩;dropfelt ⟨"%3"⟩;Code.part2;dropfelt ⟨"%0"⟩;dropfelt ⟨"%4"⟩;dropfelt ⟨"%5"⟩;dropfelt ⟨"%6"⟩;Code.part3;dropfelt ⟨"%7"⟩) = prog
   unfold Code.part0
   MLIR
-  rewrite [←eq]
+  simp [←eq]
   rewrite [MLIR.run_seq_def,MLIR.run_dropfelt]
   unfold part0_state_update part0_drops part0_state
   rfl

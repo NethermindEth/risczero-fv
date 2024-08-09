@@ -53,11 +53,12 @@ namespace Risc0.State
     have : var = ⟨Input⟩ ∨ var = ⟨Output⟩ := by
       unfold init at h; rw [Map.mem_fromList] at h; simp at h; exact h
     have : row = 0 := by simp [init] at h₂; exact h₂
-    subst this; simp
+    subst this;
     rcases this with h | h <;> subst h <;> simp [Map.update, Map.getElem_def, *]
+    aesop
 
   lemma valid_init' : (init m n input output hIn hOut).WellFormed where
-    distinct := by simp [init]
+    distinct := by simp [init, Input, Output]
     hVars    := λ var => ⟨
         λ h => by simp [init] at *; rcases h with h | h <;> subst h ; decide_mem_map,
         λ h => by simp [init] at *; simp [Map.mem_def, Map.update, Map.getElem_def] at h; split at h <;> aesop' 
