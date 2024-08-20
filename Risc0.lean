@@ -220,3 +220,4 @@ import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart31
 import Risc0.Gadgets.ComputeDecode.Proofs
 import Risc0.Gadgets.IsZero.Proofs
 import Risc0.Gadgets.OneHot2.Proofs
+import Risc0.Gadgets.OneHot.Spec

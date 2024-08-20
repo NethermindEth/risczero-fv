@@ -1,4 +1,5 @@
 import Lake
+
 open Lake DSL
 
 def globalArgs := #[
@@ -8,7 +9,7 @@ def globalArgs := #[
   "-DwarningAsError=true",
   "-Dpp.deepTerms=true",
   "-Dpp.maxSteps=20000",
-  "-Dlinter.haveLet=0"
+  "-Dweak.linter.haveLet=0"
 ]
 
 package risc0 {
@@ -20,7 +21,7 @@ package risc0 {
     ⟨`Dlinter.DwarningAsError, true⟩,
     ⟨`Dpp.deepTerms, true⟩,
     ⟨`Dpp.maxSteps, .ofNat 20000⟩,
-    ⟨`Dlinter.haveLet, .ofNat 0⟩
+    ⟨`weak.linter.haveLet, .ofNat 0⟩
   ]
 }
 

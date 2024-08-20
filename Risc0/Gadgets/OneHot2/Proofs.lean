@@ -20,4 +20,3 @@ theorem spec_of_constraints {x0 y0 y1 : Risc0.Felt} :
   rintro ⟨⟨⟨_, _ | _⟩, _ | _⟩, _⟩ <;> simp_all [sub_eq_zero]
 
 end Risc0
-
