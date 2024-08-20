@@ -1,0 +1,68 @@
+import Risc0.BasicTypes
+import Risc0.Gadgets.ComputeDecode.Lemmas.Lemmas
+import Risc0.Gadgets.ComputeDecode.Lemmas.Spec
+import Risc0.Cirgen
+import Risc0.Lemmas
+import Risc0.Gadgets.ComputeDecode.Constraints.Code
+import Risc0.Gadgets.ComputeDecode.Constraints.WeakestPresPart16
+import Risc0.Gadgets.ComputeDecode.Witness.Code
+import Risc0.Gadgets.ComputeDecode.Witness.WeakestPresPart31
+
+namespace Risc0.ComputeDecode
+
+theorem constraints_of_witness
+  {x₀ x₁ x₂ x₃ : Felt}
+  {output : BufferAtTime}
+  (h : output.length = 18) 
+  (h₁ : output.all Option.isSome) 
+  (h_isBytes: ∀ (i : Fin 4), isByte (Option.get! ([some x₀, some x₁, some x₂, some x₃][i]))):
+  (Witness.Code.run (Witness.start_state [x₀, x₁, x₂, x₃])) output →
+    (Constraints.Code.run (Constraints.start_state [x₀, x₁, x₂, x₃] output)) := by
+  rcases output with _ | ⟨y0, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y1, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y2, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y3, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y4, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y5, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y6, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y7, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y8, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y9, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y10, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y11, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y12, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y13, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y14, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y15, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y16, output⟩ <;> try simp at *
+  rcases output with _ | ⟨y17, output⟩ <;> try simp at *
+  rcases output with _ | ⟨_, output⟩ <;> try simp at *
+  rw [Witness.WP.closed_form, decoder_closed_form_equiv_decoder_direct_spec]
+  unfold decoder_direct_spec
+  try simp [Instruction.fromWords]
+  intros h₀ _ _ _ _
+  have h_toWords := @toWords_fromWords [x₀, x₁, x₂, x₃] (by try simp) h_isBytes (by {
+    rintro ⟨i, h_i⟩
+    rcases i with _ | i <;> try simp at *
+    rcases i with _ | i <;> try simp at *
+    rcases i with _ | i <;> try simp at *
+  })
+  unfold Instruction.toWords Instruction.fromWords at h_toWords
+  simp at h_toWords
+  rcases h_toWords with ⟨h_toWords₀, h_toWords₁, h_toWords₂, h_toWords₃⟩
+  rw [←h_toWords₀, ←h_toWords₁, ←h_toWords₂, ←h_toWords₃] 
+  simp [List.map] at h₀
+  aesop'
+  rw [Constraints.WP.closed_form]
+  aesop
+
+theorem spec_of_constraints {x₀ x₁ x₂ x₃ : Felt}
+  {y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15 y16 y17 : Felt} :
+  Constraints.Code.run (Constraints.start_state [x₀, x₁, x₂, x₃] [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17]) → 
+    [x₀, x₁, x₂, x₃] = (Instruction.fromList [y0, y1, y2, y3, y4, y5, y6, y7, y8, y9, y10, y11, y12, y13, y14, y15, y16, y17] rfl).toWords := by
+  intros h_
+  rw [Constraints.WP.closed_form] at h_
+  have h_ := constraints_closed_form_entails_spec h_
+  unfold constraints_spec at h_
+  try simp at h_
+  rw [h_]
