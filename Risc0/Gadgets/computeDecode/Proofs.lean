@@ -4,9 +4,9 @@ import Risc0.Gadgets.computeDecode.Lemmas.Spec
 import Risc0.Cirgen
 import Risc0.Lemmas
 import Risc0.Gadgets.computeDecode.Constraints.Code
-import Risc0.Gadgets.computeDecode.Constraints.WeakestPresPart16
+import Risc0.Gadgets.computeDecode.Constraints.WeakestPresPart15
 import Risc0.Gadgets.computeDecode.Witness.Code
-import Risc0.Gadgets.computeDecode.Witness.WeakestPresPart31
+import Risc0.Gadgets.computeDecode.Witness.WeakestPresPart20
 
 namespace Risc0.computeDecode
 
@@ -15,7 +15,7 @@ theorem constraints_of_witness
   {output : BufferAtTime}
   (h : output.length = 18) 
   (h₁ : output.all Option.isSome) 
-  (h_isBytes: ∀ (i : ℕ), i < (4 : ℕ) → isByte (Option.get! (List.get! [some x₀, some x₁, some x₂, some x₃] i))):
+  (h_isBytes: ∀ (i : Fin 4), isByte (Option.get! ([some x₀, some x₁, some x₂, some x₃][i]))):
   (Witness.Code.run (Witness.start_state [x₀, x₁, x₂, x₃])) output →
     (Constraints.Code.run (Constraints.start_state [x₀, x₁, x₂, x₃] output)) := by
   rcases output with _ | ⟨y0, output⟩ <;> try simp at *
