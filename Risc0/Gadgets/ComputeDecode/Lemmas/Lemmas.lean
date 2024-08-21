@@ -523,15 +523,15 @@ theorem Bitvec.ushr_and_commute {n m : ℕ} {x y : Bitvec n} :
         Bitvec.ushr_alternative₂' (by try simp[lt])]
     all_goals simpa
 
-lemma List.list_get! [Inhabited α] {n : ℕ} {l : List α} {j : ℕ} (h : j < n) : 
-  n = l.length → l[j]? = some (l[j]?) := by
-  induction n generalizing j l with
-    | zero => aesop'
-    | succ k _ => intros h₁
-                  rcases l <;> rcases j <;> aesop'
+-- lemma List.list_get! [Inhabited α] {n : ℕ} {l : List α} {j : ℕ} (h : j < n) : 
+--   n = l.length → l[j]? = some (l[j]?) := by
+--   induction n generalizing j l with
+--     | zero => aesop'
+--     | succ k _ => intros h₁
+--                   rcases l <;> rcases j <;> aesop'
 
-theorem List.get!_eq_get? [Inhabited α] {l : List α} {j : ℕ} (h : j < l.length) : 
-  l[j]? = some (l[j]?) := by rw [list_get! h]; try rfl
+-- theorem List.get!_eq_get? [Inhabited α] {l : List α} {j : ℕ} (h : j < l.length) : 
+--   l[j]? = some (l[j]?) := by rw [list_get! h]; try rfl
 
 lemma ble_eq_false {a b : ℕ} : Nat.ble a b = false ↔ b < a := by
   apply Iff.intro <;> intros h
