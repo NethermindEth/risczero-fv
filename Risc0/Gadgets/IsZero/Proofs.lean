@@ -37,15 +37,15 @@ theorem spec_of_constraints {x: Felt} {y₁ y₂: Option Felt}
     x = 0 ∧ y₁ = some 1 ∨
     x ≠ 0 ∧ y₁ = some 0 ∧ y₂ = x⁻¹
   ) := by
-  simp only [Option.isSome_iff_exists] at hy₁
-  simp only [Option.isSome_iff_exists] at hy₂
+  simp only [Option.isSome_iff_exists] at hy₁ hy₂
   rcases hy₁ with ⟨is0, hy₁_val⟩; subst y₁
   rcases hy₂ with ⟨inv, hy₂_val⟩; subst y₂
+  -- Use the verification condition
   rewrite [Constraints.WP.closed_form]
-  simp
-  intro hy₁ hy₂
-  simp [sub_eq_iff_eq_add, *] at *
-  aesop'
-  exact Eq.symm (inv_eq_of_mul_eq_one_right hy₂)
+  -- Proof of the main invariant
+  simp [sub_eq_iff_eq_add]
+  intros hy₁ hy₂
+  split_ifs at hy₁ <;> aesop'
+  rw [inv_eq_of_mul_eq_one_right hy₂]
 
 end Risc0.IsZero
